@@ -1,4 +1,7 @@
 2004-11-10  Jon Schewe  <jpschewe@mtu.net>
+
+	* doc/index.html: Updated documentation to match libraries...
+
 	* Release 0.8
 
 	* doc/README (BUGS): Noted that checked exceptions may still cause

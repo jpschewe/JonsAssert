@@ -17,11 +17,11 @@
     <a href="ChangeLog">ChangeLog</a>.</p>
 
     <ul>
-      <li><a href="JonsAssert-@APP-VERSION@.jar">JonsAssert-@APP-VERSION@.jar</a> (<a href="JonsAssert-@APP-VERSION@-src.zip>source</a>)</li>
+      <li><a href="JonsAssert-@APP-VERSION@.jar">JonsAssert-@APP-VERSION@.jar</a> (<a href="JonsAssert-@APP-VERSION@-src.zip">source</a>)</li>
 
       <li><a href="JonsInfra-0.4.jar">JonsInfra-0.4.jar</a> <a href="/~jpschewe/JonsInfra">Primary Site</a></li>
 
-      <li><a href="antlr.jar">antlr.jar</a>This is version 2.7.1, I haven't
+      <li><a href="antlr-2.7.4.jar">antlr.jar</a>This is version 2.7.4, I haven't
       tested it with anything newer yet, but it should work.<a
       href="http://www.antlr.org">Primary site</a></li>
 
@@ -33,6 +33,9 @@
       	Earlier versions should work, but I'd encourage you to upgrade to the
       	newest version because of some bugs.<a href="http://www.junit.org">Primary site</a></li>
 
+      <li><a href="commons-logging-1.0.3.jar">commons-logging-1.0.3.jar</a> <a
+      href="http://jakarta.apache.org/commons/logging/">Primary site.</a></li>
+      
       <li><a href="log4j-1.2.8.jar">log4j-1.2.8.jar</a> <a
       href="http://logging.apache.org/log4j/docs/">Primary site.</a></li>
       
@@ -45,7 +48,7 @@
 
     <h2><a name="usage">Usage</a></h2>
     <pre>
-	java -classpath "JonsAssert-@APP-VERSION@.jar:JonsInfra-0.2.jar:werken.opt.jar:antlr.jar" net.mtu.eggplant.dbc.JonsAssert [options] files ...
+	java -classpath "JonsAssert-@APP-VERSION@.jar:JonsInfra-0.4.jar:commons-cli-1.0.jar:antlr-2.7.4.jar:log4j-1.2.8.jar:commons-logging-1.0.3.jar" net.mtu.eggplant.dbc.JonsAssert [options] files ...
     </pre>
     <p>See the API documentation for <a href="api/net/mtu/eggplant/dbc/JonsAssert.html">JonsAssert</a> for commandline options</p>
 
@@ -70,7 +73,7 @@
       <!-- Created: Wed Apr 19 20:48:24 CDT 2000 -->
       <p>
 	<!-- hhmts start -->
-Last modified: Tue May 25 16:07:32 CDT 2004
+Last modified: Wed Nov 10 09:16:07 CST 2004
 <!-- hhmts end -->
       </p>
   </body>

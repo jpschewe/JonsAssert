@@ -17,8 +17,9 @@
   <path id="base.classpath">
     <pathelement location="${basedir}"/>
     <pathelement location="${basedir}/lib/JonsInfra-0.4.jar"/>
-    <pathelement location="${basedir}/lib/antlr.jar"/>
+    <pathelement location="${basedir}/lib/antlr-2.7.4.jar"/>
     <pathelement location="${basedir}/lib/commons-cli-1.0.jar"/>
+    <pathelement location="${basedir}/lib/commons-logging-1.0.3.jar"/>
     <pathelement location="${basedir}/lib/junit-3.8.jar"/>
     <pathelement location="${basedir}/lib/log4j-1.2.8.jar"/>
   </path>
