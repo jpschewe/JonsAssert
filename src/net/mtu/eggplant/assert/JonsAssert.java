@@ -70,8 +70,7 @@ public class JonsAssert {
   static private boolean _debugLexer = false;
 
   /**
-   * Parses the command line then calls {@link #instrument(Configuration, Collection)
-   * instrument}.
+   * Parses the command line then calls {@link #instrument(Configuration, Collection) instrument}.
    *
    * @param args see {@link #commandline_doc commandline options}
    */
