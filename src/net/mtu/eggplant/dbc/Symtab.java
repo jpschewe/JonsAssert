@@ -105,7 +105,7 @@ import org.apache.commons.logging.LogFactory;
  * This is the place where most of the work for instrumentation gets done.
  * All lookups are done here.
  * 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class Symtab {
 
@@ -606,38 +606,39 @@ public class Symtab {
           //catch programmers exceptions first so my catches are reachable
           boolean catchRuntime = true;
           boolean catchError = true;
-          final Iterator exceptionIter = method.getThrownExceptions().iterator();
-          while(exceptionIter.hasNext()) {
-            final String exception = (String)exceptionIter.next();
-            //Make sure we don't try and catch some exceptions twice
-            if(exception.equals("RuntimeException")
-               || exception.equals("java.lang.RuntimeException")
-               || exception.equals("Exception")
-               || exception.equals("java.lang.RuntimeException")) {
-              catchRuntime = false;
-            } else if(exception.equals("Error")
-                    || exception.equals("java.lang.Error")) {
-              catchError = false;
-            } else if(exception.equals("Throwable")
-                    || exception.equals("java.lang.Throwable")) {
-              catchError = false;
-              catchRuntime = false;
-            }
-            codeToInsert.append("} catch(");
-            codeToInsert.append(exception);
-            codeToInsert.append(" jps_exception");
-            codeToInsert.append(shortmclassName);
-            codeToInsert.append(") {");
-            CodeGenerator.carriageReturn(codeToInsert);
-            codeToInsert.append("jps_foundException");
-            codeToInsert.append(shortmclassName);
-            codeToInsert.append(" = true;");
-            CodeGenerator.carriageReturn(codeToInsert);
-            codeToInsert.append("throw jps_exception");
-            codeToInsert.append(shortmclassName);
-            codeToInsert.append(";");
-            CodeGenerator.carriageReturn(codeToInsert);
-          } //end while
+          //FIX need to check for thrown exceptions
+//           final Iterator exceptionIter = method.getThrownExceptions().iterator();
+//           while(exceptionIter.hasNext()) {
+//             final String exception = (String)exceptionIter.next();
+//             //Make sure we don't try and catch some exceptions twice
+//             if(exception.equals("RuntimeException")
+//                || exception.equals("java.lang.RuntimeException")
+//                || exception.equals("Exception")
+//                || exception.equals("java.lang.RuntimeException")) {
+//               catchRuntime = false;
+//             } else if(exception.equals("Error")
+//                     || exception.equals("java.lang.Error")) {
+//               catchError = false;
+//             } else if(exception.equals("Throwable")
+//                     || exception.equals("java.lang.Throwable")) {
+//               catchError = false;
+//               catchRuntime = false;
+//             }
+//             codeToInsert.append("} catch(");
+//             codeToInsert.append(exception);
+//             codeToInsert.append(" jps_exception");
+//             codeToInsert.append(shortmclassName);
+//             codeToInsert.append(") {");
+//             CodeGenerator.carriageReturn(codeToInsert);
+//             codeToInsert.append("jps_foundException");
+//             codeToInsert.append(shortmclassName);
+//             codeToInsert.append(" = true;");
+//             CodeGenerator.carriageReturn(codeToInsert);
+//             codeToInsert.append("throw jps_exception");
+//             codeToInsert.append(shortmclassName);
+//             codeToInsert.append(";");
+//             CodeGenerator.carriageReturn(codeToInsert);
+//           } //end while
           
           if(catchError) {
             //catch java.lang.Error

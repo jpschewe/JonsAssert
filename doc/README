@@ -77,6 +77,12 @@ good programming practice.
 
 
 BUGS:
+- If a checked exception is thrown from a method, the post and invariant
+conditions are still checked.  I have code to fix this, however if someone
+puts checked exceptions in their throws clause, but doesn't actually throw
+the exception the instrumented won't compile because you can't put it in a
+try/catch block unless it's actually thrown in the body of the try.
+
 - <CR>'s may exist inside assertions, however, if the first non-whitespace
 character, as determined by Character.isWhitespace, after the <CR> is an
 asterisk and it is intended to be part of the assertion and not part of the
