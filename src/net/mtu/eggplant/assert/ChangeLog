@@ -1,5 +1,8 @@
 2000-02-16  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
+	* CodeGenerator.java: Added wrapping for primatives when creating
+	the args array for method invocation.
+
 	* java.g: Added clear calls for the pre and post conditions as
 	well as correct the column numbers that get passed to the addExit method.
 

@@ -355,7 +355,6 @@ public class CodeGenerator {
     code.append("if(superMethod != null) {\n");
     code.append("Object[] args = {");
     //[jpschewe:20000213.1552CST] need parameters here, just the parameter names
-    //[jpschewe:20000216.2244CST] FIX need to wrap primative data types here!
     first = true;
     paramIter = assertMethod.getParams().iterator();
     while(paramIter.hasNext()) {
@@ -364,7 +363,7 @@ public class CodeGenerator {
         first = false;
       }
       StringPair sp = (StringPair)paramIter.next();
-      code.append(sp.getStringTwo());
+      code.append(getObjectForParam(sp.getStringOne(), sp.getStringTwo()));
     }    
     code.append("};\n");
     code.append("try {\n");
@@ -484,7 +483,6 @@ public class CodeGenerator {
     code.append("if(superMethod != null) {\n");
     code.append("Object[] args = {");
     //[jpschewe:20000213.1552CST] need parameters here, just the parameter names
-    //[jpschewe:20000216.2244CST] FIX need to wrap primative data types here!    
     first = true;
     paramIter = assertMethod.getParams().iterator();
     while(paramIter.hasNext()) {
@@ -493,7 +491,7 @@ public class CodeGenerator {
         first = false;
       }
       StringPair sp = (StringPair)paramIter.next();
-      code.append(sp.getStringTwo());
+      code.append(getObjectForParam(sp.getStringOne(), sp.getStringTwo()));
     }
     code.append("};\n");
     code.append("try {\n");
@@ -601,5 +599,40 @@ public class CodeGenerator {
     }
 
     return cl + ".class";
+  }
+
+  /**
+     Take paramName and turn it into an object.  This only effects primatives,
+     if paramType is a primative, return code that will generate a properly
+     wrapped primative object, otherwise just return paramName.
+  **/
+  static public String getObjectForParam(final String paramType,
+                                         final String paramName) {
+    if(paramType.equals("int")) {
+      return "new Integer(" + paramName + ")";
+    }
+    else if(paramType.equals("long")) {
+      return "new Long(" + paramName + ")";
+    }
+    else if(paramType.equals("float")) {
+      return "new Float(" + paramName + ")";
+    }
+    else if(paramType.equals("double")) {
+      return "new Double(" + paramName + ")";
+    }
+    else if(paramType.equals("boolean")) {
+      return "new Boolean(" + paramName + ")";
+    }
+    else if(paramType.equals("byte")) {
+      return "new Byte(" + paramName + ")";
+    }
+    else if(paramType.equals("char")) {
+      return "new Character(" + paramName + ")";
+    }
+    else if(paramType.equals("short")) {
+      return "new Short(" + paramName + ")";
+    }
+
+    return paramName;
   }
 }
