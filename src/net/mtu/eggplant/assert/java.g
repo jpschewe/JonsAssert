@@ -145,8 +145,8 @@ tokens {
   private void addAsserts(final Vector asserts, final Token jdClose) {
     if(asserts != null && asserts.size() > 0) {
       System.out.println("Parser: got asserts#");
-      long line = jdClose.getLine();
-      long column = jdClose.getColumn() + jdClose.getText().length();
+      int line = jdClose.getLine();
+      int column = jdClose.getColumn() + jdClose.getText().length();
       
       System.out.println("Insert code at line.column: " + line + "." + column + " #" + jdClose.getText() + "#"  + jdClose.getClass());
       StringBuffer codeFrag = new StringBuffer();

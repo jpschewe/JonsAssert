@@ -455,7 +455,7 @@ public class Symtab {
     _currentMethod.setMethodEntrance(startEnd.getCodePointOne());
     String retType = _currentMethod.getReturnType();
     if(_currentMethod.isVoid()) {
-      _currentMethod.addExit(startEnd.getCodePointTwo(), null);
+      //_currentMethod.addExit(startEnd.getCodePointTwo(), null);
     }
     
     _currentClass.addMethod(_currentMethod);

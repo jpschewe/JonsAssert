@@ -275,53 +275,51 @@ public class CodeGenerator {
     return code.toString();
   }
 
-  /*
-    idea for preconditions on constructor
-    stuff to add after open { for constructor:
-    
-    //start example
-  /**
-     @pre (i > 0)
-     @pre (checkValue(i))
-  **/
-  public Test (int i) {
-    this(i, new AssertDummy0(i));
-  }
-  static private class AssertDummy0 {
-    public AssertDummy0(int i) {
-      __checkConstructorPreConditions(i);
-    }
-  }
-    static /*package*/ void __checkConstructorPreConditions(int i) {
-      System.out.println("i > 0 " + (i > 0));
-      System.out.println("checkValue(i) " + checkValue(i));
-    }
-    
-  private Test(int i, AssertDummy0 ad) {
-    System.out.println("in constructor " + i);
-  }
-  //end example
-  
-    String params; // grabbed from parser tokens
-    long # = 0;
-    foreach constructor (constructors) {
-       Vector preconditions = constructor.getPreConditions();
-       
-        this(params, new AssertDummy#( (cond0), "mesg0", (cond1), "mesg1", ...));
-      }
-      static private class AssertDummy# {
-        public AssertDummy#(boolean cond0, String mesg0, boolean cond1, String mesg1, ...) {
-          // check against params here and do regular fail stuff
-        }
-      }
-      private constructorName(params, AssertDummy#) {
-      
-      CodeFragment codeFrag = new CodeFragment(constructor.getEntrance().line, constructor.getEntrance().column, code, AssertType.PRECONDITION);
-      symtab.associateCodeWithCurrentFile(codeFrag);
-      #++;
-    }
+//
+//    idea for preconditions on constructor
+//    stuff to add after open { for constructor:
 
-  */
+    //start example
+//   /**
+//      @pre (i > 0)
+//      @pre (checkValue(i))
+//   **/
+//   public Test (int i) {
+//     this(i, new AssertDummy0(i));
+//   }
+//   static private class AssertDummy0 {
+//     public AssertDummy0(int i) {
+//       __checkConstructorPreConditions(i);
+//     }
+//   }
+//     static /*package*/ void __checkConstructorPreConditions(int i) {
+//       System.out.println("i > 0 " + (i > 0));
+//       System.out.println("checkValue(i) " + checkValue(i));
+//     }
+    
+//   private Test(int i, AssertDummy0 ad) {
+//     System.out.println("in constructor " + i);
+//   }
+//   //end example
+  
+//     String params; // grabbed from parser tokens
+//     long # = 0;
+//     foreach constructor (constructors) {
+//        Vector preconditions = constructor.getPreConditions();
+       
+//         this(params, new AssertDummy#( (cond0), "mesg0", (cond1), "mesg1", ...));
+//       }
+//       static private class AssertDummy# {
+//         public AssertDummy#(boolean cond0, String mesg0, boolean cond1, String mesg1, ...) {
+//           // check against params here and do regular fail stuff
+//         }
+//       }
+//       private constructorName(params, AssertDummy#) {
+      
+//       CodeFragment codeFrag = new CodeFragment(constructor.getEntrance().line, constructor.getEntrance().column, code, AssertType.PRECONDITION);
+//       symtab.associateCodeWithCurrentFile(codeFrag);
+//       #++;
+//     }
 
   /**
      @return the code neccessary to implement the pre conditions on this method
