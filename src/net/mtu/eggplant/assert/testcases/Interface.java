@@ -18,7 +18,7 @@ public interface Interface {
   public boolean preCond(int i);
 
   /**
-     @post ($ret < 12)
+     @post (__retVal < 12)
   **/
   public int postCond(int i);
 

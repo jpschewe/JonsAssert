@@ -29,7 +29,7 @@ import junit.textui.TestRunner;
    
    @invariant (_invariant), "This is an invariant";
 **/
-public class TestAssert extends TestCase implements Cloneable {
+public class TestAssert extends TestCase {
 
   private boolean _invariant = true;
   

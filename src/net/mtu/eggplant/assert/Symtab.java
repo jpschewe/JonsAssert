@@ -193,7 +193,7 @@ public class Symtab {
     _currentClass = new AssertClass(name, getCurrentPackageName(), isInterface);
     _currentClass.setInvariants(invariants);
     
-    System.out.println("in Symtab.startClass " + _currentClass);
+    //System.out.println("in Symtab.startClass " + _currentClass);
     
     // add to the current package
     Hashtable h = (Hashtable)_allPackages.get(getCurrentPackageName());
@@ -215,10 +215,12 @@ public class Symtab {
      @pre (cp != null)
   **/
   public void finishClass(final CodePoint cp) {
-    //add the invariant method
-    String code = CodeGenerator.generateInvariantMethod(_currentClass);
-    CodeFragment cf = new CodeFragment(cp, code, CodeFragmentType.INVARIANT);
-    _currentFile.getFragments().add(cf);
+    //add the invariant method, not on interfaces though
+    if(!_currentClass.isInterface()) {
+      String code = CodeGenerator.generateInvariantMethod(_currentClass);
+      CodeFragment cf = new CodeFragment(cp, code, CodeFragmentType.INVARIANT);
+      _currentFile.getFragments().add(cf);
+    }
     
     _currentFile.getClasses().addElement(_currentClass);
     
@@ -244,7 +246,7 @@ public class Symtab {
   **/
   public void instrument() {
     String packageName = null;
-    System.out.println("\nInstrumentation");
+    //System.out.println("\nInstrumentation");
     /*
       walk over _allFiles and parse each class writing out to the instrument directory.
     */
@@ -257,9 +259,9 @@ public class Symtab {
         AssertClass aClass = (AssertClass)classIter.next();
         packageName = aClass.getPackage();
         addClassInstrumentation(ifile, aClass);
-        System.out.println(aClass);
+        //System.out.println(aClass);
       }
-      System.out.println(ifile.getFragments());
+      //System.out.println(ifile.getFragments());
       //sort the list
       //dump out the fragments and instrument the file
       try {
@@ -473,7 +475,7 @@ public class Symtab {
   **/
   public void addImport(final String className, final String packageName) {
     String shortenedPackageName = packageName.substring(1);
-    System.out.println("in addImport token className " + className + " packageName " + packageName + " shortedPackageName " + shortenedPackageName);
+    //System.out.println("in addImport token className " + className + " packageName " + packageName + " shortedPackageName " + shortenedPackageName);
     if(className != null) {
       List v = (List)_imports.get(shortenedPackageName);
       if(v == null) {
@@ -541,7 +543,7 @@ public class Symtab {
      @pre (startEnd != null)
   **/
   public void finishMethod(final CodePointPair startEnd) {
-    System.out.println("in finish method");
+    //System.out.println("in finish method");
     if(!_currentMethod.isAbstract()) {
       //[jpschewe:20000216.0742CST] add 1 so that we add the pre and post calls in the right place 
       _currentMethod.setMethodEntrance(new CodePoint(startEnd.getCodePointOne().getLine(),
@@ -594,7 +596,7 @@ public class Symtab {
     Iterator methodIter = aClass.getMethods().iterator();
     while(methodIter.hasNext()) {
       AssertMethod method = (AssertMethod)methodIter.next();
-      System.out.println("method: " + method);
+      //System.out.println("method: " + method);
 
       //can't put calls inside abstract methods
       if(!method.isAbstract()) {
@@ -604,10 +606,12 @@ public class Symtab {
         String preCall = CodeGenerator.generatePreConditionCall(method);      
         ifile.getFragments().add(new CodeFragment(entrance, preCall, CodeFragmentType.PRECONDITION));
 
-        //Add old Values
-        String oldValues = CodeGenerator.generateOldValues(method);      
-        ifile.getFragments().add(new CodeFragment(entrance, oldValues, CodeFragmentType.OLDVALUES));
-      
+        //Add old Values, only if not constructor, constructors do it differently
+        if(!method.isConstructor()) {
+          String oldValues = CodeGenerator.generateOldValues(method);      
+          ifile.getFragments().add(new CodeFragment(entrance, oldValues, CodeFragmentType.OLDVALUES));
+        }
+        
         if(!method.isStatic() && !method.isPrivate() && !method.isConstructor()) {
           //Add a call to the invariant method at entrance
           ifile.getFragments().add(new CodeFragment(entrance, invariantCall, CodeFragmentType.INVARIANT));

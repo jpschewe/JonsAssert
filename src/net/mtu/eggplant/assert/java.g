@@ -261,11 +261,11 @@ compilationUnit
   ;
 
 assertTypeDefinition
-  : (JAVADOC_OPEN invariantConditions JAVADOC_CLOSE)? typeDefinition
+  : (JAVADOC_OPEN invariantConditions JAVADOC_CLOSE)* typeDefinition
   ;
 
 invariantConditions
-  : ( iv:INVARIANT_CONDITION { addInvariant(iv); } )*
+  : ( iv:INVARIANT_CONDITION { addInvariant(iv); } | PRE_CONDITION | POST_CONDITION | ASSERT_CONDITION )*
   ;
 
 // Package statement: "package" followed by an identifier.
@@ -335,7 +335,7 @@ typeSpec returns [Token t]
 **/
 classTypeSpec returns [Token id]
     :
-	id=identifier (LBRACK RBRACK)*
+	id=identifier (LBRACK RBRACK { id.setText(id.getText() + "[]"); } )*
   ;
 
 // A builtin type specification is a builtin type with possible brackets
@@ -344,7 +344,7 @@ classTypeSpec returns [Token id]
    @return the Token that represents this builtin type spec
 **/
 builtInTypeSpec returns [Token id]
-  :	id=builtInType (LBRACK RBRACK)*
+  :	id=builtInType (LBRACK RBRACK { id.setText(id.getText() + "[]"); } )*
   ;
 
 // A type name. which is either a (possibly qualified) class name or
@@ -496,12 +496,15 @@ classBlock [ String name, boolean isInterface ]
 
 prePosts 
     :
-    ( post:POST_CONDITION { addPostCondition(post); } |
-      pre:PRE_CONDITION { addPreCondition(pre); } )* 
+    ( post:POST_CONDITION { addPostCondition(post); }
+    | pre:PRE_CONDITION { addPreCondition(pre); }
+    | ASSERT_CONDITION
+    | INVARIANT_CONDITION
+    )* 
   ;
 
 prePostField 
-  : (JAVADOC_OPEN prePosts JAVADOC_CLOSE )? field
+  : (JAVADOC_OPEN prePosts JAVADOC_CLOSE)* field
   ;
 
 
@@ -551,12 +554,12 @@ field
 	getSymtab().startMethod(null, getPreConditions(), getPostConditions(), params, null, mods);
 	clearPreConditions();
 	  clearPostConditions();
-	print("just called startMethod for constructor");
+	//print("just called startMethod for constructor");
       }
       startEnd=compoundStatement // constructor
 		{
 		    getSymtab().finishMethod(startEnd);
-		    print("Found finish: " + methodName);
+		    //print("Found finish: " + methodName);
 		}
  
 
@@ -572,7 +575,7 @@ field
 	{
 	  // needs to be before compoundStatement so that I can have it set for the addExit calls
 	  getSymtab().startMethod(methodName.getText(), getPreConditions(), getPostConditions(), params, retType.getText(), mods);
-	  print("just called startMethod: " + methodName.getText());
+	  //print("just called startMethod: " + methodName.getText());
 	    clearPreConditions();
 	    clearPostConditions();
 	}
@@ -592,7 +595,7 @@ field
 			    CodePoint close = new CodePoint(semi.getLine(), semi.getColumn());
 			    getSymtab().finishMethod(new CodePointPair(close, close));
 			}
-			print("Found finish: " + methodName);
+			//print("Found finish: " + methodName);
 		    }
       |	variableDefinitions SEMI
       )
@@ -736,10 +739,15 @@ parameterModifier
 // so this needs to be added to the places that call compoundStatement
 assertCondition
 { Vector assertTokens = new Vector(); }
-  : JAVADOC_OPEN
-    (assert:ASSERT_CONDITION { assertTokens.addElement(assert); } )*
+  : (JAVADOC_OPEN
+    (assert:ASSERT_CONDITION { assertTokens.addElement(assert); }
+      | PRE_CONDITION
+      | POST_CONDITION
+      | INVARIANT_CONDITION
+    )*
     jdc:JAVADOC_CLOSE 
     { addAsserts(assertTokens, jdc); }
+      )*
   ;
 
 // Compound statement.  This is used in many contexts:
@@ -774,10 +782,9 @@ compoundStatement returns [CodePointPair startEnd]
 statement
 // A list of statements in curly braces -- start a new scope!
     :
-	(assertCondition)?
+	(assertCondition)
 	
 	(
-	//(assertCondition)? compoundStatement
 	compoundStatement
 
 	// class definition

@@ -19,7 +19,7 @@ abstract public class AbstractClass {
   abstract public boolean preCond(int i);
 
   /**
-     @post ($ret < 12)
+     @post (__retVal < 12)
   **/
   abstract public int postCond(int i);
   

@@ -8,6 +8,8 @@
   remember only to check invariants on public instance methods, protected methods?, constructor exit
 
   Replace all of the package names '.' with '_'
+
+  All variables created here will have _JPS_ in front of them except for __retVal and __old*
 */
 public Object methodFoo(Object param1) {
   if(!__<packageName>_<className>_checkInvariant()) {
@@ -180,7 +182,7 @@ public Test(int i) {
 **/
 public Test (int i) {
 // -- start output from generatePreCondtitionCall 
-  this(i, new AssertDummy0(i));
+  this(i, i, new AssertDummy0(i));
 }
 static private class AssertDummy0 {
   public AssertDummy0(int i) {
@@ -189,9 +191,10 @@ static private class AssertDummy0 {
     }
   }
 }
-private Test(int i, AssertDummy0 ad) {
+private Test(int i, int __oldi, AssertDummy0 ad) {
 // -- end output from generatePreConditionCall
   System.out.println("in constructor " + i);
+  //post and invariant calls here just like regular method
 }
 
 // -- start output from generatePreConditionMethod

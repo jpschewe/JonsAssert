@@ -73,7 +73,7 @@ public class Main {
     }
 
     // otherwise, if this is a java file, parse it!
-    else if(f.getName().endsWith(".java")) {
+    else if(f.getName().endsWith("." + AssertTools.getSourceExtension())) {
       System.err.println("   "+f.getAbsolutePath());
 
 

@@ -258,5 +258,5 @@ final public class AssertTools {
   
   static private String _destination = "instrumented";
   static private String _sourceExtension = "java";
-  static private String _instrumentedExtension = "ijava.java";
+  static private String _instrumentedExtension = "java";
 }

@@ -72,7 +72,7 @@ public class AssertClass implements Named {
       add their pre and post conditions to the current list of pre and post
       conditions.  */
     _methods.add(am);
-    System.out.println("just added: " + am + " methods: " + _methods);
+    //System.out.println("just added: " + am + " methods: " + _methods);
   }
 
   private List _methods;
