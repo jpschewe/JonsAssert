@@ -329,7 +329,7 @@
       <fileset dir="${dir.junit.xml}">
         <include name="*.xml"/>
       </fileset>
-      <report format="frames" todir="${dir.junit.html}"/>
+      <report format="frames" todir="${dir.junit.html}" styledir="lib/ant" />
     </junitreport>
   </target>
 
