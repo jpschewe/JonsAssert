@@ -1108,15 +1108,13 @@ relationalExpression
   :	shiftExpression
     (
       (
-	(
-	  (LT
-	  |	GT
-	  |	LE
-	  |	GE
-	  )
-	  shiftExpression
-	)*
-      )
+	(LT
+	|	GT
+	|	LE
+	|	GE
+	)
+	shiftExpression
+      )*
     |	"instanceof" typeSpec
     )
   ;

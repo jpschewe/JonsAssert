@@ -1,5 +1,25 @@
 2000-03-04  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
+	* testcases/Node.java: Added for testing of the instanceof rule
+	and the end of javadoc comment rule.
+
+	* java.g: Added correction to relationExpression so that
+	instanceof gets handeled correctly.
+
+	* assert.g: Javadoc comments can end with **/ or */
+
+	* Symtab.java: Added bit to create the Hashtable for the default
+	package when needed.
+
+	* Main.java: Moved exception handling to a more useful place and
+	make sure that a file isn't written out if the parser fails.
+
+	* AssertTools.java: If the base instrumented directory doesn't
+	exist, create it.
+
+	* CodeGenerator.java: Fixed some bad coding on my part that caused
+	commas to be forgotten in parameter lists.
+
 	* MethodSkeletons.xjava: Started putting down ideas for interface
 	name resolution.
 
