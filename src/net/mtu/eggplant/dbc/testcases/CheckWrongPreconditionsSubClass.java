@@ -28,9 +28,11 @@
 package net.mtu.eggplant.dbc.test.sub;
 
 /**
-   This class will get instrumented into test/sub so that the package method
-   test is valid.
-**/
+ * This class will get instrumented into test/sub so that the package method
+ * test is valid.
+ * 
+ * @version $Revision: 1.3 $
+ */
 public class CheckWrongPreconditionsSubClass extends net.mtu.eggplant.dbc.test.CheckWrongPreconditionsSuperClass {
 
   public void testPrivateMethod(final int i) {

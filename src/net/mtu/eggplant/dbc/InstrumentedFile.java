@@ -34,10 +34,12 @@ import java.util.TreeSet;
 import java.io.File;
 
 /**
-   Represents the instrumentation that needs to be added to a file.  This
-   contains a list of CodeFragments that are the assertions and a list of
-   classes that are parsed, but still need to be turned into CodeFragments.
-**/
+ * Represents the instrumentation that needs to be added to a file.  This
+ * contains a list of CodeFragments that are the assertions and a list of
+ * classes that are parsed, but still need to be turned into CodeFragments.
+ * 
+ * @version $Revision: 1.3 $
+ */
 /*package*/ class InstrumentedFile {
 
   private SortedSet /*CodeFragment*/ _fragments;

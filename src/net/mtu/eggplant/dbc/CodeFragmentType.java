@@ -30,8 +30,10 @@ package net.mtu.eggplant.dbc;
 import net.mtu.eggplant.util.Named;
 
 /**
-   Represents a type of assertion.
-**/
+ * Represents a type of assertion.
+ * 
+ * @version $Revision: 1.3 $
+ */
 public class CodeFragmentType implements Named, Comparable {
 
 

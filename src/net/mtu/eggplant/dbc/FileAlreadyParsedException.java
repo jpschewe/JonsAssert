@@ -28,9 +28,11 @@
 package net.mtu.eggplant.dbc;
 
 /**
-   Exception thrown to break out of the parser if the destination file is
-   newer than the source file.
-**/
+ * Exception thrown to break out of the parser if the destination file is
+ * newer than the source file.
+ * 
+ * @version $Revision: 1.3 $
+ */
 public class FileAlreadyParsedException extends RuntimeException {
 
   public FileAlreadyParsedException() {

@@ -28,8 +28,10 @@
 package net.mtu.eggplant.dbc.test;
 
 /**
-   checks conditions on a method in a named inner class
-**/
+ * checks conditions on a method in a named inner class
+ * 
+ * @version $Revision: 1.3 $
+ */
 public class NamedInnerClass {
 
   public void pass() {

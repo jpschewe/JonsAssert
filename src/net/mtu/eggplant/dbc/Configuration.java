@@ -33,6 +33,8 @@ import java.util.StringTokenizer;
 
 /**
  * Holds all the option values.
+ * 
+ * @version $Revision: 1.5 $
  */
 public class Configuration {
 

@@ -29,6 +29,9 @@ package net.mtu.eggplant.dbc;
 
 import net.mtu.eggplant.util.Pair;
 
+/**
+ * @version $Revision: 1.3 $
+ */
 final public class CodePointPair extends Pair {
 
   /**

@@ -42,8 +42,10 @@ import java.util.Comparator;
 import java.util.Iterator;
 
 /**
-   class of static helper methods for assertions.
-**/
+ * class of static helper methods for assertions.
+ * 
+ * @version $Revision: 1.4 $
+ */
 final public class AssertTools {
 
   /**

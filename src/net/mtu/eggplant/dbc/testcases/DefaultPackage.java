@@ -29,6 +29,8 @@
 /**
  * This class is in the default package to test the generation of such
  * classes.
+ * 
+ * @version $Revision: 1.2 $
  */
 public class DefaultPackage {
 

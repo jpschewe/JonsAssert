@@ -29,6 +29,9 @@ package net.mtu.eggplant.dbc;
 
 import antlr.Token;
 
+/**
+ * @version $Revision: 1.3 $
+ */
 public class InvariantCondition {
   public InvariantCondition(Token condition, Token message) {
     _condition = condition;

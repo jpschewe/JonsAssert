@@ -28,8 +28,10 @@
 package net.mtu.eggplant.dbc.test;
 
 /**
-   tests conditions on a private instance method.
-**/
+ * tests conditions on a private instance method.
+ * 
+ * @version $Revision: 1.3 $
+ */
 public class PrivateMethodTest {
 
   public void pass() {

@@ -29,9 +29,11 @@ package net.mtu.eggplant.dbc.test;
 
 
 /**
-   tests pre and post conditions on abstract methods, this is the concrete
-   class.
-**/
+ * tests pre and post conditions on abstract methods, this is the concrete
+ * class.
+ * 
+ * @version $Revision: 1.3 $
+ */
 public class ConcreteClass extends AbstractClass {
 
   public boolean preCond(int i) {

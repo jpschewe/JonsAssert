@@ -27,6 +27,9 @@
  */
 package net.mtu.eggplant.dbc;
 
+/**
+ * @version $Revision: 1.3 $
+ */
 final public class CodePoint implements Comparable {
 
   /**

@@ -104,10 +104,12 @@ import java.util.LinkedList;
 */
 
 /**
-   Class that keeps track of all classes and interfaces parsed in this run.
-   This is the place where most of the work for instrumentation gets done.
-   All lookups are done here.
-**/
+ * Class that keeps track of all classes and interfaces parsed in this run.
+ * This is the place where most of the work for instrumentation gets done.
+ * All lookups are done here.
+ * 
+ * @version $Revision: 1.3 $
+ */
 public class Symtab {
 
   /**

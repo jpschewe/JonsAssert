@@ -69,6 +69,7 @@ import net.mtu.eggplant.util.algorithms.Applying;
  * {@link #instrument(Configuration, Collection) instrument} with a Configuration
  * object and a Collection of files.</p>
  *
+ * @version $Revision: 1.5 $
  */
 public class JonsAssert {
 

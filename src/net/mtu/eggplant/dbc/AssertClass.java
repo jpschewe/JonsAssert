@@ -35,8 +35,10 @@ import java.util.Map;
 import java.util.List;
 
 /**
-   Object to represent an instrumented class.
-**/
+ * Object to represent an instrumented class.
+ * 
+ * @version $Revision: 1.3 $
+ */
 public class AssertClass implements Named {
 
   /**

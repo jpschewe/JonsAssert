@@ -34,6 +34,9 @@ import net.mtu.eggplant.util.Debug;
 import java.util.List;
 import java.util.Iterator;
 
+/**
+ * @version $Revision: 1.3 $
+ */
 public class CodeGenerator {
 
   //some handy constants

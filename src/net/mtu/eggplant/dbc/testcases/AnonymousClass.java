@@ -31,8 +31,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 /**
-   test parsing of anonomous classes.
-**/
+ * test parsing of anonomous classes.
+ * 
+ * @version $Revision: 1.3 $
+ */
 public class AnonymousClass {
   private ActionListener _al;
   

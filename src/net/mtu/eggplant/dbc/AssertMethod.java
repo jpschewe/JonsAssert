@@ -38,9 +38,11 @@ import java.util.List;
 import java.util.LinkedList;
 
 /**
-   Object that contains the data needed to generate instrumented code for a
-   method.
-**/
+ * Object that contains the data needed to generate instrumented code for a
+ * method.
+ * 
+ * @version $Revision: 1.3 $
+ */
 public class AssertMethod implements Named {
 
   /**

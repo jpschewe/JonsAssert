@@ -39,6 +39,8 @@ import junit.textui.TestRunner;
  * Checks to make sure that the flag ENFORCE_INHERITED_CONDITIONS works
  * properly.  Must be called with ENFORCE_INHERITED_CONDITIONS set to FALSE.
  * Must be called with ASSERT_BEHAVIOR_CONDITIONS set to EXCEPTION.
+ * 
+ * @version $Revision: 1.3 $
  */
 public class TestEnforceInherited extends TestCase {
 

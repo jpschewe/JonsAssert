@@ -28,9 +28,11 @@
 package net.mtu.eggplant.dbc;
 
 /**
-   Class that represents a fragment of code that needs to be inserted into a
-   file to instrument it for assertions.
-**/
+ * Class that represents a fragment of code that needs to be inserted into a
+ * file to instrument it for assertions.
+ * 
+ * @version $Revision: 1.3 $
+ */
 public class CodeFragment implements Comparable {
 
   /**

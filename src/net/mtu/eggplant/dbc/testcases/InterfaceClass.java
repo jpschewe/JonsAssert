@@ -29,9 +29,11 @@ package net.mtu.eggplant.dbc.test;
 
 
 /**
-   tests implementing methods from an interface and checking hte pre and post
-   conditions.
-**/
+ * tests implementing methods from an interface and checking hte pre and post
+ * conditions.
+ * 
+ * @version $Revision: 1.3 $
+ */
 public class InterfaceClass implements Interface {
 
   public boolean preCond(int i) {

@@ -28,8 +28,10 @@
 package net.mtu.eggplant.dbc.test;
 
 /**
-   tests pre and post conditions in an interface.
-**/
+ * tests pre and post conditions in an interface.
+ * 
+ * @version $Revision: 1.3 $
+ */
 public interface Interface {
   
   /**

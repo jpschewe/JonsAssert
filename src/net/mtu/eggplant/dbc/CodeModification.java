@@ -28,10 +28,11 @@
 package net.mtu.eggplant.dbc;
 
 /**
-   Used for representing a modification to code, rather than just a chunck of
-   code to be inserted.
-
-**/
+ * Used for representing a modification to code, rather than just a chunck of
+ * code to be inserted.
+ *
+ * @version $Revision: 1.3 $
+ */
 public class CodeModification extends CodeFragment {
 
   /**

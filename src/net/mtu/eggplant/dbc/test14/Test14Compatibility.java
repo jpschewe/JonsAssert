@@ -35,6 +35,8 @@ import junit.textui.TestRunner;
 /**
  * Make sure that a file with the assert keyword parses properly.  Note: the
  * -source 1.4 flag must be passed to JonsAssert.
+ * 
+ * @version $Revision: 1.2 $
  */
 public class Test14Compatibility extends TestCase {
   

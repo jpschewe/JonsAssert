@@ -41,11 +41,12 @@ import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 
 /**
-   This is a test class for testing my assertions.  Tests all kinds of things.
-   Must be called with ASSERT_BEHAVIOR_CONDITIONS set to EXCEPTION.
-   
-   @invariant (_invariant), "This is an invariant";
-**/
+ * This is a test class for testing my assertions.  Tests all kinds of things.
+ * Must be called with ASSERT_BEHAVIOR_CONDITIONS set to EXCEPTION.
+ *  
+ * @invariant (_invariant), "This is an invariant";
+ * @version $Revision: 1.4 $
+ */
 public class TestAssert extends TestCase {
 
   private boolean _invariant = true;

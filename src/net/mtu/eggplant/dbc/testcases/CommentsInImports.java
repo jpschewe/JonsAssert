@@ -35,8 +35,10 @@ import java.util.List;
 import java.util.Set;
 
 /**
-   Check for comments in between imports.
-**/
+ * Check for comments in between imports.
+ * 
+ * @version $Revision: 1.3 $
+ */
 public class CommentsInImports {
 
 }

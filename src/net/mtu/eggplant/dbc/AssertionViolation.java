@@ -29,6 +29,8 @@ package net.mtu.eggplant.dbc;
 
 /**
  * Exception thrown when an assertiong violation occurs.
+ * 
+ * @version $Revision: 1.3 $
  */
 public class AssertionViolation extends RuntimeException {
 

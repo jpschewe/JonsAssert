@@ -31,6 +31,9 @@ import antlr.Token;
 
 import net.mtu.eggplant.util.StringUtils;
 
+/**
+ * @version $Revision: 1.3 $
+ */
 public class AssertToken extends Token {
 
   /**

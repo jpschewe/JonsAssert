@@ -31,9 +31,11 @@ import java.io.IOException;
 import java.io.File;
 
 /**
-   This tests the instanceof rule in the parser as well as an empty compound
-   statement and end of javadoc comment.
-*/
+ * This tests the instanceof rule in the parser as well as an empty compound
+ * statement and end of javadoc comment.
+ * 
+ * @version $Revision: 1.3 $
+ */
 public class Node {
   public void insert(Object child, int index) {
     if(!(child instanceof Node)) {

@@ -90,6 +90,8 @@ import java.util.LinkedList;
  *
  * <p>This parser has been modified from the original Recognizer to a pre-parser
  * that implements assertions in java as well as support JDK 1.4.</p>
+ *
+ * @version $Revision: 1.4 $
  */
 class JavaRecognizer extends Parser;
 options {

@@ -27,6 +27,9 @@
  */
 package net.mtu.eggplant.dbc.test;
 
+/**
+ * @version $Revision: 1.3 $
+ */
 public class CheckWrongPreconditionsSuperClass {
 
   /**

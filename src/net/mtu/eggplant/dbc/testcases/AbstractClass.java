@@ -28,9 +28,10 @@
 package net.mtu.eggplant.dbc.test;
 
 /**
-   Tests pre and post conditions on abstract methods, this is the abstract
-   class.
-**/
+ * Tests pre and post conditions on abstract methods, this is the abstract
+ * class.
+ * @version $Revision: 1.3 $
+ */
 abstract public class AbstractClass {
 
   /**

@@ -33,8 +33,10 @@ package net.mtu.eggplant.dbc.test;
 import java.util.Vector;
 
 /**
-   Tests for javadoc comments above imports.
-**/
+ * Tests for javadoc comments above imports.
+ * 
+ * @version $Revision: 1.3 $
+ */
 public class CommentsOverImports {
 
 

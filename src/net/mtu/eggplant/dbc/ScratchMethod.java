@@ -28,8 +28,10 @@
 package net.mtu.eggplant.dbc;
 
 /**
-   Scratch class with information to create a method.
-**/
+ * Scratch class with information to create a method.
+ * 
+ * @version $Revision: 1.3 $
+ */
 final /*package*/ class ScratchMethod {
 
   /**
