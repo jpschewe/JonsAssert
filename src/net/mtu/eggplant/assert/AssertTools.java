@@ -31,8 +31,8 @@ final public class AssertTools {
     Class superClass = thisClass.getSuperclass();
     Method superMethod = null;
 
-    if(superClass != null && !superClass.equals(Object.class)) {
-      while(superMethod == null && !superClass.equals(Object.class)) {
+    if(superClass != null) {
+      while(superMethod == null && superClass != null) {
         try {
           String fullClassName = superClass.getName().replace('.', '_');
           String mname = "__" + fullClassName + "_" + methodName;

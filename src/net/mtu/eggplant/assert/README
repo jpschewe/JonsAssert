@@ -1,51 +1,38 @@
+This is an assertion package for Java.  It implements assertions similar to
+those used in Eiffel.  I wrote this program because I've used a program in the
+past called AssertMate and it really didn't implement assertions very well and
+had a lot of bugs.  I talked with the people that wrote it and they decided to
+stop development, so I decided that being the programmer that I am, I'd write
+my own.  Little did I know how much I was getting into, I've written compilers
+before, but this is a little more difficult, I actually have to modify someone
+else's code and it still needs to work the way they intended.
+
 The grammar file used, java.g, is based off of the one from the Antlr home
 page.  The original authors comments still exist at the top of that file so
 they can recieve due credit.
 
 Implicit instrumentation is not yet supported, so each file needs to be
-instrumented explicitly.  Interfaces need no instrumentation, so they are
-just copied to the instrumented directory.  
+instrumented explicitly.  Interfaces need no instrumentation, so they are just
+copied to the instrumented directory.  Also only files found on the filesystem
+are instrumented.  Those interfaces found through some URL, either on another
+machine or in a jar file, are only parsed, but not instrumented.
 
 @assert checks cannot be before one liners ex:
-if(i < 10)
- /** @assert (i < 10) **/
- i = 11;
-
-I think the reasons are pretty obvious.  It's very difficult to insert code
-here correctly.
+if(i < 10) /** @assert (i < 10) **/ i = 11;
+I think the reasons are pretty obvious.  It's very difficult to
+insert code here correctly.
 
 Preconditions on constructors are limited by the fact that they may not
-reference reference instance methods or non-static inner classes.
+reference instance methods/variables or non-static inner classes.
 
 Methods called by assertions cannot throw exceptions.  It's rather difficult
-to find what's actually being called and what exceptions it can throw.
-
-BUGS:
-- Implementing an interface that is defined in the same file won't work right
-now.  This needs some seious thought.
-
-- When calling a method from an assertion the assertions in that method are
-also checked, so calling a method from it's precondition will cause an
-infinite loop.
-
-- Note that there my be no <CR>'s inside any assertions, unless they are
-property escaped.  So no <CR>'s between the condition and the message.
-This may be fixed in a later version.
-
-- When interfaces are searched for, interfaces that are defined as local
-interface will not be found unless the file they are in has already been
-parsed.  Other compilers I've looked at have the same problem, plus it's just
-bad programming practice.  If you want a class to be local to another class,
-just make it an inner class and save yourself the headache.
-
-- Reporting bugs.  If you happen to find a bug in the software, please send me a
-message, schewe@tcfreenet.org.  At least include the message that was output
-and a description of what condition was being checked.  A stand alone test
-case that causes the error is REALLY helpful if you can do such a thing.
+to find what's actually being called and what exceptions it can throw, with
+the exception of RuntimeExceptions.  Since these do not have to be caught it's
+ok to throw these.
 
 
-FEATURES (some people might call these bugs, but I put them there on
-purpose :)
+FEATURES:
+(some people might call these bugs, but I put them there on purpose :)
 
 - Does design by contract correct, except where noted in the BUGS.
 
@@ -53,9 +40,50 @@ purpose :)
 where <paramName> is the name of the parameter.  This includes checking in
 post conditions and assertion conditions in the method.
 
-- Preconditions can access private and package methods and
-variables, even though design by contract doesn't allow this.
+-- Allows for checking of return value in post condition via the variable
+__retVal.
+
+- Preconditions can access private and package methods and variables, even
+though design by contract doesn't normally allow this.
+
+- allows one to specify the extension of the source and instrumented files.
+
+BUGS:
+- Implementing an interface that is defined in the same file won't work
+right now.  This needs some seious thought.
+
+- When calling a method from an assertion the assertions in that method are
+also checked, so calling a method from it's precondition will cause an
+infinite loop.
+
+- Note that there my be no <CR>'s inside any assertions, unless they are
+property escaped.  So no <CR>'s between the condition and the message.  This
+may be fixed in a later version.
+
+- When interfaces are searched for, interfaces that are defined as local
+interface will not be found unless the file they are in has already been
+parsed.  Other compilers I've looked at have the same problem, plus it's just
+bad programming practice.  If you want a class to be local to another class,
+just make it an inner class and save yourself the headache otherwise put it in
+it's own file.
+
+- Assertions on native methods are not checked.  It seems like it'd be pretty
+hard to insert code into the C.  One idea is to create another method that
+calls the new native method.
+
+- Reporting bugs.  If you happen to find a bug in the software, please send me
+a message, schewe@tcfreenet.org.  At least include the message that was output
+and a description of what condition was being checked.  A stand alone test
+case that causes the error is REALLY helpful if you can do such a thing.
 
 
 TODO:
 - Get assertions off of implemented interfaces.
+
+- Allow the user to specify a destination directory for the instrumented
+files so that the extension doesn't have to be changed.
+
+- Build patch for Jikes that allows Assert to be called as files are compiled
+with Jikes.  Would be really nice if it could keep the same JVM running so
+interfaces wouldn't have to be reparsed, but that could be tough.
+

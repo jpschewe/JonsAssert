@@ -9,10 +9,6 @@ package org.tcfreenet.schewe.Assert;
 
 import org.tcfreenet.schewe.utils.StringPair;
 
-import antlr.Token;
-
-import java.util.Vector;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Iterator;
 
@@ -157,13 +153,13 @@ public class CodeGenerator {
     String mclassName = assertMethod.getContainingClass().getFullName().replace('.', '_');
     String dummyClassName = assertMethod.getContainingClass().createDummyConstructorClassName();
     boolean first = true;
-    Enumeration paramIter = assertMethod.getParams().elements();
-    while(paramIter.hasMoreElements()) {
+    Iterator paramIter = assertMethod.getParams().iterator();
+    while(paramIter.hasNext()) {
       if(! first) {
         params.append(", ");
         first = false;
       }
-      StringPair sp = (StringPair)paramIter.nextElement();
+      StringPair sp = (StringPair)paramIter.next();
       String paramName = sp.getStringTwo();
       params.append(paramName);
     }
@@ -225,9 +221,9 @@ public class CodeGenerator {
   static public String generateOldValues(final AssertMethod assertMethod) {
     StringBuffer code = new StringBuffer();
 
-    Enumeration paramIter = assertMethod.getParams().elements();
-    while(paramIter.hasMoreElements()) {
-      StringPair sp = (StringPair)paramIter.nextElement();
+    Iterator paramIter = assertMethod.getParams().iterator();
+    while(paramIter.hasNext()) {
+      StringPair sp = (StringPair)paramIter.next();
       String paramType = sp.getStringOne();
       String paramName = sp.getStringTwo();
       code.append("final ");
@@ -277,9 +273,9 @@ public class CodeGenerator {
       code.append("__retVal");
       first = false;
     }
-    Enumeration paramIter = assertMethod.getParams().elements();
-    while(paramIter.hasMoreElements()) {
-      StringPair sp = (StringPair)paramIter.nextElement();
+    Iterator paramIter = assertMethod.getParams().iterator();
+    while(paramIter.hasNext()) {
+      StringPair sp = (StringPair)paramIter.next();
       String paramName = sp.getStringTwo();
       if(! first) {
         code.append(", ");
@@ -416,11 +412,103 @@ public class CodeGenerator {
      @return the code neccessary to implement the post conditions on this method
   **/
   static public String generatePostConditionMethod(final AssertMethod assertMethod) {
+    String className = assertMethod.getContainingClass().getFullName();
+    String mclassName = className.replace('.', '_');
     StringBuffer code = new StringBuffer();
-    //[jpschewe:20000206.2034CST] FIX add code
 
+    if(assertMethod.isStatic() || assertMethod.isConstructor()) {
+      code.append("static ");
+    }
+    code.append("protected boolean __");
+    code.append(mclassName);
+    code.append("_check");
+    code.append(assertMethod.getName());
+    code.append("PostConditions(");
+    boolean first = true;
+    Iterator paramIter = assertMethod.getParams().iterator();
+    while(paramIter.hasNext()) {
+      if(! first) {
+        code.append(",");
+        first = false;
+      }
+      StringPair sp = (StringPair)paramIter.next();
+      code.append(sp.getStringOne());
+      code.append(' ');
+      code.append(sp.getStringTwo());
+    }
+    code.append(") {\n");
+    code.append("Class thisClass;\n");
+    code.append("try {\n");
+    code.append("String className = \"");
+    code.append(className);
+    code.append("\";\n");
+    code.append("thisClass = Class.forName(className);\n");
+    code.append("}\n");
+    code.append("catch(ClassNotFoundException cnfe) {\n");
+    code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"Got error getting the class object for class \" + className + \" \" + cnfe);\n");
+    code.append("}\n");
+    
+
+    //[jpschewe:20000213.1552CST] need method parameters here, just the class objects, use getClassObjectForClass
+    code.append("Class[] methodArgs = {");
+    first = true;
+    paramIter = assertMethod.getParams().iterator();
+    while(paramIter.hasNext()) {
+      if(! first) {
+        code.append(", ");
+        first = false;
+      }
+      StringPair sp = (StringPair)paramIter.next();
+      code.append(getClassObjectForClass(sp.getStringOne()));
+    }
+    code.append("};\n");
+                
+    code.append("Method superMethod = org.tcfreenet.schewe.Assert.AssertTools.findSuperMethod(thisClass, \"check");
+    code.append(assertMethod.getName());
+    code.append("PostConditions\", methodArgs);\n");
+
+    code.append("if(superMethod != null) {\n");
+    code.append("Object[] args = {");
+    //[jpschewe:20000213.1552CST] need parameters here, just the parameter names
+    first = true;
+    paramIter = assertMethod.getParams().iterator();
+    while(paramIter.hasNext()) {
+      if(! first) {
+        code.append(", ");
+        first = false;
+      }
+      StringPair sp = (StringPair)paramIter.next();
+      code.append(sp.getStringTwo());
+    }    
+    code.append("};\n");
+    code.append("try {\n");
+    code.append("retVal = superMethod.invoke(");
+    if(assertMethod.isStatic() || assertMethod.isConstructor()) {
+      code.append("null");
+    }
+    else {
+      code.append("this");
+    }
+    code.append(", args);\n");
+    code.append("}\n");
+    code.append("catch(IllegalAccessException iae) {\n");
+    code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"Not enough access executing superClass check");
+    code.append(assertMethod.getName());
+    code.append("PostConditions: \" + iae.getMessage());\n");
+    code.append("}\n");
+    code.append("catch(IllegalArgumentException iae) {\n");
+    code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"IllegalArgument executing superClass check");
+    code.append(assertMethod.getName());
+    code.append("PostConditions: \" + iae.getMessage());\n");
+    code.append("}\n");
+    code.append("catch(java.lang.reflect.InvocationTargetException ite) {\n");
+    code.append("ite.getTargetException().printStackTrace();\n");
+    code.append("}\n");
+    code.append("}\n");
+
+    
     //[jpschewe:20000116.1749CST] FIX still need to add to this to do interface
-    //post conditions first and keep track of which interface they're from
+    //postconditions first and keep track of which interface they're from
 
     addConditionChecks(code, assertMethod.getPostConditions());
 

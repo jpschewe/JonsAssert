@@ -12,18 +12,21 @@ import org.tcfreenet.schewe.utils.Named;
 /**
    Represents a type of assertion.
 **/
-public class AssertType implements Named, Comparable {
+public class CodeFragmentType implements Named, Comparable {
 
-  final static public AssertType ASSERT = new AssertType("ASSERT", 3);
-  final static public AssertType PRECONDITION = new AssertType("PRECONDITION", 0);
-  final static public AssertType INVARIANT = new AssertType("INVARIANT", 1);
-  final static public AssertType POSTCONDITION = new AssertType("POSTCONDITION", 2);
+
+  final static public CodeFragmentType PRECONDITION = new CodeFragmentType("PRECONDITION", 0);
+  final static public CodeFragmentType OLDVALUES = new CodeFragmentType("OLDVALUES", 1);
+  final static public CodeFragmentType ASSERT = new CodeFragmentType("ASSERT", 2);
+  final static public CodeFragmentType INVARIANT = new CodeFragmentType("INVARIANT", 3);
+  final static public CodeFragmentType POSTCONDITION = new CodeFragmentType("POSTCONDITION", 4);
+  final static public CodeFragmentType POSTCONDITION2 = new CodeFragmentType("POSTCONDITION2", 5);
 
   /**
      @param name the name of the type
      @param rank the rank for sorting
   **/
-  private AssertType(final String name, final long rank) {
+  private CodeFragmentType(final String name, final long rank) {
     _name = name;
     _rank = rank;
   }
@@ -43,8 +46,8 @@ public class AssertType implements Named, Comparable {
   }
 
   public boolean equals(Object o) {
-    if(o instanceof AssertType) {
-      return (getRank() == ((AssertType)o).getRank());
+    if(o instanceof CodeFragmentType) {
+      return (getRank() == ((CodeFragmentType)o).getRank());
     }
     return false;
   }
@@ -56,11 +59,11 @@ public class AssertType implements Named, Comparable {
 
   //Comparable
   /**
-     @throws ClassCastException if other is not an AssertType
+     @throws ClassCastException if other is not an CodeFragmentType
   **/
   public int compareTo(final Object o) {
-    if(o instanceof AssertType) {
-      AssertType other = (AssertType)o;
+    if(o instanceof CodeFragmentType) {
+      CodeFragmentType other = (CodeFragmentType)o;
       if(other.equals(this)) {
         return 0;
       }
@@ -72,7 +75,7 @@ public class AssertType implements Named, Comparable {
       }
     }
     else {
-      throw new ClassCastException(o.getClass() + " is not a AssertType");
+      throw new ClassCastException(o.getClass() + " is not a CodeFragmentType");
     }
   }
   //end Comparable

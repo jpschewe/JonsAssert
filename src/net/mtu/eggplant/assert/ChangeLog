@@ -1,3 +1,21 @@
+2000-02-15  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* java.g: Converted to CodeFragmentType from AssertType
+
+	* Symtab.java: Added more instrumentation to the instrument() call.
+
+	* CodeModification.java: Converted to CodeFragment from AssertType
+
+	* CodeGenerator.java: Converted from Vector to List and added
+	first pass at generatePostConditionMethod.
+
+	* CodeFragment.java: Converted to CodeFragmentType from AssertType
+
+	* AssertMethod.java: Converted from Vector to List.
+
+	* CodeFragmentType.java: Added for typing within CodeFragments,
+	mainly for ordering.
+
 2000-02-13  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* MethodSkeletons.xjava: Updated to match the code in CodeGenerator.

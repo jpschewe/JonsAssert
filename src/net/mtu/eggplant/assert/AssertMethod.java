@@ -12,6 +12,7 @@ import org.tcfreenet.schewe.utils.Named;
 import org.tcfreenet.schewe.utils.Pair;
 
 import java.util.Vector;
+import java.util.List;
 
 /**
    Object that contains the data needed to generate instrumented code for a
@@ -24,7 +25,7 @@ public class AssertMethod implements Named {
      @param name the name of this method, will match the name of the class if a constructor
      @param preConditions the preconditions for this method
      @param postConditions the postconditions for this method
-     @param params Vector of {@link StringPair StringPairs, (class, parameter name)}
+     @param params List of {@link StringPair StringPairs, (class, parameter name)}
      @param retType the return type of this method, null signals this method is a constructor
      @param isStatic true if this method is static
      @param isPrivate true if this method is private
@@ -37,9 +38,9 @@ public class AssertMethod implements Named {
   **/
   public AssertMethod(final AssertClass theClass,
                       final String name,
-                      final Vector preConditions,
-                      final Vector postConditions,
-                      final Vector params,
+                      final List preConditions,
+                      final List postConditions,
+                      final List params,
                       final String retType,
                       final boolean isStatic,
                       final boolean isPrivate) {
@@ -72,22 +73,22 @@ public class AssertMethod implements Named {
   }
     
   /** contains the tokens that define the pre conditions **/  
-  private Vector /*AssertToken*/ _preConditions;
+  private List /*AssertToken*/ _preConditions;
 
   /**
-     @return the preConditions for this method, list of AssertTokens
+     @return the preConditions for this method, list of {@link AssertToken AssertTokens}
   **/
-  public Vector getPreConditions() {
+  public List getPreConditions() {
     return _preConditions;
   }
 
   /** contains the tokens that define the post conditions **/
-  private Vector /*AssertToken*/ _postConditions;
+  private List /*AssertToken*/ _postConditions;
 
   /**
-     @return the postConditions for this method, list of AssertTokens
+     @return the postConditions for this method, list of {@link AssertToken AssertTokens}
   **/
-  public Vector getPostConditions() {
+  public List getPostConditions() {
     return _postConditions;
   }
   
@@ -109,8 +110,8 @@ public class AssertMethod implements Named {
     return _entrance;
   }
   
-  /** Vector of Points **/
-  private Vector /*CodePointPair*/ _exits;
+  /** List of Points **/
+  private List /*CodePointPair*/ _exits;
 
   /**
      Add an exit to this method.
@@ -121,25 +122,25 @@ public class AssertMethod implements Named {
      @pre (exit != null)
   **/
   public void addExit(final CodePointPair points) {
-    _exits.addElement(points);
+    _exits.add(points);
   }
   
   /**
      @return list of the exits of this class, all return statements and the
-     closing brace if this is a void method.  Don't modify this Vector.
-     Vector of {@link CodePointPair CodePointPairs(start of return, semicolon)}
+     closing brace if this is a void method.  Don't modify this List.
+     List of {@link CodePointPair CodePointPairs(start of return, semicolon)}
   **/
-  public Vector getExits() {
+  public List getExits() {
     return _exits;
   }
   
-  private Vector /*StringPair*/ _params;
+  private List /*StringPair*/ _params;
 
   /**
-     @return Vector of {@link StringPair StringPairs, (class, parameter name)}, don't modify this
-     Vector
+     @return List of {@link StringPair StringPairs, (class, parameter name)}, don't modify this
+     List
   **/
-  public Vector getParams() {
+  public List getParams() {
     return _params;
   }
 

@@ -32,8 +32,9 @@ public class CodeModification extends CodeFragment {
                           final CodePoint end,
                           final String searchText,
                           final String replaceText,
-                          final String code) {
-    super(start, code, AssertType.POSTCONDITION);
+                          final String code,
+                          final CodeFragmentType type) {
+    super(start, code, type);
     _end = end;
     _searchText = searchText;
     _replaceText = replaceText;

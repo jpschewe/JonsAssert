@@ -31,7 +31,7 @@ public Object methodFoo(Object param1) {
 }
 
 
-//[jpschewe:20000213.1555CST] FIX still need code
+//[jpschewe:20000213.1555CST] FIX still need code, it's in CodeGenerator, copy it to here or from checkPreConditions
 protected boolean __<packageName>_<methodName>_check<methodname>PostConditions(__retVal, oldParam1, param1, ...) {
 
 

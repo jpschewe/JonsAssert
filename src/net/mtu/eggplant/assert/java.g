@@ -159,7 +159,7 @@ tokens {
 	codeFrag.append(code);
       }
       System.out.println("Parser: end asserts");
-      CodeFragment codeFragment = new CodeFragment(new CodePoint(line, column), codeFrag.toString(), AssertType.ASSERT);
+      CodeFragment codeFragment = new CodeFragment(new CodePoint(line, column), codeFrag.toString(), CodeFragmentType.ASSERT);
       getSymtab().addCodeFragment(codeFragment);
       System.out.println(codeFragment);
     }
@@ -467,7 +467,6 @@ classDefinition
     implementsClause
     // now parse the body of the class
     classBlock[id.getText(), false]
-    //[jpschewe:19991230.2312CST] FIX generate method to check invariants here    
   ;
 
 
@@ -548,18 +547,22 @@ field
   boolean methodOrConstructor = false;
   boolean isStatic = false;
   boolean isPrivate = false;
+  boolean isNative = false;
+  boolean isAbstract = false;
   CodePointPair startEnd = null;
 }
   :
 
     // method, constructor, or variable declaration
+    //[jpschewe:20000215.2254CST] FIX need to do something special for abstract and native methods here
     mods=modifiers
     {
       isPrivate = mods.contains("private");
       isStatic = mods.contains("static");
+      isAbstract = mods.contains("abstract");
+      isNative = mods.contains("native");
     }
     
-    //[jpschewe:19991230.2309CST] FIX check pre and post conditions here
     (	params=ctorHead
       {
 	// needs to be before compoundStatement so that I can have it set for the addExit calls
@@ -843,12 +846,13 @@ statement
 
 	//[jpschewe:19991230.2259CST] put post call here
 	// Return an expression
-    |	ret:"return" (expression)? SEMI
+    |	ret:"return" (expression)? semi:SEMI
       {
-	CodePoint cp = new CodePoint(ret.getLine(), ret.getColumn());
+	CodePoint retcp = new CodePoint(ret.getLine(), ret.getColumn());
+	CodePoint semicp = new CodePoint(semi.getLine(), semi.getColumn());
 	//[jpschewe:20000205.1543CST] FIX need special bit here for doing search and replace in the code
 	//System.out.println("found return: " + exp);
-	//getSymtab().getCurrentMethod().addExit(cp, statement);
+	//getSymtab().getCurrentMethod().addExit(retcp, semicp);
       }
 
 	// switch/case statement

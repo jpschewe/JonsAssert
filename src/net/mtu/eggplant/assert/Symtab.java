@@ -24,12 +24,12 @@ import java.util.Iterator;
 import java.util.Hashtable;
 import java.util.Vector;
 import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.Enumeration;
+import java.util.List;
 
 /*
   Need to read the PDF again to make sure I've got these right.
-  
+
   Things to keep track of:
   methods: pre/post
   classes: methods, invariants
@@ -59,13 +59,13 @@ import java.util.Enumeration;
 
     AssertClass:
       List of Methods in this class
-      List of invariants (Vector -> AssertToken)
+      List of invariants (List -> AssertToken)
       
     AssertMethod:
-      List of preconditions, in order that they appear in the code (Vector -> AssertToken)
+      List of preconditions, in order that they appear in the code (List -> AssertToken)
       Entrance point (line, column)
-      List of exit points (Vector->(line, column))
-      List of post conditions, order matters (Vector -> AssertToken)
+      List of exit points (List->(line, column))
+      List of post conditions, order matters (List -> AssertToken)
       Return type (String)
       Static or not (boolean)
       
@@ -139,7 +139,7 @@ public class Symtab {
       return false;
     }
     
-    _allFiles.addElement(ifile);
+    _allFiles.add(ifile);
     _currentFile = ifile;
     _imports = new Hashtable();
     
@@ -186,7 +186,7 @@ public class Symtab {
      @pre (invariants != null)
      
   **/
-  public void startClass(final String name, final Vector invariants) {
+  public void startClass(final String name, final List invariants) {
     if(_currentClass != null) {
       _classStack.push(_currentClass);
     }
@@ -200,7 +200,7 @@ public class Symtab {
     h.put(name, getCurrentClass());
 
     // associate it with a file too
-    //Vector v = (Vector)_allFiles.get(getCurrentFile());
+    //List v = (List)_allFiles.get(getCurrentFile());
     //v.addElement(getCurrentClass());    
   }
 
@@ -217,7 +217,7 @@ public class Symtab {
   public void finishClass(final CodePoint cp) {
     //add the invariant method
     String code = CodeGenerator.generateInvariantMethod(_currentClass);
-    CodeFragment cf = new CodeFragment(cp, code, AssertType.INVARIANT);
+    CodeFragment cf = new CodeFragment(cp, code, CodeFragmentType.INVARIANT);
     _currentFile.getFragments().add(cf);
     
     _currentFile.getClasses().addElement(_currentClass);
@@ -247,13 +247,14 @@ public class Symtab {
     /*
       walk over _allFiles and parse each class writing out to the instrument directory.
     */
-    Enumeration ifileIter = _allFiles.elements();
-    while(ifileIter.hasMoreElements()) {
-      InstrumentedFile ifile = (InstrumentedFile)ifileIter.nextElement();
+    Iterator ifileIter = _allFiles.iterator();
+    while(ifileIter.hasNext()) {
+      InstrumentedFile ifile = (InstrumentedFile)ifileIter.next();
       //Add CodeFragments from all of the classes that are in ifile
-      Enumeration classIter = ifile.getClasses().elements();
-      while(classIter.hasMoreElements()) {
-        AssertClass aClass = (AssertClass)classIter.nextElement();
+      Iterator classIter = ifile.getClasses().iterator();
+      while(classIter.hasNext()) {
+        AssertClass aClass = (AssertClass)classIter.next();
+        addClassInstrumentation(ifile, aClass);
         System.out.println(aClass);
       }
       //sort the list
@@ -342,7 +343,7 @@ public class Symtab {
         Enumeration iter = _imports.keys();
         while(iter.hasMoreElements() && packageName == null) {
           String pn = (String)iter.nextElement();
-          Vector possibles = (Vector)_imports.get(pn);
+          List possibles = (List)_imports.get(pn);
           if(possibles.size() > 0) {
             if(possibles.contains(name)) {
               packageName = pn;
@@ -468,12 +469,12 @@ public class Symtab {
     String shortenedPackageName = packageName.substring(1);
     System.out.println("in addImport token className " + className + " packageName " + packageName + " shortedPackageName " + shortenedPackageName);
     if(className != null) {
-      Vector v = (Vector)_imports.get(shortenedPackageName);
+      List v = (List)_imports.get(shortenedPackageName);
       if(v == null) {
 	v = new Vector();
       }
       //add the class to the list of classes for this package import
-      v.addElement(className);
+      v.add(className);
       _imports.put(shortenedPackageName, v);
     }
     else {
@@ -489,7 +490,7 @@ public class Symtab {
      @param name the name of this method, null for a constructor
      @param preConditions the preconditions for this method
      @param postConditions the postconditions for this method
-     @param params Vector of StringPairs, (class, parameter name)
+     @param params List of StringPairs, (class, parameter name)
      @param retType the return type of this method, null signals this method is a constructor
      @param isStatic true if this method is static
      @param isPrivate true if this method is private
@@ -499,9 +500,9 @@ public class Symtab {
      @pre (params != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(StringPair.class))
   **/
   public void startMethod(final String name,
-                          final Vector preConditions,
-                          final Vector postConditions,
-                          final Vector params,
+                          final List preConditions,
+                          final List postConditions,
+                          final List params,
                           final String retType,
                           final boolean isStatic,
                           final boolean isPrivate) {
@@ -527,7 +528,8 @@ public class Symtab {
      @param startEnd two code points representing the opening and closing braces of the method
   **/
   public void finishMethod(final CodePointPair startEnd) {
-    //[jpschewe:20000206.1000CST] FIX change this to actuall create a CodeModification for changing the return statement, if it's not void, and one for inserting the text after the SEMI.
+    //[jpschewe:20000206.1000CST] FIX change this to actually create a CodeModification for changing the return statement, if it's not void, and one for inserting the text after the SEMI.
+    //[jpschewe:20000215.2256CST] FIX change this to tell the method where the end of the method is
     _currentMethod.setMethodEntrance(startEnd.getCodePointOne());
     String retType = _currentMethod.getReturnType();
     if(_currentMethod.isVoid()) {
@@ -549,20 +551,66 @@ public class Symtab {
   public AssertMethod getCurrentMethod() {
     return _currentMethod;
   }
+
+  /**
+     Add the pre and post condition calls for this class to ifile as well as
+     calls to the checkInvariant method.
+  **/
+  private void addClassInstrumentation(final InstrumentedFile ifile,
+                                       final AssertClass aClass) {
+    String invariantCall = CodeGenerator.generateInvariantCall(aClass);
+    
+    Iterator methodIter = aClass.getMethods().iterator();
+    while(methodIter.hasNext()) {
+      AssertMethod method = (AssertMethod)methodIter.next();
+      CodePoint entrance = method.getEntrance();      
+
+      //Add a call to the precondition method at entrance
+      String preCall = CodeGenerator.generatePreConditionCall(method);      
+      ifile.getFragments().add(new CodeFragment(entrance, preCall, CodeFragmentType.PRECONDITION));
+
+      //Add old Values
+      String oldValues = CodeGenerator.generateOldValues(method);      
+      ifile.getFragments().add(new CodeFragment(entrance, oldValues, CodeFragmentType.OLDVALUES));
+      
+      if(!method.isStatic() && !method.isPrivate()) {
+        //Add a call to the invariant method at entrance
+        ifile.getFragments().add(new CodeFragment(entrance, invariantCall, CodeFragmentType.INVARIANT));
+      }
+
+      Iterator exits = method.getExits().iterator();
+      while(exits.hasNext()) {
+        CodePointPair exit = (CodePointPair)exits.next();
+        if(!method.isStatic() && !method.isPrivate()) {      
+          //Add a call to the invariant at each exit
+        }
+        //Add a call to the postCondition at each exit
+        //[jpschewe:20000215.2236CST] FIX need two calls here
+        //String postCall = CodeGenerator.generatePostConditionCall(method);
+
+      }
+
+      //Add the pre and post check methods at the end of the method
+      String preMethod = CodeGenerator.generatePreConditionMethod(method);
+      String postMethod = CodeGenerator.generatePostConditionMethod(method);
+      
+    }
+
+  }
   
   private AssertClass _currentClass;
   private Hashtable _allPackages;
   /**
-     Vector of InstrumentedFiles.
+     List of InstrumentedFiles.
   **/
-  private Vector _allFiles;
+  private List _allFiles;
   private Stack _classStack;
   private Stack _fileStack;
   private Stack _methodStack;
   private AssertMethod _currentMethod;
   
   /**
-     Hashtable of Vectors, each key is a class name, each value is a package
+     Hashtable of List, each key is a class name, each value is a package
      name.
   **/
   private Hashtable _imports;

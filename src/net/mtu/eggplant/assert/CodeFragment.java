@@ -20,7 +20,7 @@ public class CodeFragment implements Comparable {
      @pre (code != null)
      @pre (type != null)
   **/
-  public CodeFragment(final CodePoint location, final String code, final AssertType type) {
+  public CodeFragment(final CodePoint location, final String code, final CodeFragmentType type) {
     _code = code;
     _type = type;
     _location = location;
@@ -45,10 +45,10 @@ public class CodeFragment implements Comparable {
   /**
      what type of assertion is this.
   **/
-  public AssertType getType() {
+  public CodeFragmentType getType() {
     return _type;
   }
-  private AssertType _type;
+  private CodeFragmentType _type;
 
   public boolean equals(final Object o) {
     if(o instanceof CodeFragment) {
