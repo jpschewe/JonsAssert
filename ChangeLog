@@ -1,3 +1,8 @@
+2002-01-19  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/net/mtu/eggplant/assert/JonsAssert.java: Switched
+	commandline parsers to one with a BSD style license.
+
 2001-07-07  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/net/mtu/eggplant/assert/java.g: Removed warnings from java.g

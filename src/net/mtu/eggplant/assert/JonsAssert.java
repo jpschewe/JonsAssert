@@ -28,27 +28,33 @@
 package net.mtu.eggplant.assert;
 
 import net.mtu.eggplant.util.Debug;
+import net.mtu.eggplant.util.Function;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.IOException;
-
+import java.io.InputStream;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 import antlr.TokenStreamSelector;
 
-import gnu.getopt.Getopt;
-import gnu.getopt.LongOpt;
+import com.werken.opt.CommandLine;
+import com.werken.opt.DuplicateOptionException;
+import com.werken.opt.MissingArgumentException;
+import com.werken.opt.Option;
+import com.werken.opt.Options;
+import com.werken.opt.UnrecognizedOptionException;
+
+import net.mtu.eggplant.util.algorithms.Applying;
 
 /**
  * <p>Class that starts everything off.</p>
  *
  * <a name="commandline_doc"><h2>Commandline options</h2></a>
  * <ul>
- *   <li>-f, --force  force instrumentation, reguardless of file modification time</li>
+ *   <li>-f, --force  force instrumentation, regardless of file modification time</li>
  *   <li>-d, --destination &lt;dir&gt; the destination directory (default: instrumented)</li>
  *   <li>-s, --sourceExtension &lt;ext&gt; the extension on the source files (default: java)</li>
  *   <li>-i, --instrumentedExtension &lt;ext&gt; the extension on the source files (default: java)</li>
@@ -78,60 +84,102 @@ public class JonsAssert {
     final Configuration config = new Configuration();
 
     //Setup all of the options
-    final LongOpt[] longopts = new LongOpt[6];
-    longopts[0] = new LongOpt("force", LongOpt.NO_ARGUMENT, null, 'f');
-    longopts[1] = new LongOpt("destination", LongOpt.REQUIRED_ARGUMENT, null, 'd');
-    longopts[2] = new LongOpt("sourceExtension", LongOpt.REQUIRED_ARGUMENT, null, 's');
-    longopts[3] = new LongOpt("instrumentedExtension", LongOpt.REQUIRED_ARGUMENT, null, 'i');
-    //Undocumented features for debugging
-    longopts[4] = new LongOpt("debugLexer", LongOpt.NO_ARGUMENT, null, 300);
-    longopts[5] = new LongOpt("debug", LongOpt.NO_ARGUMENT, null, 301);
-    final Getopt g = new Getopt("JonsAssert", args, "fd:s:i:", longopts);
+    final Options options = new Options();
+    try {
+      options.addOption('f', "force", false, "force instrumentation");
+      options.addOption('d', "destination", true, "<dir> the destination directory (default: instrumented)");
+      options.addOption('s', "sourceExtension", true, "<ext> the extension of the source files (default: java)");
+      options.addOption('i', "instrumentedExtension", true, "<ext> the extension used for the instrumented files (default: java)");
+      options.addOption('~', "debugLexer", false, "");
+      options.addOption('!', "debug", false, "");
+    } catch(final DuplicateOptionException doe) {
+      System.err.println("Someone specified duplicate options in the code!");
+      System.exit(1);
+    }
 
-    int c;
-    while((c = g.getopt()) != -1) {
-      switch(c) {
-      case 'f':
+    //list to hold files/directories to instrument
+    final Collection files = new LinkedList();
+
+    //parse options
+    try {
+      final CommandLine cl = options.parse(args);
+
+      if(cl.optIsSet('f')) {
         config.setIgnoreTimeStamp(true);
-        break;
-      case 'd':
-        config.setDestinationDirectory(g.getOptarg());
-        break;
-      case 's':
-        config.setSourceExtension(g.getOptarg());
-        break;
-      case 'i':
-        config.setInstrumentedExtension(g.getOptarg());
-        break;
-      case 300:
-        _debugLexer = true;
-        break;
-      case 301:
-        Debug.setDebugMode(true);
-        break;
-      default:
-        //Print out usage and exit
-        System.err.println("Usage: JonsAssert [options] files ...");
-        System.err.println("-f, --force  force instrumentation");
-        System.err.println("-d, --destination <dir> the destination directory (default: instrumented)");
-        System.err.println("-s, --sourceExtension <ext> the extension on the source files (default: java)");
-        System.err.println("-i, --instrumentedExtension <ext> the extension on the source files (default: java)");
-        System.exit(1);
-        break;
       }
+      if(cl.optIsSet('d')) {
+        config.setDestinationDirectory(cl.getOptValue('d'));
+      }
+      if(cl.optIsSet('s')) {
+        config.setSourceExtension(cl.getOptValue('s'));
+      }
+      if(cl.optIsSet('i')) {
+        config.setInstrumentedExtension(cl.getOptValue('i'));
+      }
+      if(cl.optIsSet('~')) {
+        _debugLexer = true;
+      }
+      if(cl.optIsSet('!')) {
+        Debug.setDebugMode(true);
+      }
+
+      Applying.forEach(cl.getArgs(), new Function() {
+        public void execute(final Object obj) {
+          files.add(new File((String)obj));
+        }
+      });
+      
+    } catch(final MissingArgumentException mae) {
+      System.err.println(mae.getMessage());
+      usage(options);
+      System.exit(1);
+    } catch(final UnrecognizedOptionException ure) {
+      System.err.println(ure.getMessage());
+      usage(options);
+      System.exit(1);
     }
 
     _symtab = new Symtab(config);
 
-    final Collection files = new LinkedList();
-    if (args.length - g.getOptind() > 0 ) {
-      for(int i=g.getOptind(); i< args.length; i++) {
-        files.add(new File(args[i]));
-      }
-    }
-    
     //Set the exit status based on errors
     System.exit(instrument(config, files) ? 0 : 1);
+  }
+
+  /**
+   * @pre (options != null)
+   */
+  static private void usage(final Options options) {
+    final StringBuffer sb = new StringBuffer(256);
+    sb.append("Usage: JonsAssert [options] files");
+    sb.append(System.getProperty("line.separator"));
+
+    final Iterator iter = options.getOptions().iterator();
+    while(iter.hasNext()) {
+      final Option option = (Option)iter.next();
+
+      //only short options that are characters should be shown
+      if(Character.isLetter(option.getOpt())) {
+        sb.append('-');
+        sb.append(option.getOpt());
+        if(option.hasLongOpt()) {
+          sb.append(", ");
+        }
+      } else {
+        sb.append("    ");
+      }
+      
+      if(option.hasLongOpt()) {
+        sb.append("--");
+        sb.append(option.getLongOpt());
+      }
+      
+      sb.append("  ");
+      if(option.getDescription() != null) {
+        sb.append(option.getDescription());
+      }
+      sb.append(System.getProperty("line.separator"));
+    }
+    System.err.print(sb.toString());
   }
 
   /**
