@@ -1,3 +1,8 @@
+2003-05-10  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/net/mtu/eggplant/dbc/CodeGenerator.java: Finished
+	implementing pretty-output option.
+
 2003-05-08  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/net/mtu/eggplant/dbc/doc-files/MethodSkeletons.xjava:

@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Iterator;
 
 /**
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class CodeGenerator {
 
@@ -94,11 +94,15 @@ public class CodeGenerator {
     String mclassName = aClass.getFullName().replace('.', '_');
     mclassName = mclassName.replace('$', '_');
     final StringBuffer code = new StringBuffer();
+    carriageReturn(code);
     code.append("if(" + ASSERT_TOOLS_CLASSNAME + ".ENFORCE_INVARIANT_CONDITION && !jps__");
     code.append(mclassName);
     code.append("_checkInvariant()) {");
+    carriageReturn(code);
     code.append(ASSERT_TOOLS_CLASSNAME + ".invariantFailed(" + ASSERT_TOOLS_CLASSNAME + ".getCurrentAssertionViolation());");
+    carriageReturn(code);
     code.append("}");
+    carriageReturn(code);
     
     return code.toString();
   }
@@ -123,101 +127,139 @@ public class CodeGenerator {
     final StringBuffer code = new StringBuffer();
     
     //create a variable to hold the super method
-    code.append("transient private java.lang.reflect.Method ");
+    carriageReturn(code);
+    code.append("private transient java.lang.reflect.Method ");
     code.append(methodVariableName);
     code.append(';');
+    carriageReturn(code);
                 
     code.append("final protected boolean ");
     code.append(methodName);
     code.append("() {");
+    carriageReturn(code);
 
     code.append("if(!" + ASSERT_TOOLS_CLASSNAME + ".ENFORCE_INVARIANT_CONDITION) { return true; }");
+    carriageReturn(code);
     
     //check for recursive calls
     code.append("final " + ASSERT_TOOLS_CLASSNAME + ".MethodLock jps__methodLock = " + ASSERT_TOOLS_CLASSNAME + ".lockMethod(\"" + methodKey + "\", this);");
+    carriageReturn(code);
     code.append("if(null == jps__methodLock) { return true; }");
+    carriageReturn(code);
 
     code.append("Object jps__retval = null;");
+    carriageReturn(code);
     code.append("if(" + ASSERT_TOOLS_CLASSNAME + ".ENFORCE_INHERITED_CONDITIONS) {");
+    carriageReturn(code);
       
     //Get the class object
     code.append("final String jps_className = \"");
     code.append(className);
     code.append("\";");
+    carriageReturn(code);
     code.append("final Class jps_thisClass = " + ASSERT_TOOLS_CLASSNAME + ".classForName(jps_className);");
+    carriageReturn(code);
     code.append("if(jps_thisClass == null) {");
+    carriageReturn(code);
     code.append(ASSERT_TOOLS_CLASSNAME + ".internalError(\"Could not find class \" + jps_className);");
+    carriageReturn(code);
     code.append("}");
+    carriageReturn(code);
     
     //find the super method
     code.append("if(");
     code.append(methodVariableName);
     code.append(" == null) {");
+    carriageReturn(code);
     //create the argument list
     code.append("final Class[] jps_methodArgs = new Class[0];");
+    carriageReturn(code);
     code.append(methodVariableName);
     code.append(" = " + ASSERT_TOOLS_CLASSNAME + ".findSuperMethod(jps_thisClass, \"checkInvariant\", jps_methodArgs);");
+    carriageReturn(code);
 
     code.append("if(");
     code.append(methodVariableName);
     code.append(" == null) {");
+    carriageReturn(code);
     code.append(methodVariableName);
     code.append(" = " + ASSERT_TOOLS_CLASSNAME + ".NO_METHOD;");
+    carriageReturn(code);
     code.append("}");
+    carriageReturn(code);
     code.append("}");
+    carriageReturn(code);
 
     code.append("if(");
     code.append(methodVariableName);
     code.append(" != " + ASSERT_TOOLS_CLASSNAME + ".NO_METHOD) {");
+    carriageReturn(code);
     
     //invoke it, pass on exceptions
     code.append("final Object[] jps_args = new Object[0];");
+    carriageReturn(code);
     code.append("try {");
+    carriageReturn(code);
     code.append("jps__retval = ");
     code.append(methodVariableName);
     code.append(".invoke(this, jps_args);");
-    code.append("}");
-    
-    code.append("catch(IllegalAccessException jps_iae) {");
+    carriageReturn(code);
+    code.append("} catch(IllegalAccessException jps_iae) {");
+    carriageReturn(code);
     //just means that the super method is private and we really shouldn't be calling it in the first place          
     //code.append(ASSERT_TOOLS_CLASSNAME + ".internalError(\"Not enough access executing checkInvariant method on super class: \" + jps_iae.getMessage());");
     //Pretend it returned true, which is just like not calling it
     code.append("jps__retval = Boolean.TRUE;");
-    code.append("}");
-    
-    code.append("catch(IllegalArgumentException jps_iae) {");
+    carriageReturn(code);
+    code.append("} catch(IllegalArgumentException jps_iae) {");
+    carriageReturn(code);
     code.append(ASSERT_TOOLS_CLASSNAME + ".internalError(\"IllegalArgument executing checkInvariant method on super class: \" + jps_iae.getMessage());");
-    code.append("}");
-    
-    code.append("catch(java.lang.reflect.InvocationTargetException jps_ite) {");
+    carriageReturn(code);
+    code.append("} catch(java.lang.reflect.InvocationTargetException jps_ite) {");
+    carriageReturn(code);
     code.append("jps_ite.getTargetException().printStackTrace();");
+    carriageReturn(code);
     code.append("}");
+    carriageReturn(code);
     
     code.append("if(jps__retval == null) {");
+    carriageReturn(code);
     code.append(ASSERT_TOOLS_CLASSNAME + ".internalError(\"got null from checkInvariant\");");
-    code.append("}");
-    code.append("else if(! (jps__retval instanceof Boolean) ) {");
+    carriageReturn(code);
+    code.append("} else if(! (jps__retval instanceof Boolean) ) {");
+    carriageReturn(code);
     code.append(ASSERT_TOOLS_CLASSNAME + ".internalError(\"got something odd from checkInvariant: \" + jps__retval.getClass());");
+    carriageReturn(code);
     code.append("}");
+    carriageReturn(code);
 
     code.append("if(!((Boolean)jps__retval).booleanValue()) {");
+    carriageReturn(code);
     code.append(ASSERT_TOOLS_CLASSNAME + ".unlockMethod(jps__methodLock);");
+    carriageReturn(code);
     code.append("return false;");
+    carriageReturn(code);
     code.append("}");
+    carriageReturn(code);
     code.append("}"); //end if(superMethod != AssertTools.NO_METHOD)
+    carriageReturn(code);
 
   
     //[jpschewe:20000116.1749CST] FIX still need to add to this to do interface
     //invariants first and keep track of which interface they're from
 
     code.append("}"); //end enforce inherited conditions
+    carriageReturn(code);
                 
     addConditionChecks(code, assertClass.getInvariants(), false);
 
     code.append(ASSERT_TOOLS_CLASSNAME + ".unlockMethod(jps__methodLock);");
+    carriageReturn(code);
 
     code.append("return true;"); //nothing failed, so just return
+    carriageReturn(code);
     code.append("}");
+    carriageReturn(code);
 
     return code.toString();
     
@@ -233,6 +275,7 @@ public class CodeGenerator {
   **/
   static public String generatePreConditionCall(final AssertMethod assertMethod) {
     final StringBuffer code = new StringBuffer();
+    carriageReturn(code);
     String mclassName = assertMethod.getContainingClass().getFullName().replace('.', '_');
     mclassName = mclassName.replace('$', '_');
     
@@ -259,8 +302,11 @@ public class CodeGenerator {
     }
     
     code.append(")) {");
+    carriageReturn(code);
     code.append(ASSERT_TOOLS_CLASSNAME + ".preConditionFailed(" + ASSERT_TOOLS_CLASSNAME + ".getCurrentAssertionViolation());");
+    carriageReturn(code);
     code.append("}");
+    carriageReturn(code);
     
     return code.toString();
   }
@@ -274,6 +320,7 @@ public class CodeGenerator {
   **/
   static public String generateConstructorAssertions(final AssertMethod assertMethod) {
     final StringBuffer code = new StringBuffer();
+    carriageReturn(code);
     final String dummyClassName = "JPS_" + assertMethod.getContainingClass().createDummyConstructorClassName();
     final List uniqueParams = assertMethod.getUniqueParams();
 
@@ -333,6 +380,7 @@ public class CodeGenerator {
       }
     }
     code.append("));");
+    carriageReturn(code);
 
     if(!assertMethod.getContainingClass().getInvariants().isEmpty()) {
       //call checkInvariant
@@ -345,11 +393,13 @@ public class CodeGenerator {
     }
     
     code.append("}"); //end regular constructor
+    carriageReturn(code);
 
     //dummy class
     code.append("final static private class ");
     code.append(dummyClassName);
     code.append(" { ");
+    carriageReturn(code);
     code.append("public ");
     code.append(dummyClassName);
     code.append("(");
@@ -374,6 +424,7 @@ public class CodeGenerator {
       }
     }
     code.append(") {");
+    carriageReturn(code);
 
     if(assertMethod.getPreConditions().isEmpty()) {
       //Just put in a call to the pre conditions
@@ -381,7 +432,9 @@ public class CodeGenerator {
     }
     
     code.append("}");
+    carriageReturn(code);
     code.append("}");
+    carriageReturn(code);
 
     //extra constructor
     code.append("private ");
@@ -413,6 +466,7 @@ public class CodeGenerator {
     }
     code.append(dummyClassName);
     code.append(" jps_ad) {");
+    carriageReturn(code);
 
     return code.toString();
   }
@@ -427,6 +481,7 @@ public class CodeGenerator {
   **/
   static public String generatePostConditionCall(final AssertMethod assertMethod) {
     final StringBuffer code = new StringBuffer();
+    carriageReturn(code);
     final String retType = assertMethod.getReturnType();
     String mclassName = assertMethod.getContainingClass().getFullName().replace('.', '_');
     mclassName = mclassName.replace('$', '_');
@@ -463,13 +518,17 @@ public class CodeGenerator {
       code.append(paramName);
     }
     code.append(")) {");
+    carriageReturn(code);
     code.append(ASSERT_TOOLS_CLASSNAME + ".postConditionFailed(" + ASSERT_TOOLS_CLASSNAME + ".getCurrentAssertionViolation());");
+    carriageReturn(code);
     code.append("}");
+    carriageReturn(code);
 
     if(!assertMethod.isVoid()) {
       code.append("return jps__retVal");
       code.append(shortmclassName);
       code.append(";");
+      carriageReturn(code);
     }
     
     return code.toString();
@@ -503,20 +562,23 @@ public class CodeGenerator {
     final StringBuffer code = new StringBuffer();
 
     //create a variable to cache the super method
+    carriageReturn(code);
+    code.append("private ");
     if(assertMethod.isStatic() || assertMethod.isConstructor()) {
       code.append("static ");
     } else {
       code.append("transient ");
     }
-    code.append("private java.lang.reflect.Method ");
+    code.append("java.lang.reflect.Method ");
     code.append(methodVariableName);
     code.append(';');
-    
-    code.append("final ");
+    carriageReturn(code);
     
     if(assertMethod.isStatic() || assertMethod.isConstructor()) {
       code.append("static ");
     }
+    code.append("final ");
+    
     code.append(assertMethod.getAssertMethodVisibility());
     code.append(' ');
     code.append("boolean ");
@@ -539,8 +601,10 @@ public class CodeGenerator {
       code.append(sp.getStringTwo());
     }
     code.append(") {");
+    carriageReturn(code);
 
     code.append("if(!" + ASSERT_TOOLS_CLASSNAME + ".ENFORCE_PRE_CONDITION) { return true; }");
+    carriageReturn(code);
     
     //check for recursive calls
     code.append("final " + ASSERT_TOOLS_CLASSNAME + ".MethodLock jps__methodLock = " + ASSERT_TOOLS_CLASSNAME + ".lockMethod(\"" + methodKey + "\", ");
@@ -550,28 +614,38 @@ public class CodeGenerator {
       code.append("this");
     }
     code.append(");");
+    carriageReturn(code);
     code.append("if(null == jps__methodLock) { return true; }");
+    carriageReturn(code);
     
     code.append("Object jps__retval = null;");
+    carriageReturn(code);
     
     if(!assertMethod.isPrivate() && !assertMethod.isConstructor()) {
       //don't check super class conditions if the method is private or a constructor
       
       code.append("if(" + ASSERT_TOOLS_CLASSNAME + ".ENFORCE_INHERITED_CONDITIONS) {");
+      carriageReturn(code);
 
       //Get the class object
       code.append("final String jps_className = \"");
       code.append(className);
       code.append("\";");
+      carriageReturn(code);
       code.append("final Class jps_thisClass = " + ASSERT_TOOLS_CLASSNAME + ".classForName(jps_className);");
+      carriageReturn(code);
       code.append("if(jps_thisClass == null) {");
+      carriageReturn(code);
       code.append(ASSERT_TOOLS_CLASSNAME + ".internalError(\"Could not find class \" + jps_className);");
+      carriageReturn(code);
       code.append("}");      
+      carriageReturn(code);
 
       //check if we need to find the super method
       code.append("if(");
       code.append(methodVariableName);
       code.append(" == null) {");
+      carriageReturn(code);
         
       //need method parameters here, just the class objects, use getClassObjectForClass
       code.append("final Class[] jps_methodArgs = {");
@@ -587,23 +661,30 @@ public class CodeGenerator {
         code.append(getClassObjectForClass(sp.getStringOne()));
       }
       code.append("};");
+      carriageReturn(code);
 
       //find super method
       code.append(methodVariableName);
       code.append(" = " + ASSERT_TOOLS_CLASSNAME + ".findSuperMethod(jps_thisClass, \"check");
       code.append(assertMethod.getName());
       code.append("PreConditions\", jps_methodArgs);");
+      carriageReturn(code);
       code.append("if(");
       code.append(methodVariableName);
       code.append(" == null) {");
+      carriageReturn(code);
       code.append(methodVariableName);
       code.append(" = " + ASSERT_TOOLS_CLASSNAME + ".NO_METHOD;");
+      carriageReturn(code);
       code.append("}");
+      carriageReturn(code);
       code.append("}");
-        
+      carriageReturn(code);
+  
       code.append("if(");
       code.append(methodVariableName);
       code.append(" != " + ASSERT_TOOLS_CLASSNAME + ".NO_METHOD) {");
+      carriageReturn(code);
       
       code.append("final Object[] jps_args = {");
       first = true;      
@@ -619,7 +700,9 @@ public class CodeGenerator {
         code.append(getObjectForParam(sp.getStringOne(), sp.getStringTwo()));
       }    
       code.append("};");
+      carriageReturn(code);
       code.append("try {");
+      carriageReturn(code);
       code.append("jps__retval = ");
       code.append(methodVariableName);
       code.append(".invoke(");
@@ -629,33 +712,43 @@ public class CodeGenerator {
         code.append("this");
       }
       code.append(", jps_args);");
-      code.append("}");
-      code.append("catch(IllegalAccessException jps_iae) {");
+      carriageReturn(code);
+      code.append("} catch(IllegalAccessException jps_iae) {");
+      carriageReturn(code);
       //just means that the super method is private and we really shouldn't be calling it in the first place      
       //code.append(ASSERT_TOOLS_CLASSNAME + ".internalError(\"Not enough access executing superClass check");
       //code.append(assertMethod.getName());
       //code.append("PreConditions: \" + jps_iae.getMessage());");
       //Pretend it returned true :)
       code.append("jps__retval = Boolean.TRUE;");
-      code.append("}");
-      code.append("catch(IllegalArgumentException jps_iae) {");
+      carriageReturn(code);
+      code.append("} catch(IllegalArgumentException jps_iae) {");
+      carriageReturn(code);
       code.append(ASSERT_TOOLS_CLASSNAME + ".internalError(\"IllegalArgument executing superClass check");
       code.append(assertMethod.getName());
       code.append("PreConditions: \" + jps_iae.getMessage());");
-      code.append("}");
-      code.append("catch(java.lang.reflect.InvocationTargetException jps_ite) {");
+      carriageReturn(code);
+      code.append("} catch(java.lang.reflect.InvocationTargetException jps_ite) {");
+      carriageReturn(code);
       code.append("jps_ite.getTargetException().printStackTrace();");
+      carriageReturn(code);
       code.append("}");
+      carriageReturn(code);
       code.append("if(jps__retval == null) {");
+      carriageReturn(code);
       code.append(ASSERT_TOOLS_CLASSNAME + ".internalError(\"got null from checkPreConditions\");");
-      code.append("}");
-      //PreConditions are ORed
-      code.append("else if(((Boolean)jps__retval).booleanValue()) {");
+      carriageReturn(code);
+      code.append("} else if(((Boolean)jps__retval).booleanValue()) {"); //PreConditions are ORed
+      carriageReturn(code);
       code.append(ASSERT_TOOLS_CLASSNAME + ".unlockMethod(jps__methodLock);");
+      carriageReturn(code);
       code.append("return true;");
+      carriageReturn(code);
       code.append("}");
+      carriageReturn(code);
       
       code.append("}");
+      carriageReturn(code);
 
 
     
@@ -663,20 +756,28 @@ public class CodeGenerator {
       //preconditions first and keep track of which interface they're from
 
       code.append("}"); //end if enforce inherited conditions
+      carriageReturn(code);
     }
 
     addConditionChecks(code, assertMethod.getPreConditions(), false);
     
     code.append(ASSERT_TOOLS_CLASSNAME + ".unlockMethod(jps__methodLock);");
+    carriageReturn(code);
     
     //nothing failed locally
     code.append("if(null == jps__retval) {"); //didn't call superclass checks, so return true
+    carriageReturn(code);
     code.append("return true;");
+    carriageReturn(code);
     code.append("} else {"); //superclass must have failed
+    carriageReturn(code);
     code.append("return false;");
+    carriageReturn(code);
     code.append("}");
+    carriageReturn(code);
     
     code.append("}");
+    carriageReturn(code);
     
     return code.toString();
   }
@@ -709,19 +810,22 @@ public class CodeGenerator {
     StringBuffer code = new StringBuffer();
 
     //create a variable to cache the super method
+    carriageReturn(code);
+    code.append("private ");
     if(assertMethod.isStatic() || assertMethod.isConstructor()) {
       code.append("static ");
     } else {
       code.append("transient ");
     }
-    code.append("private java.lang.reflect.Method ");
+    code.append("java.lang.reflect.Method ");
     code.append(methodVariableName);
     code.append(';');
+    carriageReturn(code);
     
-    code.append("final ");
     if(assertMethod.isStatic() || assertMethod.isConstructor()) {
       code.append("static ");
     }
+    code.append("final ");
     code.append(assertMethod.getAssertMethodVisibility());
     code.append(' ');
     code.append("boolean ");
@@ -762,8 +866,10 @@ public class CodeGenerator {
       code.append(paramName);
     }
     code.append(") {");
+    carriageReturn(code);
 
     code.append("if(!" + ASSERT_TOOLS_CLASSNAME + ".ENFORCE_POST_CONDITION) { return true; }");
+    carriageReturn(code);
     
     //check for recursive calls
     code.append("final " + ASSERT_TOOLS_CLASSNAME + ".MethodLock jps__methodLock = " + ASSERT_TOOLS_CLASSNAME + ".lockMethod(\"" + methodKey + "\", ");
@@ -773,28 +879,38 @@ public class CodeGenerator {
       code.append("this");
     }
     code.append(");");
+    carriageReturn(code);
     code.append("if(null == jps__methodLock) { return true; }");
+    carriageReturn(code);
     
     if(!assertMethod.isPrivate() && !assertMethod.isConstructor()) {
       //don't bother checking for super method if we're private or a constructor
       
       code.append("Object jps__retval = null;");
+      carriageReturn(code);
       
       code.append("if(" + ASSERT_TOOLS_CLASSNAME + ".ENFORCE_INHERITED_CONDITIONS) {");
+      carriageReturn(code);
 
       //Get the class object
       code.append("final String jps_className = \"");
       code.append(className);
       code.append("\";");
+      carriageReturn(code);
       code.append("final Class jps_thisClass = " + ASSERT_TOOLS_CLASSNAME + ".classForName(jps_className);");
+      carriageReturn(code);
       code.append("if(jps_thisClass == null) {");
+      carriageReturn(code);
       code.append(ASSERT_TOOLS_CLASSNAME + ".internalError(\"Could not find class \" + jps_className);");
+      carriageReturn(code);
       code.append("}");
+      carriageReturn(code);
 
       //check if we need to find the super method
       code.append("if(");
       code.append(methodVariableName);
       code.append(" == null) {");
+      carriageReturn(code);
       
       //need method parameters here, just the class objects, use getClassObjectForClass
       code.append("final Class[] jps_methodArgs = {");
@@ -823,23 +939,30 @@ public class CodeGenerator {
         //         code.append(classObj);
       }
       code.append("};");
+      carriageReturn(code);
 
       //find super method
       code.append(methodVariableName);
       code.append(" = " + ASSERT_TOOLS_CLASSNAME + ".findSuperMethod(jps_thisClass, \"check");
       code.append(assertMethod.getName());
       code.append("PostConditions\", jps_methodArgs);");
+      carriageReturn(code);
       code.append("if(");
       code.append(methodVariableName);
       code.append(" == null) {");
+      carriageReturn(code);
       code.append(methodVariableName);
       code.append(" = " + ASSERT_TOOLS_CLASSNAME + ".NO_METHOD;");
+      carriageReturn(code);
       code.append("}");
+      carriageReturn(code);
       code.append("}");
+      carriageReturn(code);
 
       code.append("if(");
       code.append(methodVariableName);
       code.append(" != " + ASSERT_TOOLS_CLASSNAME + ".NO_METHOD) {");
+      carriageReturn(code);
       
       code.append("final Object[] jps_args = {");
       first = true;      
@@ -866,7 +989,9 @@ public class CodeGenerator {
         //         code.append(getObjectForParam(sp.getStringOne(), "jps__old" + sp.getStringTwo()));
       }
       code.append("};");
+      carriageReturn(code);
       code.append("try {");
+      carriageReturn(code);
       code.append("jps__retval = ");
       code.append(methodVariableName);
       code.append(".invoke(");
@@ -876,44 +1001,58 @@ public class CodeGenerator {
         code.append("this");
       }
       code.append(", jps_args);");
-      code.append("}");
-      code.append("catch(IllegalAccessException jps_iae) {");
+      carriageReturn(code);
+      code.append("} catch(IllegalAccessException jps_iae) {");
+      carriageReturn(code);
       //just means that the super method is private and we really shouldn't be calling it in the first place
       //code.append(ASSERT_TOOLS_CLASSNAME + ".internalError(\"Not enough access executing superClass check");
       //code.append(assertMethod.getName());
       //code.append("PostConditions: \" + jps_iae.getMessage());");
       //Pretend it returned true :)
       code.append("jps__retval = Boolean.TRUE;");
-      code.append("}");
-      code.append("catch(IllegalArgumentException jps_iae) {");
+      carriageReturn(code);
+      code.append("} catch(IllegalArgumentException jps_iae) {");
+      carriageReturn(code);
       code.append(ASSERT_TOOLS_CLASSNAME + ".internalError(\"IllegalArgument executing superClass check");
       code.append(assertMethod.getName());
       code.append("PostConditions: \" + jps_iae.getMessage());");
-      code.append("}");
-      code.append("catch(java.lang.reflect.InvocationTargetException jps_ite) {");
+      carriageReturn(code);
+      code.append("} catch(java.lang.reflect.InvocationTargetException jps_ite) {");
+      carriageReturn(code);
       code.append("jps_ite.getTargetException().printStackTrace();");
+      carriageReturn(code);
       code.append("}");
+      carriageReturn(code);
       code.append("if(jps__retval == null) {");
+      carriageReturn(code);
       code.append(ASSERT_TOOLS_CLASSNAME + ".internalError(\"got null from checkPostConditions\");");
-      code.append("}");
-      //PostConditions are ANDed
-      code.append("else if(!((Boolean)jps__retval).booleanValue()) {");
+      carriageReturn(code);
+      code.append("} else if(!((Boolean)jps__retval).booleanValue()) {"); //PostConditions are ANDed
+      carriageReturn(code);
       code.append(ASSERT_TOOLS_CLASSNAME + ".unlockMethod(jps__methodLock);");
+      carriageReturn(code);
       code.append("return false;");
+      carriageReturn(code);
       code.append("}");
+      carriageReturn(code);
       
       code.append("}");
+      carriageReturn(code);
 
       //[jpschewe:20000116.1749CST] FIX still need to add to this to do interface
       //postconditions first and keep track of which interface they're from
 
       code.append("}"); //end if enforce inherited conditions
+      carriageReturn(code);
     }
     
     addConditionChecks(code, assertMethod.getPostConditions(), true);
     code.append(ASSERT_TOOLS_CLASSNAME + ".unlockMethod(jps__methodLock);");
+    carriageReturn(code);
     code.append("return true;"); //nothing failed, just return true
+    carriageReturn(code);
     code.append("}");
+    carriageReturn(code);
     
     return code.toString();
   }
@@ -942,6 +1081,7 @@ public class CodeGenerator {
         code.append(condition);
       }
       code.append(") {");
+      carriageReturn(code);
       String errorMessage = "";
       if(message != null) {
         errorMessage = message + " + ";
@@ -952,12 +1092,15 @@ public class CodeGenerator {
       code.append(ASSERTION_VIOLATION_CLASSNAME + " jps_av = new " + ASSERTION_VIOLATION_CLASSNAME + "(");
       code.append(errorMessage);
       code.append(");");
+      carriageReturn(code);
       code.append(ASSERT_TOOLS_CLASSNAME + ".setCurrentAssertionViolation(jps_av);");
-    
-      code.append("return false;");
-      code.append("}");
-    }
+      carriageReturn(code);
 
+      code.append("return false;");
+      carriageReturn(code);
+      code.append("}");
+      carriageReturn(code);
+    }
   }
 
   /**
@@ -967,7 +1110,7 @@ public class CodeGenerator {
      @pre (assertInterface != null && assertInterface.isInterface())
   **/
   static public String generateAssertClassForInterface(final AssertClass assertInterface) {
-    throw new RuntimeException("not implemented");
+    throw new RuntimeException("Not implemented");
   }
   
 
