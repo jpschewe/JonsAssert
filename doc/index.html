@@ -8,80 +8,10 @@
   </head>
 
   <body>
-    <h1>Jon's Assertion Package</h1>
+    <h1>Jon's Assertion Package Download (@APP-VERSION@)</h1>
 
-    <p>Jon's Assertion Package is tool that allows the use of Design by
-    Contract with Java.  More information can be found in the <a
-    href="README">README</a> and in the <a href="api/index.html">api
-    documentation</a>.</p>
-
-    <ul>
-      <li><a href="#assertions">What is Design by Contract?</a></li>
-      <li><a href="#write">Why write this?</a></li>
-      <li><a href="#download">Download</a></li>
-    </ul>
-
-
-    <h2><a name="assertions">What is Design by Contract?</a></h2>
-
-    <p>The basic idea of Design by Contract is that someone can write a
-      piece of code with a particular usage in mind and can then document the
-      usage and then enforce this during development and remove these checks
-      when releasing production code.  This is accomplised by using inline
-      assertions, just like assert.h in C, pre conditions, post conditions and
-      invariants.  Each condition is a boolean statement that "asserts" that
-      something is true when a piece of code is being executed.  Pre
-      conditions assert that a condition is true at the start of execution of
-      a method.  Post conditions are for a condition being true at the end of
-      a method.  Invariants are conditions that must be true for before and
-      after all public methods in a class are called, in the case of this tool
-      all methods that aren't private.  These conditions are also inherited so
-      that someone can define conditions for use of a superclass and all
-      subclasses follow this as well.  The way that this is done is by
-      evaluating all of the conditions for a method on one class then either
-      AND or OR this result with the next class in the inheritance tree
-      depending on the type of assertion so that the burden is placed on the
-      person using the method rather than the person writing the method.  The
-      following table shows the rules.</p>
-
-    <table border="1">
-      <tr>
-	<th>Type of assertion</th>
-	<th>Logical operation performed for inherited conditions</th>
-      </tr>
-      
-      <tr>
-	<td>invariant</td>
-	<td>AND</td>
-      </tr>
-      
-      <tr>
-	<td>precondition</td>
-	<td>OR</td>
-      </tr>
-      
-      <tr>
-	<td>postcondition</td>
-	<td>AND</td>
-      </tr>
-      
-    </table>
-
-    <h2><a name="write">Why write this?</a></h2>
-    <p>I wrote this program because I've used a program in the past called
-      AssertMate and it really didn't implement assertions very well and had a
-      lot of bugs.  I talked with the people that wrote it and they decided to
-      stop development, so I decided that being the programmer that I am, I'd
-      write my own.  Little did I know how much I was getting into, I've
-      written compilers before, but this is a little more difficult, I
-      actually have to modify someone else's code and it still needs to work
-      the way they intended.</p>
-
-    <h2><a name="download">Download</a></h2>
-
-    <p>Ok, I've got a real release again.  At least as real as it's going to
-    get.  You need jdk-1.2.x or better to run/compile this.  You'll also need
-    the following jar files.  I've listed the primary sitesto give proper
+    <p>You need jdk-1.2.x or better to run/compile this.  You'll also need
+    the following jar files.  I've listed the primary sites to give proper
     credit to the authors that wrote these great packages. You can see the
     major changes <a href="Changes">here</a>.  For a full list of changes see
     <a href="ChangeLog">ChangeLog</a>.</p>
@@ -99,8 +29,8 @@
       tested it with 2.7.2x yet.<a href="http://www.antlr.org">Primary
       site</a></li>
 
-      <li><a href="junit-3.7.jar">junit.jar</a> if you want to build and run
-      	the testcases from the jar file.  This is junit-3.7.
+      <li><a href="junit-3.8.jar">junit.jar</a> if you want to build and run
+      	the testcases from the jar file.  This is junit-3.8.
       	Earlier versions should work, but I'd encourage you to upgrade to the
       	newest version because of some bugs.<a href="http://www.junit.org">Primary site</a></li>
     </ul>
@@ -117,6 +47,11 @@
     <p>See the API documentation for <a href="api/net/mtu/eggplant/dbc/JonsAssert.html">JonsAssert</a> for commandline options</p>
 
 
+    <h2><a name="api">Documentation</a></h2>
+    
+    <p>More information can be found in the <a href="README">README</a> and
+    in the <a href="api/index.html">api documentation</a></p>
+    
     <hr />
       <p>
 	<a href="http://validator.w3.org/check/referer">
@@ -132,7 +67,7 @@
       <!-- Created: Wed Apr 19 20:48:24 CDT 2000 -->
       <p>
 	<!-- hhmts start -->
-Last modified: Thu Jan 22 21:02:49 CST 2004
+Last modified: Sun Mar 21 18:38:31 CST 2004
 <!-- hhmts end -->
       </p>
   </body>

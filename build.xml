@@ -1,4 +1,4 @@
-<project name="assert" default="compile" basedir=".">
+<project name="assert" default="compile">
 
   <property name="temp.dir"  value="tmp" />
 
@@ -119,6 +119,15 @@
       <exclude name="net/mtu/eggplant/dbc/testcases/**"/>
       <exclude name="net/mtu/eggplant/dbc/test14/**"/>
     </javac>
+
+    <!-- copy any resource files -->
+    <copy todir="${build.dir}">
+      <fileset dir="${basedir}/src">
+        <exclude name="**/*.java" />
+        <exclude name="**/*.class" />
+      </fileset>
+    </copy>
+
   </target>
 
   <target name="test" depends="compile" description="Run the unit tests">
@@ -130,7 +139,7 @@
 	  failonerror="false"> <!-- so we can see what all needs fixing -->
       <arg value="-d ${basedir}/${instrument.dir}" />
       <arg value="-f" />
-      <arg value="--pretty-output" />
+      <arg value="--prettyOutput" />
       <arg value="${basedir}/src/net/mtu/eggplant/dbc/testcases" />
       <classpath>
         <pathelement location="${basedir}/${build.dir}"/>
@@ -146,7 +155,7 @@
       <arg value="-source 1.4" />
       <arg value="-d ${basedir}/${instrument.dir}" />
       <arg value="-f" />
-      <arg value="--pretty-output" />
+      <arg value="--prettyOutput" />
       <arg value="${basedir}/src/net/mtu/eggplant/dbc/test14" />
       <classpath>
         <pathelement location="${basedir}/${build.dir}"/>
