@@ -222,6 +222,17 @@ final public class AssertTools {
     }
     
     StringBuffer dir = new StringBuffer(getDestinationDirectory());
+    File dirf = new File(dir.toString());
+    if(!dirf.exists()) {
+      boolean result = dirf.mkdir();
+      if(!result) {
+        throw new RuntimeException("Couldn't create directory: " + dir.toString());
+      }
+    }
+    else if(!dirf.isDirectory()) {
+      throw new RuntimeException("Error creating destination directories, file found where directory expected: " + dir.toString());
+    }
+      
     StringTokenizer packageIter = new StringTokenizer(packageName, ".");
     while(packageIter.hasMoreTokens()) {
       String subPackage = packageIter.nextToken();
@@ -264,7 +275,7 @@ final public class AssertTools {
     String shortFilename = filename.substring(indexOfSlash);        
     int indexOfDot = shortFilename.lastIndexOf('.');
     String ifilename = shortFilename.substring(0, indexOfDot) + "." + getInstrumentedExtension();
-    String path = AssertTools.createDirectoryForPackage(packageName);    
+    String path = createDirectoryForPackage(packageName);    
     return path + File.separatorChar + ifilename;
   }
                                         

@@ -25,4 +25,17 @@ public class MyToken extends CommonToken {
   public void setColumn(int c) {
     _column = c;
   }
+
+  public String toString() {
+    return "[\""
+      + getText()
+      + "\","
+      + getType()
+      + ",line="
+      + getLine()
+      + ",column="
+      + getColumn()
+      + "]";
+  }
+  
 }

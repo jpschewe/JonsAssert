@@ -54,11 +54,11 @@ public class Main {
       for(int i=0; i < files.length; i++)
         doFile(new File(f, files[i]));
     }
-
     // otherwise, if this is a java file, parse it!
     else if(f.getName().endsWith("." + AssertTools.getSourceExtension())) {
-      System.err.println("   "+f.getAbsolutePath());
+      System.out.println("  " + f.getAbsolutePath());
       if(getSymtab().startFile(f)) {
+        boolean success = true;
         try {
           parseFile(new FileInputStream(f));
         }
@@ -68,16 +68,20 @@ public class Main {
         catch(FileAlreadyParsedException fape) {
           System.out.println("Source file is older than instrumented file, skipping: " + f.getName());
         }
+        catch (Exception e) {
+          System.err.println("parser exception: "+e);
+          e.printStackTrace();   // so we can get a stack trace
+          success = false;
+        }
         finally {
-          getSymtab().finishFile();
+          getSymtab().finishFile(success);
         }
       }
     }
   }
 
   // Here's where we do the real work...
-  public static void parseFile(InputStream s) {
-    try {
+  public static void parseFile(InputStream s) throws Exception {
       // Create a scanner that reads from the input stream passed to us
       javaLexer = new JavaLexer(s);
       javaLexer.setTokenObjectClass("org.tcfreenet.schewe.assert.MyToken");
@@ -90,25 +94,17 @@ public class Main {
                   
       // Create a parser that reads from the scanner
       //for debugging the lexer
-      //JavaRecognizer parser = new JavaRecognizer(lexer);
-      //                   Token tok = selector.nextToken();
-      //                   while(tok.getText() != null) {
-      //                     System.out.println("Main: " + tok);
-      //                     tok = selector.nextToken();
-      //                   }
-      //                   System.exit(0);
       JavaRecognizer parser = new JavaRecognizer(selector);
+      //antlr.Token tok = selector.nextToken();
+      //while(tok.getText() != null) {
+      //  System.out.print("Main: " + tok);
+      //  System.out.println(" name=" + parser.getTokenName(tok.getType()));
+      //  tok = selector.nextToken();
+      //}
+
       parser.setSymtab(getSymtab());
       // start parsing at the compilationUnit rule
       parser.compilationUnit();
-    }
-    catch(FileAlreadyParsedException fape) {
-      throw fape;
-    }
-    catch (Exception e) {
-      System.err.println("parser exception: "+e);
-      e.printStackTrace();   // so we can get stack trace		
-    }
   }
 
   static public Symtab getSymtab() {

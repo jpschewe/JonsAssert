@@ -223,8 +223,10 @@ HEX_DIGIT
     ;
 
 // end condition for lexer
+//[jpschewe:20000304.2232CST] FIX still need to make it handle any number of *'s
 JAVADOC_CLOSE
-    : "**/"
+    : //("*/" | "**/")
+    ('*')+ '/'
 	{
 	    //System.out.println("assert: got end of javadoc comment #" + text + "#");
 	    Main.selector.pop();

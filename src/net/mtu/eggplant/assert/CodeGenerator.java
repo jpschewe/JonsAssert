@@ -361,6 +361,8 @@ public class CodeGenerator {
       String paramName = sp.getStringTwo();
       if(! first) {
         code.append(", ");
+      }
+      else {
         first = false;
       }
       code.append("__old");
@@ -407,6 +409,8 @@ public class CodeGenerator {
     while(paramIter.hasNext()) {
       if(! first) {
         code.append(",");
+      }
+      else {
         first = false;
       }
       StringPair sp = (StringPair)paramIter.next();
@@ -437,6 +441,8 @@ public class CodeGenerator {
       while(paramIter.hasNext()) {
         if(! first) {
           code.append(", ");
+        }
+        else {
           first = false;
         }
         StringPair sp = (StringPair)paramIter.next();
@@ -456,6 +462,8 @@ public class CodeGenerator {
       while(paramIter.hasNext()) {
         if(! first) {
           code.append(", ");
+        }
+        else {
           first = false;
         }
         StringPair sp = (StringPair)paramIter.next();
@@ -553,6 +561,8 @@ public class CodeGenerator {
         String paramName = sp.getStringTwo();
         if(! first) {
           code.append(",");
+        }
+        else {
           first = false;
         }
         code.append(paramType);
@@ -593,6 +603,8 @@ public class CodeGenerator {
       while(paramIter.hasNext()) {
         if(! first) {
           code.append(", ");
+        }
+        else {
           first = false;
         }
         StringPair sp = (StringPair)paramIter.next();
@@ -620,6 +632,8 @@ public class CodeGenerator {
       while(paramIter.hasNext()) {
         if(! first) {
           code.append(", ");
+        }
+        else {
           first = false;
         }
         StringPair sp = (StringPair)paramIter.next();

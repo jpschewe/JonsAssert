@@ -163,7 +163,11 @@ public class Symtab {
      Just resets the internal pointers to files to be the last file we pushed
      on the file stack, or null if no other files are being processed.
   **/
-  public void finishFile() {
+  public void finishFile(boolean success) {
+    if(!success) {
+      _allFiles.remove(_currentFile);
+    }
+    
     if(!_fileStack.isEmpty()) {
       Pair p = (Pair)_fileStack.pop();
       _currentFile = (InstrumentedFile)p.getOne();
@@ -196,6 +200,10 @@ public class Symtab {
     
     // add to the current package
     Hashtable h = (Hashtable)_allPackages.get(getCurrentPackageName());
+    if(h == null) {
+      _allPackages.put(getCurrentPackageName(), new Hashtable());
+      h = (Hashtable)_allPackages.get(getCurrentPackageName());
+    }
     h.put(name, getCurrentClass());
 
     // associate it with a file too

@@ -257,9 +257,6 @@ compilationUnit
       if(!getSymtab().isDestinationOlderThanCurrentFile(packageName)) {
 	throw new FileAlreadyParsedException();
       }
-      else {
-	System.out.println("source file is newer");
-      }
     }
 
     // Next we have a series of zero or more import statements
@@ -1079,7 +1076,6 @@ inclusiveOrExpression
 
 /**
    exclusive or (^)  (level 8)
-
 **/
 exclusiveOrExpression
   :	andExpression (BXOR andExpression)*
@@ -1110,14 +1106,19 @@ equalityExpression
 **/
 relationalExpression
   :	shiftExpression
-    (	(	LT
-      |	GT
-      |	LE
-      |	GE
+    (
+      (
+	(
+	  (LT
+	  |	GT
+	  |	LE
+	  |	GE
+	  )
+	  shiftExpression
+	)*
       )
-      shiftExpression
-    )*
-  |	"instanceof" typeSpec
+    |	"instanceof" typeSpec
+    )
   ;
 
 
@@ -1132,7 +1133,6 @@ shiftExpression
 
 /**
    binary addition/subtraction (level 3)
-
 **/
 additiveExpression
   :	multiplicativeExpression ((PLUS | MINUS) multiplicativeExpression)*
