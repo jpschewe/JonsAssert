@@ -105,7 +105,7 @@ import org.apache.commons.logging.LogFactory;
  * This is the place where most of the work for instrumentation gets done.
  * All lookups are done here.
  * 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class Symtab {
 
@@ -331,6 +331,10 @@ public class Symtab {
           int offset = 0;
           while(curFrag != null && reader.getLineNumber() == curFrag.getLocation().getLine()) {
             //instrument line
+            if(JonsAssert.getSymtab().getConfiguration().isPrettyOutput()) {
+              buf.append("//DBC Line: ");
+              buf.append(String.valueOf(reader.getLineNumber()));
+            }
             offset = curFrag.instrumentLine(offset, buf);
             if(fragIter.hasNext()) {
               curFrag = (CodeFragment)fragIter.next();
@@ -555,8 +559,7 @@ public class Symtab {
           ifile.getFragments().add(new CodeFragment(entrance, invariantCall, CodeFragmentType.INVARIANT));
         }
 
-        //build the code fragments outside the loop for effiency
-        //need to keep track of retVal
+        //build the code fragments outside the loop for efficency
         final String postCall = CodeGenerator.generatePostConditionCall(method);
         if(!method.isVoid()) {
           //non-void methods have to keep track of the return value
@@ -585,7 +588,7 @@ public class Symtab {
               //save the return value
               ifile.getFragments().add(new CodeModification(exit.getCodePointOne(), "return", postSetup, CodeFragmentType.POSTCONDITION));
               //finish the scope we just created and call the post condition method
-              String myPostCall = postCall + "}";
+              final String myPostCall = postCall + "}";
               ifile.getFragments().add(new CodeFragment(exit.getCodePointTwo(), myPostCall, CodeFragmentType.POSTCONDITION2));
             }
           }//while exits.hasNext

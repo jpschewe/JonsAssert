@@ -71,7 +71,7 @@ import org.apache.log4j.Logger;
  * {@link #instrument(Configuration, Collection) instrument} with a Configuration
  * object and a Collection of files.</p>
  *
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public final class JonsAssert {
 
@@ -96,7 +96,7 @@ public final class JonsAssert {
     options.addOption("source", "source", true, "<release> Provide source compatibility with specified release (just like javac)");
     options.addOption("debugLexer", false, "");
     options.addOption("debug", false, "");
-    options.addOption("prettyOutput", "prettyOutput", false, "put in carriage returns in the generated code.  This makes the output easier to read, but screws up line numbers");
+    options.addOption("prettyOutput", "prettyOutput", false, "put in carriage returns in the generated code.  This makes the output easier to read, but screws up line numbers.  May generate unexpected code due to single line comments added at the end of lines.");
     options.addOption("disableExit", "disableExit", false, "Disable System.exit during instrumentation");
     options.addOption("v", "verbose", false, "Should we be verbose?");
 
@@ -341,6 +341,10 @@ public final class JonsAssert {
     // Create a scanner that reads from the input stream passed to us
     _javaLexer = new JavaLexer(s);
     _assertLexer = new AssertLexer(_javaLexer.getInputState());
+
+    //ensure that the columns in the tokens are character counts
+    _javaLexer.setTabSize(1);
+    _assertLexer.setTabSize(1);
       
     _selector.addInputStream(_javaLexer, "java");
     _selector.addInputStream(_assertLexer, "assert");

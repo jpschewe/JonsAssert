@@ -1,3 +1,21 @@
+2004-11-09  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/net/mtu/eggplant/dbc/Symtab.java (Symtab): Added line
+	numbers in pretty output.
+
+	* src/net/mtu/eggplant/dbc/CodeModification.java
+	(CodeModification): A little more efficient use of variables.
+
+	* src/net/mtu/eggplant/dbc/CodeGenerator.java (CodeGenerator):
+	Added comment for carriage returns inserted due to prettyOutput
+	option.
+
+	* build.xml: Updated to antlr 2.7.4
+
+	* src/net/mtu/eggplant/dbc/JonsAssert.java (JonsAssert): Set
+	tabSize to 1 on lexers so that it's a character count.  This is
+	needed to support tabs in code. 
+
 2004-04-27  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/net/mtu/eggplant/dbc/java.g: Now can handle comments above

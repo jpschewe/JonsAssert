@@ -34,7 +34,7 @@ import net.mtu.eggplant.util.StringPair;
 import net.mtu.eggplant.util.StringUtils;
 
 /**
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public final class CodeGenerator {
 
@@ -481,7 +481,6 @@ public final class CodeGenerator {
   public static String generatePostConditionCall(final AssertMethod assertMethod) {
     final StringBuffer code = new StringBuffer();
     carriageReturn(code);
-    final String retType = assertMethod.getReturnType();
     String mclassName = assertMethod.getContainingClass().getFullName().replace('.', '_');
     mclassName = mclassName.replace('$', '_');
     String shortmclassName = assertMethod.getContainingClass().getName().replace('.', '_');
@@ -1201,6 +1200,7 @@ public final class CodeGenerator {
    */
   /*package*/ static void carriageReturn(final StringBuffer code) {
     if(JonsAssert.getSymtab().getConfiguration().isPrettyOutput()) {
+      code.append("/*DBC CR*/");
       code.append(System.getProperty("line.separator"));
     }
   }

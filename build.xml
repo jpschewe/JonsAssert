@@ -53,7 +53,7 @@
 
   <path id="base.classpath">
     <pathelement location="${basedir}/lib/JonsInfra-0.4.jar"/>
-    <pathelement location="${basedir}/lib/antlr-2.7.3.jar"/>
+    <pathelement location="${basedir}/lib/antlr-2.7.4.jar"/>
     <pathelement location="${basedir}/lib/log4j-1.2.8.jar"/>
     <pathelement location="${basedir}/lib/commons-logging-1.0.3.jar"/>
     <pathelement location="${basedir}/lib/commons-cli-1.0.jar"/>
@@ -61,7 +61,7 @@
   </path>
 
   <path id="antlr.classpath">
-    <pathelement location="${basedir}/lib/antlr-2.7.3.jar"/>
+    <pathelement location="${basedir}/lib/antlr-2.7.4.jar"/>
   </path>
 
   <target name="NightlyTasks"
@@ -386,7 +386,7 @@
   <!-- ===================== Checkstyle =================== -->
   <taskdef resource="checkstyletask.properties">
     <classpath>
-      <pathelement location="${basedir}/lib/antlr-2.7.3.jar" />
+      <pathelement location="${basedir}/lib/antlr-2.7.4.jar" />
       <pathelement location="${basedir}/lib/ant/checkstyle-3.3.jar" />
       <pathelement location="${basedir}/lib/ant/commons-beanutils.jar" />
       <pathelement location="${basedir}/lib/commons-cli-1.0.jar" />
@@ -418,6 +418,7 @@
 
   <target name="checkstyle.full"
           description="Check for code convention violations (more aggressive)"
+          depends="init"
           >
     <mkdir dir="${build.dir}/classes" />
 

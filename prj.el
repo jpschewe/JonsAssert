@@ -10,21 +10,38 @@
       (setq tag-table-alist (list tag-cons))))
   (jde-set-variables
    '(jde-run-working-directory (expand-file-name "build/" project-root))
-   '(jde-compile-option-directory (expand-file-name "src/" project-root))
+   '(jde-compile-option-directory (expand-file-name "build/classes" project-root))
    '(jde-compile-option-debug (quote ("all")))
+   '(jde-bug-vm-includes-jpda-p t)
+   '(jde-run-option-debug '(nil "Attach" nil)) ;;don't open a socket for the debugger
    '(jde-run-read-app-args t)
-   '(jde-compile-option-deprecation t)
    '(jde-global-classpath (list
 			   (expand-file-name "build/" project-root)
 			   (expand-file-name "lib/JonsInfra-0.4.jar" project-root)
-			   (expand-file-name "lib/antlr-2.7.3.jar" project-root)
+			   (expand-file-name "lib/antlr-2.7.4.jar" project-root)
 			   (expand-file-name "lib/commons-cli-1.0.jar" project-root)
 			   (expand-file-name "lib/commons-logging-1.0.3.jar" project-root)
 			   (expand-file-name "lib/junit-3.8.jar" project-root)
 			   (expand-file-name "lib/log4j-1.2.8.jar" project-root)
 			   ))
    '(jde-compile-option-deprecation t)
-   '(jde-run-option-vm-args '("-DASSERT_BEHAVIOR=CONTINUE "))
+   '(jde-run-option-vm-args (list
+			     "-DASSERT_BEHAVIOR=CONTINUE "
+			     ))
+   '(jde-build-function '(jde-ant-build))
+   '(jde-ant-read-target t);;prompt for the target name
+   '(jde-ant-enable-find t);;make jde-ant look for the build file
+   '(jde-ant-complete-target nil);;don't try and parse the build file for me
+   '(jde-import-excluded-packages '("\\(bsh.*\\|sched-infra.*\\|com.sun.*\\|sunw.*\\|sun.*\\|org.gjt.mm.mysql.*\\)"))
+ '(jde-import-sorted-groups 'asc)
+ '(jde-import-group-of-rules
+   (quote
+    (
+     ("^\\(com\\.honeywell\\.htc\\.[^.]+\\([.][^.]+[.]\\)*\\)" . 1)
+     ("^\\(com\\.honeywell\\.[^.]+\\([.][^.]+[.]\\)*\\)" . 1)
+     ;;("^javax?\\.")
+     ("^\\([^.]+\\([.][^.]+[.]\\)*\\)" . 1)
+     )))
    '(jde-gen-buffer-boilerplate
      (quote (
 	     "/*"

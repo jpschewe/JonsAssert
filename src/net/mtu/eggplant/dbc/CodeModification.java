@@ -31,7 +31,7 @@ package net.mtu.eggplant.dbc;
  * Used for representing a modification to code, rather than just a chunck of
  * code to be inserted.
  *
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class CodeModification extends CodeFragment {
 
@@ -64,11 +64,11 @@ public class CodeModification extends CodeFragment {
 
   public int instrumentLine(final int offset,
                             final StringBuffer line) {
-    int start = getLocation().getColumn() + offset;
-    String search = getSearchText();
-    String replace = getReplaceText();
-    int newOffset = offset + (replace.length() - search.length());
-    int searchTextIndex = line.toString().indexOf(getSearchText(), start);
+    final int start = getLocation().getColumn() + offset;
+    final String search = getSearchText();
+    final String replace = getReplaceText();
+    final int newOffset = offset + (replace.length() - search.length());
+    final int searchTextIndex = line.toString().indexOf(search, start);
     line.replace(start, start+search.length(), replace);
 
     return newOffset;
