@@ -1,3 +1,9 @@
+2001-02-03  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/net/mtu/eggplant/assert/CodeGenerator.java: Fixed caching of
+	super methods.  Need to make sure variable names are unique even
+	if method names aren't.
+
 2001-01-07  Jon Schewe  <jpschewe@mtu.net>
 
 	* prj.el: Upgraded to junit-3.4

@@ -111,7 +111,7 @@ public class CodeGenerator {
     final StringBuffer code = new StringBuffer();
     
     //create a variable to hold the super method
-    code.append("private java.lang.reflect.Method ");
+    code.append("transient private java.lang.reflect.Method ");
     code.append(methodVariableName);
     code.append(';');
                 
@@ -469,7 +469,21 @@ public class CodeGenerator {
     String mclassName = className.replace('.', '_');
     mclassName = mclassName.replace('$', '_');
     final String methodName = "jps__" + mclassName + "_check" + assertMethod.getName() + "PreConditions";
-    final String methodVariableName = "_" + methodName;
+
+    final StringBuffer methodVariableNameBuf = new StringBuffer();
+    methodVariableNameBuf.append('_');
+    methodVariableNameBuf.append(methodName);
+    methodVariableNameBuf.append('_');
+    { //generate a unique name for the method variable
+      final Iterator paramIter = assertMethod.getParams().iterator();
+      while(paramIter.hasNext()) {
+        final StringPair sp = (StringPair)paramIter.next();
+        methodVariableNameBuf.append(sp.getStringOne());
+        methodVariableNameBuf.append('_');
+      }
+    }
+    final String methodVariableName = methodVariableNameBuf.toString().replace('.', '_').replace('[', 'L').replace(']', 'R');
+    
     String methodKey = methodName; //for lock and unlock method calls
     
     final StringBuffer code = new StringBuffer();
@@ -477,6 +491,8 @@ public class CodeGenerator {
     //create a variable to cache the super method
     if(assertMethod.isStatic() || assertMethod.isConstructor()) {
       code.append("static ");
+    } else {
+      code.append("transient ");
     }
     code.append("private java.lang.reflect.Method ");
     code.append(methodVariableName);
@@ -648,7 +664,21 @@ public class CodeGenerator {
     String mclassName = className.replace('.', '_');
     mclassName = mclassName.replace('$', '_');
     final String methodName = "jps__" + mclassName + "_check" + assertMethod.getName() + "PostConditions";
-    final String methodVariableName = "_" + methodName;
+
+    final StringBuffer methodVariableNameBuf = new StringBuffer();
+    methodVariableNameBuf.append('_');
+    methodVariableNameBuf.append(methodName);
+    methodVariableNameBuf.append('_');
+    { //generate a unique name for the method variable
+      final Iterator paramIter = assertMethod.getParams().iterator();
+      while(paramIter.hasNext()) {
+        final StringPair sp = (StringPair)paramIter.next();
+        methodVariableNameBuf.append(sp.getStringOne());
+        methodVariableNameBuf.append('_');
+      }
+    }
+    final String methodVariableName = methodVariableNameBuf.toString().replace('.', '_').replace('[', 'L').replace(']', 'R');
+    
     String methodKey = methodName; //for lock and unlock method calls
     
     StringBuffer code = new StringBuffer();
@@ -656,6 +686,8 @@ public class CodeGenerator {
     //create a variable to cache the super method
     if(assertMethod.isStatic() || assertMethod.isConstructor()) {
       code.append("static ");
+    } else {
+      code.append("transient ");
     }
     code.append("private java.lang.reflect.Method ");
     code.append(methodVariableName);
