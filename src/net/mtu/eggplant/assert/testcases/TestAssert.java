@@ -30,6 +30,7 @@ package net.mtu.eggplant.assert.test;
 import DefaultPackage;
 
 import net.mtu.eggplant.assert.AssertionViolation;
+import net.mtu.eggplant.assert.AssertTools;
 
 import java.util.Vector;
 import java.io.*;
@@ -40,10 +41,6 @@ import junit.textui.TestRunner;
 
 /**
    This is a test class for testing my assertions.  Tests all kinds of things.
-   TODO:
-   Add junit tests.
-   StaticMethod
-   StaticMethodInnerClass
    
    @invariant (_invariant), "This is an invariant";
 **/
@@ -52,9 +49,6 @@ public class TestAssert extends TestCase {
   private boolean _invariant = true;
   
   static public void main(final String[] args) {
-    //Make sure exceptions are thrown for assertions
-    System.setProperty("ASSERT_BEHAVIOR", "EXCEPTION");
-
     final TestSuite suite = new TestSuite();
     suite.addTest(suite());
     TestRunner.run(suite);
@@ -63,6 +57,9 @@ public class TestAssert extends TestCase {
 
   public TestAssert(final String name) {
     super(name);
+    if(!"EXCEPTION".equalsIgnoreCase(AssertTools.ASSERT_BEHAVIOR)) {
+      fail("ASSERT_BEHAVIOR must be set to EXCEPTION");
+    }
   }
 
   /**
@@ -353,28 +350,6 @@ public class TestAssert extends TestCase {
   }
 
   /**
-     Test assertions on named local classes.
-  **/
-  public void testNamedLocalClass() {
-    final NamedLocalClass nic = new NamedLocalClass();
-    boolean exception = false;
-    try {
-      nic.pass();
-    } catch(final AssertionViolation av) {
-      exception = true;
-    }
-    assert("a1:This should not throw an assertion violation", !exception); 
-
-    exception = false;
-    try {
-      nic.fail();
-    } catch(final AssertionViolation av) {
-      exception = true;
-    }
-    assert("a2:This should throw an assertion violation", exception); 
-  }
-
-  /**
      Test assertions on private methods.
   **/
   public void testPrivateMethod() {
@@ -473,5 +448,13 @@ public class TestAssert extends TestCase {
     assert("a2:Precondditions are being checked on superclass of package method with subclass in different package", !exception);
     
   }
+
+//   /**
+//    * Tests support for 1.4
+//    */
+//   public void test14Support() {
+//     assert 1 == 10;
+//     assert 1 == 10 : "message";
+//   }
   
 }

@@ -120,9 +120,6 @@ case that causes the error is REALLY helpful if you can do such a thing.
 
 
 TODO:
-- optimizations.  One idea is to cache the methods to be called at the
-class level so the lookup only happens once.
-
 - fix bugs!
 
 - Assertions on native methods are not checked.  It seems like it'd be pretty
@@ -130,3 +127,12 @@ hard to insert code into the C.  One idea is to create another method that
 calls the new native method...
 
 - Implement assertions of implemented interfaces.
+
+- implement pre/post conditions on constructors
+
+- handle constructor conditions on inner classes
+
+- JDK 1.4 support
+
+- ant task to delete instrumented files that coorespond to deleted source
+files

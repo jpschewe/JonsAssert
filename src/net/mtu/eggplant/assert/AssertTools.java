@@ -86,7 +86,7 @@ final public class AssertTools {
    * 
    * @see net.mtu.eggplant.assert#systemProperties
    */
-  private static final String ASSERT_BEHAVIOR = System.getProperty("ASSERT_BEHAVIOR", "EXIT");
+  public static final String ASSERT_BEHAVIOR = System.getProperty("ASSERT_BEHAVIOR", "EXIT");
 
   private AssertTools() {} //no instances
   

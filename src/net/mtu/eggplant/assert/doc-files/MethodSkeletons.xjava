@@ -1,3 +1,4 @@
+// -*- jde -*-
 /*
   This file is meant to let others know how I intend to instrument files so
   that they know what types of method names may cause problems and to ease in

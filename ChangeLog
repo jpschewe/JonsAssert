@@ -1,4 +1,13 @@
+2002-05-27  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/net/mtu/eggplant/assert/testcases/TestAssert.java: Now works
+	properly with ant and all expected tests pass.
+
 2002-05-26  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/net/mtu/eggplant/assert/testcases/TestAssert.java
+	(TestAssert): Removed NamedLocalClass test, java compiler doesn't
+	seem to allow this anymore.
 
 	* src/net/mtu/eggplant/assert/JonsAssert.java (main): Fixed bug
 	with files being instrumented into the destination directory,

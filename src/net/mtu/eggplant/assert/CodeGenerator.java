@@ -129,8 +129,8 @@ public class CodeGenerator {
     code.append("if(!" + ASSERT_TOOLS_CLASSNAME + ".lockMethod(\"");
     code.append(methodKey);
     code.append("\")) { return true; }");
-    code.append("Object jps__retval = null;");
 
+    code.append("Object jps__retval = null;");
     code.append("if(" + ASSERT_TOOLS_CLASSNAME + ".ENFORCE_INHERITED_CONDITIONS) {");
       
     //Get the class object
@@ -159,9 +159,9 @@ public class CodeGenerator {
     code.append("}");
     code.append("}");
 
-    code.append("if(!");
+    code.append("if(");
     code.append(methodVariableName);
-    code.append(" == " + ASSERT_TOOLS_CLASSNAME + ".NO_METHOD) {");
+    code.append(" != " + ASSERT_TOOLS_CLASSNAME + ".NO_METHOD) {");
     
     //invoke it, pass on exceptions
     code.append("final Object[] jps_args = new Object[0];");
@@ -193,7 +193,7 @@ public class CodeGenerator {
     code.append(ASSERT_TOOLS_CLASSNAME + ".internalError(\"got something odd from checkInvariant: \" + jps__retval.getClass());");
     code.append("}");
 
-    code.append("if(jps__retval != null && !((Boolean)jps__retval).booleanValue()) {");
+    code.append("if(!((Boolean)jps__retval).booleanValue()) {");
     code.append(ASSERT_TOOLS_CLASSNAME + ".unlockMethod(\"");
     code.append(methodKey);
     code.append("\");");
@@ -206,13 +206,14 @@ public class CodeGenerator {
     //invariants first and keep track of which interface they're from
 
     code.append("}"); //end enforce inherited conditions
-    
+                
     addConditionChecks(code, assertClass.getInvariants(), false);
 
     code.append(ASSERT_TOOLS_CLASSNAME + ".unlockMethod(\"");
     code.append(methodKey);
     code.append("\");");
-    code.append("return jps__retval == null || ((Boolean)jps__retval).booleanValue();");
+
+    code.append("return true;"); //nothing failed, so just return
     code.append("}");
 
     return code.toString();
@@ -543,11 +544,12 @@ public class CodeGenerator {
     code.append(methodKey);
     code.append("\")) { return true; }");
     
+    code.append("Object jps__retval = null;");
+    
     if(!assertMethod.isPrivate() && !assertMethod.isConstructor()) {
-      code.append("if(" + ASSERT_TOOLS_CLASSNAME + ".ENFORCE_INHERITED_CONDITIONS) {");
-      
       //don't check super class conditions if the method is private or a constructor
-      code.append("Object jps__retval = null;");
+      
+      code.append("if(" + ASSERT_TOOLS_CLASSNAME + ".ENFORCE_INHERITED_CONDITIONS) {");
 
       //Get the class object
       code.append("final String jps_className = \"");
@@ -591,9 +593,9 @@ public class CodeGenerator {
       code.append("}");
       code.append("}");
         
-      code.append("if(!");
+      code.append("if(");
       code.append(methodVariableName);
-      code.append(" == " + ASSERT_TOOLS_CLASSNAME + ".NO_METHOD) {");
+      code.append(" != " + ASSERT_TOOLS_CLASSNAME + ".NO_METHOD) {");
       
       code.append("final Object[] jps_args = {");
       first = true;      
@@ -662,11 +664,14 @@ public class CodeGenerator {
     code.append(ASSERT_TOOLS_CLASSNAME + ".unlockMethod(\"");
     code.append(methodKey);
     code.append("\");");
-    if(assertMethod.isPrivate() || assertMethod.isConstructor()) {
-      code.append("return true;");
-    } else {
-      code.append("return jps__retval == null || ((Boolean)jps__retval).booleanValue();");
-    }
+    
+    //nothing failed locally
+    code.append("if(null == jps__retval) {"); //didn't call superclass checks, so return true
+    code.append("return true;");
+    code.append("} else {"); //superclass must have failed
+    code.append("return false;");
+    code.append("}");
+    
     code.append("}");
     
     return code.toString();
@@ -762,10 +767,11 @@ public class CodeGenerator {
     code.append("\")) { return true; }");
     
     if(!assertMethod.isPrivate() && !assertMethod.isConstructor()) {
-      code.append("if(" + ASSERT_TOOLS_CLASSNAME + ".ENFORCE_INHERITED_CONDITIONS) {");
-
       //don't bother checking for super method if we're private or a constructor
+      
       code.append("Object jps__retval = null;");
+      
+      code.append("if(" + ASSERT_TOOLS_CLASSNAME + ".ENFORCE_INHERITED_CONDITIONS) {");
 
       //Get the class object
       code.append("final String jps_className = \"");
@@ -822,9 +828,9 @@ public class CodeGenerator {
       code.append("}");
       code.append("}");
 
-      code.append("if(!");
+      code.append("if(");
       code.append(methodVariableName);
-      code.append(" == " + ASSERT_TOOLS_CLASSNAME + ".NO_METHOD) {");
+      code.append(" != " + ASSERT_TOOLS_CLASSNAME + ".NO_METHOD) {");
       
       code.append("final Object[] jps_args = {");
       first = true;      
@@ -891,8 +897,6 @@ public class CodeGenerator {
       
       code.append("}");
 
-
-    
       //[jpschewe:20000116.1749CST] FIX still need to add to this to do interface
       //postconditions first and keep track of which interface they're from
 
@@ -903,21 +907,18 @@ public class CodeGenerator {
     code.append(ASSERT_TOOLS_CLASSNAME + ".unlockMethod(\"");
     code.append(methodKey);
     code.append("\");");
-    if(assertMethod.isPrivate() || assertMethod.isConstructor()) {
-      code.append("return true;");
-    } else {
-      code.append("return jps__retval == null || ((Boolean)jps__retval).booleanValue();");
-    }
+    code.append("return true;"); //nothing failed, just return true
     code.append("}");
     
     return code.toString();
   }
 
   /**
-     Append to code code to check for the assert conditions in tokens.
-
-     @param postCondition true if we're adding checks for a postcondition method. 
-  **/
+   * Append to code code to check for the assert conditions in tokens.
+   * Generated code returns fales if any condition fails
+   *
+   * @param postCondition true if we're adding checks for a postcondition method. 
+   */
   static private void addConditionChecks(final StringBuffer code,
                                          final List tokens,
                                          final boolean postCondition) {
