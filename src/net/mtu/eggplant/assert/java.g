@@ -183,7 +183,8 @@ tokens {
 	codeFrag.append(code);
       }
       System.out.println("Parser: end asserts");
-      CodeFragment codeFragment = new CodeFragment(new CodePoint(line, column), codeFrag.toString(), AssertType.ASSERT);      
+      CodeFragment codeFragment = new CodeFragment(new CodePoint(line, column), codeFrag.toString(), AssertType.ASSERT);
+      getSymtab().addCodeFragment(codeFragment);
       System.out.println(codeFragment);
     }
   }
@@ -480,13 +481,11 @@ interfaceDefinition
 // That's about it (until you see what a field is...)
 classBlock
   :
-    //[jpschewe:20000120.2217CST] need special case for anonymous classes here
-    // [jpschewe:19991230.2300CST] insert the call to __JPSCheckPre<methodname>(<params>)
     LCURLY
     //this should just be methods and constructors,
     //but can't find a better place for it.
     ( prePostField | SEMI )*
-    RCURLY
+    rc:RCURLY { getSymtab().finishClass(new CodePoint(rc.getLine(), rc.getColumn())); }
   ;
 
 prePosts 
@@ -1071,8 +1070,12 @@ primaryExpression
 newExpression
 { Token t; }
   :	"new" t=type
-    (	LPAREN argList RPAREN (classBlock)?
+    (	LPAREN argList RPAREN (classBlock { getSymtab().startClass(getSymtab().getCurrentClass().createAnonymousClassName(), new Vector()); } )?
 
+      //[jpschewe:20000128.0740CST] need to start an anonymous class
+      //here, use t to determine what interfaces we need to check for
+      //conditions
+	    
       //java 1.1
       // Note: This will allow bad constructs like
       //    new int[4][][3] {exp,exp}.

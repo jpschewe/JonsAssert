@@ -74,8 +74,9 @@ public class Main {
       System.err.println("   "+f.getAbsolutePath());
 
       // let the symbol table know what's being parsed and parse the file if we haven't already
-      if(_symtab.setCurrentFile(f)) {
+      if(getSymtab().startFile(f)) {
         parseFile(f.getName(), new FileInputStream(f));
+        getSymtab().finishFile();
       }
     }
   }
@@ -104,7 +105,7 @@ public class Main {
       //                   }
       //                   System.exit(0);
       JavaRecognizer parser = new JavaRecognizer(selector);
-      parser.setSymtab(_symtab);
+      parser.setSymtab(getSymtab());
       // start parsing at the compilationUnit rule
       parser.compilationUnit();
     }
@@ -112,5 +113,9 @@ public class Main {
       System.err.println("parser exception: "+e);
       e.printStackTrace();   // so we can get stack trace		
     }
+  }
+
+  static public Symtab getSymtab() {
+    return _symtab;
   }
 }

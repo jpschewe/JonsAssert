@@ -1,3 +1,11 @@
+2000-01-29  Jon Schewe  <schewe@tcfreenet.org>
+
+	* Symtab.java: added stack of files just like the class stack so
+	that multiple files can be parsed recursively.
+
+	* java.g: Added calls for creating inner classes too and the end
+	of classes.
+
 2000-01-22  Jon Schewe  <schewe@tcfreenet.org>
 
 	* AssertMethod.java: Added stuff for static and private methods,

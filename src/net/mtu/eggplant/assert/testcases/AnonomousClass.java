@@ -17,6 +17,7 @@ public class AnonomousClass {
 
   public AnonomousClass() {
 
+    
     ActionListener al = new ActionListener() {
         public void actionPerformed(ActionEvent ae) {
           System.out.println("here");

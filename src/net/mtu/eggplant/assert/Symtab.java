@@ -8,12 +8,15 @@
 package org.tcfreenet.schewe.Assert;
 
 import org.tcfreenet.schewe.utils.StringPair;
+import org.tcfreenet.schewe.utils.Pair;
 
 import java.io.File;
 
 import java.util.Stack;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /*
   Need to read the PDF again to make sure I've got these right.
@@ -33,7 +36,9 @@ import java.util.Vector;
 
 
   DataStructures to be maintained:
-    List of files:
+    List of all classes parsed, so we don't parse one twice
+    
+    List of files: HashTable (File, SortedSet)
       classes associated with those files?
       CodeFragments associated with those files
     List of classes:
@@ -80,6 +85,7 @@ public class Symtab {
     _classStack = new Stack();
     _currentClass = null;
     _currentFile = null;
+    _fileStack = new Stack();
     _currentPackageName = "";
     _allPackages = new Hashtable();
     _allFiles = new Hashtable();
@@ -110,18 +116,40 @@ public class Symtab {
   }
 
   /**
-     Set the current file
+     Start a file.  Sets this file as the current one and saves the state of
+     the current file being processed, if there is one.
+     
      @return false if the file has already been seen.
   **/
-  public boolean setCurrentFile(final File f) {
+  public boolean startFile(final File f) {
+    if(_currentFile != null) {
+      _fileStack.push(new Pair(_currentFile, _imports));
+    }
+    
     _currentFile = f;
     _imports = new Hashtable();
     if(_allFiles.get(f) != null) {
       return false;
     }
     else {
-      _allFiles.put(f, new Vector());
+      _allFiles.put(f, new TreeSet());
       return true;
+    }
+  }
+
+  /**
+     Just resets the internal pointers to files to be the last file we pushed
+     on the file stack, or null if no other files are being processed.
+  **/
+  public void finishFile() {
+    if(!_fileStack.isEmpty()) {
+      Pair p = (Pair)_classStack.pop();
+      _currentFile = (File)p.getOne();
+      _imports = (Hashtable)p.getTwo();
+    }
+    else {
+      _currentFile = null;
+      _imports = null;
     }
   }
   
@@ -146,21 +174,24 @@ public class Symtab {
     
     // add to the current package
     Hashtable h = (Hashtable)_allPackages.get(getCurrentPackageName());
-    //[jpschewe:20000116.0859CST] need to do something about anonomous classes
-    //here, name will be null
     h.put(name, getCurrentClass());
 
     // associate it with a file too
-    Vector v = (Vector)_allFiles.get(getCurrentFile());
-    v.addElement(getCurrentClass());    
+    //Vector v = (Vector)_allFiles.get(getCurrentFile());
+    //v.addElement(getCurrentClass());    
   }
 
   /**
      Take all of the assertion methods that have been cached up and dump them
      out with this class.  This should dump out pre and post methods for each
      method defined as well as a checkInvariants method.
+
+     @param cp the point that represents the closing curly brace of the class,
+     the checkInvariant method will be inserted here.
+
+     @pre (cp != null)
   **/
-  public void finishClass() {
+  public void finishClass(final CodePoint cp) {
     if(!_classStack.isEmpty()) {
       _currentClass = (AssertClass)_classStack.pop();
     }
@@ -199,11 +230,27 @@ public class Symtab {
   public StringPair resolveInterface(String name) {
     return null;
   }
+
+  /**
+     Associate this CodeFragment with the current file begin parsed.
+
+     @param cf fragment of code that needs to be inserted
+
+     @pre (cf != null)
+  **/
+  public void addCodeFragment(final CodeFragment cf) {
+    SortedSet fragments = (SortedSet)_allFiles.get(getCurrentFile());
+    if(!fragments.add(cf)) {
+      throw new RuntimeException("CodeFragment matches another one already associated with the file: " + cf);
+    }
+  }
   
   private AssertClass _currentClass;
   private Hashtable _allPackages;
   private Hashtable _allFiles;
   private Stack _classStack;
+  private Stack _fileStack;
+  
   /**
      Hashtable of Vectors, each key is a class name, each value is a package
      name.

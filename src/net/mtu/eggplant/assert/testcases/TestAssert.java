@@ -17,6 +17,13 @@ import java.io.*;
 **/
 public class TestAssert implements Cloneable {
 
+  /**
+     @pre (j > 10)
+  **/
+  public TestAssert(final int j) {
+    System.out.println(j);
+  }
+  
   public void testPrecondition() {
     preCond(-5); // should fail
     preCond(10); // should pass
