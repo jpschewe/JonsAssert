@@ -58,7 +58,7 @@ public class TestAssert extends TestCase {
     catch(AssertionViolation av) {
       exception = true;
     }
-    assert("This should throw an assertion violation", exception); 
+    assert("a1:This should throw an assertion violation", exception); 
 
     exception = false;
     try {
@@ -67,7 +67,7 @@ public class TestAssert extends TestCase {
     catch(AssertionViolation av) {
       exception=true;
     }
-    assert("This should not throw an assertion violation", !exception);
+    assert("a2:This should not throw an assertion violation", !exception);
     
   }
   
@@ -80,13 +80,44 @@ public class TestAssert extends TestCase {
   }
   
   public void testPrecondition() {
-    preCond(-5); // should fail
-    preCond(10); // should pass
+    boolean exception = false;
+    try {
+      preCond(-5); // should fail
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("a1:This should throw an assertion violation", exception);
+
+    exception = false;
+    try {
+      preCond(10); // should pass
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("a2:This not should throw an assertion violation", !exception);
   }
 
-  public void testPoscondition() {
-    postCond(5); // should pass
-    postCond(10); // should fail
+  public void testPostcondition() {
+    boolean exception = false;
+    try {
+      postCond(4); // should pass
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("a3:This should not throw an assertion violation", !exception); 
+
+    exception = false;
+    try {
+      postCond(10); // should fail
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("a4:This should throw an assertion violation", exception); 
+      
   }
 
   /**
@@ -104,25 +135,89 @@ public class TestAssert extends TestCase {
   }
 
   public void testAbstractMethod() {
+    boolean exception = false;
     AbstractClass ac = new ConcreteClass();
 
     /**
        @assert (ac != null)
     **/
-    ac.preCond(-5); // should fail
-    ac.preCond(10); // should pass
-    ac.postCond(5); // should pass
-    ac.postCond(10); // should fail
+    try {
+      ac.preCond(-5); // should fail
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("a1:This should throw an assertion violation", exception); 
+
+    exception = false;
+    try {
+      ac.preCond(10); // should pass
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("a2:This should not throw an assertion violation", !exception); 
+
+    exception = false;
+    try {
+      ac.postCond(5); // should pass
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("a3:This should not throw an assertion violation", !exception); 
+
+    exception = false;
+    try {
+      ac.postCond(10); // should fail
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("a4:This should throw an assertion violation", exception); 
+    
     
   }
 
   public void testInterface() {
+    boolean exception = false;
     Interface it = new InterfaceClass();
+
+    try {
+      it.preCond(-5); // should fail
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("a1:This should throw an assertion violation", exception); 
+
+    exception = false;
+    try {
+      it.preCond(10); // should pass
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("a2:This should not throw an assertion violation", !exception); 
+
+    exception = false;
+    try {
+      it.postCond(5); // should pass
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("a3:This should not throw an assertion violation", !exception); 
+
+    exception = false;
+    try {
+      it.postCond(10); // should fail
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("a4:This should throw an assertion violation", exception); 
     
-    it.preCond(-5); // should fail
-    it.preCond(10); // should pass
-    it.postCond(5); // should pass
-    it.postCond(10); // should fail
 
   }
 

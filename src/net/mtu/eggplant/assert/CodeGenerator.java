@@ -112,13 +112,11 @@ public class CodeGenerator {
     code.append("_JPS_retVal = Boolean.TRUE;\n");
     code.append("}\n");
     code.append("catch(IllegalArgumentException _JPS_iae) {\n");
-    code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"IllegalArgument executing checkInvariant method on super class: \" + _JPS_iae.getMessage());\n");
+    code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"IllegalArgument executing checkInvariant method on super class: \" + _JPS_iae.getMessage() + \" methodArgs \" + _JPS_methodArgs + \" args \" + _JPS_args);\n");
     code.append("}\n");
     code.append("catch(java.lang.reflect.InvocationTargetException _JPS_ite) {\n");
     code.append("_JPS_ite.getTargetException().printStackTrace();\n");
     code.append("}\n");
-    code.append("}\n");
-
     code.append("if(_JPS_retVal == null) {\n");
     code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"got null from checkInvariant\");\n");
     code.append("}\n");
@@ -129,6 +127,8 @@ public class CodeGenerator {
     code.append("if(_JPS_retVal != null && !((Boolean)_JPS_retVal).booleanValue()) {\n");
     code.append("return false;\n");
     code.append("}\n");
+    code.append("}\n");
+
   
     //[jpschewe:20000116.1749CST] FIX still need to add to this to do interface
     //invariants first and keep track of which interface they're from
@@ -281,10 +281,10 @@ public class CodeGenerator {
           String paramName = sp.getStringTwo();
           code.append(paramType);
           code.append(" ");
+          code.append(" __old");          
           code.append(paramName);
           code.append(", ");
           code.append(paramType);
-          code.append(" __old");
           code.append(paramName);
         }
       }      
@@ -477,17 +477,21 @@ public class CodeGenerator {
       code.append("catch(IllegalArgumentException _JPS_iae) {\n");
       code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"IllegalArgument executing superClass check");
       code.append(assertMethod.getName());
-      code.append("PreConditions: \" + _JPS_iae.getMessage());\n");
+      code.append("PreConditions: \" + _JPS_iae.getMessage() + \" methodArgs \" + _JPS_methodArgs + \" args \" + _JPS_args);\n");
       code.append("}\n");
       code.append("catch(java.lang.reflect.InvocationTargetException _JPS_ite) {\n");
       code.append("_JPS_ite.getTargetException().printStackTrace();\n");
       code.append("}\n");
+      code.append("if(_JPS_retVal == null) {\n");
+      code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"got null from checkInvariant\");\n");
       code.append("}\n");
-
-
-      code.append("if(_JPS_retVal != null && !((Boolean)_JPS_retVal).booleanValue()) {\n");
+      code.append("else if(!((Boolean)_JPS_retVal).booleanValue()) {\n");
       code.append("return false;\n");
       code.append("}\n");
+      
+      code.append("}\n");
+
+
     
       //[jpschewe:20000116.1749CST] FIX still need to add to this to do interface
       //preconditions first and keep track of which interface they're from
@@ -568,6 +572,12 @@ public class CodeGenerator {
       //[jpschewe:20000213.1552CST] need method parameters here, just the class objects, use getClassObjectForClass
       code.append("Class[] _JPS_methodArgs = {");
       first = true;
+      
+      //Need return value here too
+      if(!assertMethod.isVoid()) {
+        code.append(getClassObjectForClass(assertMethod.getReturnType()));
+        first = false;
+      }
       paramIter = assertMethod.getParams().iterator();
       while(paramIter.hasNext()) {
         if(! first) {
@@ -575,7 +585,11 @@ public class CodeGenerator {
           first = false;
         }
         StringPair sp = (StringPair)paramIter.next();
-        code.append(getClassObjectForClass(sp.getStringOne()));
+        String classObj = getClassObjectForClass(sp.getStringOne());
+        code.append(classObj);
+        //for old value
+        code.append(", ");
+        code.append(classObj);
       }
       code.append("};\n");
                 
@@ -585,8 +599,12 @@ public class CodeGenerator {
 
       code.append("if(_JPS_superMethod != null) {\n");
       code.append("Object[] _JPS_args = {");
+      first = true;      
       //[jpschewe:20000213.1552CST] need parameters here, just the parameter names
-      first = true;
+      if(!assertMethod.isVoid()) {
+        code.append(getObjectForParam(assertMethod.getReturnType(), "__retVal"));
+        first = false;
+      }
       paramIter = assertMethod.getParams().iterator();
       while(paramIter.hasNext()) {
         if(! first) {
@@ -595,6 +613,8 @@ public class CodeGenerator {
         }
         StringPair sp = (StringPair)paramIter.next();
         code.append(getObjectForParam(sp.getStringOne(), sp.getStringTwo()));
+        // once for old
+        code.append(getObjectForParam(sp.getStringOne(), "__old" + sp.getStringTwo()));
       }
       code.append("};\n");
       code.append("try {\n");
@@ -618,17 +638,21 @@ public class CodeGenerator {
       code.append("catch(IllegalArgumentException _JPS_iae) {\n");
       code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"IllegalArgument executing superClass check");
       code.append(assertMethod.getName());
-      code.append("PostConditions: \" + _JPS_iae.getMessage());\n");
+      code.append("PostConditions: \" + _JPS_iae.getMessage() + \" methodArgs \" + _JPS_methodArgs + \" args \" + _JPS_args);\n");
       code.append("}\n");
       code.append("catch(java.lang.reflect.InvocationTargetException _JPS_ite) {\n");
       code.append("_JPS_ite.getTargetException().printStackTrace();\n");
       code.append("}\n");
+      code.append("if(_JPS_retVal == null) {\n");
+      code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"got null from checkInvariant\");\n");
       code.append("}\n");
-
-
-      code.append("if(_JPS_retVal != null && ((Boolean)_JPS_retVal).booleanValue()) {\n");
+      code.append("else if(((Boolean)_JPS_retVal).booleanValue()) {\n");
       code.append("return true;\n");
       code.append("}\n");
+      
+      code.append("}\n");
+
+
     
       //[jpschewe:20000116.1749CST] FIX still need to add to this to do interface
       //postconditions first and keep track of which interface they're from

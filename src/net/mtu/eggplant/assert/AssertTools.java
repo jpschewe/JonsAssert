@@ -34,15 +34,25 @@ final public class AssertTools {
   static public Method findSuperMethod(final Class thisClass, final String methodName, final Class[] methodArgs) {
     Class superClass = thisClass.getSuperclass();
     Method superMethod = null;
-
+    System.out.println("top findSuperMethod"
+                       + " thisClass: " + thisClass
+                       + " methodName: " + methodName
+                       + " methodArgs: " + methodArgs
+                       + " superClass: " + superClass
+                       );
     if(superClass != null) {
+      System.out.println("inside if: " + superClass);
       while(superMethod == null && superClass != null) {
+        System.out.println("top while: " + superMethod + " " + superClass);
         try {
           String fullClassName = superClass.getName().replace('.', '_');
           String mname = "__" + fullClassName + "_" + methodName;
+          System.out.println("looking for: " + mname);
           superMethod = superClass.getDeclaredMethod(mname, methodArgs);
+          System.out.println("found: " + superMethod);
         }
         catch(NoSuchMethodException nsme) {
+          System.out.println("didn't find it!");
           // no method, don't bother
           //superMethod = null;
           //Try up another level
@@ -55,7 +65,7 @@ final public class AssertTools {
         }
       }
     }
-
+    System.out.println("bottom method: " + superClass + " " + superMethod);
     return superMethod;
   }
 
