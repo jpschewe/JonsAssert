@@ -49,9 +49,9 @@ import gnu.getopt.LongOpt;
  * <a name="commandline_doc"><h2>Commandline options</h2></a>
  * <ul>
  *   <li>-f, --force  force instrumentation, reguardless of file modification time</li>
- *   <li>-d, --destination <dir> the destination directory (default: instrumented)</li>
- *   <li>-s, --sourceExtension <ext> the extension on the source files (default: java)</li>
- *   <li>-i, --instrumentedExtension <ext> the extension on the source files (default: java)</li>
+ *   <li>-d, --destination &lt;dir&gt; the destination directory (default: instrumented)</li>
+ *   <li>-s, --sourceExtension &lt;ext&gt; the extension on the source files (default: java)</li>
+ *   <li>-i, --instrumentedExtension &lt;ext&gt; the extension on the source files (default: java)</li>
  *   <li>files all other arguments are taken to be files or directories to be parsed</li>
  * </ul>
  *
@@ -171,14 +171,14 @@ public class JonsAssert {
   }
   
   /**
-     This method decides what action to take based on the type of file we are
-     looking at.
-
-     @param f the file/directory to parse, if a directory recursively look
-     through the directory for files that match the source extension and parse
-     them.
-     @return true for success
-  **/
+   * This method decides what action to take based on the type of file we are
+   * looking at.
+   *
+   * @param f the file/directory to parse, if a directory recursively look
+   * through the directory for files that match the source extension and parse
+   * them.
+   * @return true for success
+   */
   static public boolean doFile(final File f) {
     boolean success = true;
     if (f.isDirectory()) {
@@ -216,10 +216,10 @@ public class JonsAssert {
   }
 
   /**
-     Actually do the work of parsing the file here.
-
-     @param s a stream to parse  
-  ***/
+   * Actually do the work of parsing the file here.
+   *
+   * @param s a stream to parse  
+   */
   static public void parseFile(final InputStream s) throws Exception {
       // Create a scanner that reads from the input stream passed to us
       javaLexer = new JavaLexer(s);
