@@ -691,51 +691,66 @@ public class Symtab {
           StringBuffer codeToInsert = new StringBuffer();
           codeToInsert.append("}");
           //catch programmers exceptions first so my catches are reachable
+          boolean catchRuntime = true;
+          boolean catchError = true;
           Iterator exceptionIter = method.getThrownExceptions().iterator();
           while(exceptionIter.hasNext()) {
             String exception = (String)exceptionIter.next();
             //Make sure we don't try and catch some exceptions twice
-            if(!exception.equals("RuntimeException")
-               && !exception.equals("Error")
-               && !exception.equals("java.lang.RuntimeException")
-               && !exception.endsWith("java.lang.Error")) {
-              codeToInsert.append("catch(");
-              codeToInsert.append(exception);
-              codeToInsert.append(" _JPS_exception");
-              codeToInsert.append(shortmclassName);
-              codeToInsert.append(") {");
-              codeToInsert.append("_JPS_foundException");
-              codeToInsert.append(shortmclassName);
-              codeToInsert.append(" = true;");
-              codeToInsert.append("throw _JPS_exception");
-              codeToInsert.append(shortmclassName);
-              codeToInsert.append(";");
-              codeToInsert.append("}"); //end catch
+            if(exception.equals("RuntimeException")
+               || exception.equals("java.lang.RuntimeException")
+               || exception.equals("Exception")
+               || exception.equals("java.lang.RuntimeException")) {
+              catchRuntime = false;
             }
+            else if(exception.equals("Error")
+                    || exception.equals("java.lang.Error")) {
+              catchError = false;
+            }
+            else if(exception.equals("Throwable")
+                    || exception.equals("java.lang.Throwable")) {
+              catchError = false;
+              catchRuntime = false;
+            }
+            codeToInsert.append("catch(");
+            codeToInsert.append(exception);
+            codeToInsert.append(" _JPS_exception");
+            codeToInsert.append(shortmclassName);
+            codeToInsert.append(") {");
+            codeToInsert.append("_JPS_foundException");
+            codeToInsert.append(shortmclassName);
+            codeToInsert.append(" = true;");
+            codeToInsert.append("throw _JPS_exception");
+            codeToInsert.append(shortmclassName);
+            codeToInsert.append(";");
+            codeToInsert.append("}"); //end catch
           }
-          //catch java.lang.Error
-          codeToInsert.append("catch(Error _JPS_exception");
-          codeToInsert.append(shortmclassName);
-          codeToInsert.append(") {");
-          codeToInsert.append("_JPS_foundException");
-          codeToInsert.append(shortmclassName);
-          codeToInsert.append("= true;");
-          codeToInsert.append("throw _JPS_exception");
-          codeToInsert.append(shortmclassName);
-          codeToInsert.append(";");
-          codeToInsert.append("}"); //end catch
-          //catch java.lang.RuntimeException
-          codeToInsert.append("catch(RuntimeException _JPS_exception");
-          codeToInsert.append(shortmclassName);
-          codeToInsert.append(") {");
-          codeToInsert.append("_JPS_foundException");
-          codeToInsert.append(shortmclassName);
-          codeToInsert.append(" = true;");
-          codeToInsert.append("throw _JPS_exception");
-          codeToInsert.append(shortmclassName);
-          codeToInsert.append(";");
-          codeToInsert.append("}"); //end catch          
-
+          if(catchError) {
+            //catch java.lang.Error
+            codeToInsert.append("catch(Error _JPS_exception");
+            codeToInsert.append(shortmclassName);
+            codeToInsert.append(") {");
+            codeToInsert.append("_JPS_foundException");
+            codeToInsert.append(shortmclassName);
+            codeToInsert.append("= true;");
+            codeToInsert.append("throw _JPS_exception");
+            codeToInsert.append(shortmclassName);
+            codeToInsert.append(";");
+            codeToInsert.append("}"); //end catch
+          }
+          if(catchRuntime) {
+            //catch java.lang.RuntimeException
+            codeToInsert.append("catch(RuntimeException _JPS_exception");
+            codeToInsert.append(shortmclassName);
+            codeToInsert.append(") {");
+            codeToInsert.append("_JPS_foundException");
+            codeToInsert.append(shortmclassName);
+            codeToInsert.append(" = true;");
+            codeToInsert.append("throw _JPS_exception");
+            codeToInsert.append(shortmclassName);
+            codeToInsert.append(";");
+            codeToInsert.append("}"); //end catch          
+          }
           codeToInsert.append("finally { ");
           codeToInsert.append("if(!_JPS_foundException");
           codeToInsert.append(shortmclassName);
