@@ -72,7 +72,7 @@ public class AssertMethod implements Named {
   /**
      @return the class that this method belongs to.
   **/
-  public AssertClass getContainingClass() {
+  final public AssertClass getContainingClass() {
     return _theClass;
   }
     
@@ -82,7 +82,7 @@ public class AssertMethod implements Named {
   /**
      @return the preConditions for this method, list of {@link AssertToken AssertTokens}
   **/
-  public List getPreConditions() {
+  final public List getPreConditions() {
     return _preConditions;
   }
 
@@ -92,7 +92,7 @@ public class AssertMethod implements Named {
   /**
      @return the postConditions for this method, list of {@link AssertToken AssertTokens}
   **/
-  public List getPostConditions() {
+  final public List getPostConditions() {
     return _postConditions;
   }
   
@@ -102,7 +102,7 @@ public class AssertMethod implements Named {
   /**
      Set the entrance to this method.
   **/
-  public void setMethodEntrance(final CodePoint entrance) {
+  final public void setMethodEntrance(final CodePoint entrance) {
     _entrance = entrance;
   }
 
@@ -110,7 +110,7 @@ public class AssertMethod implements Named {
      @return the entrance to this class, ie. the location of the open brace.
      Don't modify this Point.
   **/
-  public CodePoint getEntrance() {
+  final public CodePoint getEntrance() {
     return _entrance;
   }
   
@@ -127,7 +127,7 @@ public class AssertMethod implements Named {
      
      @pre (exit != null)
   **/
-  public void addExit(final CodePointPair points) {
+  final public void addExit(final CodePointPair points) {
     _exits.add(points);
   }
   
@@ -136,7 +136,7 @@ public class AssertMethod implements Named {
      closing brace if this is a void method.  Don't modify this List.
      List of {@link CodePointPair CodePointPairs(start of return, semicolon)}
   **/
-  public List getExits() {
+  final public List getExits() {
     return _exits;
   }
   
@@ -146,7 +146,7 @@ public class AssertMethod implements Named {
      @return List of {@link StringPair StringPairs, (class, parameter name)}, don't modify this
      List
   **/
-  public List getParams() {
+  final public List getParams() {
     return _params;
   }
 
@@ -155,7 +155,7 @@ public class AssertMethod implements Named {
   /**
      @return the return type of this method, used for building post checks
   **/
-  public String getReturnType() {
+  final public String getReturnType() {
     return _retType;
   }
 
@@ -163,7 +163,7 @@ public class AssertMethod implements Named {
      @return true if this method is static, therefore the pre and post checks
      need to be static and the invariant condition isn't checked.
   **/
-  public boolean isStatic() {
+  final public boolean isStatic() {
     return _static;
   }
   private boolean _static;
@@ -171,7 +171,7 @@ public class AssertMethod implements Named {
   /**
      @return true if this method is private, therefore the invariant condition isn't checked.
   **/
-  public boolean isPrivate() {
+  final public boolean isPrivate() {
     return _private;
   }
   private boolean _private;
@@ -181,14 +181,14 @@ public class AssertMethod implements Named {
      processing for the preConditions and don't check the invariant at the top
      of the method, only at the bottom.
   **/
-  public boolean isConstructor() {
+  final public boolean isConstructor() {
     return (getReturnType() == null);
   }
 
   /**
      @return true if this method is a void method, this includes constructors.
   **/
-  public boolean isVoid() {
+  final public boolean isVoid() {
     return (getReturnType() == null || getReturnType().equals("void"));
   }
 
@@ -197,14 +197,14 @@ public class AssertMethod implements Named {
   /**
      @return the point at which should be added to be just outside the method, location of '}' + 1
   **/
-  public CodePoint getClose() {
+  final public CodePoint getClose() {
     return _close;
   }
 
   /**
      Set the point at which should be added to be just outside the method, location of '}' + 1
   **/
-  public void setClose(final CodePoint close) {
+  final public void setClose(final CodePoint close) {
     _close = close;
   }
 
@@ -217,7 +217,7 @@ public class AssertMethod implements Named {
   /**
      @return true if this method is abstract or native
   **/
-  public boolean isAbstract() {
+  final public boolean isAbstract() {
     return _abstract;
   }
 
@@ -225,11 +225,11 @@ public class AssertMethod implements Named {
   /**
      @pre (thrownExceptions != null)
   **/
-  public void setThrownExceptions(final List thrownExceptions) {
+  final public void setThrownExceptions(final List thrownExceptions) {
     _thrownExceptions = thrownExceptions;
   }
   
-  public List getThrownExceptions() {
+  final public List getThrownExceptions() {
     return _thrownExceptions;
   }
 }

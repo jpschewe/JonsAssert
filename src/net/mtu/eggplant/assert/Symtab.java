@@ -107,7 +107,7 @@ public class Symtab {
   }
 
   private Configuration _config;
-  public Configuration getConfiguration() {
+  final public Configuration getConfiguration() {
     return _config;
   }
   
@@ -115,7 +115,7 @@ public class Symtab {
   /**
      set the package the the next class(es) belong to
   **/
-  public void setCurrentPackageName(final String packageName) {
+  final public void setCurrentPackageName(final String packageName) {
     if(_allPackages.get(packageName) == null) {
       _allPackages.put(packageName, new Hashtable());
     }
@@ -125,13 +125,13 @@ public class Symtab {
   /**
      @return the package that we're currently defining classes for
   **/
-  public String getCurrentPackageName() {
+  final public String getCurrentPackageName() {
     return _currentPackageName;
   }
   
   private InstrumentedFile _currentFile;
 
-  public InstrumentedFile getCurrentFile() {
+  final public InstrumentedFile getCurrentFile() {
     return _currentFile;
   }
 
@@ -269,7 +269,7 @@ public class Symtab {
 
      @return the current class being parsed, may return null
   **/
-  public AssertClass getCurrentClass() {
+  final public AssertClass getCurrentClass() {
     return _currentClass;
   }
 

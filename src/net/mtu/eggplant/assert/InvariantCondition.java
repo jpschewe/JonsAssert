@@ -16,12 +16,12 @@ public class InvariantCondition {
   }
 
   private Token _condition;
-  public Token getCondition() {
+  final public Token getCondition() {
     return _condition;
   }
 
   private Token _message;
-  public Token getMessage() {
+  final public Token getMessage() {
     return _message;
   }
 

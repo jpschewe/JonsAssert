@@ -43,24 +43,24 @@ public class AssertClass implements Named {
   }
 
   private AssertClass _enclosingClass;
-  public AssertClass getEnclosingClass() {
+  final public AssertClass getEnclosingClass() {
     return _enclosingClass;
   }
 
   private boolean _isAnonymous;
-  public boolean isAnonymous() {
+  final public boolean isAnonymous() {
     return _isAnonymous;
   }
   
   private boolean _isInterface;
-  public boolean isInterface() {
+  final public boolean isInterface() {
     return _isInterface;
   }
   
   //Named
   private String _name;
 
-  public String getName() {
+  final public String getName() {
     return _name;
   }
   //end Named
@@ -68,15 +68,15 @@ public class AssertClass implements Named {
   /**
      @return the fully qualified name of this class object
   **/
-  public String getFullName() {
+  final public String getFullName() {
     return getPackage() + "." + getName();
   }
 
-  public void setPackage(final String packageName) {
+  final public void setPackage(final String packageName) {
     _packageName = packageName;
   }
 
-  public String getPackage() {
+  final public String getPackage() {
     return _packageName;
   }
 
@@ -85,7 +85,7 @@ public class AssertClass implements Named {
   /**
      Adds this method to the list of methods defined on this class.
   **/
-  public void addMethod(final AssertMethod am) {
+  final public void addMethod(final AssertMethod am) {
     /*
       see if this method exists in any of the implemented interfaces, if so
       add their pre and post conditions to the current list of pre and post
@@ -95,7 +95,7 @@ public class AssertClass implements Named {
 
   private List _methods;
   
-  public List getMethods() {
+  final public List getMethods() {
     return _methods;
   }
   
@@ -108,11 +108,11 @@ public class AssertClass implements Named {
   /**
      @pre (invariants != null)
   **/
-  public void setInvariants(final List invariants) {
+  final public void setInvariants(final List invariants) {
     _invariants = invariants;
   }
 
-  public List getInvariants() {
+  final public List getInvariants() {
     return _invariants;
   }
 
@@ -125,7 +125,7 @@ public class AssertClass implements Named {
      Create the name for the next anonymous class that is defined
      inside this class.
   **/
-  public String createAnonymousClassName() {
+  final public String createAnonymousClassName() {
     String name = getName();
     name += "$" + _anonymousClassCounter++;
     return name;
@@ -137,7 +137,7 @@ public class AssertClass implements Named {
      Create the name for a dummy class for the next constructors pre
      conditions.
   **/
-  public String createDummyConstructorClassName() {
+  final public String createDummyConstructorClassName() {
     return "_AssertDummy" + _constructorCounter++;
   }
 

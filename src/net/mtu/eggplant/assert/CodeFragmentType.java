@@ -36,7 +36,7 @@ public class CodeFragmentType implements Named, Comparable {
   }
   private long _rank;
   
-  public String getName() {
+  final public String getName() {
     return _name;
   }
   private String _name;

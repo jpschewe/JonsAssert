@@ -14,7 +14,6 @@ import java.io.File;
 import java.util.StringTokenizer;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 /**
    class of static helper methods for assertions.
@@ -37,12 +36,18 @@ final public class AssertTools {
      @pre (methodArgs != null)
   **/
   static public Method findSuperMethod(final Class thisClass, final String methodName, final Class[] methodArgs) {
+//     System.out.println("findSuperMethod:"
+//                        + " thisClass: " + thisClass
+//                        + " methodName: " + methodName
+//                        + " methodArgs: " + methodArgs
+//                        );
     //Use a scratch class for the key
     ScratchMethod sm = new ScratchMethod(thisClass, methodName, methodArgs);
 
     //Now see if it's cached
     if(_superMethods.containsKey(sm)) {
-        return (Method)_superMethods.get(sm);
+//       System.out.println("Found in table");
+      return (Method)_superMethods.get(sm);
     }
     
     Class superClass = thisClass.getSuperclass();
@@ -70,7 +75,8 @@ final public class AssertTools {
     
     //put it in the cache
     _superMethods.put(sm, superMethod);
-    
+
+//     System.out.println("had to lookup");
     return superMethod;
   }
 

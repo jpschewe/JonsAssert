@@ -33,7 +33,7 @@ public class AssertToken extends MyToken {
   /**
      @return the message for this assertion, this may be null
   **/
-  public String getMessage() {
+  final public String getMessage() {
     return _message;
   }
 
@@ -41,7 +41,7 @@ public class AssertToken extends MyToken {
   /**
      @return the condition for this assertion
   **/
-  public String getCondition() {
+  final public String getCondition() {
     return _condition;
   }
   

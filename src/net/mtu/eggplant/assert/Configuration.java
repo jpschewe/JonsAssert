@@ -12,10 +12,10 @@ package org.tcfreenet.schewe.assert;
 **/
 public class Configuration {
 
-  public boolean ignoreTimeStamp() {
+  final public boolean ignoreTimeStamp() {
     return _ignoreTimeStamp;
   }
-  /*package*/ void setIgnoreTimeStamp(boolean b) {
+  final /*package*/ void setIgnoreTimeStamp(boolean b) {
     _ignoreTimeStamp = b;
   }
   private boolean _ignoreTimeStamp = false;

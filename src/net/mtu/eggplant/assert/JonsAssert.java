@@ -151,7 +151,7 @@ public class JonsAssert {
        parser.compilationUnit();
   }
 
-  static public Symtab getSymtab() {
+  final static public Symtab getSymtab() {
     return _symtab;
   }
 }

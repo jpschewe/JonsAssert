@@ -29,7 +29,7 @@ public class CodeFragment implements Comparable {
   /**
      where to insert the code
   **/
-  public CodePoint getLocation() {
+  final public CodePoint getLocation() {
     return _location;
   }
   private CodePoint _location;
@@ -37,7 +37,7 @@ public class CodeFragment implements Comparable {
   /**
      what code to insert
   **/
-  public String getCode() {
+  final public String getCode() {
     return _code;
   }
   private String _code;
@@ -45,7 +45,7 @@ public class CodeFragment implements Comparable {
   /**
      what type of assertion is this.
   **/
-  public CodeFragmentType getType() {
+  final public CodeFragmentType getType() {
     return _type;
   }
   private CodeFragmentType _type;

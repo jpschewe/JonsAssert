@@ -18,12 +18,12 @@ final public class CodePoint implements Comparable {
     _column = column;
   }
 
-  public int getLine() {
+  final public int getLine() {
     return _line;
   }
   private int _line;
 
-  public int getColumn() {
+  final public int getColumn() {
     return _column;
   }
   private int _column;

@@ -36,12 +36,12 @@ public class CodeModification extends CodeFragment {
     _searchText = searchText;
   }
 
-  public String getSearchText() {
+  final public String getSearchText() {
     return _searchText;
   }
   private String _searchText;
   
-  public String getReplaceText() {
+  final public String getReplaceText() {
     return getCode();
   }
 

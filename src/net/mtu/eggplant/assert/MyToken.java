@@ -19,10 +19,10 @@ public class MyToken extends CommonToken {
   }
   
   private int _column;
-  public int getColumn() {
+  final public int getColumn() {
     return _column;
   }
-  public void setColumn(int c) {
+  final public void setColumn(int c) {
     _column = c;
   }
 

@@ -32,15 +32,15 @@ import java.io.File;
     _classes = new Vector();
   }
 
-  public File getFile() {
+  final public File getFile() {
     return _file;
   }
   
-  public SortedSet getFragments() {
+  final public SortedSet getFragments() {
     return _fragments;
   }
 
-  public Vector getClasses() {
+  final public Vector getClasses() {
     return _classes;
   }
 
