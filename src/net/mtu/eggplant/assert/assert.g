@@ -57,36 +57,36 @@ options {
 	defaultErrorHandler = false;     // generate parser error handlers
 }
 
-{
-  // for column tracking
-  public void setColumnTracker(final ColumnTracker ct) {
-    _ct = ct;
-  }
-
-  private ColumnTracker _ct;
-  
-  public void consume() throws IOException {
-    if(text.length()==0) {
-      // remember the token start column
-      _ct._tokenColumn = _ct._column;
-    }
-    _ct._column++;
-    super.consume();
-  }
-
-  public void newline() {
-    _ct._column = 0;
-    _ct._line++;
-    super.newline();
-  }
-  
-  protected Token makeToken(int t) {
-    Token tok = super.makeToken(t);
-    tok.setColumn(_ct._tokenColumn);
-    tok.setLine(_ct._line);
-    return tok;
-  }
-}
+//{
+//  // for column tracking
+//  public void setColumnTracker(final ColumnTracker ct) {
+//    _ct = ct;
+//  }
+//
+//  private ColumnTracker _ct;
+//  
+//  public void consume() throws IOException {
+//    if(text.length()==0) {
+//	// remember the token start column
+//	_ct._tokenColumn = _ct._column;
+//    }
+//    _ct._column++;
+//    super.consume();
+//  }
+//
+//  public void newline() {
+//    _ct._column = 0;
+//    _ct._line++;
+//    super.newline();
+//  }
+//  
+//  protected Token makeToken(int t) {
+//    Token tok = super.makeToken(t);
+//    tok.setColumn(_ct._tokenColumn);
+//    tok.setLine(_ct._line);
+//    return tok;
+//  }
+//}
 
 // a dummy rule to force vocabulary to be all characters (except special
 //   ones that ANTLR uses internally (0 to 2)

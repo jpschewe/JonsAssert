@@ -223,12 +223,7 @@ public class JonsAssert {
   static public void parseFile(final InputStream s) throws Exception {
       // Create a scanner that reads from the input stream passed to us
       javaLexer = new JavaLexer(s);
-      javaLexer.setTokenObjectClass("net.mtu.eggplant.assert.MyToken");
       assertLexer = new AssertLexer(javaLexer.getInputState());
-      assertLexer.setTokenObjectClass("net.mtu.eggplant.assert.MyToken");
-      final ColumnTracker ct = new ColumnTracker();
-      assertLexer.setColumnTracker(ct);
-      javaLexer.setColumnTracker(ct);
       
       selector.addInputStream(javaLexer, "java");
       selector.addInputStream(assertLexer, "assert");

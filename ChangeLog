@@ -1,3 +1,8 @@
+2001-04-05  Jon Schewe  <jpschewe@mtu.net>
+
+	* lib/antlr.jar: updated to antlr-2.7.1, does column tracking for
+	me :)
+
 2001-03-07  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/net/mtu/eggplant/assert/AssertClass.java: Fixed bug reported
