@@ -2,18 +2,42 @@ The grammar file used, java.g, is based off of the one from the Antlr home
 page.  The original authors comments still exist at the top of that file so
 they can recieve due credit.
 
-Note that there my be no <CR>'s inside any assertions, unless they are
-property escaped.  So no <CR>'s between the condition and the message.
-This may be fixed in a later version.
-
-Note that when calling a method as part of an assertion condition, the
-assertions on that method will be checked also, so unless you're careful
-you can get into an infinite loop.
-
 Implicit instrumentation is not yet supported, so each file needs to be
 instrumented explicitly.  Interfaces need no instrumentation, so they are
 just copied to the instrumented directory.  
 
+@assert checks cannot be before one liners ex:
+if(i < 10)
+ /** @assert (i < 10) **/
+ i = 11;
+
+I think the reasons are pretty obvious.  It's very difficult to insert code
+here correctly.
+
 BUGS:
 Implementing an interface that is defined in the same file won't work right
 now.  This needs some seious thought.
+
+When calling a method from an assertion the assertions in that method are
+also checked, so calling a method from it's precondition will cause an
+infinite loop.
+
+Note that there my be no <CR>'s inside any assertions, unless they are
+property escaped.  So no <CR>'s between the condition and the message.
+This may be fixed in a later version.
+
+
+
+
+FEATURES (some people might call these bugs, but I put them there on
+purpose :)
+
+Does design by contract correct, except where noted in the BUGS.
+
+Allows checking of old values for variables in a method __old<paramName>
+where <paramName> is the name of the parameter.  This includes checking in
+post conditions and assertion conditions in the method.
+
+Preconditions can access private and package methods and
+variables, even though design by contract doesn't allow this.
+

@@ -35,15 +35,53 @@ options {
     filter=true;
 }
 
+{
+// for column tracking
+protected int tokColumn = 1;
+protected int column = 1;
+public void consume() throws IOException {
+  if ( inputState.guessing>0 ) {
+    if (text.length()==0) {
+      // remember token start column
+      tokColumn = column;
+    }
+    if (LA(1)=='\n') { column = 1; }
+    else { column++; }
+  }
+  super.consume();
+}
+protected Token makeToken(int t) {
+  Token tok = super.makeToken(t);
+  tok.setColumn(tokColumn);
+  return tok;
+}
+}
 
 NEWLINE
-    : ('\n'|'\r'('\n')?)
+    : ('\n'
+	| '\r'
+	| '\r' '\n'
+	)
         { _ttype = Token.SKIP; newline(); }
     ;
 
 protected
 CONDITION
-    : '(' (~')')* ')'
+{ int count = 0; }
+    : '('
+	(
+	    options {
+		generateAmbigWarnings=false;
+	    }
+	:
+	    { count > 0 }? ')' { count--; }
+	| '(' { count++; }
+	| ~('('|')')
+	)*
+	')'
+//    : '(' ( ~('('|')') )* ')'
+//    | '(' CONDITION ')'
+//    : '(' ( ~('('|')') )* (CONDITION)? ( ~('('|')') )* ')'
 	//	{ System.out.println("Assert: got CONDITION #" + text + "#"); }
     ;
 

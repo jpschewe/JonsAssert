@@ -1,18 +1,17 @@
 /*
 
-  still need to check order of pre vs. invariant
-  
-  pres and posts get ANDed or ORed with super classes?  Interfaces, I'd assume
-  they're just like super classes
+  still need to check order of pre vs. invariant, or does it matter?
 
+  remember only to check invariants on public instance methods, protected methods?, constructor exit
+  
 */
 public Object methodFoo(Object param1) {
   Object __oldParam1 = param1;
   if(!__checkInvariant()) {
-    throw AssertTools.getCurrentAssertionViolation();
+    throw AssertTools.getCurrentAssertionViolation().fillInStackTrace();
   }
-  if(!__check<methodName>PreConditions()) {
-    throw AssertTools.getCurrentAssertionViolation();
+  if(!__check<methodName>PreConditions(oldParam1, param1)) {
+    throw AssertTools.getCurrentAssertionViolation().fillInStackTrace();
   }
 
 
@@ -20,22 +19,33 @@ public Object methodFoo(Object param1) {
   /* was return b; */
   Object __retVal = b;
   if(!__checkInvariant()) {
-    throw AssertTools.getCurrentAssertionViolation();
+    throw AssertTools.getCurrentAssertionViolation().fillInStackTrace();
   }
   if(!__check<methodName>PostConditions(__retVal, oldParam1, param1)) {
-    throw AssertTools.getCurrentAssertionViolation();
+    throw AssertTools.getCurrentAssertionViolation().fillInStackTrace();
   }
   return __retVal;
 }
 
-protected boolean __check<methodname>PostConditions() {
+protected boolean __check<methodname>PostConditions(__retVal, oldParam1, param1, ...) {
+    // OR, as soon as a true is seen, return true
 
+    // do interface post conditions first and keep track of which interface they're from
+    
+    if(((Boolean)retVal).booleanValue()) {
+        return true;
+    }
 
 }
 
-protected boolean __check<methodname>PreConditions() {
-  
+protected boolean __check<methodname>PreConditions(oldParam1, param1, ...) {
+    // AND, as soon as a false is seen, return false;
 
+    // do interface pre conditions first and keep track of which interface they're from
+    
+    if(!((Boolean)retVal).booleanValue()) {
+        return false;
+    }
 }
 
   
@@ -74,8 +84,9 @@ protected boolean __checkInvariant() {
   }
   
   //[jpschewe:20000103.1845CST] need to think about this one, should we return a value and store some state somewhere else or just throw the exception?
+
+  // do interface invariants first and keep track of which interface they're from
   
-  // add users conditions here and throw an exception on the first failure
   //for <condition> (conditions)
   if(<condition>) {
     AssertionViolation av = new AssertionViolation("Failed invariant\n" + (<message> != null ? <message> : "") + "\n" + <condition>);

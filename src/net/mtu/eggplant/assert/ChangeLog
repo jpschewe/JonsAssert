@@ -1,3 +1,13 @@
+2000-01-08  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* java.g: Should parse everything correctly now!  Now we just need
+	to generate code and find interfaces :)
+
+	* assert.g: Handels ()'s in the condition!
+
+	* MethodSkeletons.java: refined ideas of how the pre and post
+	conditions are checked
+
 2000-01-03  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* TestAssert.java: Added some more code that can break the lexer :(

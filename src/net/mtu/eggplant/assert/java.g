@@ -150,7 +150,7 @@ tokens {
   private void addAsserts(Vector asserts, Token jdClose) {
     if(asserts != null && asserts.size() > 0) {
       System.out.println("Parser: got asserts#");
-      System.out.println("Insert code at line.column: " + jdClose.getLine() + "." + jdClose.getColumn());
+      System.out.println("Insert code at line.column: " + jdClose.getLine() + "." + jdClose.getColumn() + " #" + jdClose.getText() + "#");
       Enumeration iter = asserts.elements();
       while(iter.hasMoreElements()) {
 	Token assertToken = (Token)iter.nextElement();
@@ -595,7 +595,7 @@ assertCondition
 { Vector assertTokens = new Vector(); }
   : JAVADOC_OPEN
     (assert:ASSERT_CONDITION { assertTokens.addElement(assert); } )*
-    jdc:JAVADOC_CLOSE
+    jdc:JAVADOC_CLOSE 
     { addAsserts(assertTokens, jdc); }
   ;
 
@@ -619,87 +619,95 @@ compoundStatement
 
 statement
 // A list of statements in curly braces -- start a new scope!
-  :	//(assertCondition)? compoundStatement
-    compoundStatement
-
-    // class definition
-  |	classDefinition
-
-    // final class definition
-  |	"final" classDefinition
-
-    // abstract class definition
-  |	"abstract" classDefinition
-
-    // declarations are ambiguous with "ID DOT" relative to expression
-    // statements.  Must backtrack to be sure.  Could use a semantic
-    // predicate to test symbol table to see what the type was coming
-    // up, but that's pretty hard without a symbol table ;)
-  |	(declaration)=> declaration SEMI
-
-    // An expression statement.  This could be a method call,
-    // assignment statement, or any other expression evaluated for
-    // side-effects.
-  |	expression SEMI
-
-    // Attach a label to the front of a statement
-  |	IDENT COLON statement
-
-    // If-else statement
-  |	"if" LPAREN expression RPAREN statement
-    (
-      // CONFLICT: the old "dangling-else" problem...
-      //           ANTLR generates proper code matching
-      //			 as soon as possible.  Hush warning.
-      options {
-	warnWhenFollowAmbig = false;
-      }
     :
-      "else" statement
-    )?
+	(assertCondition)?
+	
+	(
+	//(assertCondition)? compoundStatement
+	compoundStatement
 
-    // For statement
-  |	"for"
-    LPAREN
-    forInit SEMI   // initializer
-    forCond	SEMI   // condition test
-    forIter         // updater
-    RPAREN
-    statement                     // statement to loop over
+	// class definition
+    |	classDefinition
 
-    // While statement
-  |	"while" LPAREN expression RPAREN statement
+	// final class definition
+    |	"final" classDefinition
 
-    // do-while statement
-  |	"do" statement "while" LPAREN expression RPAREN SEMI
+	// abstract class definition
+    |	"abstract" classDefinition
 
-    // get out of a loop (or switch)
-  |	"break" (IDENT)? SEMI
+	// declarations are ambiguous with "ID DOT" relative to expression
+	// statements.  Must backtrack to be sure.  Could use a semantic
+	// predicate to test symbol table to see what the type was coming
+	// up, but that's pretty hard without a symbol table ;)
+	//#5
+    |	/*(assertCondition)?*/ (declaration)=> declaration SEMI
 
-    // do next iteration of a loop
-  |	"continue" (IDENT)? SEMI
+	// An expression statement.  This could be a method call,
+	// assignment statement, or any other expression evaluated for
+	// side-effects.
+    |	/*(assertCondition)?*/ expression SEMI
 
-    //[jpschewe:19991230.2259CST] put post call here
-    // Return an expression
-  |	"return" (expression)? SEMI
+	// Attach a label to the front of a statement
+    |	IDENT COLON statement
 
-    // switch/case statement
-  |	"switch" LPAREN expression RPAREN LCURLY
-    ( casesGroup )*
-    RCURLY
+	// If-else statement
+    |	/*(assertCondition)?*/"if" LPAREN expression RPAREN statement
+	(
+	    // CONFLICT: the old "dangling-else" problem...
+	    //           ANTLR generates proper code matching
+	    //			 as soon as possible.  Hush warning.
+	    options {
+		warnWhenFollowAmbig = false;
+	    }
+	:
+	    "else" statement
+	)?
 
-    // exception try-catch block
-  |	(assertCondition)? tryBlock
+	// For statement
+    |	/*(assertCondition)?*/ "for"
+	LPAREN
+	forInit SEMI   // initializer
+	forCond	SEMI   // condition test
+	forIter         // updater
+	RPAREN
+	statement                     // statement to loop over
 
-    // throw an exception
-  |	"throw" expression SEMI
+	// While statement
+	//#10
+    |	/*(assertCondition)?*/ "while" LPAREN expression RPAREN statement
 
-    // synchronize a statement
-  |	"synchronized" LPAREN expression RPAREN (assertCondition)? compoundStatement
+	// do-while statement
+    |	/*(assertCondition)?*/ "do" statement "while" LPAREN expression RPAREN SEMI
 
-    // empty statement
-  |	SEMI 
-  ;
+	// get out of a loop (or switch)
+    |	/*(assertCondition)?*/ "break" (IDENT)? SEMI
+
+	// do next iteration of a loop
+    |	/*(assertCondition)?*/ "continue" (IDENT)? SEMI
+
+	//[jpschewe:19991230.2259CST] put post call here
+	// Return an expression
+    |	/*(assertCondition)?*/ "return" (expression)? SEMI
+
+	// switch/case statement
+    |	/*(assertCondition)?*/ "switch" LPAREN expression RPAREN LCURLY
+	( casesGroup )*
+	RCURLY
+
+	// exception try-catch block
+	//#16
+    |	/*(assertCondition)?*/ tryBlock
+
+	// throw an exception
+    |	/*(assertCondition)?*/ "throw" expression SEMI
+
+	// synchronize a statement
+    |	/*(assertCondition)?*/ "synchronized" LPAREN expression RPAREN compoundStatement
+
+	// empty statement
+    |	SEMI
+	)
+    ;
 
 
 casesGroup
@@ -743,7 +751,7 @@ forIter
 
 // an exception handler try/catch block
 tryBlock
-  :	"try" compoundStatement
+    :	"try" compoundStatement
     (handler)*
     ( "finally" compoundStatement )?
   ;
@@ -751,7 +759,7 @@ tryBlock
 
 // an exception handler
 handler
-  :	"catch" LPAREN parameterDeclaration RPAREN (assertCondition)? compoundStatement
+  :	"catch" LPAREN parameterDeclaration RPAREN compoundStatement
   ;
 
 
@@ -1042,12 +1050,34 @@ constant
 // The Java scanner
 //----------------------------------------------------------------------------
 class JavaLexer extends Lexer;
-
 options {
   exportVocab=Java;      // call the vocabulary "Java"
   testLiterals=false;    // don't automatically test for literals
   k=4;                   // four characters of lookahead
 }
+
+{
+// for column tracking
+protected int tokColumn = 1;
+protected int column = 1;
+public void consume() throws IOException {
+  if ( inputState.guessing>0 ) {
+    if (text.length()==0) {
+      // remember token start column
+      tokColumn = column;
+    }
+    if (LA(1)=='\n') { column = 1; }
+    else { column++; }
+  }
+  super.consume();
+}
+protected Token makeToken(int t) {
+  Token tok = super.makeToken(t);
+  tok.setColumn(tokColumn);
+  return tok;
+}
+}
+
 
 
 
@@ -1105,11 +1135,9 @@ WS	:	(	' '
     |	'\t'
     |	'\f'
       // handle newlines
-    |	(	"\r\n"  // Evil DOS
-      |	'\r'    // Macintosh
-      |	'\n'    // Unix (the right way)
-      )
-      { newline(); }
+	|	'\r' '\n'		{newline();}
+	|	'\r'			{newline();}
+	|	'\n'			{newline();}
     )
     { _ttype = Token.SKIP; }
   ;
@@ -1117,8 +1145,12 @@ WS	:	(	' '
 // Single-line comments
 SL_COMMENT
   :	"//"
-    (~('\n'|'\r'))* ('\n'|'\r'('\n')?)
-    {$setType(Token.SKIP); newline();}
+    (~('\n'|'\r'))* (
+	|	'\r' '\n'		{newline();}
+	|	'\r'			{newline();}
+	|	'\n'			{newline();}
+	)	    
+    {$setType(Token.SKIP); }
   ;
 
 // Javadoc comments
@@ -1152,9 +1184,19 @@ JAVADOC_OPEN
 
 // multiple-line comments
 ML_COMMENT
-  :	"/*"
-    ~'*'
-    (	/*	'\r' '\n' can be matched in one alternative or by matching
+    :
+	"/*"
+	(
+	    options {
+		generateAmbigWarnings=false;
+	    }
+	:	    
+	    ~('*'|'\n'|'\r')
+	|	'\r' '\n'		{newline();}
+	|	'\r'			{newline();}
+	|	'\n'			{newline();}
+	)
+	(	/*	'\r' '\n' can be matched in one alternative or by matching
 				'\r' in one iteration and '\n' in another.  I am trying to
 				handle any flavor of newline that comes in, but the language
 				that allows both "\r\n" and "\r" and "\n" to all be valid
@@ -1166,15 +1208,14 @@ ML_COMMENT
       }
     :
       { LA(2)!='/' }? '*'
-    |	'\r' '\n'		{newline();}
-    |	'\r'			{newline();}
-    |	'\n'			{newline();}
+	|	'\r' '\n'		{newline();}
+	|	'\r'			{newline();}
+	|	'\n'			{newline();}
     |	~('*'|'\n'|'\r')
     )*
     "*/"
     {$setType(Token.SKIP);}
   ;
-
 
 // character literals
 CHAR_LITERAL
