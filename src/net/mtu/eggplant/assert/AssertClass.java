@@ -141,7 +141,11 @@ public class AssertClass implements Named {
      @return the fully qualified name of this class object
   **/
   final public String getFullName() {
-    return getPackage() + "." + getName();
+    if(getPackage() == null || getPackage().equals("")) {
+      return getName();
+    } else {
+      return getPackage() + "." + getName();
+    }
   }
 
   final public void setPackage(final String packageName) {

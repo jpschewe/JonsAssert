@@ -242,14 +242,14 @@ final public class AssertTools {
 
   static private Set _lockedMethods = new HashSet(20);
   /**
-     Lock a method.  This is ued at the top of the pre, post and invariant
-     check methods so that the methods don't get called recursively.  Method
-     signatures are just stored in a Set, if the signature is in the Set, the
-     method is locked.
-
-     @param signature the signature of the method to lock
-     @return true if the lock succeeded, false if the method is already locked.
-  **/
+   * Lock a method.  This is ued at the top of the pre, post and invariant
+   * check methods so that the methods don't get called recursively.  Method
+   * signatures are just stored in a Set, if the signature is in the Set, the
+   * method is locked.
+   *
+   * @param signature the signature of the method to lock
+   * @return true if the lock succeeded, false if the method is already locked.
+   **/
   static synchronized public boolean lockMethod(final String signature) {
     if(_lockedMethods.contains(signature)) {
       return false;
@@ -272,60 +272,59 @@ final public class AssertTools {
   }
 
   /**
-     <p>Calculate the unique parameters for all constructors for class and set
-     those values on the AssertMethod objects.  This is for creating a unique
-     parameter list for checking preconditions on constructors.  If in a class
-     there exists a constructor C1 such that there is another constructor C2
-     that has number parameters N+1, where N is the number of parameters to
-     C1, and the first N parameter types match exactly and the N+1 parameter
-     is not a primative there is a possibility for ambiguity errors with the
-     generated constructors.  So boolean parameters are added to such
-     constructors to guarentee uniqueness.</p>
-
-     <p>Here is an example:
-     
-     <pre>
-* This won't work:
-* public class A {
-*   public A(int i) {
-*     this(i, new AssertDummy(i));
-*   }
-*   private A(int i, AssertDummy ad) {
-*     //generated to handle preconditions
-*   }
-* 
-*   public A(int i, int j) {
-*    this(i, null);
-*    //should call following constructor, but with generated constructor is ambiguous
-*   }
-*   
-*   public A(int i, Component c) {
-*     //do something
-*   }
-* }
-* This will work:
-* public class A {
-*   public A(int i) {
-*     this(i, true, new AssertDummy(i));
-*   }
-*   private A(int i, boolean dummy0, AssertDummy ad) {
-*     //generated to handle preconditions
-*   }
-* 
-*   public A(int i, int j) {
-*    this(i, null);
-*    //should call following constructor, and now will since the code is no longer ambigous
-*   }
-*   
-*   public A(int i, Component c) {
-*     //do something
-*   }
-* }
-     </pre>
-     </p>
-     
-     @pre (assertClass != null)
-  **/
+   * <p>Calculate the unique parameters for all constructors for class and set
+   * those values on the AssertMethod objects.  This is for creating a unique
+   * parameter list for checking preconditions on constructors.  If in a class
+   * there exists a constructor C1 such that there is another constructor C2
+   * that has number parameters N+1, where N is the number of parameters to
+   * C1, and the first N parameter types match exactly and the N+1 parameter
+   * is not a primative there is a possibility for ambiguity errors with the
+   * generated constructors.  So boolean parameters are added to such
+   * constructors to guarentee uniqueness.</p>
+   *
+   * <p>Here is an example:
+   * <pre>
+   * This won't work:
+   * public class A {
+   *   public A(int i) {
+   *     this(i, new AssertDummy(i));
+   *   }
+   *   private A(int i, AssertDummy ad) {
+   *     //generated to handle preconditions
+   *   }
+   * 
+   *   public A(int i, int j) {
+   *    this(i, null);
+   *    //should call following constructor, but with generated constructor is ambiguous
+   *   }
+   *   
+   *   public A(int i, Component c) {
+   *     //do something
+   *   }
+   * }
+   * This will work:
+   * public class A {
+   *   public A(int i) {
+   *     this(i, true, new AssertDummy(i));
+   *   }
+   *   private A(int i, boolean dummy0, AssertDummy ad) {
+   *     //generated to handle preconditions
+   *   }
+   * 
+   *   public A(int i, int j) {
+   *    this(i, null);
+   *    //should call following constructor, and now will since the code is no longer ambigous
+   *   }
+   *   
+   *   public A(int i, Component c) {
+   *     //do something
+   *   }
+   * }
+   * </pre>
+   * </p>
+   *     
+   * @pre (assertClass != null)
+   */
   static public void setUniqueParams(final AssertClass assertClass) {
     final Set methods = assertClass.getMethods();
 
