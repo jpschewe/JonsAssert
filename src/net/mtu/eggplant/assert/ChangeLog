@@ -1,5 +1,14 @@
 2000-01-03  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
+	* TestAssert.java: Added some more code that can break the lexer :(
+
+	* MethodSkeletons.java: Working out how to actually signal the assertions.
+
+	* AssertTools.java: Generalized code to find the super class method.
+
+	* AssertMethod.java: Added stubs for methods and slots that should
+	be required for methods to be handeled correctly.
+
 	* java.g: list of mports should be correctly built, still need to
 	figure out how to resolve interfaces
 

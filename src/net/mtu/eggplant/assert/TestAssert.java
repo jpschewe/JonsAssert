@@ -28,7 +28,7 @@ public class TestAssert implements foo.bar {
   }
 
   /**
-     @pre (i > 0)
+     @pre (foo(i) > 0)
   **/
   public boolean preCond(int i) {
     return false;

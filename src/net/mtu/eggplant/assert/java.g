@@ -118,15 +118,16 @@ tokens {
     }
 
     //[jpschewe:20000103.0113CST] actually parse the file so we can check
-    //against it later
-    
+    //against it later, if no file can be found then don't add it to the
+    //class, otherwise add it to the current class with
+    //_symtab.getCurrentClass().addInterface(assertInterface)
+
   }
   
   private Hashtable _imports = new Hashtable();
   
   private void addImport(Token t, String className, String packageName) {
     packageName = packageName.substring(1);
-    print("in addImport " + t + ":" + className + ":" + packageName + ":");
     if(className != null) {
       Vector v = (Vector)_imports.get(packageName);
       if(v == null) {

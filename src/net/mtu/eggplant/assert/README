@@ -12,9 +12,7 @@ you can get into an infinite loop.
 
 Implicit instrumentation is not yet supported, so each file needs to be
 instrumented explicitly.  Interfaces need no instrumentation, so they are
-just copied to the instrumented directory.  Interfaces will get copied to
-the instrumented directory whenever a class that implements them is
-instrumented or if the one tries to instrument the interface itself.
+just copied to the instrumented directory.  
 
 BUGS:
 Implementing an interface that is defined in the same file won't work right
