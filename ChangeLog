@@ -1,4 +1,5 @@
 2004-11-10  Jon Schewe  <jpschewe@mtu.net>
+	* Release 0.8
 
 	* doc/README (BUGS): Noted that checked exceptions may still cause
 	conditions to be checked.

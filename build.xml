@@ -7,7 +7,7 @@
 
   <!-- used for building releases -->
   <property name="app.name"   value="JonsAssert" />
-  <property name="app.version" value="0.7" />
+  <property name="app.version" value="0.8" />
   <property name="instrument.dir"  value="instrumented" />
   <property name="build.dir"  value="build" />
   <property name="release.html.dir" value="/home/jpschewe/public_html/mtu.net/public_html" />
