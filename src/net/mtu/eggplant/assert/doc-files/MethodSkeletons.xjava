@@ -96,11 +96,6 @@ protected boolean __<packageName>_<methodName>_check<methodname>PreConditions(pa
 
 
   //[jpschewe:20000213.1603CST] FIX do interface pre conditions first and keep track of which interface they're from
-  Class[] interfaces = thisClass.getInterfaces();
-  for(int i=0; i<interfaces.length; i++) {
-    final String interfaceName = interfaces[i].getName();
-    final Class assertInterfaceClass =  AssertTools.classForName(__interfaceName + '$' + __<packageName>_<interfaceName>_checkAssertions);
-  }
 
   
   // OR, as soon as a false is seen, return false;  
