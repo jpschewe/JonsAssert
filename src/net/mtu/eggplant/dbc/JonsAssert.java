@@ -71,7 +71,7 @@ import org.apache.log4j.Logger;
  * {@link #instrument(Configuration, Collection) instrument} with a Configuration
  * object and a Collection of files.</p>
  *
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public final class JonsAssert {
 
@@ -349,7 +349,7 @@ public final class JonsAssert {
         debugLexer(parser);
       } else {
         parser.setSymtab(getSymtab());
-        parser.compilationUnit();
+        parser.unit();
       }
     } else if(Configuration.JAVA_1_3 == sourceCompatibility) {
       final JavaRecognizer parser = new JavaRecognizer(_selector);
@@ -357,7 +357,7 @@ public final class JonsAssert {
         debugLexer(parser);
       } else {
         parser.setSymtab(getSymtab());
-        parser.compilationUnit();
+        parser.unit();
       }
     } else {
       AssertTools.internalError("Invalid source compatibility: " + sourceCompatibility);

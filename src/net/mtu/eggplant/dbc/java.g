@@ -95,7 +95,7 @@ import org.apache.commons.logging.LogFactory;
  * <p>This parser has been modified from the original Recognizer to a pre-parser
  * that implements assertions in java as well as support JDK 1.4.</p>
  *
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 class JavaRecognizer extends Parser;
 options {
@@ -278,32 +278,16 @@ tokens {
   }    
 }
 
-/**
-   Compilation Unit: In Java, this is a single file.  This is the start rule
-   for this parser
-**/
-compilationUnit
+unit : pre start middle end EOF ;
+
+pre : uselessComments ;
+
+start
 {
   String packageName = null;
-  //short parseSection = 0;
 }
   :
-
-    //FIX This parseSection bit is strange.  There's got to be a better way to
-    //do this
-
-    // zero or more javadoc comments, ignore any conditions in these
-    //( {parseSection==0}? (javadocComment)*
-    //( {parseSection==0}? ( (javadocComment)* packageName=packageDefinition )
-    //| /* nothing */
-    //)
-    //)
-
-    // optional package name
-    (
-      ( (javadocComment)* packageDefinition ) => (javadocComment)* packageName=packageDefinition
-      | /*nothing*/
-    )
+    (packageName=packageDefinition uselessComments)?
     {//stuff to do after finding packageName
       getSymtab().setCurrentPackageName(packageName);
       LOG.debug("just found the package: " + packageName);
@@ -314,37 +298,27 @@ compilationUnit
           throw new FileAlreadyParsedException();
         }
       }
-      //If we get here, either we're in force mode or the source file is newer
-      //parseSection = 1;
-      clearInvariants();
 
       //Put the print here so you don't see it unless we're really parsing the files
       if(getSymtab().getConfiguration().isVerbose()) {
         System.out.println("  " + getSymtab().getCurrentFile().getFile().getAbsolutePath());
       }
     }
-    
-    // Next we have a series of zero or more import statements with
-    // intermingled javadoc comments
-    //(
-    //  ( (javadocComment)* importDefinition ) => (javadocComment)* importDefinition
-    //  | ( importDefinition )*
-    //)
-    ( importDefinition )*
-    //( ( javadocComment )* | importDefinition )*
-
-    // Wrapping things up with any number of class or interface definitions
-    // with their corresponding invariants
-    ( (invariantCondition)? typeDefinition )*
-
-    //handle case where file is just javadocComments
-    //(
-    //  ((javadocComment)+ EOF) => EOF
-    //  | EOF
-    //)
-
-    EOF
   ;
+
+middle
+  :
+    (importDefinition uselessComments)*
+    {
+      clearInvariants();
+    }
+  ;
+
+end : ((invariantCondition)? typeDefinition)* ;
+
+uselessComments :
+  (javadocComment) => ( (invariantCondition typeDefinition) => /* empty */ | javadocComment uselessComments )
+  | /* empty */ ;
 
 /**
    This is a javadoc comment that we're not looking for any conditions in.
