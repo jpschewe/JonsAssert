@@ -28,7 +28,7 @@ public class JonsAssert {
   
   public static void main(String[] args) {
     Configuration config = new Configuration();
-    LongOpt[] longopts = new LongOpt[2];
+    LongOpt[] longopts = new LongOpt[4];
 
     longopts[0] = new LongOpt("force", LongOpt.NO_ARGUMENT, null, 'f');
     longopts[1] = new LongOpt("destination", LongOpt.REQUIRED_ARGUMENT, null, 'd');
