@@ -15,8 +15,8 @@
 
   <!-- used for *.javadoc -->
   <property name="local.java.packages" value="http://netserver.mn.mtu.net/package-docs/java" />
-  <property name="local.java.projects" value="http://netserver.mn.mtu.net/package-docs/projects" />
-  <property name="nightly.html.dir" value="/net/package-docs/projects" />
+  <property name="local.java.projects" value="http://workstation.mn.mtu.net/package-docs/projects" />
+  <property name="nightly.html.dir" value="/srv/www/htdocs/package-docs/projects" />
   <property name="mtu.net" value="http://mtu.net/~jpschewe" />
   <property name="mtu.net.offline" value="/home/jpschewe/public_html/mtu.net/public_html" />
 
@@ -475,13 +475,19 @@
         <path refid="base.classpath"/>
       </classpath>
       <!-- core java -->
-      <link href="${local.java.packages}/jdk-1.4.0/api/"/>
+      <link href="${local.java.packages}/jdk-1.4.2/api/"/>
       <!-- junit -->
-      <link href="${local.java.packages}/junit-3.8/" />
+      <link href="${local.java.packages}/junit-3.8.1/" />
       <!-- antlr -->
-      <link href="${local.java.packages}/antlr/javadoc/" />
+      <link href="${local.java.packages}/antlr-2.7.3/" />
       <!-- infra -->
       <link href="${local.java.projects}/JonsInfra/" />
+      <!-- log4j -->
+      <link href="${local.java.packages}/log4j-1.2.8/" />
+      <!-- commons-logging -->
+      <link href="${local.java.packages}/commons-logging-1.0.3/" />
+      <!-- commons-cli -->
+      <link href="${local.java.packages}/commons-cli-1.0/" />
     </javadoc>
     
   </target>
