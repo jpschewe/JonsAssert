@@ -30,6 +30,11 @@ to find what's actually being called and what exceptions it can throw, with
 the exception of RuntimeExceptions.  Since these do not have to be caught it's
 ok to throw these.
 
+Pre and Postconditions on private methods are only checked on that method.
+Event if a method with the same signature exists on the superclass.  This make
+sense if you think about it a little, but I thought I should mention it.
+However if there is a package method on the superclass with the same
+signature, it's conditions WILL be checked.
 
 FEATURES:
 (some people might call these bugs, but I put them there on purpose :)

@@ -485,7 +485,7 @@ classBlock [ String name, boolean isInterface ]
   :
     lc:LCURLY
     {
-      getSymtab().startClass(name, getInvariants());
+      getSymtab().startClass(name, getInvariants(), isInterface);
       clearInvariants();
     }
     //this should just be methods and constructors,
@@ -537,10 +537,6 @@ field
   Token retType = null;
   Vector params = null;
   boolean methodOrConstructor = false;
-  boolean isStatic = false;
-  boolean isPrivate = false;
-  boolean isNative = false;
-  boolean isAbstract = false;
   CodePointPair startEnd = null;
 }
   :
@@ -549,22 +545,19 @@ field
     // method, constructor, or variable declaration
     //[jpschewe:20000215.2254CST] FIX need to do something special for abstract and native methods here
     mods=modifiers
-    {
-      isPrivate = mods.contains("private");
-      isStatic = mods.contains("static");
-      isAbstract = mods.contains("abstract");
-      isNative = mods.contains("native");
-    }
-    
     (	params=ctorHead
       {
 	// needs to be before compoundStatement so that I can have it set for the addExit calls
-	getSymtab().startMethod(null, getPreConditions(), getPostConditions(), params, null, isStatic, isPrivate);
+	getSymtab().startMethod(null, getPreConditions(), getPostConditions(), params, null, mods);
 	clearPreConditions();
 	  clearPostConditions();
 	print("just called startMethod for constructor");
       }
       startEnd=compoundStatement // constructor
+		{
+		    getSymtab().finishMethod(startEnd);
+		    print("Found finish: " + methodName);
+		}
  
 
     |	classDefinition       // inner class
@@ -578,7 +571,7 @@ field
 	LPAREN params=parameterDeclarationList
 	{
 	  // needs to be before compoundStatement so that I can have it set for the addExit calls
-	  getSymtab().startMethod(methodName.getText(), getPreConditions(), getPostConditions(), params, retType.getText(), isStatic, isPrivate);
+	  getSymtab().startMethod(methodName.getText(), getPreConditions(), getPostConditions(), params, retType.getText(), mods);
 	  print("just called startMethod: " + methodName.getText());
 	    clearPreConditions();
 	    clearPostConditions();
@@ -589,7 +582,18 @@ field
 
 	// get the list of exceptions that this method is declared to throw
 	(throwsClause)?
-	( startEnd=compoundStatement | SEMI )
+	( startEnd=compoundStatement | semi:SEMI )
+		    {
+			if(startEnd != null) {
+			    getSymtab().finishMethod(startEnd);
+			}
+			else {
+			    //abstract, native or interface method
+			    CodePoint close = new CodePoint(semi.getLine(), semi.getColumn());
+			    getSymtab().finishMethod(new CodePointPair(close, close));
+			}
+			print("Found finish: " + methodName);
+		    }
       |	variableDefinitions SEMI
       )
     )
@@ -600,20 +604,6 @@ field
     // "{ ... }" instance initializer
   |	compoundStatement
     )
-    
-    {
-      if(startEnd != null) {
-	//got a method or constructor
-	//set the methods entrace to startEnd.getCodePointOne();
-	//if retType is null or is void, add an exit at startEnd.getCodePointTwo();
-	//generate code for pre/post/invariants
-	getSymtab().finishMethod(startEnd);
-	print("Found finish: " + methodName);
-      }
-      else {
-	print("Couldn't find end!: " + methodName);
-      }
-    }
   ;
 
 variableDefinitions
@@ -1213,9 +1203,8 @@ newExpression
   :	"new" t=type
     (	LPAREN argList RPAREN ( classBlock[getSymtab().getCurrentClass().createAnonymousClassName(), false] )?
 
-      //[jpschewe:20000128.0740CST] FIX need to start an anonymous class
-      //here, use t to determine what interfaces we need to check for
-      //conditions
+      //[jpschewe:20000128.0740CST] FIX need to use t to figure out what
+      //interfaces we need to check conditions on.
 	    
       //java 1.1
       // Note: This will allow bad constructs like

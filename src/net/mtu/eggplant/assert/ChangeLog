@@ -1,3 +1,24 @@
+2000-02-20  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* Symtab.java: More code to handle abstract and native methods.
+
+	* java.g: Should handle abstract and native methods now.
+
+	* AssertTools.java: Added method to translate a package name into
+	a directory name and create the directories relative to a
+	destination directory.  This will allow me to instrument files
+	into another directory rather than just changing the extension and
+	confusing compilers.
+
+	* Main.java: Added code to check modification times of files
+	before parsing, so we don't parse extra files.  
+
+	* AssertMethod.java: Added flag to tell if this method is abstract/native.
+
+	* CodeGenerator.java: private methods have private pre and post
+	condition check methods.  Also the check for a super method isn't
+	done if the method is private.
+
 2000-02-16  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* CodeGenerator.java: Added wrapping for primatives when creating

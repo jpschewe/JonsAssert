@@ -9,6 +9,10 @@ package org.tcfreenet.schewe.Assert;
 
 import java.lang.reflect.Method;
 
+import java.io.File;
+
+import java.util.StringTokenizer;
+
 /**
    class of static helper methods for assertions.
 
@@ -207,6 +211,50 @@ final public class AssertTools {
     return _instrumentedExtension;
   }
 
+  /**
+     Take a package name that's passed in and turn it into a directory name
+     and create the directories relative to the instrumented directory path.
+  **/
+  static public String createDirectoryForPackage(final String packageName) {
+    if(packageName == null) {
+      //default package
+      return getDestinationDirectory();
+    }
+    
+    StringBuffer dir = new StringBuffer(getDestinationDirectory());
+    StringTokenizer packageIter = new StringTokenizer(packageName, ".");
+    while(packageIter.hasMoreTokens()) {
+      String subPackage = packageIter.nextToken();
+      dir.append(File.separator);
+      dir.append(subPackage);
+      File f = new File(dir.toString());
+      if(!f.exists()) {
+        boolean result = f.mkdir();
+        if(!result) {
+          throw new RuntimeException("Couldn't create directory: " + dir.toString());
+        }
+      }
+      else if(!f.isDirectory()) {
+        throw new RuntimeException("Error creating destination directories, file found where directory expected: " + dir.toString());
+      }
+    }
+
+    return dir.toString();
+  }
+
+  static public String getDestinationDirectory() {
+    return _destination;
+  }
+
+  /**
+     Set the directory where the instrumented files should go.  Directories
+     will be created under this directory for the packages.
+  **/
+  static public void setDestinationDirectory(final String dir) {
+    _destination = dir;
+  }
+  
+  static private String _destination = "instrumented";
   static private String _sourceExtension = "java";
   static private String _instrumentedExtension = "ijava";
 }

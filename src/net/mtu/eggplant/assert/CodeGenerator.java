@@ -303,102 +303,113 @@ public class CodeGenerator {
     if(assertMethod.isStatic() || assertMethod.isConstructor()) {
       code.append("static ");
     }
-    code.append("protected boolean __");
+    if(assertMethod.isPrivate()) {
+      code.append("private ");
+    }
+    else {
+      code.append("protected ");
+    }
+    code.append("boolean __");
     code.append(mclassName);
     code.append("_check");
     code.append(assertMethod.getName());
     code.append("PreConditions(");
-    boolean first = true;
-    Iterator paramIter = assertMethod.getParams().iterator();
-    while(paramIter.hasNext()) {
-      if(! first) {
-        code.append(",");
-        first = false;
+
+    if(!assertMethod.isPrivate()) {
+      //[jpschewe:20000220.0933CST] don't check super class conditions if the method is private
+      boolean first = true;
+      Iterator paramIter = assertMethod.getParams().iterator();
+      while(paramIter.hasNext()) {
+        if(! first) {
+          code.append(",");
+          first = false;
+        }
+        StringPair sp = (StringPair)paramIter.next();
+        code.append(sp.getStringOne());
+        code.append(' ');
+        code.append(sp.getStringTwo());
       }
-      StringPair sp = (StringPair)paramIter.next();
-      code.append(sp.getStringOne());
-      code.append(' ');
-      code.append(sp.getStringTwo());
-    }
-    code.append(") {\n");
-    code.append("Object retVal = null;\n");
-    code.append("Class thisClass = null;\n");
-    code.append("String className = \"");
-    code.append(className);
-    code.append("\";\n");
-    code.append("try {\n");
-    code.append("thisClass = Class.forName(className);\n");
-    code.append("}\n");
-    code.append("catch(ClassNotFoundException cnfe) {\n");
-    code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"Got error getting the class object for class \" + className + \" \" + cnfe);\n");
-    code.append("}\n");
+      code.append(") {\n");
+      code.append("Object retVal = null;\n");
+      code.append("Class thisClass = null;\n");
+      code.append("String className = \"");
+      code.append(className);
+      code.append("\";\n");
+      code.append("try {\n");
+      code.append("thisClass = Class.forName(className);\n");
+      code.append("}\n");
+      code.append("catch(ClassNotFoundException cnfe) {\n");
+      code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"Got error getting the class object for class \" + className + \" \" + cnfe);\n");
+      code.append("}\n");
     
 
-    //[jpschewe:20000213.1552CST] need method parameters here, just the class objects, use getClassObjectForClass
-    code.append("Class[] methodArgs = {");
-    first = true;
-    paramIter = assertMethod.getParams().iterator();
-    while(paramIter.hasNext()) {
-      if(! first) {
-        code.append(", ");
-        first = false;
+      //[jpschewe:20000213.1552CST] need method parameters here, just the class objects, use getClassObjectForClass
+      code.append("Class[] methodArgs = {");
+      first = true;
+      paramIter = assertMethod.getParams().iterator();
+      while(paramIter.hasNext()) {
+        if(! first) {
+          code.append(", ");
+          first = false;
+        }
+        StringPair sp = (StringPair)paramIter.next();
+        code.append(getClassObjectForClass(sp.getStringOne()));
       }
-      StringPair sp = (StringPair)paramIter.next();
-      code.append(getClassObjectForClass(sp.getStringOne()));
-    }
-    code.append("};\n");
+      code.append("};\n");
                 
-    code.append("java.lang.reflect.Method superMethod = org.tcfreenet.schewe.Assert.AssertTools.findSuperMethod(thisClass, \"check");
-    code.append(assertMethod.getName());
-    code.append("PreConditions\", methodArgs);\n");
+      code.append("java.lang.reflect.Method superMethod = org.tcfreenet.schewe.Assert.AssertTools.findSuperMethod(thisClass, \"check");
+      code.append(assertMethod.getName());
+      code.append("PreConditions\", methodArgs);\n");
 
-    code.append("if(superMethod != null) {\n");
-    code.append("Object[] args = {");
-    //[jpschewe:20000213.1552CST] need parameters here, just the parameter names
-    first = true;
-    paramIter = assertMethod.getParams().iterator();
-    while(paramIter.hasNext()) {
-      if(! first) {
-        code.append(", ");
-        first = false;
+      code.append("if(superMethod != null) {\n");
+      code.append("Object[] args = {");
+      //[jpschewe:20000213.1552CST] need parameters here, just the parameter names
+      first = true;
+      paramIter = assertMethod.getParams().iterator();
+      while(paramIter.hasNext()) {
+        if(! first) {
+          code.append(", ");
+          first = false;
+        }
+        StringPair sp = (StringPair)paramIter.next();
+        code.append(getObjectForParam(sp.getStringOne(), sp.getStringTwo()));
+      }    
+      code.append("};\n");
+      code.append("try {\n");
+      code.append("retVal = superMethod.invoke(");
+      if(assertMethod.isStatic() || assertMethod.isConstructor()) {
+        code.append("null");
       }
-      StringPair sp = (StringPair)paramIter.next();
-      code.append(getObjectForParam(sp.getStringOne(), sp.getStringTwo()));
-    }    
-    code.append("};\n");
-    code.append("try {\n");
-    code.append("retVal = superMethod.invoke(");
-    if(assertMethod.isStatic() || assertMethod.isConstructor()) {
-      code.append("null");
-    }
-    else {
-      code.append("this");
-    }
-    code.append(", args);\n");
-    code.append("}\n");
-    code.append("catch(IllegalAccessException iae) {\n");
-    code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"Not enough access executing superClass check");
-    code.append(assertMethod.getName());
-    code.append("PreConditions: \" + iae.getMessage());\n");
-    code.append("}\n");
-    code.append("catch(IllegalArgumentException iae) {\n");
-    code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"IllegalArgument executing superClass check");
-    code.append(assertMethod.getName());
-    code.append("PreConditions: \" + iae.getMessage());\n");
-    code.append("}\n");
-    code.append("catch(java.lang.reflect.InvocationTargetException ite) {\n");
-    code.append("ite.getTargetException().printStackTrace();\n");
-    code.append("}\n");
-    code.append("}\n");
+      else {
+        code.append("this");
+      }
+      code.append(", args);\n");
+      code.append("}\n");
+      code.append("catch(IllegalAccessException iae) {\n");
+      //[jpschewe:20000220.0936CST] just means that the super method is private and we really shouldn't be calling it in the first place      
+      //code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"Not enough access executing superClass check");
+      //code.append(assertMethod.getName());
+      //code.append("PreConditions: \" + iae.getMessage());\n");
+      code.append("}\n");
+      code.append("catch(IllegalArgumentException iae) {\n");
+      code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"IllegalArgument executing superClass check");
+      code.append(assertMethod.getName());
+      code.append("PreConditions: \" + iae.getMessage());\n");
+      code.append("}\n");
+      code.append("catch(java.lang.reflect.InvocationTargetException ite) {\n");
+      code.append("ite.getTargetException().printStackTrace();\n");
+      code.append("}\n");
+      code.append("}\n");
 
 
-    code.append("if(!((Boolean)retVal).booleanValue()) {\n");
-    code.append("return false;\n");
-    code.append("}\n");
+      code.append("if(!((Boolean)retVal).booleanValue()) {\n");
+      code.append("return false;\n");
+      code.append("}\n");
     
-    //[jpschewe:20000116.1749CST] FIX still need to add to this to do interface
-    //preconditions first and keep track of which interface they're from
-
+      //[jpschewe:20000116.1749CST] FIX still need to add to this to do interface
+      //preconditions first and keep track of which interface they're from
+    }
+    
     addConditionChecks(code, assertMethod.getPreConditions());
 
     code.append("return true;\n");
@@ -418,115 +429,126 @@ public class CodeGenerator {
     if(assertMethod.isStatic() || assertMethod.isConstructor()) {
       code.append("static ");
     }
-    code.append("protected boolean __");
+
+    if(assertMethod.isPrivate()) {
+      code.append("private ");
+    }
+    else {
+      code.append("protected ");
+    }
+    code.append("boolean __");
     code.append(mclassName);
     code.append("_check");
     code.append(assertMethod.getName());
     code.append("PostConditions(");
-    boolean first = true;
-    if(!assertMethod.isVoid()) {
-      code.append(assertMethod.getReturnType());
-      code.append(" ");
-      code.append("__retVal");
-      first = false;
-    }
-    Iterator paramIter = assertMethod.getParams().iterator();
-    while(paramIter.hasNext()) {
-      StringPair sp = (StringPair)paramIter.next();
-      String paramType = sp.getStringOne();
-      String paramName = sp.getStringTwo();
-      if(! first) {
-        code.append(",");
+    if(assertMethod.isPrivate()) {
+      //[jpschewe:20000220.0934CST] don't bother checking for super method if we're private
+      boolean first = true;
+      if(!assertMethod.isVoid()) {
+        code.append(assertMethod.getReturnType());
+        code.append(" ");
+        code.append("__retVal");
         first = false;
       }
-      code.append(paramType);
-      code.append(" ");
-      code.append("__old");
-      code.append(paramName);
-      code.append(", ");
-      code.append(paramType);
-      code.append(' ');
-      code.append(paramName);
-    }
-    code.append(") {\n");
-    code.append("Object retVal = null;\n");
-    code.append("Class thisClass = null;\n");
-    code.append("String className = \"");
-    code.append(className);
-    code.append("\";\n");
-    code.append("try {\n");
-    code.append("thisClass = Class.forName(className);\n");
-    code.append("}\n");
-    code.append("catch(ClassNotFoundException cnfe) {\n");
-    code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"Got error getting the class object for class \" + className + \" \" + cnfe);\n");
-    code.append("}\n");
+      Iterator paramIter = assertMethod.getParams().iterator();
+      while(paramIter.hasNext()) {
+        StringPair sp = (StringPair)paramIter.next();
+        String paramType = sp.getStringOne();
+        String paramName = sp.getStringTwo();
+        if(! first) {
+          code.append(",");
+          first = false;
+        }
+        code.append(paramType);
+        code.append(" ");
+        code.append("__old");
+        code.append(paramName);
+        code.append(", ");
+        code.append(paramType);
+        code.append(' ');
+        code.append(paramName);
+      }
+      code.append(") {\n");
+      code.append("Object retVal = null;\n");
+      code.append("Class thisClass = null;\n");
+      code.append("String className = \"");
+      code.append(className);
+      code.append("\";\n");
+      code.append("try {\n");
+      code.append("thisClass = Class.forName(className);\n");
+      code.append("}\n");
+      code.append("catch(ClassNotFoundException cnfe) {\n");
+      code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"Got error getting the class object for class \" + className + \" \" + cnfe);\n");
+      code.append("}\n");
     
 
-    //[jpschewe:20000213.1552CST] need method parameters here, just the class objects, use getClassObjectForClass
-    code.append("Class[] methodArgs = {");
-    first = true;
-    paramIter = assertMethod.getParams().iterator();
-    while(paramIter.hasNext()) {
-      if(! first) {
-        code.append(", ");
-        first = false;
+      //[jpschewe:20000213.1552CST] need method parameters here, just the class objects, use getClassObjectForClass
+      code.append("Class[] methodArgs = {");
+      first = true;
+      paramIter = assertMethod.getParams().iterator();
+      while(paramIter.hasNext()) {
+        if(! first) {
+          code.append(", ");
+          first = false;
+        }
+        StringPair sp = (StringPair)paramIter.next();
+        code.append(getClassObjectForClass(sp.getStringOne()));
       }
-      StringPair sp = (StringPair)paramIter.next();
-      code.append(getClassObjectForClass(sp.getStringOne()));
-    }
-    code.append("};\n");
+      code.append("};\n");
                 
-    code.append("java.lang.reflect.Method superMethod = org.tcfreenet.schewe.Assert.AssertTools.findSuperMethod(thisClass, \"check");
-    code.append(assertMethod.getName());
-    code.append("PostConditions\", methodArgs);\n");
+      code.append("java.lang.reflect.Method superMethod = org.tcfreenet.schewe.Assert.AssertTools.findSuperMethod(thisClass, \"check");
+      code.append(assertMethod.getName());
+      code.append("PostConditions\", methodArgs);\n");
 
-    code.append("if(superMethod != null) {\n");
-    code.append("Object[] args = {");
-    //[jpschewe:20000213.1552CST] need parameters here, just the parameter names
-    first = true;
-    paramIter = assertMethod.getParams().iterator();
-    while(paramIter.hasNext()) {
-      if(! first) {
-        code.append(", ");
-        first = false;
+      code.append("if(superMethod != null) {\n");
+      code.append("Object[] args = {");
+      //[jpschewe:20000213.1552CST] need parameters here, just the parameter names
+      first = true;
+      paramIter = assertMethod.getParams().iterator();
+      while(paramIter.hasNext()) {
+        if(! first) {
+          code.append(", ");
+          first = false;
+        }
+        StringPair sp = (StringPair)paramIter.next();
+        code.append(getObjectForParam(sp.getStringOne(), sp.getStringTwo()));
       }
-      StringPair sp = (StringPair)paramIter.next();
-      code.append(getObjectForParam(sp.getStringOne(), sp.getStringTwo()));
-    }
-    code.append("};\n");
-    code.append("try {\n");
-    code.append("retVal = superMethod.invoke(");
-    if(assertMethod.isStatic() || assertMethod.isConstructor()) {
-      code.append("null");
-    }
-    else {
-      code.append("this");
-    }
-    code.append(", args);\n");
-    code.append("}\n");
-    code.append("catch(IllegalAccessException iae) {\n");
-    code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"Not enough access executing superClass check");
-    code.append(assertMethod.getName());
-    code.append("PostConditions: \" + iae.getMessage());\n");
-    code.append("}\n");
-    code.append("catch(IllegalArgumentException iae) {\n");
-    code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"IllegalArgument executing superClass check");
-    code.append(assertMethod.getName());
-    code.append("PostConditions: \" + iae.getMessage());\n");
-    code.append("}\n");
-    code.append("catch(java.lang.reflect.InvocationTargetException ite) {\n");
-    code.append("ite.getTargetException().printStackTrace();\n");
-    code.append("}\n");
-    code.append("}\n");
+      code.append("};\n");
+      code.append("try {\n");
+      code.append("retVal = superMethod.invoke(");
+      if(assertMethod.isStatic() || assertMethod.isConstructor()) {
+        code.append("null");
+      }
+      else {
+        code.append("this");
+      }
+      code.append(", args);\n");
+      code.append("}\n");
+      code.append("catch(IllegalAccessException iae) {\n");
+      //[jpschewe:20000220.0936CST] just means that the super method is private and we really shouldn't be calling it in the first place
+      //code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"Not enough access executing superClass check");
+      //code.append(assertMethod.getName());
+      //code.append("PostConditions: \" + iae.getMessage());\n");
+      code.append("}\n");
+      code.append("catch(IllegalArgumentException iae) {\n");
+      code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"IllegalArgument executing superClass check");
+      code.append(assertMethod.getName());
+      code.append("PostConditions: \" + iae.getMessage());\n");
+      code.append("}\n");
+      code.append("catch(java.lang.reflect.InvocationTargetException ite) {\n");
+      code.append("ite.getTargetException().printStackTrace();\n");
+      code.append("}\n");
+      code.append("}\n");
 
 
-    code.append("if(((Boolean)retVal).booleanValue()) {\n");
-    code.append("return true;\n");
-    code.append("}\n");
+      code.append("if(((Boolean)retVal).booleanValue()) {\n");
+      code.append("return true;\n");
+      code.append("}\n");
     
-    //[jpschewe:20000116.1749CST] FIX still need to add to this to do interface
-    //postconditions first and keep track of which interface they're from
-
+      //[jpschewe:20000116.1749CST] FIX still need to add to this to do interface
+      //postconditions first and keep track of which interface they're from
+    }
+    
     addConditionChecks(code, assertMethod.getPostConditions());
 
     code.append("return true;\n");

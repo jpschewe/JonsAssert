@@ -73,15 +73,29 @@ public class Main {
     }
 
     // otherwise, if this is a java file, parse it!
-    else if ((f.getName().length()>5) &&
-             f.getName().substring(f.getName().length()-5).equals(".java")) {
+    else if(f.getName().endsWith(".java")) {
       System.err.println("   "+f.getAbsolutePath());
 
-      // let the symbol table know what's being parsed and parse the file if we haven't already
-      if(getSymtab().startFile(f)) {
-        parseFile(new FileInputStream(f));
-        getSymtab().finishFile();
-      }
+
+      String filename = f.getName();
+      int indexOfDot = filename.lastIndexOf('.');
+      String ifilename = filename.substring(0, indexOfDot) + "." + AssertTools.getInstrumentedExtension();
+      String abPath = f.getAbsolutePath();
+      int indexOfSlash = abPath.lastIndexOf(File.separatorChar);
+      String path = abPath.substring(0, indexOfSlash);
+
+      // check to make sure the source file is newer than the other file.
+      //[jpschewe:20000219.0152CST] FIX leave this commented out for testing
+      //if(f.lastModified() > (new File(path + File.separatorChar + ifilename)).lastModified()) {
+        // let the symbol table know what's being parsed and parse the file if we haven't already
+        if(getSymtab().startFile(f)) {
+          parseFile(new FileInputStream(f));
+          getSymtab().finishFile();
+        }
+      //}
+      //else {
+      //  System.err.println("source file is older than instrumented file, skipping: " + f.getName());
+      //}
     }
   }
 

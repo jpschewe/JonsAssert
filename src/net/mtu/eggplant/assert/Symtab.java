@@ -186,11 +186,11 @@ public class Symtab {
      @pre (invariants != null)
      
   **/
-  public void startClass(final String name, final List invariants) {
+  public void startClass(final String name, final List invariants, final boolean isInterface) {
     if(_currentClass != null) {
       _classStack.push(_currentClass);
     }
-    _currentClass = new AssertClass(name, getCurrentPackageName());
+    _currentClass = new AssertClass(name, getCurrentPackageName(), isInterface);
     _currentClass.setInvariants(invariants);
     
     System.out.println("in Symtab.startClass " + _currentClass);
@@ -493,20 +493,25 @@ public class Symtab {
      @param postConditions the postconditions for this method
      @param params List of StringPairs, (class, parameter name)
      @param retType the return type of this method, null signals this method is a constructor
-     @param isStatic true if this method is static
-     @param isPrivate true if this method is private
+     @param mods the modifiers for the method, List of Strings
      
      @pre (preConditions != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(postConditions, AssertToken.class))
      @pre (postConditions != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(preConditions, AssertToken.class))
      @pre (params != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(StringPair.class))
+     @pre (mods != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(String.class))
   **/
   public void startMethod(final String name,
                           final List preConditions,
                           final List postConditions,
                           final List params,
                           final String retType,
-                          final boolean isStatic,
-                          final boolean isPrivate) {
+                          final List mods) {
+    
+    boolean isPrivate = mods.contains("private");
+    boolean isStatic = mods.contains("static");
+    boolean isAbstract = mods.contains("abstract");
+    boolean isNative = mods.contains("native");
+    
     if(_currentMethod != null) {
       _methodStack.push(_currentMethod);
     }
@@ -517,7 +522,7 @@ public class Symtab {
       theName = name;
     }
     
-    _currentMethod = new AssertMethod(_currentClass, theName, preConditions, postConditions, params, retType, isStatic, isPrivate);
+    _currentMethod = new AssertMethod(_currentClass, theName, preConditions, postConditions, params, retType, isStatic, isPrivate, (isAbstract || isNative));
 
   }
 
@@ -526,14 +531,17 @@ public class Symtab {
      method off the method stack, if one exists.  This will also set the
      method entrance and add a method exit if the method is void.
 
-     @param startEnd two code points representing the opening and closing braces of the method
+     @param startEnd two code points representing the opening and closing braces of the method, these points are equal if the method is abstract/native
+
+     @pre (startEnd != null)
   **/
   public void finishMethod(final CodePointPair startEnd) {
     System.out.println("in finish method");
-    //[jpschewe:20000216.0742CST] add 1 so that we add the pre and post calls in the right place 
-    _currentMethod.setMethodEntrance(new CodePoint(startEnd.getCodePointOne().getLine(),
-                                                  startEnd.getCodePointOne().getColumn() + 1));
-
+    if(!_currentMethod.isAbstract()) {
+      //[jpschewe:20000216.0742CST] add 1 so that we add the pre and post calls in the right place 
+      _currentMethod.setMethodEntrance(new CodePoint(startEnd.getCodePointOne().getLine(),
+                                                     startEnd.getCodePointOne().getColumn() + 1));
+    }
     //[jpschewe:20000216.0718CST] keep track of the closing brace, add 1 so we insert code after the '}'
     CodePoint close = new CodePoint(startEnd.getCodePointTwo().getLine(),
                                     startEnd.getCodePointTwo().getColumn() + 1);
@@ -572,46 +580,54 @@ public class Symtab {
   **/
   private void addClassInstrumentation(final InstrumentedFile ifile,
                                        final AssertClass aClass) {
+    if(aClass.isInterface()) {
+      //Don't touch interfaces
+      return;
+    }
     String invariantCall = CodeGenerator.generateInvariantCall(aClass);
     
     Iterator methodIter = aClass.getMethods().iterator();
     while(methodIter.hasNext()) {
       AssertMethod method = (AssertMethod)methodIter.next();
       System.out.println("method: " + method);
-      CodePoint entrance = method.getEntrance();      
 
-      //Add a call to the precondition method at entrance
-      String preCall = CodeGenerator.generatePreConditionCall(method);      
-      ifile.getFragments().add(new CodeFragment(entrance, preCall, CodeFragmentType.PRECONDITION));
-
-      //Add old Values
-      String oldValues = CodeGenerator.generateOldValues(method);      
-      ifile.getFragments().add(new CodeFragment(entrance, oldValues, CodeFragmentType.OLDVALUES));
+      //can't put calls inside abstract methods
+      if(!method.isAbstract()) {
+        CodePoint entrance = method.getEntrance();      
       
-      if(!method.isStatic() && !method.isPrivate() && !method.isConstructor()) {
-        //Add a call to the invariant method at entrance
-        ifile.getFragments().add(new CodeFragment(entrance, invariantCall, CodeFragmentType.INVARIANT));
-      }
+        //Add a call to the precondition method at entrance
+        String preCall = CodeGenerator.generatePreConditionCall(method);      
+        ifile.getFragments().add(new CodeFragment(entrance, preCall, CodeFragmentType.PRECONDITION));
 
-      //build the code fragments outside the loop for effiency
-          //[jpschewe:20000216.0704CST] need to keep track of retVal      
-      String postSetup = "final " + method.getReturnType() + " __retVal ="; 
-      String postCall = CodeGenerator.generatePostConditionCall(method);      
-      Iterator exits = method.getExits().iterator();
-      while(exits.hasNext()) {
-        CodePointPair exit = (CodePointPair)exits.next();
-        if(!method.isStatic() && !method.isPrivate()) {      
-          //Add a call to the invariant at each exit
-          ifile.getFragments().add(new CodeFragment(exit.getCodePointOne(), invariantCall, CodeFragmentType.INVARIANT));
-        }
-        //Add a call to the postCondition at each exit
-        if(!method.isVoid()) {
-          ifile.getFragments().add(new CodeModification(exit.getCodePointOne(), "return", postSetup, CodeFragmentType.POSTCONDITION));
+        //Add old Values
+        String oldValues = CodeGenerator.generateOldValues(method);      
+        ifile.getFragments().add(new CodeFragment(entrance, oldValues, CodeFragmentType.OLDVALUES));
+      
+        if(!method.isStatic() && !method.isPrivate() && !method.isConstructor()) {
+          //Add a call to the invariant method at entrance
+          ifile.getFragments().add(new CodeFragment(entrance, invariantCall, CodeFragmentType.INVARIANT));
         }
 
-        ifile.getFragments().add(new CodeFragment(exit.getCodePointTwo(), postCall, CodeFragmentType.POSTCONDITION2));
-      }
+        //build the code fragments outside the loop for effiency
+        //[jpschewe:20000216.0704CST] need to keep track of retVal      
+        String postSetup = "final " + method.getReturnType() + " __retVal ="; 
+        String postCall = CodeGenerator.generatePostConditionCall(method);      
+        Iterator exits = method.getExits().iterator();
+        while(exits.hasNext()) {
+          CodePointPair exit = (CodePointPair)exits.next();
+          if(!method.isStatic() && !method.isPrivate()) {      
+            //Add a call to the invariant at each exit
+            ifile.getFragments().add(new CodeFragment(exit.getCodePointOne(), invariantCall, CodeFragmentType.INVARIANT));
+          }
+          //Add a call to the postCondition at each exit
+          if(!method.isVoid()) {
+            ifile.getFragments().add(new CodeModification(exit.getCodePointOne(), "return", postSetup, CodeFragmentType.POSTCONDITION));
+          }
 
+          ifile.getFragments().add(new CodeFragment(exit.getCodePointTwo(), postCall, CodeFragmentType.POSTCONDITION2));
+        }
+      }
+      
       //Add the pre and post check methods at the end of the method
       CodePoint close = method.getClose();
       String preMethod = CodeGenerator.generatePreConditionMethod(method);

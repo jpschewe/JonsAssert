@@ -29,6 +29,7 @@ public class AssertMethod implements Named {
      @param retType the return type of this method, null signals this method is a constructor
      @param isStatic true if this method is static
      @param isPrivate true if this method is private
+     @param isAbstract true if this method is abstract or native
      
      @pre (theClass != null)
      @pre (name != null)
@@ -43,7 +44,8 @@ public class AssertMethod implements Named {
                       final List params,
                       final String retType,
                       final boolean isStatic,
-                      final boolean isPrivate) {
+                      final boolean isPrivate,
+                      final boolean isAbstract) {
     _name = name;
     _preConditions = preConditions;
     _postConditions = postConditions;
@@ -52,6 +54,7 @@ public class AssertMethod implements Named {
     _retType = retType;
     _static = isStatic;
     _private = isPrivate;
+    _abstract = isAbstract;
     _exits = new Vector();
   }
 
@@ -207,5 +210,13 @@ public class AssertMethod implements Named {
   public String toString() {
     return "[AssertMethod] " + getName();
   }
+
+  private boolean _abstract;
   
+  /**
+     @return true if this method is abstract or native
+  **/
+  public boolean isAbstract() {
+    return _abstract;
+  }
 }

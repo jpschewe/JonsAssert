@@ -45,7 +45,6 @@ public class CodeModification extends CodeFragment {
     return getCode();
   }
 
-  //[jpschewe:20000205.2234CST] FIX need to handle multiple line return statements..., can fix this with two code fragments for a post condition call, everything else is single line then
   public int instrumentLine(final int offset,
                             final StringBuffer line) {
     int start = getLocation().getColumn() + offset;
