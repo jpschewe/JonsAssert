@@ -459,7 +459,7 @@
   </target>
 
   <target name="nightly.javadoc"
-          depends="antlrTasks,checkstyle.full"
+          depends="checkstyle.full,antlrTasks"
           description="Do a nightly build of the Javadoc to my fileserver">
 
     <!-- run javadoc on the source -->
