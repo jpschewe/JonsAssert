@@ -72,7 +72,7 @@ public class JonsAssert {
   /**
    * Parses the command line then calls {@link #instrument(Configuration, Collection) instrument}.
    *
-   * @param args see {@link #commandline_doc commandline options}
+   * @param args see <a href="#commandline_doc">commandline options</a>
    */
   public static void main(final String[] args) {
     final Configuration config = new Configuration();
