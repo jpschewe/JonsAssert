@@ -1,3 +1,11 @@
+2000-01-22  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* CodeGenerator.java: Added roughed out version of how to handle constructors
+
+	* java.g: Added CodeFragment objects to hold generated code and
+	some points for sorting so that the files can be instrumented in
+	some sane manner 
+
 2000-01-20  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* assert.g: Added column tracking code

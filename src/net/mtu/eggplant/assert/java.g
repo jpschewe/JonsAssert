@@ -169,14 +169,22 @@ tokens {
   private void addAsserts(final Vector asserts, final Token jdClose) {
     if(asserts != null && asserts.size() > 0) {
       System.out.println("Parser: got asserts#");
-      System.out.println("Insert code at line.column: " + jdClose.getLine() + "." + (jdClose.getColumn() + jdClose.getText().length()) + " #" + jdClose.getText() + "#"  + jdClose.getClass());
+      long line = jdClose.getLine();
+      long column = jdClose.getColumn() + jdClose.getText().length();
+      
+      System.out.println("Insert code at line.column: " + line + "." + column + " #" + jdClose.getText() + "#"  + jdClose.getClass());
+      StringBuffer codeFrag = new StringBuffer();
       Enumeration iter = asserts.elements();
       while(iter.hasMoreElements()) {
 	AssertToken assertToken = (AssertToken)iter.nextElement();
 	//System.out.println(assertToken.getCondition() + " " + assertToken.getMessage());
-	System.out.println("code: " + CodeGenerator.generateAssertion(assertToken));
+	String code = CodeGenerator.generateAssertion(assertToken);
+	System.out.println("code: " + code);
+	codeFrag.append(code);
       }
       System.out.println("Parser: end asserts");
+      CodeFragment codeFragment = new CodeFragment(new CodePoint(line, column), codeFrag.toString(), AssertType.ASSERT);      
+      System.out.println(codeFragment);
     }
   }
 

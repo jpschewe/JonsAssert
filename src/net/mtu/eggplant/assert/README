@@ -26,11 +26,11 @@ Note that there my be no <CR>'s inside any assertions, unless they are
 property escaped.  So no <CR>'s between the condition and the message.
 This may be fixed in a later version.
 
-
 Reporting bugs.  If you happen to find a bug in the software, please send me a
 message, schewe@tcfreenet.org.  At least include the message that was output
 and a description of what condition was being checked.  A stand alone test
 case that causes the error is REALLY helpful if you can do such a thing.
+
 
 
 

@@ -260,5 +260,29 @@ public class CodeGenerator {
     return code.toString();
   }
 
+  /*
+    idea for preconditions on constructor
+    stuff to add after open { for constructor:
+
+    String params; // grabbed from parser tokens
+    long # = 0;
+    foreach constructor (constructors) {
+       Vector preconditions = constructor.getPreConditions();
+       
+        this(params, new AssertDummy#( (cond0), "mesg0", (cond1), "mesg1", ...));
+      }
+      static private class AssertDummy# {
+        public AssertDummy#(boolean cond0, String mesg0, boolean cond1, String mesg1, ...) {
+          // check against params here and do regular fail stuff
+        }
+      }
+      private constructorName(params, AssertDummy#) {
+
+      CodeFragment codeFrag = new CodeFragment(constructor.getEntrance().line, constructor.getEntrance().column, code, AssertType.PRECONDITION);
+      symtab.associateCodeWithCurrentFile(codeFrag);
+      #++;
+    }    
+
+  */
   
 }

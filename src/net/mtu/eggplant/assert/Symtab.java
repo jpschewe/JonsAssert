@@ -25,10 +25,44 @@ import java.util.Vector;
   This to keep track of from class to class:
   interfaces: pre/post, methods, invariant
 
-  I figure I can just write a method called __checkPre<methodName>(same signature) and __checkPost<methodName>(same signature) to get pre and post conditions and then just use introspection to call the super method if it exists.  Need to explicitly code all interface pre/post/invariant methods into all classes that implement an interface.
+  I figure I can just write a method called __checkPre<methodName>(same
+  signature) and __checkPost<methodName>(same signature) to get pre and post
+  conditions and then just use introspection to call the super method if it
+  exists.  Need to explicitly code all interface pre/post/invariant methods
+  into all classes that implement an interface.
 
 
+  DataStructures to be maintained:
+    List of files:
+      classes associated with those files?
+      CodeFragments associated with those files
+    List of classes:
+      Key = full classname
+      Value = AssertClass (contains AssertMethods)
+    List of interfaces:
+      Key = full interface name
+      Value = AssertClass (contains AssertMethods)
 
+    AssertClass:
+      List of Methods in this class
+      List of invariants (Vector -> AssertToken)
+      
+    AssertMethod:
+      List of preconditions, in order that they appear in the code (Vector -> AssertToken)
+      Entrance point (line, column)
+      List of exit points (Vector->(line, column))
+      List of post conditions, order matters (Vector -> AssertToken)
+      Return type (String)
+      Static or not (boolean)
+      
+  At end of method build CodeFragments for all pre, post, invariants and
+  associate them with the current file being processed
+
+  Associate asserts with the current file as they appear
+
+  At the end of a class create a CodeFragment that contains all of the extra
+  methods that need to be called and associate it with the current file, grab
+  (line, column) from the parser token for '}'
 
 */
 
