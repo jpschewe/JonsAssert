@@ -262,12 +262,13 @@
     <delete dir="${release.html.dir}/${app.name}/${app.version}" />
     <mkdir dir="${release.html.dir}/${app.name}/${app.version}" />
 
-    <!-- copy index.html, ChangeLog to web directory -->
+    <!-- copy index.html, ChangeLog, lib to web directory -->
     <copy todir="${release.html.dir}/${app.name}/${app.version}"
           flatten="true">
       <fileset dir="${basedir}">
         <include name="ChangeLog" />
         <include name="doc/*" />
+        <include name="lib/*" />
       </fileset>
       <filterset>
         <filter token="APP-VERSION" value="${app.version}" />
@@ -275,15 +276,17 @@
     </copy>
 
     <!-- zip source to web directory -->
-    <zip basedir="${basedir}"
-         destfile="${release.html.dir}/${app.name}/${app.version}/${app.name}-${app.version}-src.zip"
-         >
-      <include name="src/**" />
-      <include name="doc/**" />
-      <include name="lib/**" />
-      <include name="prj.el" />
-      <include name="build.xml" />
-      <include name="ChangeLog" />
+    <zip destfile="${release.html.dir}/${app.name}/${app.version}/${app.name}-${app.version}-src.zip">
+      <zipfileset dir="${basedir}"
+                  prefix="${app.name}-${app.version}"
+                  >
+        <include name="src/**" />
+        <include name="doc/**" />
+        <include name="lib/**" />
+        <include name="prj.el" />
+        <include name="build.xml" />
+        <include name="ChangeLog" />
+      </zipfilset>
     </zip>
 
     <!-- now compile everything -->
@@ -322,9 +325,6 @@
 
         <!-- antlr -->
         <link href="http://www.antlr.org/javadoc/" />
-
-        <!-- werken.opt -->
-        <link href="http://code.werken.com/werken.opt/build/apidocs/" />
       </javadoc>
 
 
