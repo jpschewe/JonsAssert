@@ -61,11 +61,11 @@ though design by contract doesn't normally allow this.
    * (getBoundedRangeModel().getMaximum()-getBoundedRangeModel().getMinimum()))
    This will put a * inside the middle of the condition between the <= and the (.
 
-BUGS:
-- When calling a method from an assertion the assertions in that method are
-also checked, so calling a method from it's precondition will cause an
-infinite loop.
+- assertions are checked on the methods called from assertions, however
+assertions that end up calling the methods themselves will not cause a
+recursive loop
 
+BUGS:
 - Note that there my be no <CR>'s inside any assertions, unless they are
 property escaped.  So no <CR>'s between the condition and the message.  This
 may be fixed in a later version.
@@ -87,8 +87,7 @@ case that causes the error is REALLY helpful if you can do such a thing.
 TODO:
 - Get assertions off of implemented interfaces.
 
-- Allow the user to specify a destination directory for the instrumented
-files so that the extension doesn't have to be changed.
+- hook up to ant for builds
 
 - Build patch for Jikes that allows Assert to be called as files are compiled
 with Jikes.  Would be really nice if it could keep the same JVM running so

@@ -26,12 +26,14 @@ public class AssertClass implements Named {
      @param isInterface true if this class represents an interface
      @param enclosingClass the enclosing class, this can not be another anonymous class
      @param isAnonymous true if this class represents an anonymous class
+     @param superclass name of the superclass, null if none listed in the .java file
   **/
   public AssertClass(final String name,
                      final String packageName,
                      final boolean isInterface,
                      final AssertClass enclosingClass,
-                     final boolean isAnonymous) {
+                     final boolean isAnonymous,
+                     final String superclass) {
     _name = name;
     _packageName = packageName;
     _isInterface = isInterface;
@@ -40,8 +42,14 @@ public class AssertClass implements Named {
     _methods = new Vector();
     _isAnonymous = isAnonymous;
     _enclosingClass = enclosingClass;
+    _superclass = superclass;
   }
 
+  private String _superclass;
+  final public String getSuperclass() {
+    return _superclass;
+  }
+  
   private AssertClass _enclosingClass;
   final public AssertClass getEnclosingClass() {
     return _enclosingClass;

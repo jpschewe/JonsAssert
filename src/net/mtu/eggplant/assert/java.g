@@ -486,6 +486,7 @@ modifier returns [Token t]
 classDefinition
 {
   String name = null;
+  Token superclass = null;
 }
   :	"class" id:IDENT
     {
@@ -497,16 +498,16 @@ classDefinition
       }
     }
     // it _might_ have a superclass...
-    superClassClause
+    superclass = superClassClause
     // it might implement some interfaces...
     implementsClause
     // now parse the body of the class
-    classBlock[name, false, false]
+    classBlock[name, false, false, superclass]
   ;
 
 
-superClassClause
-{ Token id; }
+superClassClause returns [Token id]
+{ id = null; }
   :	( "extends" id=identifier )?
   ;
 
@@ -528,7 +529,7 @@ interfaceDefinition
     // it might extend some other interfaces
     interfaceExtends
     // now parse the body of the interface (looks like a class...)
-    classBlock[name, true, false]
+    classBlock[name, true, false, null]
   ;
 
 
@@ -536,11 +537,11 @@ interfaceDefinition
    This is the body of a class or interface.  You can have fields and extra semicolons,
    That's about it (until you see what a field is...)
 **/
-classBlock [ String name, boolean isInterface, boolean isAnonymous ]
+classBlock [ String name, boolean isInterface, boolean isAnonymous, Token superclass ]
   :
     lc:LCURLY
     {
-      getSymtab().startClass(name, getInvariants(), isInterface, isAnonymous);
+      getSymtab().startClass(name, getInvariants(), isInterface, isAnonymous, (superclass == null ? null : superclass.getText()));
       clearInvariants();
     }
     //this should just be methods and constructors,
@@ -1291,7 +1292,7 @@ primaryExpression
 newExpression
 { Token t; }
   :	"new" t=type
-    (	LPAREN argList RPAREN ( classBlock[null, false, true] )?
+    (	LPAREN argList RPAREN ( classBlock[null, false, true, t] )?
 
       //[jpschewe:20000128.0740CST] FIX need to use t to figure out what
       //interfaces we need to check conditions on.

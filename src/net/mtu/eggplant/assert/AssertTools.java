@@ -14,6 +14,8 @@ import java.io.File;
 import java.util.StringTokenizer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
    class of static helper methods for assertions.
@@ -36,17 +38,17 @@ final public class AssertTools {
      @pre (methodArgs != null)
   **/
   static public Method findSuperMethod(final Class thisClass, final String methodName, final Class[] methodArgs) {
-//     System.out.println("findSuperMethod:"
-//                        + " thisClass: " + thisClass
-//                        + " methodName: " + methodName
-//                        + " methodArgs: " + methodArgs
-//                        );
+    //     System.out.println("findSuperMethod:"
+    //                        + " thisClass: " + thisClass
+    //                        + " methodName: " + methodName
+    //                        + " methodArgs: " + methodArgs
+    //                        );
     //Use a scratch class for the key
     ScratchMethod sm = new ScratchMethod(thisClass, methodName, methodArgs);
 
     //Now see if it's cached
     if(_superMethods.containsKey(sm)) {
-//       System.out.println("Found in table");
+      //       System.out.println("Found in table");
       return (Method)_superMethods.get(sm);
     }
     
@@ -76,7 +78,7 @@ final public class AssertTools {
     //put it in the cache
     _superMethods.put(sm, superMethod);
 
-//     System.out.println("had to lookup");
+    //     System.out.println("had to lookup");
     return superMethod;
   }
 
@@ -322,31 +324,63 @@ final public class AssertTools {
   }
                                         
 
-//   static private HashMap _classMap = new HashMap();
+  //   static private HashMap _classMap = new HashMap();
   /**
      Get the class object for this class name.  Just like {@link
      Class#forName(String) Class.forName()}, but catches the exceptions
 
      @return null for no such class found
-
-     @pre (className != null)
   **/
   static public Class classForName(final String className) {
-//     if(_classMap.containsKey(className)) {
-//       return (Class)_classMap.get(className);
-//     }
-//     else {
-      Class thisClass = null;
-      try {
-        thisClass = Class.forName(className);
-      }
-      catch(ClassNotFoundException cnfe) {
-        //ignore it, return null instead
-      }
-//       _classMap.put(className, thisClass);
+    if(className == null) {
+      return null;
+    }
+    //     if(_classMap.containsKey(className)) {
+    //       return (Class)_classMap.get(className);
+    //     }
+    //     else {
+    Class thisClass = null;
+    try {
+      thisClass = Class.forName(className);
+    }
+    catch(ClassNotFoundException cnfe) {
+      //ignore it, return null instead
+    }
+    //       _classMap.put(className, thisClass);
       
-      return thisClass;
-//     }
+    return thisClass;
+    //     }
+  }
+
+  static private Set _lockedMethods = new HashSet(20);
+  /**
+     Lock a method.  This is ued at the top of the pre, post and invariant
+     check methods so that the methods don't get called recursively.  Method
+     signatures are just stored in a Set, if the signature is in the Set, the
+     method is locked.
+
+     @param signature the signature of the method to lock
+     @return true if the lock succeeded, false if the method is already locked.
+  **/
+  static synchronized public boolean lockMethod(final String signature) {
+    if(_lockedMethods.contains(signature)) {
+      return false;
+    } else {
+      _lockedMethods.add(signature);
+      return true;
+    }
+  }
+
+  /**
+     Unlock a method.
+
+     @param signature the signature of the method to unlock
+     @return true if the method was locked
+     
+     @see #lockMethod()
+  **/
+  static synchronized public boolean unlockMethod(final String signature) {
+    return _lockedMethods.remove(signature);
   }
   
 }
