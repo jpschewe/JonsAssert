@@ -1,3 +1,9 @@
+2001-03-07  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/net/mtu/eggplant/assert/AssertClass.java: Fixed bug reported
+	by John Maloney (jmaloney@uswest.net) that caused classes in the
+	default package to cause an internal error when run.
+
 2001-02-03  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/net/mtu/eggplant/assert/CodeGenerator.java: Fixed caching of
