@@ -13,10 +13,14 @@ import org.tcfreenet.schewe.utils.Pair;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.LineNumberReader;
+import java.io.FileReader;
+import java.io.FileWriter;
 
 import java.net.URL;
 
 import java.util.Stack;
+import java.util.Iterator;
 import java.util.Hashtable;
 import java.util.Vector;
 import java.util.SortedSet;
@@ -93,7 +97,7 @@ public class Symtab {
     _fileStack = new Stack();
     _currentPackageName = "";
     _allPackages = new Hashtable();
-    _allFiles = new Hashtable();
+    _allFiles = new Vector();
     _methodStack = new Stack();
     _currentMethod = null;
   }
@@ -116,32 +120,34 @@ public class Symtab {
     return _currentPackageName;
   }
   
-  private File _currentFile;
+  private InstrumentedFile _currentFile;
 
-  public File getCurrentFile() {
+  public InstrumentedFile getCurrentFile() {
     return _currentFile;
   }
 
   /**
      Start a file.  Sets this file as the current one and saves the state of
-     the current file being processed, if there is one.
+     the current file being processed, if there is one, nothing happens if
+     this file has already been seen.
      
      @return false if the file has already been seen.
   **/
   public boolean startFile(final File f) {
+    InstrumentedFile ifile = new InstrumentedFile(f);
+    if(_allFiles.contains(ifile)) {
+      return false;
+    }
+    
+    _allFiles.addElement(ifile);
+    _currentFile = ifile;
+    _imports = new Hashtable();
+    
     if(_currentFile != null) {
       _fileStack.push(new Pair(_currentFile, _imports));
     }
-    
-    _currentFile = f;
-    _imports = new Hashtable();
-    if(_allFiles.get(f) != null) {
-      return false;
-    }
-    else {
-      _allFiles.put(f, new TreeSet());
-      return true;
-    }
+
+    return true;
   }
 
   /**
@@ -160,8 +166,8 @@ public class Symtab {
   public void finishFile() {
     //[jpschewe:20000130.0958CST] at this point we should fill out any assertions that were found in other interfaces created in this file that weren't seen known the first time through. 
     if(!_fileStack.isEmpty()) {
-      Pair p = (Pair)_classStack.pop();
-      _currentFile = (File)p.getOne();
+      Pair p = (Pair)_fileStack.pop();
+      _currentFile = (InstrumentedFile)p.getOne();
       _imports = (Hashtable)p.getTwo();
     }
     else {
@@ -209,6 +215,13 @@ public class Symtab {
      @pre (cp != null)
   **/
   public void finishClass(final CodePoint cp) {
+    //add the invariant method
+    String code = CodeGenerator.generateInvariantMethod(_currentClass);
+    CodeFragment cf = new CodeFragment(cp, code, AssertType.INVARIANT);
+    _currentFile.getFragments().add(cf);
+    
+    _currentFile.getClasses().addElement(_currentClass);
+    
     if(!_classStack.isEmpty()) {
       _currentClass = (AssertClass)_classStack.pop();
     }
@@ -230,9 +243,69 @@ public class Symtab {
      instrument all of the files we've parsed so far.
   **/
   public void instrument() {
+    System.out.println("\nInstrumentation");
     /*
       walk over _allFiles and parse each class writing out to the instrument directory.
     */
+    Enumeration ifileIter = _allFiles.elements();
+    while(ifileIter.hasMoreElements()) {
+      InstrumentedFile ifile = (InstrumentedFile)ifileIter.nextElement();
+      //Add CodeFragments from all of the classes that are in ifile
+      Enumeration classIter = ifile.getClasses().elements();
+      while(classIter.hasMoreElements()) {
+        AssertClass aClass = (AssertClass)classIter.nextElement();
+        System.out.println(aClass);
+      }
+      //sort the list
+      //dump out the fragments and instrument the file
+      try {
+        LineNumberReader reader = new LineNumberReader(new FileReader(ifile.getFile()));
+        String filename = ifile.getFile().getName();
+        int indexOfDot = filename.lastIndexOf('.');
+        String ifilename = filename.substring(0, indexOfDot) + ".ijava";
+        String abPath = ifile.getFile().getAbsolutePath();
+        int indexOfSlash = abPath.lastIndexOf(File.separatorChar);
+        String path = abPath.substring(0, indexOfSlash);
+        FileWriter writer = new FileWriter(path + File.separatorChar + ifilename);
+
+        // instrument lines
+        Iterator fragIter = ifile.getFragments().iterator();
+        CodeFragment curFrag = null;
+        if(fragIter.hasNext()) {
+          curFrag = (CodeFragment)fragIter.next();
+        }
+        else {
+          //short-circuit and just copy the file over
+        }
+        String line = reader.readLine();
+        while(line != null) {
+          StringBuffer buf = new StringBuffer(line);        
+          int offset = 0;        
+          while(curFrag != null && reader.getLineNumber() == curFrag.getLocation().getLine()) {
+            //instrument line
+            offset = curFrag.instrumentLine(offset, buf);
+            if(fragIter.hasNext()) {
+              curFrag = (CodeFragment)fragIter.next();
+            }
+            else {
+              curFrag = null;
+            }
+          }
+          //now write out the modified line
+          writer.write(buf.toString() + "\n");
+          line = reader.readLine();
+        }
+        writer.close();
+        reader.close();
+        //while(fragIter.hasNext()) {
+        //  CodeFragment fragment = (CodeFragment)fragIter.next();
+        //  System.out.println(fragment);
+        //}
+      }
+      catch(final IOException ioe) {
+        ioe.printStackTrace();
+      }
+    }
   }
 
   /**
@@ -379,10 +452,12 @@ public class Symtab {
      @pre (cf != null)
   **/
   public void addCodeFragment(final CodeFragment cf) {
-    SortedSet fragments = (SortedSet)_allFiles.get(getCurrentFile());
-    if(!fragments.add(cf)) {
+
+    SortedSet fragments = getCurrentFile().getFragments();
+    if(fragments.contains(cf)) {
       throw new RuntimeException("CodeFragment matches another one already associated with the file: " + cf);
     }
+    fragments.add(cf);
   }
 
   /**
@@ -476,7 +551,10 @@ public class Symtab {
   
   private AssertClass _currentClass;
   private Hashtable _allPackages;
-  private Hashtable _allFiles;
+  /**
+     Vector of InstrumentedFiles.
+  **/
+  private Vector _allFiles;
   private Stack _classStack;
   private Stack _fileStack;
   private Stack _methodStack;

@@ -55,6 +55,10 @@ public class Main {
       System.err.println("exception: "+e);
       e.printStackTrace(System.err);   // so we can get stack trace
     }
+
+    //Let's see what we've found
+    getSymtab().instrument();
+    
   }
 
 

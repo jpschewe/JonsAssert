@@ -63,13 +63,13 @@ public class AssertMethod implements Named {
   //end Named
 
   private AssertClass _theClass;
-  
+
   private AssertClass getContainingClass() {
     return _theClass;
   }
     
   /** contains the tokens that define the pre conditions **/  
-  private Vector _preConditions;
+  private Vector /*Token*/ _preConditions;
 
   /**
      @return the preConditions for this method, list of AssertTokens
@@ -79,7 +79,7 @@ public class AssertMethod implements Named {
   }
 
   /** contains the tokens that define the post conditions **/
-  private Vector _postConditions;
+  private Vector /*Token*/ _postConditions;
 
   /**
      @return the postConditions for this method, list of AssertTokens
@@ -107,7 +107,7 @@ public class AssertMethod implements Named {
   }
   
   /** Vector of Points **/
-  private Vector _exits;
+  private Vector /*CodePointPair*/ _exits;
 
   /**
      Add an exit to this method.
@@ -130,7 +130,7 @@ public class AssertMethod implements Named {
     return _exits;
   }
   
-  private Vector _params;
+  private Vector /*StringPair*/ _params;
 
   /**
      @return Vector of StringPairs, (class, parameter name), don't modify this

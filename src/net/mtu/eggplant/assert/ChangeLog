@@ -1,3 +1,12 @@
+2000-02-12  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* Symtab.java: Added code to actually create the CodeFragments for
+	the checkInvariant method.
+
+	* Main.java: Added in the call to instrument everything.  I can
+	actually instrument a file now!  Granted it only does @assert, but
+	that's a start.
+
 2000-02-06  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* java.g: Better documented what still needs to be fixed in here.
