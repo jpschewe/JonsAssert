@@ -69,7 +69,7 @@ public class AssertMethod implements Named {
   }
     
   /** contains the tokens that define the pre conditions **/  
-  private Vector /*Token*/ _preConditions;
+  private Vector /*AssertToken*/ _preConditions;
 
   /**
      @return the preConditions for this method, list of AssertTokens
@@ -79,7 +79,7 @@ public class AssertMethod implements Named {
   }
 
   /** contains the tokens that define the post conditions **/
-  private Vector /*Token*/ _postConditions;
+  private Vector /*AssertToken*/ _postConditions;
 
   /**
      @return the postConditions for this method, list of AssertTokens
