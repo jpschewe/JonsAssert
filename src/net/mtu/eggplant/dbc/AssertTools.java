@@ -252,7 +252,7 @@ final public class AssertTools {
     return thisClass;
   }
 
-  static private Set _lockedMethods = new HashSet(20);
+  private static final Set _lockedMethods = new HashSet(20);
   /**
    * Lock a method.  This is ued at the top of the pre, post and invariant
    * check methods so that the methods don't get called recursively.  Method
