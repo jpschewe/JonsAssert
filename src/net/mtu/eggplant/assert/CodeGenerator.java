@@ -285,6 +285,7 @@ public class CodeGenerator {
           code.append(paramName);
           code.append(", ");
           code.append(paramType);
+          code.append (" ");
           code.append(paramName);
         }
       }      
@@ -614,6 +615,7 @@ public class CodeGenerator {
         StringPair sp = (StringPair)paramIter.next();
         code.append(getObjectForParam(sp.getStringOne(), sp.getStringTwo()));
         // once for old
+        code.append(", ");
         code.append(getObjectForParam(sp.getStringOne(), "__old" + sp.getStringTwo()));
       }
       code.append("};\n");
