@@ -31,23 +31,19 @@ package net.mtu.eggplant.dbc;
  * Used for representing a modification to code, rather than just a chunck of
  * code to be inserted.
  *
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class CodeModification extends CodeFragment {
 
   /**
      @param start the start of the region to modify
-     @param end the end of the region to modify
-     @param search what to find in the region
-     @param replace what to replace search with
-     @param code what to insert at the end of the region, after end
+     @param searchText what to find in the region
+     @param replaceText what to replace search with
      @param type the type of assertion this is
 
      @pre (start != null)
-     @pre (end != null)
-     @pre (search != null)
-     @pre (replace != null)
-     @pre (code != null)
+     @pre (searchText != null)
+     @pre (replaceText != null)
   **/
   public CodeModification(final CodePoint start,
                           final String searchText,

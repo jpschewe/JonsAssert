@@ -42,7 +42,6 @@ public Object methodFoo(Object param1) {
     AssertTools.postConditionFailed(AssertTools.getCurrentAssertionViolation());
   }
   return jps__retVal<classname>;
-
 }
 
 

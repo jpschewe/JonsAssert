@@ -7,12 +7,12 @@
   <property name="instrument.dir"  value="instrumented" />
   <property name="build.dir"  value="build" />
 
-  <property name="cvs.root" value="disk:/export/CVS-Repository" />
+  <property name="cvs.root" value="/net/CVS-Repository" />
   <property name="cvs.module" value="assert" />
 
   <!-- used for *.javadoc -->
-  <property name="local.java.packages" value="http://disk.mn.mtu.net/package-docs/java" />
-  <property name="local.java.projects" value="http://disk.mn.mtu.net/package-docs/projects" />
+  <property name="local.java.packages" value="http://netserver.mn.mtu.net/package-docs/java" />
+  <property name="local.java.projects" value="http://netserver.mn.mtu.net/package-docs/projects" />
   <property name="nightly.html.dir" value="/net/package-docs/projects" />
   
   <target name="init">
@@ -255,7 +255,7 @@
   <property name="mtu.net.offline" value="/home/jpschewe/public_html/mtu.net/public_html" />
 
   <!-- used for active_javadoc -->
-  <property name="active.home.html.dir" value="http://disk.mnt.mtu.net/~jpschewe" />
+  <property name="active.home.html.dir" value="http://netserver.mnt.mtu.net/~jpschewe" />
   <property name="active.html.dir" value="/home/public_html/" />
 
   <target name="init_javadoc">

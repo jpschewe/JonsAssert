@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Iterator;
 
 /**
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class CodeGenerator {
 
@@ -473,8 +473,6 @@ public class CodeGenerator {
   
   /**
      @param assertMethod the method to generate the post condition check call for
-     @param retVal the actual return statement that is in the code before it
-     is instrumented, ignored if the method has no return value
      @return code to call the post condition check for a method
 
      @pre (assertMethod != null)
