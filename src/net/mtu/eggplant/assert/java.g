@@ -12,11 +12,11 @@ header {
   package org.tcfreenet.schewe.assert;
 
   import org.tcfreenet.schewe.utils.StringPair;
+  import org.tcfreenet.schewe.utils.Pair;
   
-  import java.util.Enumeration;
+  import java.util.Iterator;
   import java.util.Vector;
-  import java.util.Hashtable;
-  
+  import java.util.List;
 }
 /** Java 1.1 Recognizer Grammar
  *<pre>
@@ -142,7 +142,7 @@ tokens {
   /**
      add an assert.  This should get cached with the file object?
   **/
-  private void addAsserts(final Vector asserts, final Token jdClose) {
+  private void addAsserts(final List asserts, final Token jdClose) {
     if(asserts != null && asserts.size() > 0) {
       int line = jdClose.getLine();
       int column = jdClose.getColumn() + jdClose.getText().length();
@@ -151,9 +151,9 @@ tokens {
       //  + " column: " + column
       //  );
       StringBuffer codeFrag = new StringBuffer();
-      Enumeration iter = asserts.elements();
-      while(iter.hasMoreElements()) {
-	AssertToken assertToken = (AssertToken)iter.nextElement();
+      Iterator iter = asserts.iterator();
+      while(iter.hasNext()) {
+	AssertToken assertToken = (AssertToken)iter.next();
 	String code = CodeGenerator.generateAssertion(assertToken);
 	codeFrag.append(code);
       }
@@ -163,7 +163,7 @@ tokens {
   }
 
   
-  private Vector _invariants = new Vector();
+  private List _invariants = new Vector();
 
   /**
      add invariants to this class
@@ -174,13 +174,13 @@ tokens {
     if(! (invariant instanceof AssertToken)) {
       throw new RuntimeException("Expecting AssertToken! " + invariant.getClass());
     }
-    _invariants.addElement(invariant);
+    _invariants.add(invariant);
   }
 
   /**
      get the invariants for this class.
   **/
-  private Vector getInvariants() {
+  private List getInvariants() {
     return _invariants;
   }
 
@@ -192,11 +192,11 @@ tokens {
   }
 
 
-  private Vector _preConditions = new Vector();
+  private List _preConditions = new Vector();
   /**
      Get the list of preconditions that have been seen since the last clear.
   **/
-  public Vector getPreConditions() {
+  public List getPreConditions() {
     return _preConditions;
   }
 
@@ -207,8 +207,7 @@ tokens {
     if(! (pre instanceof AssertToken)) {
       throw new RuntimeException("Expecting AssertToken! " + pre.getClass());
     }
-    
-    _preConditions.addElement(pre);
+    _preConditions.add(pre);
   }
 
   /**
@@ -218,11 +217,11 @@ tokens {
     _preConditions = new Vector();
   }
 
-  private Vector _postConditions = new Vector();
+  private List _postConditions = new Vector();
   /**
      Get the list of postconditions that have been seen since the last clear.
   **/
-  public Vector getPostConditions() {
+  public List getPostConditions() {
     return _postConditions;
   }
 
@@ -233,7 +232,7 @@ tokens {
     if(! (post instanceof AssertToken)) {
       throw new RuntimeException("Expecting AssertToken! " + post.getClass());
     }
-    _postConditions.addElement(post);
+    _postConditions.add(post);
   }
 
   /**
@@ -267,6 +266,10 @@ compilationUnit
       if(!getSymtab().getConfiguration().ignoreTimeStamp()) {
 	if(!getSymtab().isDestinationOlderThanCurrentFile(packageName)) {
 	  throw new FileAlreadyParsedException();
+	}
+	else {
+	  //Put the print here so you don't see it unless we're really parsing the files
+	  System.out.println("  " + getSymtab().getCurrentFile().getFile().getAbsolutePath());
 	}
 	_parseSection = 1;
 	clearInvariants();
@@ -334,17 +337,17 @@ declaration
 
 // A list of zero or more modifiers.  We could have used (modifier)* in
 //   place of a call to modifiers, but I thought it was a good idea to keep
-//   this rule separate so they can easily be collected in a Vector if
+//   this rule separate so they can easily be collected in a List if
 //   someone so desires
 /**
    @return the list of modifiers as Strings
 **/
-modifiers returns [Vector mods]
+modifiers returns [List mods]
 {
   mods = new Vector();
   Token mod = null;
 }
-  :	( mod = modifier { mods.addElement(mod.getText()); } )*
+  :	( mod = modifier { mods.add(mod.getText()); } )*
   ;
 
 
@@ -593,76 +596,80 @@ implementsClause
 **/
 field
 {
-  Vector mods = null;
+  List mods = null;
   Token retType = null;
-  Vector params = null;
+  List params = null;
   boolean methodOrConstructor = false;
   CodePointPair startEnd = null;
+  List thrownExceptions = null;
+  Pair p = null;
 }
   :
 
     (
-    // method, constructor, or variable declaration
-    //[jpschewe:20000215.2254CST] FIX need to do something special for abstract and native methods here
-    mods=modifiers
-    (	params=ctorHead
-      {
-	// needs to be before compoundStatement so that I can have it set for the addExit calls
-	getSymtab().startMethod(null, getPreConditions(), getPostConditions(), params, null, mods);
-	clearPreConditions();
-	  clearPostConditions();
-	//print("just called startMethod for constructor");
-      }
-      startEnd=compoundStatement // constructor
-		{
-		    getSymtab().finishMethod(startEnd);
-		    //print("Found finish: " + methodName);
-		}
- 
-
-    |	classDefinition       // inner class
-      
-    |	interfaceDefinition   // inner interface
-
-    |	retType=typeSpec  // method or variable declaration(s)
-      (	methodName:IDENT  // the name of the method
-
-	// parse the formal parameter declarations.
-	LPAREN params=parameterDeclarationList
+      // method, constructor, or variable declaration
+      //[jpschewe:20000215.2254CST] FIX need to do something special for abstract and native methods here
+      mods=modifiers
+      (	p=ctorHead
 	{
+	  params = (List)p.getOne();
+	  thrownExceptions = (List)p.getTwo();
 	  // needs to be before compoundStatement so that I can have it set for the addExit calls
-	  getSymtab().startMethod(methodName.getText(), getPreConditions(), getPostConditions(), params, retType.getText(), mods);
-	  //print("just called startMethod: " + methodName.getText());
+	  getSymtab().startMethod(null, getPreConditions(), getPostConditions(), params, null, mods);
+	  clearPreConditions();
+	  clearPostConditions();
+	  //print("just called startMethod for constructor");
+	}
+	startEnd=compoundStatement // constructor
+	{
+	  getSymtab().finishMethod(startEnd, thrownExceptions);
+	  //print("Found finish: " + methodName);
+	}
+	
+
+      |	classDefinition       // inner class
+	
+      |	interfaceDefinition   // inner interface
+
+      |	retType=typeSpec  // method or variable declaration(s)
+	(	methodName:IDENT  // the name of the method
+	  
+	  // parse the formal parameter declarations.
+	  LPAREN params=parameterDeclarationList
+	  {
+	    // needs to be before compoundStatement so that I can have it set for the addExit calls
+	    getSymtab().startMethod(methodName.getText(), getPreConditions(), getPostConditions(), params, retType.getText(), mods);
+	    //print("just called startMethod: " + methodName.getText());
 	    clearPreConditions();
 	    clearPostConditions();
-	}
-	RPAREN
+	  }
+	  RPAREN
 
-	returnTypeBrackersOnEndOfMethodHead
+	  returnTypeBrackersOnEndOfMethodHead
 
-	// get the list of exceptions that this method is declared to throw
-	(throwsClause)?
-	( startEnd=compoundStatement | semi:SEMI )
-		    {
-			if(startEnd != null) {
-			    getSymtab().finishMethod(startEnd);
-			}
-			else {
-			    //abstract, native or interface method
-			    CodePoint close = new CodePoint(semi.getLine(), semi.getColumn());
-			    getSymtab().finishMethod(new CodePointPair(close, close));
-			}
-			//print("Found finish: " + methodName);
-		    }
-      |	variableDefinitions SEMI
+	  // get the list of exceptions that this method is declared to throw
+	  (thrownExceptions=throwsClause)?
+	  ( startEnd=compoundStatement | semi:SEMI )
+	  {
+	    if(startEnd != null) {
+	      getSymtab().finishMethod(startEnd, thrownExceptions);
+	    }
+	    else {
+	      //abstract, native or interface method
+	      CodePoint close = new CodePoint(semi.getLine(), semi.getColumn());
+	      getSymtab().finishMethod(new CodePointPair(close, close), null);
+	    }
+	    //print("Found finish: " + methodName);
+	  }
+	|	variableDefinitions SEMI
+	)
       )
-    )
 
-    // "static { ... }" class initializer
-  |	"static" compoundStatement
+      // "static { ... }" class initializer
+    |	"static" compoundStatement
 
-    // "{ ... }" instance initializer
-  |	compoundStatement
+      // "{ ... }" instance initializer
+    |	compoundStatement
     )
   ;
 
@@ -728,23 +735,36 @@ initializer
 
    @return the parameters as StringPair(type, name)
 **/
-ctorHead returns [Vector params]
+ctorHead returns [Pair p]
 {
-  params = null;
+  List params = null;
+  List thrownExceptions = null;
+  p = null;
 }
-  :	IDENT  // the name of the method
-
-    // parse the formal parameter declarations.
-    LPAREN params=parameterDeclarationList RPAREN
-
-    // get the list of exceptions that this method is declared to throw
-    (throwsClause)?
+  :
+    (
+      IDENT  // the name of the method
+      
+      // parse the formal parameter declarations.
+      LPAREN params=parameterDeclarationList RPAREN
+      
+      // get the list of exceptions that this method is declared to throw
+      (thrownExceptions=throwsClause)?
+    )
+    
+    {
+      p = new Pair(params, thrownExceptions);
+    }
   ;
 
 // This is a list of exception classes that the method is declared to throw
-throwsClause
-{ Token id, id2; }
-  :	"throws" id=identifier ( COMMA id2=identifier )*
+throwsClause returns [List exceptions]
+{
+  exceptions = new Vector();
+  Token id, id2;
+}
+  :	"throws" id=identifier { exceptions.add(id.getText()); }
+    ( COMMA id2=identifier {exceptions.add(id2.getText()); } )*
   ;
 
 
@@ -754,12 +774,12 @@ returnTypeBrackersOnEndOfMethodHead
   ;
 
 // A list of formal parameters
-parameterDeclarationList returns [Vector params]
+parameterDeclarationList returns [List params]
 {
   params = new Vector();
   StringPair pd = null;
 }
-  :	( pd=parameterDeclaration { params.addElement(pd); } ( COMMA pd=parameterDeclaration { params.addElement(pd); } )* )?
+  :	( pd=parameterDeclaration { params.add(pd); } ( COMMA pd=parameterDeclaration { params.add(pd); } )* )?
   ;
 
 // A formal parameter.
@@ -798,9 +818,9 @@ parameterModifier
    us out of trouble.
 **/
 assertOrInvariantCondition
-{ Vector assertTokens = new Vector(); }
+{ List assertTokens = new Vector(); }
   : (JAVADOC_OPEN
-    ( assert:ASSERT_CONDITION { assertTokens.addElement(assert); clearInvariants(); }
+    ( assert:ASSERT_CONDITION { assertTokens.add(assert); clearInvariants(); }
       | PRE_CONDITION
       | POST_CONDITION
       | iv:INVARIANT_CONDITION { addInvariant(iv); assertTokens = new Vector(); }
@@ -1331,35 +1351,34 @@ options {
 }
 
 {
-    // for column tracking
-    public void setColumnTracker(final ColumnTracker ct) {
-	_ct = ct;
-	_ct._tokenColumn = 0;
-	_ct._column = 0;
-    }
+  // for column tracking
+  public void setColumnTracker(final ColumnTracker ct) {
+    _ct = ct;
+  }
 
-    private ColumnTracker _ct;
-    
-    public void consume() throws IOException {
-	if(text.length()==0) {
-	    // remember the token start column
-	    _ct._tokenColumn = _ct._column;
-	}
-	_ct._column++;
-	super.consume();
-    }
-
-    public void newline() {
-	_ct._column = 0;
-	super.newline();
-    }
-    
-    protected Token makeToken(int t) {
-	Token tok = super.makeToken(t);
-	tok.setColumn(_ct._tokenColumn);
-	return tok;
-    }
+  private ColumnTracker _ct;
   
+  public void consume() throws IOException {
+    if(text.length()==0) {
+      // remember the token start column
+      _ct._tokenColumn = _ct._column;
+    }
+    _ct._column++;
+    super.consume();
+  }
+
+  public void newline() {
+    _ct._column = 0;
+    _ct._line++;
+    super.newline();
+  }
+  
+  protected Token makeToken(int t) {
+    Token tok = super.makeToken(t);
+    tok.setColumn(_ct._tokenColumn);
+    tok.setLine(_ct._line);
+    return tok;
+  }
 }
 
 
@@ -1419,22 +1438,23 @@ WS	:	(	' '
     |	'\t'
     |	'\f'
       // handle newlines
-	|	'\r' '\n'		{newline();}
+	|	'\r' '\n'		{newline(); }
 	|	'\r'			{newline();}
 	|	'\n'			{newline();}
     )
-    { _ttype = Token.SKIP; }
+    { $setType(Token.SKIP); }
   ;
 
 // Single-line comments
 SL_COMMENT
   :	"//"
-    (~('\n'|'\r'))* (
-	|	'\r' '\n'		{newline();}
-	|	'\r'			{newline();}
-	|	'\n'			{newline();}
-	)	    
-    {$setType(Token.SKIP); }
+    (~('\n'|'\r'))*
+    (
+    |	'\r' '\n'		{newline();}
+    |	'\r'			{newline();}
+    |	'\n'			{newline();}
+    )	    
+    { $setType(Token.SKIP); }
   ;
 
 // Javadoc comments

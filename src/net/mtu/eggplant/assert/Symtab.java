@@ -561,11 +561,18 @@ public class Symtab {
      method entrance and add a method exit if the method is void.
 
      @param startEnd two code points representing the opening and closing braces of the method, these points are equal if the method is abstract/native
-
+     @param thrownExceptions list of exceptions this method declares in it's throws clause, null if no exceptions are declared
+     
      @pre (startEnd != null)
   **/
-  public void finishMethod(final CodePointPair startEnd) {
-    //System.out.println("in finish method");
+  public void finishMethod(final CodePointPair startEnd,
+                           final List thrownExceptions) {
+    //System.out.println("in finish method startEnd: " + startEnd + " _currentMethod: " + _currentMethod + " thrownExceptions: " + thrownExceptions);
+
+    if(thrownExceptions != null) {
+      _currentMethod.setThrownExceptions(thrownExceptions);
+    }
+    
     if(!_currentMethod.isAbstract()) {
       //[jpschewe:20000216.0742CST] add 1 so that we add the pre and post calls in the right place 
       _currentMethod.setMethodEntrance(new CodePoint(startEnd.getCodePointOne().getLine(),
@@ -634,7 +641,7 @@ public class Symtab {
 //         String oldValues = CodeGenerator.generateOldValues(method);
         //Put a try-finally around void methods for post condition checks
         if(method.isVoid()) {
-          ifile.getFragments().add(new CodeFragment(entrance, " try { ", CodeFragmentType.OLDVALUES));
+          ifile.getFragments().add(new CodeFragment(entrance, " boolean _JPS_foundException" + shortmclassName + " = false; try { ", CodeFragmentType.OLDVALUES));
         }
 
         
@@ -678,16 +685,68 @@ public class Symtab {
           //checkInvariant
           //checkPost
           //}
-          
+
           //Subtract 1 so that we add just before the '}'
           CodePoint insertFinallyAt = new CodePoint(method.getClose().getLine(), method.getClose().getColumn() - 1);
-          String myInvariantCall = "} finally { ";
-          if(!method.isStatic() && !method.isPrivate()) {
-            myInvariantCall += invariantCall;
+          StringBuffer codeToInsert = new StringBuffer();
+          codeToInsert.append("}");
+          //catch programmers exceptions first so my catches are reachable
+          Iterator exceptionIter = method.getThrownExceptions().iterator();
+          while(exceptionIter.hasNext()) {
+            String exception = (String)exceptionIter.next();
+            //Make sure we don't try and catch some exceptions twice
+            if(!exception.equals("RuntimeException")
+               && !exception.equals("Error")
+               && !exception.equals("java.lang.RuntimeException")
+               && !exception.endsWith("java.lang.Error")) {
+              codeToInsert.append("catch(");
+              codeToInsert.append(exception);
+              codeToInsert.append(" _JPS_exception");
+              codeToInsert.append(shortmclassName);
+              codeToInsert.append(") {");
+              codeToInsert.append("_JPS_foundException");
+              codeToInsert.append(shortmclassName);
+              codeToInsert.append(" = true;");
+              codeToInsert.append("throw _JPS_exception");
+              codeToInsert.append(shortmclassName);
+              codeToInsert.append(";");
+              codeToInsert.append("}"); //end catch
+            }
           }
-          String myPostCall = postCall + " }"; // end of finally
-          ifile.getFragments().add(new CodeFragment(insertFinallyAt, myInvariantCall, CodeFragmentType.INVARIANT));
-          ifile.getFragments().add(new CodeFragment(insertFinallyAt, myPostCall, CodeFragmentType.POSTCONDITION));
+          //catch java.lang.Error
+          codeToInsert.append("catch(Error _JPS_exception");
+          codeToInsert.append(shortmclassName);
+          codeToInsert.append(") {");
+          codeToInsert.append("_JPS_foundException");
+          codeToInsert.append(shortmclassName);
+          codeToInsert.append("= true;");
+          codeToInsert.append("throw _JPS_exception");
+          codeToInsert.append(shortmclassName);
+          codeToInsert.append(";");
+          codeToInsert.append("}"); //end catch
+          //catch java.lang.RuntimeException
+          codeToInsert.append("catch(RuntimeException _JPS_exception");
+          codeToInsert.append(shortmclassName);
+          codeToInsert.append(") {");
+          codeToInsert.append("_JPS_foundException");
+          codeToInsert.append(shortmclassName);
+          codeToInsert.append(" = true;");
+          codeToInsert.append("throw _JPS_exception");
+          codeToInsert.append(shortmclassName);
+          codeToInsert.append(";");
+          codeToInsert.append("}"); //end catch          
+
+          codeToInsert.append("finally { ");
+          codeToInsert.append("if(!_JPS_foundException");
+          codeToInsert.append(shortmclassName);
+          codeToInsert.append(") {");
+          if(!method.isStatic() && !method.isPrivate()) {
+            codeToInsert.append(invariantCall);
+          }
+          codeToInsert.append(postCall);
+          codeToInsert.append("}"); // end if
+          codeToInsert.append("}"); // end finally
+          ifile.getFragments().add(new CodeFragment(insertFinallyAt, codeToInsert.toString(), CodeFragmentType.POSTCONDITION));
         }
       }//end if not abstract
 

@@ -56,6 +56,7 @@ public class AssertMethod implements Named {
     _private = isPrivate;
     _abstract = isAbstract;
     _exits = new Vector();
+    _thrownExceptions = new Vector();
   }
 
   //Named
@@ -218,5 +219,17 @@ public class AssertMethod implements Named {
   **/
   public boolean isAbstract() {
     return _abstract;
+  }
+
+  private List _thrownExceptions;
+  /**
+     @pre (thrownExceptions != null)
+  **/
+  public void setThrownExceptions(final List thrownExceptions) {
+    _thrownExceptions = thrownExceptions;
+  }
+  
+  public List getThrownExceptions() {
+    return _thrownExceptions;
   }
 }
