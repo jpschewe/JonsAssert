@@ -28,10 +28,13 @@ public class JonsAssert {
   
   public static void main(String[] args) {
     Configuration config = new Configuration();
-    LongOpt[] longopts = new LongOpt[1];
+    LongOpt[] longopts = new LongOpt[2];
 
-    longopts[0] = new LongOpt("force", LongOpt.NO_ARGUMENT, null, 'f');    
-    Getopt g = new Getopt("JonsAssert", args, "f", longopts);
+    longopts[0] = new LongOpt("force", LongOpt.NO_ARGUMENT, null, 'f');
+    longopts[1] = new LongOpt("destination", LongOpt.REQUIRED_ARGUMENT, null, 'd');
+    longopts[2] = new LongOpt("sourceExtension", LongOpt.REQUIRED_ARGUMENT, null, 's');
+    longopts[3] = new LongOpt("instrumentedExtension", LongOpt.REQUIRED_ARGUMENT, null, 'i');
+    Getopt g = new Getopt("JonsAssert", args, "fd:s:i:", longopts);
 
     int c;
     String arg;
@@ -40,10 +43,22 @@ public class JonsAssert {
       case 'f':
         config.setIgnoreTimeStamp(true);
         break;
+      case 'd':
+        AssertTools.setDestinationDirectory(g.getOptarg());
+        break;
+      case 's':
+        AssertTools.setSourceExtension(g.getOptarg());
+        break;
+      case 'i':
+        AssertTools.setInstrumentedExtension(g.getOptarg());
+        break;
       default:
         //Print out usage and exit
         System.err.println("Usage: JonsAssert [options] files ...");
         System.err.println("-f, --force  force instrumentation");
+        System.err.println("-d, --destination <dir> the destination directory (default: instrumented)");
+        System.err.println("-s, --sourceExtension <ext> the extension on the source files (default: java)");
+        System.err.println("-i, --instrumentedExtension <ext> the extension on the source files (default: java)");
         System.exit(1);
         break;
       }
@@ -60,7 +75,8 @@ public class JonsAssert {
       }
     }
     else {
-      System.err.println("Parsing...");
+      System.err.println("Parsing testcases...");
+      config.setIgnoreTimeStamp(true);
       //Test case
       doFile(new File("org/tcfreenet/schewe/assert/testcases/")); // parse it
     }
@@ -78,7 +94,6 @@ public class JonsAssert {
     }
     // otherwise, if this is a java file, parse it!
     else if(f.getName().endsWith("." + AssertTools.getSourceExtension())) {
-      System.out.println("  " + f.getAbsolutePath());
       if(getSymtab().startFile(f)) {
         boolean success = true;
         try {
@@ -86,9 +101,11 @@ public class JonsAssert {
         }
         catch(IOException ioe) {
           System.err.println("Caught exception getting file input stream: " + ioe);
+          success = false;
         }
         catch(FileAlreadyParsedException fape) {
           //System.out.println("Source file is older than instrumented file, skipping: " + f.getName());
+          success = false;
         }
         catch (Exception e) {
           System.err.println("parser exception: "+e);
@@ -118,18 +135,20 @@ public class JonsAssert {
       selector.select(javaLexer);
                   
       // Create a parser that reads from the scanner
-      //for debugging the lexer
       JavaRecognizer parser = new JavaRecognizer(selector);
-      //antlr.Token tok = selector.nextToken();
-      //while(tok.getText() != null) {
-      //  System.out.print("Main: " + tok);
-      //  System.out.println(" name=" + parser.getTokenName(tok.getType()));
-      //  tok = selector.nextToken();
-      //}
-
-      parser.setSymtab(getSymtab());
-      // start parsing at the compilationUnit rule
-      parser.compilationUnit();
+      
+      //for debugging the lexer      
+//       antlr.Token tok = selector.nextToken();
+//       while(tok.getText() != null) {
+//         System.out.print("JonsAssert: " + tok);
+//         System.out.println(" name=" + parser.getTokenName(tok.getType()));
+//         tok = selector.nextToken();
+//       }
+//       System.exit(0);
+      
+       parser.setSymtab(getSymtab());
+       // start parsing at the compilationUnit rule
+       parser.compilationUnit();
   }
 
   static public Symtab getSymtab() {

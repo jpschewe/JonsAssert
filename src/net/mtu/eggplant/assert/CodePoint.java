@@ -29,7 +29,7 @@ final public class CodePoint implements Comparable {
   private int _column;
 
   public String toString() {
-    return getLine() + "." + getColumn();
+    return getLine() + ":" + getColumn();
   }
 
   public boolean equals(Object o) {

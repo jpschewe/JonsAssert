@@ -31,47 +31,57 @@ options {
     importVocab=Java;      // import vocabulary "Java"
     testLiterals=false;    // don't automatically test for literals
     k=4;                   // four characters of lookahead
-    charVocabulary = '\1'..'\377';
-    filter=true;
+    filter=true; //ignore things we can't match
 }
 
 {
-    // for column tracking
-    public void setColumnTracker(final ColumnTracker ct) {
-	_ct = ct;
-	_ct._tokenColumn = 0;
-	_ct._column = 0;
-    }
+  // for column tracking
+  public void setColumnTracker(final ColumnTracker ct) {
+    _ct = ct;
+  }
 
-    private ColumnTracker _ct;
-    
-    public void consume() throws IOException {
-	if(text.length()==0) {
-	    // remember the token start column
-	    _ct._tokenColumn = _ct._column;
-	}
-	_ct._column++;
-	super.consume();
+  private ColumnTracker _ct;
+  
+  public void consume() throws IOException {
+    if(text.length()==0) {
+      // remember the token start column
+      _ct._tokenColumn = _ct._column;
     }
+    _ct._column++;
+    super.consume();
+  }
 
-    public void newline() {
-	_ct._column = 0;
-	super.newline();
-    }
-    
-    protected Token makeToken(int t) {
-	Token tok = super.makeToken(t);
-	tok.setColumn(_ct._tokenColumn);
-	return tok;
-    }
+  public void newline() {
+    _ct._column = 0;
+    _ct._line++;
+    super.newline();
+  }
+  
+  protected Token makeToken(int t) {
+    Token tok = super.makeToken(t);
+    tok.setColumn(_ct._tokenColumn);
+    tok.setLine(_ct._line);
+    return tok;
+  }
 }
 
+// a dummy rule to force vocabulary to be all characters (except special
+//   ones that ANTLR uses internally (0 to 2)
+protected
+VOCAB
+  :	'\3'..'\377'
+  ;
+
 NEWLINE
-    : ('\n'
+    : (
+	'\r' '\n'
+        | '\n'
 	| '\r'
-	| '\r' '\n'
 	)
-        { _ttype = Token.SKIP; newline(); }
+    {
+      newline();
+      $setType(Token.SKIP);
+    }
     ;
 
 protected
@@ -85,9 +95,9 @@ CONDITION
     :
       { count > 0 }? ')' { count--; }
     | '(' { count++; }
+    | '\r' '\n' { newline(); }
     | '\n' { newline(); }
     | '\r' { newline(); }
-    | '\r' '\n' { newline(); }
     | ~('('|')'|'\n'|'\r')
     )*
     ')'
@@ -147,7 +157,6 @@ PRE_CONDITION
       }
       AssertToken assertTok = new AssertToken(c, m, _ttype, $getText);
       $setToken(assertTok);
-      //System.out.println("Just found a pre condition text: " + c);
     }
     ;
 
@@ -235,14 +244,19 @@ HEX_DIGIT
 	//{ System.out.println("Assert: got HEX_DIGIT #" + text + "#"); }
     ;
 
+STAR_TEXT
+  :
+    (
+	{ LA(2) !='/' }? '*'
+    )+
+    {
+	  $setType(Token.SKIP);
+    }
+  ;
+    
 // end condition for lexer
-//[jpschewe:20000304.2232CST] FIX still need to make it handle any number of *'s
 JAVADOC_CLOSE
-    : //("*/" | "**/")
-    ('*')+ '/'
-	{
-	    //System.out.println("assert: got end of javadoc comment #" + text + "#");
-	    JonsAssert.selector.pop();
-	}
+    :
+    "*/" { /*System.out.println("assert: got end of javadoc comment #" + text + "#");*/ JonsAssert.selector.pop(); }
     ;
 

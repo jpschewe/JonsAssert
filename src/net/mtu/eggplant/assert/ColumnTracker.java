@@ -11,7 +11,12 @@ package org.tcfreenet.schewe.assert;
    Scratch class to track column information across multiple lexers.
 **/
 /*package*/ class ColumnTracker {
-
+  /*package*/ ColumnTracker() {
+    _column = 0;
+    _tokenColumn = 0;
+    _line = 1;
+  }
+  /*package*/ int _line;
   /*package*/ int _column;
   /*package*/ int _tokenColumn;
 }

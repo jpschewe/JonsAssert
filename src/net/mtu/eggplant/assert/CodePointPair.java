@@ -26,4 +26,8 @@ final public class CodePointPair extends Pair {
   public CodePoint getCodePointTwo() {
     return (CodePoint)super.getTwo();
   }
+
+  public String toString() {
+    return "CodePointPair one: " + getCodePointOne().toString() + " two: " + getCodePointTwo().toString();
+  }
 }

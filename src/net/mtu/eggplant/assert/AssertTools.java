@@ -162,16 +162,18 @@ final public class AssertTools {
   **/
   static public void fail(final AssertionViolation av) {
     String assertBehavior = System.getProperty("ASSERT_BEHAVIOR", "EXIT");    
-    if(assertBehavior.equalsIgnoreCase("EXIT")) {
-      av.printStackTrace();
-      System.exit(1);
-    }
-    else if(assertBehavior.equalsIgnoreCase("CONTINUE")) {
+    if(assertBehavior.equalsIgnoreCase("CONTINUE")) {
       av.printStackTrace();
     }
     else if(assertBehavior.equalsIgnoreCase("EXCEPTION")) {
       throw av;
     }
+    //default behavior
+    else {//(assertBehavior.equalsIgnoreCase("EXIT")) {
+      av.printStackTrace();
+      System.exit(1);
+    }
+
   }
 
   /**
@@ -184,10 +186,8 @@ final public class AssertTools {
 
 
   /**
-     Set the extensions to be used for files.
-
-     @param sourceExtension the extension on the source files, defaults to 'java'
-     @param instrumentedExtension the extension on the instrumented files, defalts to 'ijava'
+     @see #setSourceExtension(String)
+     @see #setDestinationExtension(String)
   **/
   static public void setExtensions(final String sourceExtension,
                                    final String instrumentedExtension) {
@@ -209,6 +209,21 @@ final public class AssertTools {
     return _instrumentedExtension;
   }
 
+  /**
+     @param sourceExtension the extension on the source files, defaults to 'java'
+  **/
+  static public void setSourceExtension(final String sourceExtension) {
+    _sourceExtension = sourceExtension;
+  }
+
+
+  /**
+     @param instrumentedExtension the extension on the instrumented files, defaults to 'java' 
+  **/    
+  static public void setInstrumentedExtension(final String instrumentedExtension) {
+    _instrumentedExtension = instrumentedExtension;
+  }
+  
   /**
      Take a package name that's passed in and turn it into a directory name
      and create the directories relative to the instrumented directory path.
