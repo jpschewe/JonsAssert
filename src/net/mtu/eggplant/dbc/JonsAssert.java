@@ -140,13 +140,19 @@ public class JonsAssert {
           return;
         }
       }
-      
-      Applying.forEach(cl.getArgs(), new Function() {
-        public void execute(final Object obj) {
-          files.add(new File((String)obj));
-          System.out.println(obj);
+
+      final Iterator iter = cl.getArgs().iterator();
+      while(iter.hasNext()) {
+        final String obj = (String)iter.next();
+        final File file = new File((String)obj);
+        if(!file.exists() || !file.canRead()) {
+          System.err.println("Invalid option: " + obj);
+          usage(options);
+          return;
+        } else {
+          files.add(file);
         }
-      });
+      }
       
     } catch(final MissingArgumentException mae) {
       System.err.println(mae.getMessage());
@@ -224,7 +230,7 @@ public class JonsAssert {
     boolean success = true;
     // if we have at least one file to parse
     if(!files.isEmpty()) {
-      System.out.println("Parsing...");
+      System.out.println("Instrumenting...");
       // for each directory/file specified on the command line
       final Iterator iter = files.iterator();
       while(iter.hasNext()) {
@@ -260,7 +266,9 @@ public class JonsAssert {
         success &= doFile(new File(f, files[i]));
       }
     } else if(f.getName().endsWith("." + getSymtab().getConfiguration().getSourceExtension())) {
-      // otherwise, if this is a java file, parse it!      
+      // otherwise, this is a java file, parse it!
+      System.out.println(f.getName()); //let the user know where we are
+      
       if(getSymtab().startFile(f)) {
         try {
           parseFile(new FileInputStream(f));

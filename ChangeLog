@@ -1,3 +1,12 @@
+2002-06-02  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/net/mtu/eggplant/dbc/JonsAssert.java (main): Now check to
+	make sure that all files passed on the commandline and are
+	readable.  If not, then print out an invalid option message.  This
+	also handles invalid options because werken.opt passes everything
+	from the first option that it doesn't recognize to the end of the
+	commandline as other arguments.
+
 2002-05-27  Jon Schewe  <jpschewe@mtu.net>
 	* Release 0.5
 
