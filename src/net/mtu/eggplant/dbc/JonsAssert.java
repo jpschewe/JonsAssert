@@ -38,6 +38,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import antlr.Parser;
+import antlr.RecognitionException;
+import antlr.TokenStreamException;
 import antlr.TokenStreamSelector;
 
 import com.werken.opt.CommandLine;
@@ -52,18 +55,19 @@ import net.mtu.eggplant.util.algorithms.Applying;
 /**
  * <p>Class that starts everything off.</p>
  *
- * <a name="commandline_doc"><h2>Commandline options</h2></a>
+ * <p><a name="commandline_doc"><h2>Commandline options</h2></a>
  * <ul>
  *   <li>-f, --force  force instrumentation, regardless of file modification time</li>
  *   <li>-d, --destination &lt;dir&gt; the destination directory (default: instrumented)</li>
  *   <li>-s, --sourceExtension &lt;ext&gt; the extension on the source files (default: java)</li>
  *   <li>-i, --instrumentedExtension &lt;ext&gt; the extension on the source files (default: java)</li>
+ *   <li>--source &lt;release&gt; Provide source compatibility with specified release (just like javac</li>
  *   <li>files all other arguments are taken to be files or directories to be parsed</li>
- * </ul>
+ * </ul></p>
  *
  * <p>Classes can also be instrumented by calling
  * {@link #instrument(Configuration, Collection) instrument} with a Configuration
- * object and a Collection of files.
+ * object and a Collection of files.</p>
  *
  */
 public class JonsAssert {
@@ -80,7 +84,7 @@ public class JonsAssert {
    *
    * @param args see <a href="#commandline_doc">commandline options</a>
    */
-  public static void main(final String[] args) {
+  static public void main(final String[] args) {
     final Configuration config = new Configuration();
 
     //Setup all of the options
@@ -90,6 +94,7 @@ public class JonsAssert {
       options.addOption('d', "destination", true, "<dir> the destination directory (default: instrumented)");
       options.addOption('s', "sourceExtension", true, "<ext> the extension of the source files (default: java)");
       options.addOption('i', "instrumentedExtension", true, "<ext> the extension used for the instrumented files (default: java)");
+      options.addOption('@', "source", true, "<release> Provide source compatibility with specified release (just like javac");
       options.addOption('~', "debugLexer", false, "");
       options.addOption('!', "debug", false, "");
     } catch(final DuplicateOptionException doe) {
@@ -123,10 +128,23 @@ public class JonsAssert {
       if(cl.optIsSet('!')) {
         Debug.setDebugMode(true);
       }
-
+      if(cl.optIsSet('@')) {
+        final String sourceCompatibility = cl.getOptValue('@');
+        if(Configuration.JAVA_1_4.getName().equals(sourceCompatibility)) {
+          config.setSourceCompatibility(Configuration.JAVA_1_4);
+        } else if(Configuration.JAVA_1_3.getName().equals(sourceCompatibility)) {
+          config.setSourceCompatibility(Configuration.JAVA_1_3);
+        } else {
+          System.err.println("Invalid source release: " + sourceCompatibility);
+          usage(options);
+          return;
+        }
+      }
+      
       Applying.forEach(cl.getArgs(), new Function() {
         public void execute(final Object obj) {
           files.add(new File((String)obj));
+          System.out.println(obj);
         }
       });
       
@@ -151,7 +169,7 @@ public class JonsAssert {
   /**
    * @pre (options != null)
    */
-  static private void usage(final Options options) {
+  private static void usage(final Options options) {
     final StringBuffer sb = new StringBuffer(256);
     sb.append("Usage: JonsAssert [options] files");
     sb.append(System.getProperty("line.separator"));
@@ -193,13 +211,13 @@ public class JonsAssert {
    * @param config the {@link Configuration configuration} object
    * @param files Collection of {@link java.io.File files/directories} to
    * parse.  Directories are parsed recursively.
-   * @return exit status
+   * @return true if everything went ok, false otherwise
    *
    * @pre (config != null)
    * @pre (files != null && net.mtu.eggplant.util.CollectionUtils.checkInstanceOf(files, File.class))
    *
    */
-  static public boolean instrument(final Configuration config,
+  public static boolean instrument(final Configuration config,
                                    final Collection files) {
     _symtab = new Symtab(config);
 
@@ -232,7 +250,7 @@ public class JonsAssert {
    * them.
    * @return true for success
    */
-  static public boolean doFile(final File f) {
+  private static boolean doFile(final File f) {
     boolean success = true; //did the run pass?
     boolean writeFile = false; //do we need to write the file 
     if (f.isDirectory()) {
@@ -258,10 +276,17 @@ public class JonsAssert {
           //System.out.println("Source file is older than instrumented file, skipping: " + f.getName());
           success = true;
           writeFile = false;
-        } catch (final Exception e) {
-          System.err.println("parser exception: "+e);
+        } catch (final TokenStreamException tse) {
+          System.err.println("parser exception: " + tse);
           if(Debug.isDebugMode()) {
-            e.printStackTrace();   // so we can get a stack trace
+            tse.printStackTrace();   // so we can figure out what went wrong
+          }
+          success = false;
+          writeFile = false;
+        } catch (final RecognitionException re) {
+          System.err.println("parser exception: " + re);
+          if(Debug.isDebugMode()) {
+            re.printStackTrace();   // so we can figure out what went wrong
           }
           success = false;
           writeFile = false;
@@ -276,9 +301,9 @@ public class JonsAssert {
   /**
    * Actually do the work of parsing the file here.
    *
-   * @param s a stream to parse  
+   * @param s a stream to parse
    */
-  static public void parseFile(final InputStream s) throws Exception {
+  private static void parseFile(final InputStream s) throws TokenStreamException, RecognitionException {
     // Create a scanner that reads from the input stream passed to us
     javaLexer = new JavaLexer(s);
     assertLexer = new AssertLexer(javaLexer.getInputState());
@@ -286,26 +311,46 @@ public class JonsAssert {
     selector.addInputStream(javaLexer, "java");
     selector.addInputStream(assertLexer, "assert");
     selector.select(javaLexer);
-                  
+
     // Create a parser that reads from the scanner
-    final JavaRecognizer parser = new JavaRecognizer(selector);
-      
-    //for debugging the lexer
-    if(_debugLexer) {
-      antlr.Token tok = selector.nextToken();
-      while(tok.getText() != null) {
-        System.out.print("JonsAssert: " + tok);
-        System.out.println(" name=" + parser.getTokenName(tok.getType()));
-        tok = selector.nextToken();
+    final Configuration.SourceCompatibilityEnum sourceCompatibility = getSymtab().getConfiguration().getSourceCompatibility();
+    //FIX this statement is flipped because antlr is being stupid about
+    //inheritance, when antlr is fixed change java.g and java14.g to contain
+    //proper assert functionality
+    if(Configuration.JAVA_1_4 == sourceCompatibility) {
+      final JavaRecognizer parser = new JavaRecognizer(selector);
+      if(_debugLexer) {
+        debugLexer(parser);
+      } else {
+        parser.setSymtab(getSymtab());
+        parser.compilationUnit();
+      }
+    } else if(Configuration.JAVA_1_3 == sourceCompatibility) {
+      final Java14Recognizer parser = new Java14Recognizer(selector);
+      if(_debugLexer) {
+        debugLexer(parser);
+      } else {
+        parser.setSymtab(getSymtab());
+        parser.compilationUnit();
       }
     } else {
-      parser.setSymtab(getSymtab());
-      // start parsing at the compilationUnit rule
-      parser.compilationUnit();
+      AssertTools.internalError("Invalid source compatibility: " + sourceCompatibility);
     }
   }
 
   final static public Symtab getSymtab() {
     return _symtab;
+  }
+
+  /**
+   * Just print out the tokens as they're found.
+   */
+  private static final void debugLexer(final Parser parser) throws TokenStreamException {
+    antlr.Token tok = selector.nextToken();
+    while(null != tok.getText()) {
+      System.out.print("JonsAssert: " + tok);
+      System.out.println(" name=" + parser.getTokenName(tok.getType()));
+      tok = selector.nextToken();
+    }
   }
 }

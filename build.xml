@@ -12,7 +12,13 @@
   <target name="init">
     <tstamp />
     <uptodate property="buildJavaLexer" targetfile="${basedir}/src/net/mtu/eggplant/dbc/java.g">
-      <srcfiles dir="${basedir}/src/net/mtu/eggplant/dbc" includes="JavaLexer.java" />
+      <srcfiles dir="${basedir}/src/net/mtu/eggplant/dbc" includes="JavaRecognizer.java" />
+    </uptodate>
+    <uptodate property="buildJava14Lexer" targetfile="${basedir}/src/net/mtu/eggplant/dbc/java14.g">
+      <srcfiles dir="${basedir}/src/net/mtu/eggplant/dbc">
+        <include name="Java14Recognizer.java" />
+        <include name="java.g" />
+      </srcfiles>
     </uptodate>
     <uptodate property="buildAssertLexer" targetfile="${basedir}/src/net/mtu/eggplant/dbc/assert.g">
       <srcfiles dir="${basedir}/src/net/mtu/eggplant/dbc" includes="AssertLexer.java" />
@@ -40,6 +46,20 @@
     </java>
   </target>
 
+  <target name="buildJava14Lexer" if="buildJava14Lexer" depends="buildJavaLexer">
+    <java classname="antlr.Tool"
+	  fork="yes"
+	  failonerror="true"
+	  taskname="antlr"
+	  dir="${basedir}/src/net/mtu/eggplant/dbc">
+      <classpath>
+  	<pathelement location="${basedir}/lib/antlr.jar" />
+      </classpath>
+      <arg line="-glib java.g" />
+      <arg value="java14.g" />
+    </java>
+  </target>
+  
   <target name="buildAssertLexer" if="buildAssertLexer">
     <java classname="antlr.Tool"
 	  fork="yes"
@@ -53,20 +73,20 @@
     </java>
   </target>
   
-  <target name="compile" depends="init,buildJavaLexer,buildAssertLexer">
+  <target name="compile" depends="init,buildJavaLexer,buildJava14Lexer,buildAssertLexer">
     <!-- broken until 1.5 <antlr target="${basedir}/src/net/mtu/eggplant/dbc/java.g" /> -->
     <!-- broken until 1.5 <antlr target="${basedir}/src/net/mtu/eggplant/dbc/assert.g" /> -->
 
     <javac srcdir="${basedir}/src"
 	   destdir="${basedir}/src"
 	   debug="true"
-	   source="1.4"
 	   deprecation="true">
       <classpath>
         <path refid="base.classpath"/>
       </classpath>
       <include name="net/**/*.java"/>
       <exclude name="net/mtu/eggplant/dbc/testcases/**"/>
+      <exclude name="net/mtu/eggplant/dbc/test14/**"/>
     </javac>
   </target>
 
@@ -91,6 +111,21 @@
       </classpath>
     </java>
 
+    <!-- instrument the 1.4 files -->
+    <java fork="yes"
+	  classname="net.mtu.eggplant.dbc.JonsAssert"
+	  taskname="DBC"
+	  failonerror="false"> <!-- so we can see what all needs fixing -->
+      <arg value="-source 1.4" />
+      <arg value="-d ${basedir}/${instrument.dir}" />
+      <arg value="-f" />
+      <arg value="${basedir}/src/net/mtu/eggplant/dbc/test14" />
+      <classpath>
+        <pathelement location="${basedir}/src"/>
+        <path refid="base.classpath"/>
+      </classpath>
+    </java>
+
     <!-- compile newly instrumented files -->
     <javac srcdir="${basedir}/${instrument.dir}"
 	   destdir="${basedir}/src"
@@ -100,6 +135,8 @@
         <path refid="base.classpath"/>
       </classpath>
       <include name="**/*.java" />
+      <!-- don't try and compile the 1.4 stuff -->
+      <exclude name="net/mtu/eggplant/dbc/test/Test14Compatibility.java" />
       <!--<include name="DefaultPackage.java" />
       <include name="net/mtu/eggplant/dbc/test/**/*.java" />-->
     </javac>
@@ -175,24 +212,14 @@
   <target name="clean">
     <delete>
       <fileset dir="${basedir}/src">
-  	<patternset>
   	  <include name="**/*.class" />
-  	</patternset>
-  	<patternset>
   	  <include name="net/mtu/eggplant/dbc/AssertLexer.*" />
-  	</patternset>
-  	<patternset>
   	  <include name="net/mtu/eggplant/dbc/AssertLexerTokenTypes.*" />
-  	</patternset>
-  	<patternset>
   	  <include name="net/mtu/eggplant/dbc/JavaLexer.*" />
-  	</patternset>
-  	<patternset>
   	  <include name="net/mtu/eggplant/dbc/JavaRecognizer.*" />
-  	</patternset>
-  	<patternset>
       	  <include name="net/mtu/eggplant/dbc/JavaTokenTypes.*" />
-  	</patternset>
+  	  <include name="net/mtu/eggplant/dbc/Java14Recognizer.*" />
+      	  <include name="net/mtu/eggplant/dbc/Java14RecognizerTokenTypes.*" />
       </fileset>
     </delete>
   </target>

@@ -32,28 +32,61 @@ import java.io.File;
 import java.util.StringTokenizer;
 
 /**
-   Holds all the options values.
-**/
+ * Holds all the option values.
+ */
 public class Configuration {
 
   /**
-     @return true if files are to be parsed reguardless of the timestamp.
-  **/
-  final public boolean ignoreTimeStamp() {
+   * Enum for 1.4 source compatibility.
+   *
+   * @see #setSourceCompatibility(SourceCompatibilityEnum)
+   */
+  public static final SourceCompatibilityEnum JAVA_1_4 = new SourceCompatibilityEnum("1.4");
+  /**
+   * Enum for 1.3 source compatibility.
+   *
+   * @see #setSourceCompatibility(SourceCompatibilityEnum)
+   */
+  public static final SourceCompatibilityEnum JAVA_1_3 = new SourceCompatibilityEnum("1.3");
+
+  /**
+   * Set the source compatibility for the parser.  Defaults to JAVA_1_3.
+   *
+   * @see #JAVA_1_4
+   * @see #JAVA_1_3
+   * 
+   * @pre (null != sc)
+   */
+  public void setSourceCompatibility(final SourceCompatibilityEnum sc) {
+    _sourceCompatibility = sc;
+  }
+
+  public SourceCompatibilityEnum getSourceCompatibility() {
+    return _sourceCompatibility;
+  }
+
+  private SourceCompatibilityEnum _sourceCompatibility = JAVA_1_3;
+  
+  /**
+   * @return true if files are to be parsed reguardless of the timestamp.
+   */
+  public boolean ignoreTimeStamp() {
     return _ignoreTimeStamp;
   }
-  final public void setIgnoreTimeStamp(boolean b) {
+  
+  /**
+   * @see #ignoreTimeStamp()
+   */
+  public void setIgnoreTimeStamp(boolean b) {
     _ignoreTimeStamp = b;
   }
   private boolean _ignoreTimeStamp = false;
 
   
-  private String _sourceExtension = "java";
-
   /**
-     @see #setSourceExtension(String)
-     @see #setInstrumentedExtension(String)
-  **/
+   * @see #setSourceExtension(String)
+   * @see #setInstrumentedExtension(String)
+   */
   public void setExtensions(final String sourceExtension,
                             final String instrumentedExtension) {
     _sourceExtension = sourceExtension;
@@ -61,41 +94,42 @@ public class Configuration {
   }
 
   /**
-     @return the extension for the source files
-  **/
+   * @return the extension for the source files
+   */
   public String getSourceExtension() {
     return _sourceExtension;
   }
 
   private String _instrumentedExtension = "java";  
   /**
-     @return the extension for the instrumented files
-  **/
+   * @return the extension for the instrumented files
+   */
   public String getInstrumentedExtension() {
     return _instrumentedExtension;
   }
 
   /**
-     @param sourceExtension the extension on the source files, defaults to 'java'
-  **/
+   * @param sourceExtension the extension on the source files, defaults to 'java'
+   */
   public void setSourceExtension(final String sourceExtension) {
     _sourceExtension = sourceExtension;
   }
 
+  private String _sourceExtension = "java";
 
   /**
-     @param instrumentedExtension the extension on the instrumented files, defaults to 'java' 
-  **/    
+   * @param instrumentedExtension the extension on the instrumented files, defaults to 'java' 
+   */    
   public void setInstrumentedExtension(final String instrumentedExtension) {
     _instrumentedExtension = instrumentedExtension;
   }
   
   /**
-     Take a package name that's passed in and turn it into a directory name
-     and create the directories relative to the instrumented directory path.
-
-     @return the directory to put the file in
-  **/
+   * Take a package name that's passed in and turn it into a directory name
+   * and create the directories relative to the instrumented directory path.
+   *
+   * @return the directory to put the file in
+   */
   public String createDirectoryForPackage(final String packageName) {
     if(packageName == null) {
       //default package
@@ -132,14 +166,19 @@ public class Configuration {
   }
 
   private String _destination = "instrumented";
+
+  /**
+   * @see #setDestinationDirectory(String)
+   */
   public String getDestinationDirectory() {
     return _destination;
   }
 
   /**
-     Set the directory where the instrumented files should go.  Directories
-     will be created under this directory for the packages.
-  **/
+   * Set the directory where the instrumented files should go.  Directories
+   * will be created under this directory for the packages.  Defaults to
+   * "instrumented".
+   */
   public void setDestinationDirectory(final String dir) {
     _destination = dir.trim();
   }
@@ -157,6 +196,18 @@ public class Configuration {
     final String ifilename = shortFilename.substring(0, indexOfDot) + "." + getInstrumentedExtension();
     final String path = createDirectoryForPackage(packageName);
     return path + File.separatorChar + ifilename;
+  }
+
+  // Inner classes only below here
+  public static final class SourceCompatibilityEnum {
+    /**
+     * @pre (null != name)
+     */
+    private SourceCompatibilityEnum(final String name) {
+      _name = name;
+    }
+    public String getName() { return _name; }
+    private final String _name;
   }
   
 }

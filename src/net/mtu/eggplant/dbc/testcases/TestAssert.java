@@ -27,6 +27,8 @@
  */
 package net.mtu.eggplant.dbc.test;
 
+import DefaultPackage;
+
 import net.mtu.eggplant.dbc.AssertTools;
 import net.mtu.eggplant.dbc.AssertionViolation;
 
@@ -449,12 +451,4 @@ public class TestAssert extends TestCase {
     
   }
 
-//   /**
-//    * Tests support for 1.4
-//    */
-//   public void test14Support() {
-//     assert 1 == 10;
-//     assert 1 == 10 : "message";
-//   }
-  
 }
