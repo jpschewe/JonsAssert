@@ -267,13 +267,12 @@ compilationUnit
 	if(!getSymtab().isDestinationOlderThanCurrentFile(packageName)) {
 	  throw new FileAlreadyParsedException();
 	}
-	else {
-	  //Put the print here so you don't see it unless we're really parsing the files
-	  System.out.println("  " + getSymtab().getCurrentFile().getFile().getAbsolutePath());
-	}
-	_parseSection = 1;
-	clearInvariants();
       }
+      //If we get here, either we're in force mode or the source file is newer
+      _parseSection = 1;
+      clearInvariants();
+      //Put the print here so you don't see it unless we're really parsing the files
+      System.out.println("  " + getSymtab().getCurrentFile().getFile().getAbsolutePath());
     }
 
     // Next we have a series of zero or more import statements with
