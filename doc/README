@@ -66,9 +66,11 @@ assertions that end up calling the methods themselves will not cause a
 recursive loop
 
 BUGS:
-- Note that there my be no <CR>'s inside any assertions, unless they are
-property escaped.  So no <CR>'s between the condition and the message.  This
-may be fixed in a later version.
+- <CR>'s may exist inside assertions, however, if the first non-whitespace
+character, as determined by Character.isWhitespace, after the <CR> is an
+asterisk and it is intended to be part of the assertion and not part of the
+comment, as is commonly done in emacs, then that character will be lost from
+the assertion.
 
 - javadoc comments cannot exist above import statements
 

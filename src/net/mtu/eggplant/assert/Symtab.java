@@ -388,7 +388,13 @@ public class Symtab {
      @param packageName the name of the package package from the import statement
   **/
   public void addImport(final String className, final String packageName) {
-    final String shortenedPackageName = packageName.substring(1);
+    final String shortenedPackageName;
+    if(packageName != null && !packageName.equals("")) {
+      shortenedPackageName = packageName.substring(1);
+    } else {
+      //default package, use null
+      shortenedPackageName = null;
+    }
     if(className != null) {
       Set v = (Set)_imports.get(shortenedPackageName);
       if(v == null) {
@@ -424,7 +430,7 @@ public class Symtab {
                           final List params,
                           final String retType,
                           final Set mods) {
-    
+
     if(_currentMethod != null) {
       _methodStack.push(_currentMethod);
     }

@@ -296,7 +296,7 @@ compilationUnit
     )
     {//stuff to do after finding packageName
       getSymtab().setCurrentPackageName(packageName);
-      Debug.println("just found the package");
+      Debug.println("just found the package: " + packageName);
       //Now we just need to check to make sure the destination file is older
       if(!getSymtab().getConfiguration().ignoreTimeStamp()) {
         if(!getSymtab().isDestinationOlderThanCurrentFile(packageName)) {

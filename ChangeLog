@@ -1,3 +1,10 @@
+2002-01-20  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/net/mtu/eggplant/assert/AssertToken.java: Now can handle
+	<CR> inside assertions and messages.  The only problem now, is if
+	the first character after the <CR> is a star and it's not a
+	continuation star it gets stomped.
+
 2002-01-19  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/net/mtu/eggplant/assert/JonsAssert.java: Switched

@@ -89,5 +89,15 @@ public class Node {
   final public static long stringDateToLong(String dateStr) {
     return 10L;
   }
+
+  /**
+   * Test assertion with <cr> in the middle.
+   *
+   * @pre ( 1 != 10
+   * )
+   */
+  final public void foo() {
+
+  }
     
 }

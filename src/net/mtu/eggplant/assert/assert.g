@@ -54,7 +54,7 @@ options {
     testLiterals=false;    // don't automatically test for literals
     k=4;                   // four characters of lookahead
     filter=true; //ignore things we can't match
-	defaultErrorHandler = false;     // generate parser error handlers
+    defaultErrorHandler = false;     // generate parser error handlers
 }
 
 //{
@@ -67,8 +67,8 @@ options {
 //  
 //  public void consume() throws IOException {
 //    if(text.length()==0) {
-//	// remember the token start column
-//	_ct._tokenColumn = _ct._column;
+//      // remember the token start column
+//      _ct._tokenColumn = _ct._column;
 //    }
 //    _ct._column++;
 //    super.consume();
@@ -92,15 +92,15 @@ options {
 //   ones that ANTLR uses internally (0 to 2)
 protected
 VOCAB
-  :	'\3'..'\377'
+  :     '\3'..'\377'
   ;
 
 NEWLINE
     : (
-	'\r' '\n'
+        '\r' '\n'
         | '\n'
-	| '\r'
-	)
+        | '\r'
+        )
     {
       newline();
       $setType(Token.SKIP);
@@ -113,7 +113,7 @@ CONDITION
   : '('
     (
       options {
-		generateAmbigWarnings=false;
+                generateAmbigWarnings=false;
       }
     :
       { count > 0 }? ')' { count--; }
@@ -127,7 +127,7 @@ CONDITION
     //    : '(' ( ~('('|')') )* ')'
     //    | '(' CONDITION ')'
     //    : '(' ( ~('('|')') )* (CONDITION)? ( ~('('|')') )* ')'
-	{ Debug.println("Assert: got CONDITION #" + text + "#"); }
+        { Debug.println("Assert: got CONDITION #" + text + "#"); }
   ;
 
 protected
@@ -143,7 +143,7 @@ SEMI
 protected
 STRING_LITERAL 
     :  '"' (ESC|~('"'|'\\'))* '"'
-	{ Debug.println("Assert: got MESSAGE #" + text + "#"); }
+        { Debug.println("Assert: got MESSAGE #" + text + "#"); }
     ;
 
 protected
@@ -156,14 +156,16 @@ POST_CONDITION
   String c = null;
   String m = null;
 }
-    :	"@post" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:STRING_LITERAL { m = mesg.getText(); } SEMI)?
+    :   "@post" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:STRING_LITERAL { m = mesg.getText(); } SEMI)?
     {
       if(c != null) {
-        c = c.replace('\n', ' ');
-		c = c.replace('\r', ' ');
+//        c = c.replace('\n', ' ');
+//        c = c.replace('\r', ' ');
+        AssertToken assertTok = new AssertToken(c, m, _ttype, $getText);
+        $setToken(assertTok);
+      } else {
+        $setType(Token.SKIP);
       }
-      AssertToken assertTok = new AssertToken(c, m, _ttype, $getText);
-      $setToken(assertTok);
     }
     ;
 
@@ -172,16 +174,16 @@ PRE_CONDITION
   String c = null;
   String m = null;
 }
-  :	"@pre" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:STRING_LITERAL { m = mesg.getText(); } SEMI)?
+  :     "@pre" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:STRING_LITERAL { m = mesg.getText(); } SEMI)?
     {
       if(c != null) {
-        c = c.replace('\n', ' ');
-		c = c.replace('\r', ' ');
-		final AssertToken assertTok = new AssertToken(c, m, _ttype, $getText);
-		$setToken(assertTok);
+//        c = c.replace('\n', ' ');
+//        c = c.replace('\r', ' ');
+        final AssertToken assertTok = new AssertToken(c, m, _ttype, $getText);
+        $setToken(assertTok);
       } else {
-		$setType(Token.SKIP);
-	  }
+        $setType(Token.SKIP);
+      }
     }
   ;
 
@@ -190,14 +192,16 @@ ASSERT_CONDITION
   String c = null;
   String m = null;
 }
-    :	"@assert" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:STRING_LITERAL { m = mesg.getText(); } SEMI)?
+    :   "@assert" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:STRING_LITERAL { m = mesg.getText(); } SEMI)?
     {
       if(c != null) {
-        c = c.replace('\n', ' ');
-	c = c.replace('\r', ' ');
+//        c = c.replace('\n', ' ');
+//        c = c.replace('\r', ' ');
+        AssertToken assertTok = new AssertToken(c, m, _ttype, $getText);
+        $setToken(assertTok);
+      } else {
+        $setType(Token.SKIP);
       }
-      AssertToken assertTok = new AssertToken(c, m, _ttype, $getText);
-      $setToken(assertTok);
     }
     ;
 
@@ -206,14 +210,16 @@ INVARIANT_CONDITION
   String c = null;
   String m = null;
 }
-    :	"@invariant" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:STRING_LITERAL { m = mesg.getText(); } SEMI)?
+    :   "@invariant" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:STRING_LITERAL { m = mesg.getText(); } SEMI)?
     {
       if(c != null) {
-        c = c.replace('\n', ' ');
-	c = c.replace('\r', ' ');
+//        c = c.replace('\n', ' ');
+//        c = c.replace('\r', ' ');
+        AssertToken assertTok = new AssertToken(c, m, _ttype, $getText);
+        $setToken(assertTok);
+      } else {
+        $setType(Token.SKIP);
       }
-      AssertToken assertTok = new AssertToken(c, m, _ttype, $getText);
-      $setToken(assertTok);
     }
     ;
 
@@ -227,55 +233,55 @@ INVARIANT_CONDITION
 // the FOLLOW ambig warnings.
 protected
 ESC
-    :	'\\'
-	(	'n'
-	|	'r'
-	|	't'
-	|	'b'
-	|	'f'
-	|	'"'
-	|	'\''
-	|	'\\'
-	|	('u')+ HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT 
-	|	('0'..'3')
-	    (
-		options {
-		    warnWhenFollowAmbig = false;
-		}
-	    :	('0'..'9')
-		(	
-		    options {
-			warnWhenFollowAmbig = false;
-		    }
-		:	'0'..'9'
-		)?
-	    )?
-	|	('4'..'7')
-	    (
-		options {
-		    warnWhenFollowAmbig = false;
-		}
-	    :	('0'..'9')
-	    )?
-	)
-	//{ Debug.println("Assert: got ESC #" + text + "#"); }
+    :   '\\'
+        (       'n'
+        |       'r'
+        |       't'
+        |       'b'
+        |       'f'
+        |       '"'
+        |       '\''
+        |       '\\'
+        |       ('u')+ HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT 
+        |       ('0'..'3')
+            (
+                options {
+                    warnWhenFollowAmbig = false;
+                }
+            :   ('0'..'9')
+                (       
+                    options {
+                        warnWhenFollowAmbig = false;
+                    }
+                :       '0'..'9'
+                )?
+            )?
+        |       ('4'..'7')
+            (
+                options {
+                    warnWhenFollowAmbig = false;
+                }
+            :   ('0'..'9')
+            )?
+        )
+        //{ Debug.println("Assert: got ESC #" + text + "#"); }
     ;
 
 
 // hexadecimal digit (again, note it's protected!)
 protected
 HEX_DIGIT
-    :	('0'..'9'|'A'..'F'|'a'..'f')
-	//{ Debug.println("Assert: got HEX_DIGIT #" + text + "#"); }
+    :   ('0'..'9'|'A'..'F'|'a'..'f')
+        //{ Debug.println("Assert: got HEX_DIGIT #" + text + "#"); }
     ;
 
 STAR_TEXT
   :
     (
-	{ LA(2) !='/' }? '*'
+        { LA(2) !='/' }? '*'
     )+
     {
-	  $setType(Token.SKIP);
+          $setType(Token.SKIP);
     }
   ;
     
@@ -283,10 +289,10 @@ STAR_TEXT
 JAVADOC_CLOSE
     :
     "*/"
-	{
-	  Debug.println("Assert: got end of javadoc comment #" + text + "#");
-	  JonsAssert.selector.pop();
+        {
+          Debug.println("Assert: got end of javadoc comment #" + text + "#");
+          JonsAssert.selector.pop();
       //JonsAssert.selector.push(JonsAssert.javaLexer);
-	}
+        }
     ;
 
