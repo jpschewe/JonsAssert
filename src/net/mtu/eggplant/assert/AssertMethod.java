@@ -10,10 +10,12 @@ package org.tcfreenet.schewe.assert;
 import org.tcfreenet.schewe.utils.StringPair;
 import org.tcfreenet.schewe.utils.Named;
 import org.tcfreenet.schewe.utils.Pair;
+import org.tcfreenet.schewe.utils.algorithms.Copying;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.List;
+import java.util.LinkedList;
 
 /**
    Object that contains the data needed to generate instrumented code for a
@@ -49,6 +51,8 @@ public class AssertMethod implements Named {
     _postConditions = postConditions;
     _theClass = theClass;
     _params = params;
+    _uniqueParams = new LinkedList();
+    Copying.copy(params, _uniqueParams);
     _retType = retType;
     _mods = mods;
     _exits = new HashSet(10);
@@ -146,6 +150,21 @@ public class AssertMethod implements Named {
     return _params;
   }
 
+  /**
+     Get the unique parameters for this method.  This is initialized to the
+     parameter list passed into the constructor.  If this object represents a
+     constructor then this list may be changed in a post processing phase
+     before code generation.
+   **/
+  public List getUniqueParams() {
+    return _uniqueParams;
+  }
+  private List _uniqueParams;
+  public void setUniqueParams(final List uniqueParams) {
+    _uniqueParams = uniqueParams;
+  }
+  
+  
   private String _retType;
   
   /**

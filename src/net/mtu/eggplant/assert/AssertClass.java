@@ -26,7 +26,8 @@ public class AssertClass implements Named {
      @param name the simple name of this class
      @param packageName the name of hte package this class is in
      @param isInterface true if this class represents an interface
-     @param enclosingClass the enclosing class, this can not be another anonymous class
+     @param enclosingClass the enclosing class, this can not be another
+     anonymous class, null if this is the outermost class
      @param isAnonymous true if this class represents an anonymous class
      @param superclass name of the superclass, null if none listed in the .java file
      @param interfaces list of interfaces implemented, this is where the list
@@ -38,6 +39,7 @@ public class AssertClass implements Named {
      
      @pre (interfaces != null)
      @pre (imports != null)
+     @pre (enclosingClass == null || !enclosingClass.isAnonymous)
   **/
   public AssertClass(final String name,
                      final String packageName,

@@ -208,10 +208,11 @@ public class CodeGenerator {
   static public String generateConstructorAssertions(final AssertMethod assertMethod) {
     final StringBuffer code = new StringBuffer();
     final String dummyClassName = assertMethod.getContainingClass().createDummyConstructorClassName();
+    final List uniqueParams = assertMethod.getUniqueParams();
     
     /*
       insert:
-      this(param0, param1, new AssertDummy#(param0, param1), true, ...);
+      this(param0, param1, true, ..., new AssertDummy#(param0, param1));
       checkInvariant(); //standard
       checkPostConditions(param0, param0, param1, param1); //standard
       }
@@ -220,7 +221,7 @@ public class CodeGenerator {
       checkPreConditions(param0, param1); //standard
       }
       }
-      private className(param0, param1, AssertDummy#, boolean, ...) {
+      private className(param0, param1, boolean, ..., AssertDummy#) {
     */
     code.append("this(");
     //put param names in here once

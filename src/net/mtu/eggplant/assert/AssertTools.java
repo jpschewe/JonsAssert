@@ -7,15 +7,26 @@
 */
 package org.tcfreenet.schewe.assert;
 
+import org.tcfreenet.schewe.utils.UnaryPredicate;
+import org.tcfreenet.schewe.utils.StringPair;
+import org.tcfreenet.schewe.utils.algorithms.Filtering;
+
 import java.lang.reflect.Method;
 
 import java.io.File;
 
 import java.util.StringTokenizer;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.List;
+import java.util.LinkedList;
+import java.util.Comparator;
+import java.util.Collections;
+import java.util.Iterator;
 
 /**
    class of static helper methods for assertions.
@@ -269,5 +280,226 @@ final public class AssertTools {
   static synchronized public boolean unlockMethod(final String signature) {
     return _lockedMethods.remove(signature);
   }
+
+  /**
+     <p>Calculate the unique parameters for all constructors for class and set
+     those values on the AssertMethod objects.  This is for creating a unique
+     parameter list for checking preconditions on constructors.  If in a class
+     there exists a constructor C1 such that there is another constructor C2
+     that has number parameters N+1, where N is the number of parameters to
+     C1, and the first N parameter types match exactly and the N+1 parameter
+     is not a primative there is a possibility for ambiguity errors with the
+     generated constructors.  So boolean parameters are added to such
+     constructors to guarentee uniqueness.</p>
+
+     <p>Here is an example:
+     
+     <pre>
+This won't work:
+public class A {
+  public A(int i) {
+    this(i, new AssertDummy(i));
+  }
+  private A(int i, AssertDummy ad) {
+    //generated to handle preconditions
+  }
+
+  public A(int i, int j) {
+   this(i, null);
+   //should call following constructor, but with generated constructor is ambiguous
+  }
   
+  public A(int i, Component c) {
+    //do something
+  }
+}
+This will work:
+public class A {
+  public A(int i) {
+    this(i, true, new AssertDummy(i));
+  }
+  private A(int i, boolean dummy0, AssertDummy ad) {
+    //generated to handle preconditions
+  }
+
+  public A(int i, int j) {
+   this(i, null);
+   //should call following constructor, and now will since the code is no longer ambigous
+  }
+  
+  public A(int i, Component c) {
+    //do something
+  }
+}
+     </pre>
+     </p>
+     
+     @pre (assertClass != null)
+  **/
+  static public void setUniqueParams(final AssertClass assertClass) {
+    final Set methods = assertClass.getMethods();
+
+    //Sort by parameter list size    
+    final SortedSet constructors = new TreeSet(CONSTRUCTOR_PARAM_COMPARATOR);
+    //Filter down to just constructors    
+    Filtering.select(methods, constructors, new UnaryPredicate() {
+      public boolean execute(final Object obj) {
+        return ((AssertMethod)obj).isConstructor();
+      }
+    });
+
+
+    /* Now do the smart stuff.  Take the first constructor off the SortedSet,
+    C1, and find out if there is any constructor, C2, whose parameter list is
+    one longer than the parameter list of C1.  If C2 exists, check if the
+    first N parameter types are equal, where N is the number of parameters to
+    C1.  If this is true and the last parameter, N+1, of C2 is not a primative
+    then add a boolean parameter.  Now check if this new parameter list
+    exactly matches an existing one, if so add another boolean parameter,
+    repeat until no more constructors parameter lists match exactly.  Then
+    requeue. */
+    
+    //keep dummy names unique
+    long dummyCount = 0;
+    while(constructors.size() > 1) {
+      final AssertMethod constructor = (AssertMethod)constructors.first();
+      constructors.remove(constructor); //maybe add it later
+      final List constructorParams = constructor.getUniqueParams();
+
+      //Check if we're done with the first loop
+      boolean done = false;
+      //Check if we've added extra parameters
+      boolean addedDummy = false;
+      final Iterator constructorIter = constructors.iterator();
+      while(constructorIter.hasNext() && !done) {
+        final AssertMethod compare = (AssertMethod)constructorIter.next();
+        final List compareParams = compare.getUniqueParams();
+        if(compareParams.size() == constructorParams.size()+1) {
+          //Need to check for exact list up to constructorParams.size()
+          boolean matches = true;
+          final Iterator paramIter = constructorParams.iterator();
+          final Iterator compareParamIter = compareParams.iterator();
+          while(paramIter.hasNext() && matches) {
+            final String paramType = ((StringPair)paramIter.next()).getStringOne();
+            final String compareParamType = ((StringPair)compareParamIter.next()).getStringOne();
+            if(!paramType.equals(compareParamType)) {
+              matches = false;
+            }
+          }
+          if(matches) {
+            final String lastCompareParamType = ((StringPair)compareParamIter.next()).getStringOne();
+            if(!isPrimative(lastCompareParamType)) {
+              constructorParams.add(new StringPair("boolean", "dummy" + dummyCount++));
+              //We're done for now
+              done = true;
+              addedDummy = true;
+            }
+          }
+        }
+      }
+
+      //Need to make sure we're still unique
+      if(addedDummy) {
+        //Keep working off the same iterator
+        done = false;
+        while(constructorIter.hasNext() && addedDummy && !done) {
+          //Now watch for new dummy added
+          addedDummy = false;
+          final AssertMethod compare = (AssertMethod)constructorIter.next();
+          final List compareParams = compare.getParams();
+          if(compareParams.size() == constructorParams.size()) {
+            //Possible conflict
+            boolean matches = true;
+            final Iterator paramIter = constructorParams.iterator();
+            final Iterator compareParamIter = compareParams.iterator();
+            while(paramIter.hasNext() && matches) {
+              final String paramType = ((StringPair)paramIter.next()).getStringOne();
+              final String compareParamType = ((StringPair)compareParamIter.next()).getStringOne();
+              if(!paramType.equals(compareParamType)) {
+                matches = false;
+              }
+            }
+            if(matches) {
+              constructorParams.add(new StringPair("boolean", "dummy" + dummyCount++));
+              //Need to try again
+              addedDummy = true;
+            }
+          } else if(compareParams.size() > constructorParams.size()) {
+            //We're all done, no more possible conflicts
+            done = true;
+          }
+        }
+
+        //Set new params
+        constructor.setUniqueParams(constructorParams);
+        //requeue
+        constructors.add(constructor);
+      }
+    }
+  }
+  
+  /**
+     Sort for constructors.  First by size of unique parameter list.  Then
+     string compare of parameter types, boolean are always last.  This makes
+     my uniqueness algorithm a little quicker.
+  **/
+  static private Comparator CONSTRUCTOR_PARAM_COMPARATOR = new Comparator() {
+    public boolean equals(final Object other) {
+      return other == this;
+    }
+    public int compare(final Object o1, final Object o2) {
+      if(o1.equals(o2)) {
+        return 0;
+      }
+      final List m1Params = ((AssertMethod)o1).getUniqueParams();
+      final List m2Params = ((AssertMethod)o2).getUniqueParams();
+      final int m1Size = m1Params.size();
+      final int m2Size = m2Params.size();
+      if(m1Size < m2Size) {
+        return -1;
+      } else if(m1Size > m2Size) {
+        return 1;
+      } else {
+        //Need total order, can't return 0.
+        //Check params and sort by Object name,
+        final Iterator m1Iterator = m1Params.iterator();
+        final Iterator m2Iterator = m2Params.iterator();
+        while(m1Iterator.hasNext()) {
+          final String m1Type = ((StringPair)m1Iterator.next()).getStringOne();
+          final String m2Type = ((StringPair)m2Iterator.next()).getStringOne();
+          if(m1Type.equals("boolean") && !m2Type.equals("boolean")) {
+            return 1;
+          } else if(!m1Type.equals("boolean") && m2Type.equals("boolean")) {
+            return -1;
+          } else {
+            final int stringCmp = m1Type.compareTo(m2Type);
+            if(stringCmp != 0) {
+              return stringCmp;
+            }
+          }
+        }
+        throw new RuntimeException("This should never happen");
+      }
+    }
+  };
+
+  /**
+     @param type String that represents a java type
+     
+     @return <tt>true</tt> if <tt>type</tt> represents a java primative
+
+     @pre (type != null)
+  **/
+  static public boolean isPrimative(final String type) {
+    return (type.equals("boolean")
+            || type.equals("byte")
+            || type.equals("char")
+            || type.equals("short")
+            || type.equals("int")
+            || type.equals("long")
+            || type.equals("float")
+            || type.equals("double"));
+  }
+  
+
 }

@@ -1,3 +1,22 @@
+2000-10-19  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* AssertTools.java: Added code to uniquify the parameters of a
+	constructor.  See setUniqueParams for a full explanation. 
+
+	* AssertMethod.java: Added the concept of unique parameters.  This
+	is really for generated constructors.  See
+	AssertTools.setUniqueParams for a full explanation.
+
+2000-10-17  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* AssertMethod.java: Made conditions and params properties Lists
+	and specified that the lists have the same order as the
+	corresponding lists in the source.
+
+	* AssertClass.java: Made interfaces property a list rather than a
+	set and specified that the list has the same order as the
+	implements line in the source.
+
 2000-10-15  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* CodeGenerator.java: Removed dependancy on gnu regexp package.
