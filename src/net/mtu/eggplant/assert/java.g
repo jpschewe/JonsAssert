@@ -44,43 +44,43 @@ import java.util.LinkedList;
  * Run 'java JonsAssert <directory full of java files>'
  *
  * Contributing authors:
- *		John Mitchell		johnm@non.net
- *		Terence Parr		parrt@magelang.com
- *		John Lilley			jlilley@empathy.com
- *		Scott Stanchfield	thetick@magelang.com
- *		Markus Mohnen       mohnen@informatik.rwth-aachen.de
- *		Peter Williams		pwilliams@netdynamics.com
+ *      John Mitchell       johnm@non.net
+ *      Terence Parr        parrt@magelang.com
+ *      John Lilley         jlilley@empathy.com
+ *      Scott Stanchfield   thetick@magelang.com
+ *      Markus Mohnen       mohnen@informatik.rwth-aachen.de
+ *      Peter Williams      pwilliams@netdynamics.com
  *
  * Version 1.00 December 9, 1997 -- initial release
  * Version 1.01 December 10, 1997
- *		fixed bug in octal def (0..7 not 0..8)
+ *      fixed bug in octal def (0..7 not 0..8)
  * Version 1.10 August 1998 (parrt)
- *		added tree construction
- *		fixed definition of WS,comments for mac,pc,unix newlines
- *		added unary plus
+ *      added tree construction
+ *      fixed definition of WS,comments for mac,pc,unix newlines
+ *      added unary plus
  * Version 1.11 (Nov 20, 1998)
- *		Added "shutup" option to turn off last ambig warning.
- *		Fixed inner class def to allow named class defs as statements
- *		synchronized requires compound not simple statement
- *		add [] after builtInType DOT class in primaryExpression
- *		"const" is reserved but not valid..removed from modifiers
+ *      Added "shutup" option to turn off last ambig warning.
+ *      Fixed inner class def to allow named class defs as statements
+ *      synchronized requires compound not simple statement
+ *      add [] after builtInType DOT class in primaryExpression
+ *      "const" is reserved but not valid..removed from modifiers
  *
  * Version 1.12 (Feb 2, 1999)
- *		Changed LITERAL_xxx to xxx in tree grammar.
- *		Updated java.g to use tokens {...} now for 2.6.0 (new feature).
+ *      Changed LITERAL_xxx to xxx in tree grammar.
+ *      Updated java.g to use tokens {...} now for 2.6.0 (new feature).
  *
  * Version 1.13 (Apr 23, 1999)
- *		Didn't have (stat)? for else clause in tree parser.
- *		Didn't gen ASTs for interface extends.  Updated tree parser too.
- *		Updated to 2.6.0.
+ *      Didn't have (stat)? for else clause in tree parser.
+ *      Didn't gen ASTs for interface extends.  Updated tree parser too.
+ *      Updated to 2.6.0.
  * Version 1.14 (Jun 20, 1999)
- *		Allowed final/abstract on local classes.
- *		Removed local interfaces from methods
- *		Put instanceof precedence where it belongs...in relationalExpr
- *			It also had expr not type as arg; fixed it.
- *		Missing ! on SEMI in classBlock
- *		fixed: (expr) + "string" was parsed incorrectly (+ as unary plus).
- *		fixed: didn't like Object[].class in parser or tree parser
+ *      Allowed final/abstract on local classes.
+ *      Removed local interfaces from methods
+ *      Put instanceof precedence where it belongs...in relationalExpr
+ *          It also had expr not type as arg; fixed it.
+ *      Missing ! on SEMI in classBlock
+ *      fixed: (expr) + "string" was parsed incorrectly (+ as unary plus).
+ *      fixed: didn't like Object[].class in parser or tree parser
  *
  * This grammar is in the PUBLIC DOMAIN
  *
@@ -175,9 +175,9 @@ tokens {
       StringBuffer codeFrag = new StringBuffer();
       Iterator iter = asserts.iterator();
       while(iter.hasNext()) {
-		AssertToken assertToken = (AssertToken)iter.next();
-		String code = CodeGenerator.generateAssertion(assertToken);
-		codeFrag.append(code);
+        AssertToken assertToken = (AssertToken)iter.next();
+        String code = CodeGenerator.generateAssertion(assertToken);
+        codeFrag.append(code);
       }
       CodeFragment codeFragment = new CodeFragment(new CodePoint(line, column), codeFrag.toString(), CodeFragmentType.ASSERT);
       getSymtab().addCodeFragment(codeFragment);
@@ -283,41 +283,42 @@ compilationUnit
     //FIX This parseSection bit is strange.  There's got to be a better way to
     //do this
 
-    // A compilation unit starts with an optional package definition and
-    // possibly some javadoc comments
-
+    // zero or more javadoc comments, ignore any conditions in these
     //( {parseSection==0}? (javadocComment)*
     //( {parseSection==0}? ( (javadocComment)* packageName=packageDefinition )
     //| /* nothing */
     //)
     //)
 
-    ( packageName=packageDefinition
-    | 
+    // optional package name
+    ( ( /* javadocComment* */ packageName=packageDefinition )
+    | /*nothing*/
     )
-    {
+    {//stuff to do after finding packageName
       getSymtab().setCurrentPackageName(packageName);
       Debug.println("just found the package");
       //Now we just need to check to make sure the destination file is older
       if(!getSymtab().getConfiguration().ignoreTimeStamp()) {
-		if(!getSymtab().isDestinationOlderThanCurrentFile(packageName)) {
-		  throw new FileAlreadyParsedException();
-		}
+        if(!getSymtab().isDestinationOlderThanCurrentFile(packageName)) {
+          // already parsed this file and force is off, skip it
+          throw new FileAlreadyParsedException();
+        }
       }
       //If we get here, either we're in force mode or the source file is newer
       //parseSection = 1;
       clearInvariants();
+
       //Put the print here so you don't see it unless we're really parsing the files
       System.out.println("  " + getSymtab().getCurrentFile().getFile().getAbsolutePath());
     }
-	
+    
     // Next we have a series of zero or more import statements with
     // intermingled javadoc comments
     ( /* (javadocComment)* */ importDefinition )*
 
     // Wrapping things up with any number of class or interface definitions
     // with their corresponding invariants
-	( (invariantCondition)* typeDefinition )*
+    ( (invariantCondition)* typeDefinition )*
     EOF
   ;
 
@@ -357,24 +358,31 @@ options {
 // Import statement: import followed by a package or class name
 importDefinition
 options {defaultErrorHandler = true;}
-  :	"import" identifierStar SEMI
+  : "import" identifierStar SEMI
   ;
 
 // A type definition in a file is either a class or interface definition.
 typeDefinition
 options {defaultErrorHandler = true;}
-  :	modifiers
+{
+  Set dummyMods;
+}
+  : dummyMods=modifiers
     ( classDefinition
     | interfaceDefinition
     )
-  |	SEMI
+  | SEMI
   ;
 
 /** A declaration is the creation of a reference or primitive-type variable
  *  Create a separate Type/Var tree for each var in the var list.
  */
 declaration
-  :	modifiers typeSpec variableDefinitions
+{
+  Set dummyMods;
+  Token dummyType;
+}
+  : dummyMods=modifiers dummyType=typeSpec variableDefinitions
   ;
 
 // A list of zero or more modifiers.  We could have used (modifier)* in
@@ -389,7 +397,7 @@ modifiers returns [Set mods]
   mods = new HashSet(10);
   Token mod = null;
 }
-  :	( mod = modifier { mods.add(mod.getText()); } )*
+  : ( mod = modifier { mods.add(mod.getText()); } )*
   ;
 
 
@@ -416,7 +424,7 @@ classTypeSpec returns [Token id]
   id = null;
 }
     :
-	id=identifier (LBRACK RBRACK { id.setText(id.getText() + "[]"); } )*
+    id=identifier (LBRACK RBRACK { id.setText(id.getText() + "[]"); } )*
   ;
 
 // A builtin type specification is a builtin type with possible brackets
@@ -428,7 +436,7 @@ builtInTypeSpec returns [Token id]
 {
   id = null;
 }
-  :	id=builtInType (LBRACK RBRACK { id.setText(id.getText() + "[]"); } )*
+  : id=builtInType (LBRACK RBRACK { id.setText(id.getText() + "[]"); } )*
   ;
 
 // A type name. which is either a (possibly qualified) class name or
@@ -440,8 +448,8 @@ type returns [Token t]
 {
   t = null;
 }
-  :	t=identifier
-  |	t=builtInType
+  : t=identifier
+  | t=builtInType
   ;
 
 // The primitive types.
@@ -450,15 +458,15 @@ type returns [Token t]
 **/
 builtInType returns [Token t]
 { t = null; }
-  :	tvoid:"void" { t = tvoid; }
-  |	tboolean:"boolean" { t = tboolean; }
-  |	tbyte:"byte" { t = tbyte; }
-  |	tchar:"char" { t = tchar; }
-  |	tshort:"short" { t = tshort; }
-  |	tint:"int" { t = tint; }
-  |	tfloat:"float" { t = tfloat; }
-  |	tlong:"long" { t = tlong; }
-  |	tdouble:"double" { t = tdouble; }
+  : tvoid:"void" { t = tvoid; }
+  | tboolean:"boolean" { t = tboolean; }
+  | tbyte:"byte" { t = tbyte; }
+  | tchar:"char" { t = tchar; }
+  | tshort:"short" { t = tshort; }
+  | tint:"int" { t = tint; }
+  | tfloat:"float" { t = tfloat; }
+  | tlong:"long" { t = tlong; }
+  | tdouble:"double" { t = tdouble; }
   ;
 
 /**
@@ -496,12 +504,12 @@ identifierStar
   :
     id:IDENT        { className = id.getText(); }
     ( DOT id2:IDENT
-	 { packageName += "." + className; className = id2.getText(); } )*
+     { packageName += "." + className; className = id2.getText(); } )*
     ( DOT STAR      { packageName += "." + className; className = null; } )?
 
     {
-	 // tell the symbol table about the import
-	 getSymtab().addImport(className, packageName);
+     // tell the symbol table about the import
+     getSymtab().addImport(className, packageName);
     }
   ;
 
@@ -511,18 +519,18 @@ modifier returns [Token t]
 {
   t = null;
 }
-  :	tprivate:"private" { t = tprivate; }
-  |	tpublic:"public" { t = tpublic; }
-  |	tprotected:"protected" { t = tprotected; }
-  |	tstatic:"static" { t = tstatic; }
-  |	ttransient:"transient" { t = ttransient; }
-  |	tfinal:"final" { t = tfinal; }
-  |	tabstract:"abstract" { t = tabstract; }
-  |	tnative:"native" { t = tnative; }
-  |	tthreadsafe:"threadsafe" { t = tthreadsafe; }
-  |	tsynchronized:"synchronized" { t = tsynchronized; }
-    //	|	tconst:"const"	{ t = tconst; }		// reserved word; leave out
-  |	tvolatile:"volatile" { t = tvolatile; }
+  : tprivate:"private" { t = tprivate; }
+  | tpublic:"public" { t = tpublic; }
+  | tprotected:"protected" { t = tprotected; }
+  | tstatic:"static" { t = tstatic; }
+  | ttransient:"transient" { t = ttransient; }
+  | tfinal:"final" { t = tfinal; }
+  | tabstract:"abstract" { t = tabstract; }
+  | tnative:"native" { t = tnative; }
+  | tthreadsafe:"threadsafe" { t = tthreadsafe; }
+  | tsynchronized:"synchronized" { t = tsynchronized; }
+    //  |   tconst:"const"  { t = tconst; }     // reserved word; leave out
+  | tvolatile:"volatile" { t = tvolatile; }
   ;
 
 
@@ -532,13 +540,13 @@ classDefinition
   String name = null;
   Token superclass = null;
 }
-  :	"class" id:IDENT
+  : "class" id:IDENT
     {
       if(getSymtab().getCurrentClass() != null) {
-	name = getSymtab().getCurrentClass().getName() + "$" + id.getText();
+    name = getSymtab().getCurrentClass().getName() + "$" + id.getText();
       }
       else {
-	name = id.getText();
+    name = id.getText();
       }
     }
     // it _might_ have a superclass...
@@ -552,7 +560,7 @@ classDefinition
 
 superClassClause returns [Token id]
 { id = null; }
-  :	( "extends" id=identifier )?
+  : ( "extends" id=identifier )?
   ;
 
 // Definition of a Java Interface
@@ -560,13 +568,13 @@ interfaceDefinition
 {
   String name = null;
 }
-  :	"interface" id:IDENT
+  : "interface" id:IDENT
     {
       if(getSymtab().getCurrentClass() != null) {
-	name = getSymtab().getCurrentClass().getName() + "$" + id.getText();
+    name = getSymtab().getCurrentClass().getName() + "$" + id.getText();
       }
       else {
-	name = id.getText();
+    name = id.getText();
       }
     }
     
@@ -616,7 +624,7 @@ prePostField
 //[jpschewe:20000102.1415CST] FIX need stuff here too, this could get messy
 interfaceExtends
 { Token id, id2; }
-  :	(
+  : (
       "extends"
       id=identifier ( COMMA id2=identifier )*
     )?
@@ -626,7 +634,7 @@ interfaceExtends
 //[jpschewe:20000102.1414CST] FIX need stuff here
 implementsClause
 { Token id, id2; }
-  :	(
+  : (
       "implements" id=identifier { parseImplementedInterface(id); }
       ( COMMA id2=identifier { parseImplementedInterface(id2); } )*
     )?
@@ -645,6 +653,7 @@ field
   List params = null;
   boolean methodOrConstructor = false;
   CodePointPair startEnd = null;
+  CodePointPair dummyStartEnd;
   Set thrownExceptions = null;
   Pair p = null;
 }
@@ -654,72 +663,72 @@ field
       // method, constructor, or variable declaration
       //need to do something special for abstract and native methods here
       mods=modifiers
-      (	p=ctorHead
-	{
-	  params = (List)p.getOne();
-	  thrownExceptions = (Set)p.getTwo();
-	  // needs to be before compoundStatement so that I can have it set for the addExit calls
-	  getSymtab().startMethod(null, getPreConditions(), getPostConditions(), params, null, mods);
-	  clearPreConditions();
-	  clearPostConditions();
-	  //print("just called startMethod for constructor");
-	}
-	startEnd=compoundStatement // constructor
-	{
-	  getSymtab().finishMethod(startEnd, thrownExceptions);
-	  //print("Found finish: " + methodName);
-	}
-	
+      ( p=ctorHead
+    {
+      params = (List)p.getOne();
+      thrownExceptions = (Set)p.getTwo();
+      // needs to be before compoundStatement so that I can have it set for the addExit calls
+      getSymtab().startMethod(null, getPreConditions(), getPostConditions(), params, null, mods);
+      clearPreConditions();
+      clearPostConditions();
+      //print("just called startMethod for constructor");
+    }
+    startEnd=compoundStatement // constructor
+    {
+      getSymtab().finishMethod(startEnd, thrownExceptions);
+      //print("Found finish: " + methodName);
+    }
+    
 
-      |	classDefinition       // inner class
-	
-      |	interfaceDefinition   // inner interface
+      | classDefinition       // inner class
+    
+      | interfaceDefinition   // inner interface
 
-      |	retType=typeSpec  // method or variable declaration(s)
-	(	methodName:IDENT  // the name of the method
-	  
-	  // parse the formal parameter declarations.
-	  LPAREN params=parameterDeclarationList
-	  {
-	    // needs to be before compoundStatement so that I can have it set for the addExit calls
-	    getSymtab().startMethod(methodName.getText(), getPreConditions(), getPostConditions(), params, retType.getText(), mods);
-	    //print("just called startMethod: " + methodName.getText());
-	    clearPreConditions();
-	    clearPostConditions();
-	  }
-	  RPAREN
+      | retType=typeSpec  // method or variable declaration(s)
+    (   methodName:IDENT  // the name of the method
+      
+      // parse the formal parameter declarations.
+      LPAREN params=parameterDeclarationList
+      {
+        // needs to be before compoundStatement so that I can have it set for the addExit calls
+        getSymtab().startMethod(methodName.getText(), getPreConditions(), getPostConditions(), params, retType.getText(), mods);
+        //print("just called startMethod: " + methodName.getText());
+        clearPreConditions();
+        clearPostConditions();
+      }
+      RPAREN
 
-	  returnTypeBrackersOnEndOfMethodHead
+      returnTypeBrackersOnEndOfMethodHead
 
-	  // get the list of exceptions that this method is declared to throw
-	  (thrownExceptions=throwsClause)?
-	  ( startEnd=compoundStatement | semi:SEMI )
-	  {
-	    if(startEnd != null) {
-	      getSymtab().finishMethod(startEnd, thrownExceptions);
-	    }
-	    else {
-	      //abstract, native or interface method
-	      CodePoint close = new CodePoint(semi.getLine(), semi.getColumn()-1);
-	      getSymtab().finishMethod(new CodePointPair(close, close), null);
-	    }
-	    //print("Found finish: " + methodName);
-	  }
-	|	variableDefinitions SEMI
-	)
+      // get the list of exceptions that this method is declared to throw
+      (thrownExceptions=throwsClause)?
+      ( startEnd=compoundStatement | semi:SEMI )
+      {
+        if(startEnd != null) {
+          getSymtab().finishMethod(startEnd, thrownExceptions);
+        }
+        else {
+          //abstract, native or interface method
+          CodePoint close = new CodePoint(semi.getLine(), semi.getColumn()-1);
+          getSymtab().finishMethod(new CodePointPair(close, close), null);
+        }
+        //print("Found finish: " + methodName);
+      }
+    |   variableDefinitions SEMI
+    )
       )
 
       // "static { ... }" class initializer
-    |	"static" compoundStatement
+    |   "static" dummyStartEnd=compoundStatement
 
       // "{ ... }" instance initializer
-    |	compoundStatement
+    |   dummyStartEnd=compoundStatement
     )
   ;
 
 variableDefinitions
-  :	variableDeclarator
-    (	COMMA
+  : variableDeclarator
+    (   COMMA
       variableDeclarator
     )*
   ;
@@ -729,7 +738,7 @@ variableDefinitions
  * It can also include possible initialization.
  */
 variableDeclarator
-  :	IDENT declaratorBrackets varInitializer
+  : IDENT declaratorBrackets varInitializer
   ;
 
 declaratorBrackets
@@ -738,23 +747,23 @@ declaratorBrackets
   ;
 
 varInitializer
-  :	( ASSIGN initializer )?
+  : ( ASSIGN initializer )?
   ;
 
 // This is an initializer used to set up an array.
 arrayInitializer
-  :	LCURLY
-    (	initializer
+  : LCURLY
+    (   initializer
       (
-	// CONFLICT: does a COMMA after an initializer start a new
-	//           initializer or start the option ',' at end?
-	//           ANTLR generates proper code by matching
-	//			 the comma as soon as possible.
-	options {
-	  warnWhenFollowAmbig = false;
-	}
+    // CONFLICT: does a COMMA after an initializer start a new
+    //           initializer or start the option ',' at end?
+    //           ANTLR generates proper code by matching
+    //           the comma as soon as possible.
+    options {
+      warnWhenFollowAmbig = false;
+    }
       :
-	COMMA initializer
+    COMMA initializer
       )*
       (COMMA)?
     )?
@@ -765,8 +774,8 @@ arrayInitializer
 // The two "things" that can initialize an array element are an expression
 //   and another (nested) array initializer.
 initializer
-  :	expression
-  |	arrayInitializer
+  : expression
+  | arrayInitializer
   ;
 
 /**
@@ -807,7 +816,7 @@ throwsClause returns [Set exceptions]
   exceptions = new HashSet(10);
   Token id, id2;
 }
-  :	"throws" id=identifier { exceptions.add(id.getText()); }
+  : "throws" id=identifier { exceptions.add(id.getText()); }
     ( COMMA id2=identifier {exceptions.add(id2.getText()); } )*
   ;
 
@@ -823,7 +832,7 @@ parameterDeclarationList returns [List params]
   params = new LinkedList();
   StringPair pd = null;
 }
-  :	( pd=parameterDeclaration { params.add(pd); } ( COMMA pd=parameterDeclaration { params.add(pd); } )* )?
+  : ( pd=parameterDeclaration { params.add(pd); } ( COMMA pd=parameterDeclaration { params.add(pd); } )* )?
   ;
 
 // A formal parameter.
@@ -833,12 +842,12 @@ parameterDeclaration returns [StringPair sp]
   Token type;
   sp = null;
 }
-  :	parameterModifier type=typeSpec name:IDENT
+  : parameterModifier type=typeSpec name:IDENT
     brackets=parameterDeclaratorBrackets
     {
       String typeText = type.getText();
       if(brackets.length() > 0) {
-	typeText += brackets.toString();
+        typeText += brackets.toString();
       }
       sp = new StringPair(typeText, name.getText());
     }
@@ -848,12 +857,12 @@ parameterDeclaratorBrackets returns [StringBuffer text]
 {
   text = new StringBuffer();
 }
-  :	
+  : 
     (lb:LBRACK rb:RBRACK { text.append("[]"); } )*
   ;
 
 parameterModifier
-  :	("final")?
+  : ("final")?
   ;
 
 /**
@@ -890,7 +899,7 @@ compoundStatement returns [CodePointPair startEnd]
 {
   startEnd = null;
 }
-  :	
+  : 
     (
       lc:LCURLY
       // include the (possibly-empty) list of statements
@@ -906,95 +915,97 @@ compoundStatement returns [CodePointPair startEnd]
 
 
 statement
-
+{
+  CodePointPair dummyStartEnd;
+}
   :
 
     // A list of statements in curly braces -- start a new scope!    
-    compoundStatement
+    dummyStartEnd=compoundStatement
 
-	// class definition
-    |	classDefinition
+    // class definition
+    |   classDefinition
 
-	// final class definition
-    |	"final" classDefinition
+    // final class definition
+    |   "final" classDefinition
 
-	// abstract class definition
-    |	"abstract" classDefinition
+    // abstract class definition
+    |   "abstract" classDefinition
 
-	// declarations are ambiguous with "ID DOT" relative to expression
-	// statements.  Must backtrack to be sure.  Could use a semantic
-	// predicate to test symbol table to see what the type was coming
-	// up, but that's pretty hard without a symbol table ;)
-    |	(declaration)=> declaration SEMI
+    // declarations are ambiguous with "ID DOT" relative to expression
+    // statements.  Must backtrack to be sure.  Could use a semantic
+    // predicate to test symbol table to see what the type was coming
+    // up, but that's pretty hard without a symbol table ;)
+    |   (declaration)=> declaration SEMI
 
-	// An expression statement.  This could be a method call,
-	// assignment statement, or any other expression evaluated for
-	// side-effects.
-    |	expression SEMI
+    // An expression statement.  This could be a method call,
+    // assignment statement, or any other expression evaluated for
+    // side-effects.
+    |   expression SEMI
 
-	// Attach a label to the front of a statement
-    |	IDENT COLON statement
+    // Attach a label to the front of a statement
+    |   IDENT COLON statement
 
-	// If-else statement
-    |	"if" LPAREN expression RPAREN statement
-	(
-	    // CONFLICT: the old "dangling-else" problem...
-	    //           ANTLR generates proper code matching
-	    //			 as soon as possible.  Hush warning.
-	    options {
-		warnWhenFollowAmbig = false;
-	    }
-	:
-	    "else" statement
-	)?
+    // If-else statement
+    |   "if" LPAREN expression RPAREN statement
+    (
+        // CONFLICT: the old "dangling-else" problem...
+        //           ANTLR generates proper code matching
+        //           as soon as possible.  Hush warning.
+        options {
+        warnWhenFollowAmbig = false;
+        }
+    :
+        "else" statement
+    )?
 
-	// For statement
-    |	"for"
-	LPAREN
-	forInit SEMI   // initializer
-	forCond	SEMI   // condition test
-	forIter         // updater
-	RPAREN
-	statement                     // statement to loop over
+    // For statement
+    |   "for"
+    LPAREN
+    forInit SEMI   // initializer
+    forCond SEMI   // condition test
+    forIter         // updater
+    RPAREN
+    statement                     // statement to loop over
 
-	// While statement
-    |	"while" LPAREN expression RPAREN statement
+    // While statement
+    |   "while" LPAREN expression RPAREN statement
 
-	// do-while statement
-    |	"do" statement "while" LPAREN expression RPAREN SEMI
+    // do-while statement
+    |   "do" statement "while" LPAREN expression RPAREN SEMI
 
-	// get out of a loop (or switch)
-    |	"break" (IDENT)? SEMI
+    // get out of a loop (or switch)
+    |   "break" (IDENT)? SEMI
 
-	// do next iteration of a loop
-    |	"continue" (IDENT)? SEMI
+    // do next iteration of a loop
+    |   "continue" (IDENT)? SEMI
 
-	// Return an expression
-    |	ret:"return" (expression)? semi:SEMI
+    // Return an expression
+    |   ret:"return" (expression)? semi:SEMI
       {
-	//keep track of these points for post conditions
-	CodePoint retcp = new CodePoint(ret.getLine(), ret.getColumn()-1);
-	//add 1 so that code is inserted after the semi colon
-	CodePoint semicp = new CodePoint(semi.getLine(), semi.getColumn());
-	getSymtab().getCurrentMethod().addExit(new CodePointPair(retcp, semicp));
+    //keep track of these points for post conditions
+    CodePoint retcp = new CodePoint(ret.getLine(), ret.getColumn()-1);
+    //add 1 so that code is inserted after the semi colon
+    CodePoint semicp = new CodePoint(semi.getLine(), semi.getColumn());
+    getSymtab().getCurrentMethod().addExit(new CodePointPair(retcp, semicp));
       }
 
-	// switch/case statement
-    |	"switch" LPAREN expression RPAREN LCURLY
-	( casesGroup )*
-	RCURLY
+    // switch/case statement
+    |   "switch" LPAREN expression RPAREN LCURLY
+    ( casesGroup )*
+    RCURLY
 
-	// exception try-catch block
-    |	tryBlock
+    // exception try-catch block
+    |   tryBlock
 
-	// throw an exception
-    |	"throw" expression SEMI
+    // throw an exception
+    |   "throw" expression SEMI
 
-	// synchronize a statement
-    |	"synchronized" LPAREN expression RPAREN compoundStatement
+    // synchronize a statement
+    |   "synchronized" LPAREN expression RPAREN dummyStartEnd=compoundStatement
 
-	// empty statement
-    |	SEMI
+    // empty statement
+    |   SEMI
       
       //assertion, checks invariants too for the class definitions allowed in statement
     |   assertOrInvariantCondition
@@ -1002,12 +1013,12 @@ statement
 
 
 casesGroup
-  :	(	// CONFLICT: to which case group do the statements bind?
+  : (   // CONFLICT: to which case group do the statements bind?
       //           ANTLR generates proper code: it groups the
       //           many "case"/"default" labels together then
       //           follows them with the statements
       options {
-	warnWhenFollowAmbig = false;
+    warnWhenFollowAmbig = false;
       }
     :
       aCase
@@ -1016,41 +1027,48 @@ casesGroup
   ;
 
 aCase
-  :	("case" expression | "default") COLON
+  : ("case" expression | "default") COLON
   ;
 
 caseSList
-  :	(statement)*
+  : (statement)*
   ;
 
 // The initializer for a for loop
 forInit
 // if it looks like a declaration, it is
-  :	(	(declaration)=> declaration
+  : (   (declaration)=> declaration
       // otherwise it could be an expression list...
-    |	expressionList
+    |   expressionList
     )?
   ;
 
 forCond
-  :	(expression)?
+  : (expression)?
   ;
 
 forIter
-  :	(expressionList)?
+  : (expressionList)?
   ;
 
 // an exception handler try/catch block
 tryBlock
-    :	"try" compoundStatement
+{
+  CodePointPair dummyStartEnd;
+}
+    :   "try" dummyStartEnd=compoundStatement
     (handler)*
-    ( "finally" compoundStatement )?
+    ( "finally" dummyStartEnd=compoundStatement )?
   ;
 
 
 // an exception handler
 handler
-  :	"catch" LPAREN parameterDeclaration RPAREN compoundStatement
+{
+  CodePointPair dummyStartEnd;
+  StringPair dummyParams;
+}
+  : "catch" LPAREN dummyParams=parameterDeclaration RPAREN dummyStartEnd=compoundStatement
   ;
 
 
@@ -1095,7 +1113,7 @@ handler
 
 **/
 expression
-  :	assignmentExpression
+  : assignmentExpression
   ;
 
 
@@ -1103,14 +1121,14 @@ expression
    This is a list of expressions.
 **/
 expressionList
-  :	expression (COMMA expression)*
+  : expression (COMMA expression)*
   ;
 
 
 // assignment expression (level 13)
 assignmentExpression
-  :	conditionalExpression
-    (	(	ASSIGN
+  : conditionalExpression
+    (   (   ASSIGN
       |   PLUS_ASSIGN
       |   MINUS_ASSIGN
       |   STAR_ASSIGN
@@ -1130,7 +1148,7 @@ assignmentExpression
 
 // conditional test (level 12)
 conditionalExpression
-  :	logicalOrExpression
+  : logicalOrExpression
     ( QUESTION conditionalExpression COLON conditionalExpression )?
   ;
 
@@ -1140,7 +1158,7 @@ conditionalExpression
 
 **/
 logicalOrExpression
-  :	logicalAndExpression (LOR logicalAndExpression)*
+  : logicalAndExpression (LOR logicalAndExpression)*
   ;
 
 
@@ -1149,7 +1167,7 @@ logicalOrExpression
 
 **/
 logicalAndExpression
-  :	inclusiveOrExpression (LAND inclusiveOrExpression)*
+  : inclusiveOrExpression (LAND inclusiveOrExpression)*
   ;
 
 
@@ -1158,7 +1176,7 @@ logicalAndExpression
 
 **/
 inclusiveOrExpression
-  :	exclusiveOrExpression (BOR exclusiveOrExpression)*
+  : exclusiveOrExpression (BOR exclusiveOrExpression)*
   ;
 
 
@@ -1166,7 +1184,7 @@ inclusiveOrExpression
    exclusive or (^)  (level 8)
 **/
 exclusiveOrExpression
-  :	andExpression (BXOR andExpression)*
+  : andExpression (BXOR andExpression)*
   ;
 
 
@@ -1175,7 +1193,7 @@ exclusiveOrExpression
 
 **/
 andExpression
-  :	equalityExpression (BAND equalityExpression)*
+  : equalityExpression (BAND equalityExpression)*
   ;
 
 
@@ -1184,7 +1202,7 @@ andExpression
 
 **/
 equalityExpression
-  :	relationalExpression ((NOT_EQUAL | EQUAL) relationalExpression)*
+  : relationalExpression ((NOT_EQUAL | EQUAL) relationalExpression)*
   ;
 
 
@@ -1193,17 +1211,20 @@ equalityExpression
 
 **/
 relationalExpression
-  :	shiftExpression
+{
+  Token dummyType;
+}
+  : shiftExpression
     (
       (
-	(LT
-	|	GT
-	|	LE
-	|	GE
-	)
-	shiftExpression
+    (LT
+    |   GT
+    |   LE
+    |   GE
+    )
+    shiftExpression
       )*
-    |	"instanceof" typeSpec
+    |   "instanceof" dummyType=typeSpec
     )
   ;
 
@@ -1213,7 +1234,7 @@ relationalExpression
 
 **/
 shiftExpression
-  :	additiveExpression ((SL | SR | BSR) additiveExpression)*
+  : additiveExpression ((SL | SR | BSR) additiveExpression)*
   ;
 
 
@@ -1221,7 +1242,7 @@ shiftExpression
    binary addition/subtraction (level 3)
 **/
 additiveExpression
-  :	multiplicativeExpression ((PLUS | MINUS) multiplicativeExpression)*
+  : multiplicativeExpression ((PLUS | MINUS) multiplicativeExpression)*
   ;
 
 
@@ -1230,40 +1251,43 @@ additiveExpression
 
 **/
 multiplicativeExpression
-  :	unaryExpression ((STAR | DIV | MOD ) unaryExpression)*
+  : unaryExpression ((STAR | DIV | MOD ) unaryExpression)*
   ;
 
 unaryExpression
-  :	INC unaryExpression
-  |	DEC unaryExpression
-  |	MINUS unaryExpression
-  |	PLUS  unaryExpression
-  |	unaryExpressionNotPlusMinus
+  : INC unaryExpression
+  | DEC unaryExpression
+  | MINUS unaryExpression
+  | PLUS  unaryExpression
+  | unaryExpressionNotPlusMinus
   ;
 
 unaryExpressionNotPlusMinus
-  :	BNOT unaryExpression
-  |	LNOT unaryExpression
+{
+  Token dummyToken;
+}
+  : BNOT unaryExpression
+  | LNOT unaryExpression
 
-  |	(	// subrule allows option to shut off warnings
+  | (   // subrule allows option to shut off warnings
       options {
-	// "(int" ambig with postfixExpr due to lack of sequence
-	// info in linear approximate LL(k).  It's ok.  Shut up.
-	generateAmbigWarnings=false;
+        // "(int" ambig with postfixExpr due to lack of sequence
+        // info in linear approximate LL(k).  It's ok.  Shut up.
+        generateAmbigWarnings=false;
       }
-    :	// If typecast is built in type, must be numeric operand
+    :   // If typecast is built in type, must be numeric operand
       // Also, no reason to backtrack if type keyword like int, float...
-      LPAREN builtInTypeSpec RPAREN
+      LPAREN dummyToken=builtInTypeSpec RPAREN
       unaryExpression
 
       // Have to backtrack to see if operator follows.  If no operator
       // follows, it's a typecast.  No semantic checking needed to parse.
       // if it _looks_ like a cast, it _is_ a cast; else it's a "(expr)"
-    |	(LPAREN classTypeSpec RPAREN unaryExpressionNotPlusMinus)=>
-      LPAREN classTypeSpec RPAREN
+    |   (LPAREN classTypeSpec RPAREN unaryExpressionNotPlusMinus)=>
+      LPAREN dummyToken=classTypeSpec RPAREN
       unaryExpressionNotPlusMinus
 
-    |	postfixExpression
+    |   postfixExpression
     )
   ;
 
@@ -1273,9 +1297,9 @@ unaryExpressionNotPlusMinus
 **/
 postfixExpression
 { Token id; }
-  :	primaryExpression // start with a primary
+  : primaryExpression // start with a primary
 
-    (	// qualified id (id.id.id.id...) -- build the name
+    (   // qualified id (id.id.id.id...) -- build the name
       DOT ( IDENT
       | "this"
       | "class"
@@ -1286,31 +1310,31 @@ postfixExpression
       //   is the _last_ qualifier.
 
       // allow ClassName[].class
-    |	( LBRACK RBRACK )+
+    |   ( LBRACK RBRACK )+
       DOT "class"
 
       // an array indexing operation
-    |	LBRACK expression RBRACK
+    |   LBRACK expression RBRACK
 
       // method invocation
       // The next line is not strictly proper; it allows x(3)(4) or
       //  x[2](4) which are not valid in Java.  If this grammar were used
       //  to validate a Java program a semantic check would be needed, or
       //   this rule would get really ugly...
-    |	LPAREN
+    |   LPAREN
       argList
       RPAREN
     )*
 
     // possibly add on a post-increment or post-decrement.
     // allows INC/DEC on too much, but semantics can check
-    (	INC
-    |	DEC
-    |	// nothing
+    (   INC
+    |   DEC
+    |   // nothing
     )
 
     // look for int.class and int[].class
-  |	id=builtInType 
+  | id=builtInType 
     ( LBRACK RBRACK )*
     DOT "class"
   ;
@@ -1319,15 +1343,15 @@ postfixExpression
    the basic element of an expression
 **/
 primaryExpression
-  :	IDENT
-  |	newExpression
-  |	constant
-  |	"super"
-  |	"true"
-  |	"false"
-  |	"this"
-  |	"null"
-  |	LPAREN assignmentExpression RPAREN
+  : IDENT
+  | newExpression
+  | constant
+  | "super"
+  | "true"
+  | "false"
+  | "this"
+  | "null"
+  | LPAREN assignmentExpression RPAREN
   ;
 
 /**
@@ -1335,12 +1359,12 @@ primaryExpression
 **/
 newExpression
 { Token t; }
-  :	"new" t=type
-    (	LPAREN argList RPAREN ( classBlock[null, false, true, t] )?
+  : "new" t=type
+    (   LPAREN argList RPAREN ( classBlock[null, false, true, t] )?
 
       //[jpschewe:20000128.0740CST] FIX need to use t to figure out what
       //interfaces we need to check conditions on.
-	    
+        
       //java 1.1
       // Note: This will allow bad constructs like
       //    new int[4][][3] {exp,exp}.
@@ -1349,25 +1373,25 @@ newExpression
       //   a) [ expr ] and [ ] are not mixed
       //   b) [ expr ] and an init are not used together
 
-    |	newArrayDeclarator (arrayInitializer)?
+    |   newArrayDeclarator (arrayInitializer)?
     )
   ;
 
 argList
-  :	(	expressionList
-    |	/*nothing*/
+  : (   expressionList
+    |   /*nothing*/
     )
   ;
 
 newArrayDeclarator
-  :	(
+  : (
       // CONFLICT:
       // newExpression is a primaryExpression which can be
       // followed by an array index reference.  This is ok,
       // as the generated code will stay in this loop as
       // long as it sees an LBRACK (proper behavior)
       options {
-	warnWhenFollowAmbig = false;
+    warnWhenFollowAmbig = false;
       }
     :
       LBRACK
@@ -1377,10 +1401,10 @@ newArrayDeclarator
   ;
 
 constant
-  :	NUM_INT
-  |	CHAR_LITERAL
-  |	STRING_LITERAL
-  |	NUM_FLOAT
+  : NUM_INT
+  | CHAR_LITERAL
+  | STRING_LITERAL
+  | NUM_FLOAT
   ;
 
 
@@ -1395,75 +1419,75 @@ options {
 }
 
 // OPERATORS
-QUESTION		:	'?'		;
-LPAREN			:	'('		;
-RPAREN			:	')'		;
-LBRACK			:	'['		;
-RBRACK			:	']'		;
-LCURLY			:	'{'		;
-RCURLY			:	'}'		;
-COLON			:	':'		;
-COMMA			:	','		;
-//DOT			:	'.'		;
-ASSIGN			:	'='		;
-EQUAL			:	"=="	;
-LNOT			:	'!'		;
-BNOT			:	'~'		;
-NOT_EQUAL		:	"!="	;
-DIV				:	'/'		;
-DIV_ASSIGN		:	"/="	;
-PLUS			:	'+'		;
-PLUS_ASSIGN		:	"+="	;
-INC				:	"++"	;
-MINUS			:	'-'		;
-MINUS_ASSIGN	:	"-="	;
-DEC				:	"--"	;
-STAR			:	'*'		;
-STAR_ASSIGN		:	"*="	;
-MOD				:	'%'		;
-MOD_ASSIGN		:	"%="	;
-SR				:	">>"	;
-SR_ASSIGN		:	">>="	;
-BSR				:	">>>"	;
-BSR_ASSIGN		:	">>>="	;
-GE				:	">="	;
-GT				:	">"		;
-SL				:	"<<"	;
-SL_ASSIGN		:	"<<="	;
-LE				:	"<="	;
-LT				:	'<'		;
-BXOR			:	'^'		;
-BXOR_ASSIGN		:	"^="	;
-BOR				:	'|'		;
-BOR_ASSIGN		:	"|="	;
-LOR				:	"||"	;
-BAND			:	'&'		;
-BAND_ASSIGN		:	"&="	;
-LAND			:	"&&"	;
-SEMI			:	';'		;
+QUESTION        :   '?'     ;
+LPAREN          :   '('     ;
+RPAREN          :   ')'     ;
+LBRACK          :   '['     ;
+RBRACK          :   ']'     ;
+LCURLY          :   '{'     ;
+RCURLY          :   '}'     ;
+COLON           :   ':'     ;
+COMMA           :   ','     ;
+//DOT           :   '.'     ;
+ASSIGN          :   '='     ;
+EQUAL           :   "=="    ;
+LNOT            :   '!'     ;
+BNOT            :   '~'     ;
+NOT_EQUAL       :   "!="    ;
+DIV             :   '/'     ;
+DIV_ASSIGN      :   "/="    ;
+PLUS            :   '+'     ;
+PLUS_ASSIGN     :   "+="    ;
+INC             :   "++"    ;
+MINUS           :   '-'     ;
+MINUS_ASSIGN    :   "-="    ;
+DEC             :   "--"    ;
+STAR            :   '*'     ;
+STAR_ASSIGN     :   "*="    ;
+MOD             :   '%'     ;
+MOD_ASSIGN      :   "%="    ;
+SR              :   ">>"    ;
+SR_ASSIGN       :   ">>="   ;
+BSR             :   ">>>"   ;
+BSR_ASSIGN      :   ">>>="  ;
+GE              :   ">="    ;
+GT              :   ">"     ;
+SL              :   "<<"    ;
+SL_ASSIGN       :   "<<="   ;
+LE              :   "<="    ;
+LT              :   '<'     ;
+BXOR            :   '^'     ;
+BXOR_ASSIGN     :   "^="    ;
+BOR             :   '|'     ;
+BOR_ASSIGN      :   "|="    ;
+LOR             :   "||"    ;
+BAND            :   '&'     ;
+BAND_ASSIGN     :   "&="    ;
+LAND            :   "&&"    ;
+SEMI            :   ';'     ;
 
 
 // Whitespace -- ignored
-WS	:	(	' '
-    |	'\t'
-    |	'\f'
+WS  :   (   ' '
+    |   '\t'
+    |   '\f'
       // handle newlines
-	|	'\r' '\n'		{newline(); }
-	|	'\r'			{newline();}
-	|	'\n'			{newline();}
+    |   '\r' '\n'       {newline(); }
+    |   '\r'            {newline();}
+    |   '\n'            {newline();}
     )
     { $setType(Token.SKIP); }
   ;
 
 // Single-line comments
 SL_COMMENT
-  :	"//"
+  : "//"
     (~('\n'|'\r'))*
     (
-    |	'\r' '\n'		{newline();}
-    |	'\r'			{newline();}
-    |	'\n'			{newline();}
-    )	    
+    |   '\r' '\n'       {newline();}
+    |   '\r'            {newline();}
+    |   '\n'            {newline();}
+    )       
     { $setType(Token.SKIP); }
   ;
 
@@ -1477,55 +1501,55 @@ JAVADOC_OPEN
   ;
 
 //JD_COMMENT
-//	    :	"/**"
-//		    (	options {
-//				    generateAmbigWarnings=false;
-//			    }
-//		    :
-//			  { LA(2)!='/' }? '*'
-//		    |	'\r' '\n'		{newline();}
-//		    |	'\r'			{newline();}
-//		    |	'\n'			{newline();}
-//		    |	~('*'|'\n'|'\r')
-//		    )*
-//		    "*/"
-//		  {
-//			  $setType(Token.SKIP);			
-//			  System.out.println("Got a javadoc comment #" + text + "#");
-//		  }
+//      :   "/**"
+//          (   options {
+//                  generateAmbigWarnings=false;
+//              }
+//          :
+//            { LA(2)!='/' }? '*'
+//          |   '\r' '\n'       {newline();}
+//          |   '\r'            {newline();}
+//          |   '\n'            {newline();}
+//          |   ~('*'|'\n'|'\r')
+//          )*
+//          "*/"
+//        {
+//            $setType(Token.SKIP);         
+//            System.out.println("Got a javadoc comment #" + text + "#");
+//        }
 //
-//	    ;
+//      ;
 
 // multiple-line comments
 ML_COMMENT
     :
-	"/*"
-	(
-	    options {
-		generateAmbigWarnings=false;
-	    }
-	:	    
-	    ~('*'|'\n'|'\r')
-	|	'\r' '\n'		{newline();}
-	|	'\r'			{newline();}
-	|	'\n'			{newline();}
-	)
-	(	/*	'\r' '\n' can be matched in one alternative or by matching
-				'\r' in one iteration and '\n' in another.  I am trying to
-				handle any flavor of newline that comes in, but the language
-				that allows both "\r\n" and "\r" and "\n" to all be valid
-				newline is ambiguous.  Consequently, the resulting grammar
-				must be ambiguous.  I'm shutting this warning off.
-			 */
+    "/*"
+    (
+        options {
+        generateAmbigWarnings=false;
+        }
+    :       
+        ~('*'|'\n'|'\r')
+    |   '\r' '\n'       {newline();}
+    |   '\r'            {newline();}
+    |   '\n'            {newline();}
+    )
+    (   /*  '\r' '\n' can be matched in one alternative or by matching
+                '\r' in one iteration and '\n' in another.  I am trying to
+                handle any flavor of newline that comes in, but the language
+                that allows both "\r\n" and "\r" and "\n" to all be valid
+                newline is ambiguous.  Consequently, the resulting grammar
+                must be ambiguous.  I'm shutting this warning off.
+             */
       options {
-	generateAmbigWarnings=false;
+    generateAmbigWarnings=false;
       }
     :
       { LA(2)!='/' }? '*'
-	|	'\r' '\n'		{newline();}
-	|	'\r'			{newline();}
-	|	'\n'			{newline();}
-    |	~('*'|'\n'|'\r')
+    |   '\r' '\n'       {newline();}
+    |   '\r'            {newline();}
+    |   '\n'            {newline();}
+    |   ~('*'|'\n'|'\r')
     )*
     "*/"
     {$setType(Token.SKIP);}
@@ -1533,12 +1557,12 @@ ML_COMMENT
 
 // character literals
 CHAR_LITERAL
-  :	'\'' ( ESC | ~'\'' ) '\''
+  : '\'' ( ESC | ~'\'' ) '\''
   ;
 
 // string literals
 STRING_LITERAL
-  :	'"' (ESC|~('"'|'\\'))* '"'
+  : '"' (ESC|~('"'|'\\'))* '"'
   ;
 
 
@@ -1552,35 +1576,35 @@ STRING_LITERAL
 // the FOLLOW ambig warnings.
 protected
 ESC
-  :	'\\'
-    (	'n'
-    |	'r'
-    |	't'
-    |	'b'
-    |	'f'
-    |	'"'
-    |	'\''
-    |	'\\'
-    |	('u')+ HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT 
-    |	('0'..'3')
+  : '\\'
+    (   'n'
+    |   'r'
+    |   't'
+    |   'b'
+    |   'f'
+    |   '"'
+    |   '\''
+    |   '\\'
+    |   ('u')+ HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT 
+    |   ('0'..'3')
       (
-	options {
-	  warnWhenFollowAmbig = false;
-	}
-      :	('0'..'9')
-	(	
-	  options {
-	    warnWhenFollowAmbig = false;
-	  }
-	:	'0'..'9'
-	)?
+    options {
+      warnWhenFollowAmbig = false;
+    }
+      : ('0'..'9')
+    (   
+      options {
+        warnWhenFollowAmbig = false;
+      }
+    :   '0'..'9'
+    )?
       )?
-    |	('4'..'7')
+    |   ('4'..'7')
       (
-	options {
-	  warnWhenFollowAmbig = false;
-	}
-      :	('0'..'9')
+    options {
+      warnWhenFollowAmbig = false;
+    }
+      : ('0'..'9')
       )?
     )
   ;
@@ -1589,7 +1613,7 @@ ESC
 // hexadecimal digit (again, note it's protected!)
 protected
 HEX_DIGIT
-  :	('0'..'9'|'A'..'F'|'a'..'f')
+  : ('0'..'9'|'A'..'F'|'a'..'f')
   ;
 
 
@@ -1597,7 +1621,7 @@ HEX_DIGIT
 //   ones that ANTLR uses internally (0 to 2)
 protected
 VOCAB
-  :	'\3'..'\377'
+  : '\3'..'\377'
   ;
 
 
@@ -1606,39 +1630,39 @@ VOCAB
 // if it's a literal or really an identifer
 IDENT
 options {testLiterals=true;}
-  :	('a'..'z'|'A'..'Z'|'_'|'$') ('a'..'z'|'A'..'Z'|'_'|'0'..'9'|'$')*
+  : ('a'..'z'|'A'..'Z'|'_'|'$') ('a'..'z'|'A'..'Z'|'_'|'0'..'9'|'$')*
   ;
 
 
 // a numeric literal
 NUM_INT
 {boolean isDecimal=false;}
-  :	'.' {_ttype = DOT;}
+  : '.' {_ttype = DOT;}
     (('0'..'9')+ (EXPONENT)? (FLOAT_SUFFIX)? { _ttype = NUM_FLOAT; })?
-  |	(	'0' {isDecimal = true;} // special case for just '0'
-      (	('x'|'X')
-	(											// hex
-	  // the 'e'|'E' and float suffix stuff look
-	  // like hex digits, hence the (...)+ doesn't
-	  // know when to stop: ambig.  ANTLR resolves
-	  // it correctly by matching immediately.  It
-	  // is therefor ok to hush warning.
-	  options {
-	    warnWhenFollowAmbig=false;
-	  }
-	:	HEX_DIGIT
-	)+
-      |	('0'..'7')+									// octal
+  | (   '0' {isDecimal = true;} // special case for just '0'
+      ( ('x'|'X')
+    (                                           // hex
+      // the 'e'|'E' and float suffix stuff look
+      // like hex digits, hence the (...)+ doesn't
+      // know when to stop: ambig.  ANTLR resolves
+      // it correctly by matching immediately.  It
+      // is therefor ok to hush warning.
+      options {
+        warnWhenFollowAmbig=false;
+      }
+    :   HEX_DIGIT
+    )+
+      | ('0'..'7')+                                 // octal
       )?
-    |	('1'..'9') ('0'..'9')*  {isDecimal=true;}		// non-zero decimal
+    |   ('1'..'9') ('0'..'9')*  {isDecimal=true;}       // non-zero decimal
     )
-    (	('l'|'L')
+    (   ('l'|'L')
       
       // only check to see if it's a float if looks like decimal so far
-    |	{isDecimal}?
-      (	'.' ('0'..'9')* (EXPONENT)? (FLOAT_SUFFIX)?
-      |	EXPONENT (FLOAT_SUFFIX)?
-      |	FLOAT_SUFFIX
+    |   {isDecimal}?
+      ( '.' ('0'..'9')* (EXPONENT)? (FLOAT_SUFFIX)?
+      | EXPONENT (FLOAT_SUFFIX)?
+      | FLOAT_SUFFIX
       )
       { _ttype = NUM_FLOAT; }
     )?
@@ -1648,12 +1672,12 @@ NUM_INT
 // a couple protected methods to assist in matching floating point numbers
 protected
 EXPONENT
-  :	('e'|'E') ('+'|'-')? ('0'..'9')+
+  : ('e'|'E') ('+'|'-')? ('0'..'9')+
   ;
 
 
 protected
 FLOAT_SUFFIX
-  :	'f'|'F'|'d'|'D'
+  : 'f'|'F'|'d'|'D'
   ;
 

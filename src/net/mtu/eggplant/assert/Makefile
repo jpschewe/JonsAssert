@@ -1,6 +1,6 @@
-CLASSPATH=${HOME}/projects/assert/src:${HOME}/projects/assert/lib/JonsInfra.jar:${HOME}/projects/assert/lib/antlr.jar:${HOME}/projects/assert/lib/java-getopt-1.0.7.jar:${HOME}/projects/assert/lib/junit.jar:${JAVA_HOME}/jre/lib/rt.jar
+CLASSPATH=${HOME}/projects/assert/src:${HOME}/projects/assert/lib/JonsInfra-0.1.jar:${HOME}/projects/assert/lib/antlr.jar:${HOME}/projects/assert/lib/java-getopt-1.0.7.jar:${HOME}/projects/assert/lib/junit-3.6.jar:${JAVA_HOME}/jre/lib/rt.jar
 JAVA=java -classpath "${CLASSPATH}"
-JAVAC=jikes -g +E -deprecation -classpath "${CLASSPATH}"
+JAVAC=javac -g -deprecation -classpath "${CLASSPATH}"
 #JAVAC=javac -g -deprecation -classpath "${CLASSPATH}"
 
 #%.class : %.java
