@@ -6,7 +6,7 @@
 ;;home-root - root of home project
 ;;java-vm - jvm to use
 ;;java-home - root of java install directory
-(jde-set-project-name "JonesAssert")
+(jde-set-project-name "JonsAssert")
 (jde-set-variables
  '(jde-run-working-directory (expand-file-name home-root))
  '(jde-run-read-app-args t)
