@@ -445,17 +445,6 @@ identifierStar
     ( DOT STAR      { packageName += "." + className; className = null; } )?
 
     {
-	 // put the overall name in the token's text
-	 if (packageName.equals("")) {
-	   id.setText(className);
-	 }
-	 else if (className == null) {
-	   id.setText(packageName.substring(1));
-	 }
-	 else {
-	   id.setText(packageName.substring(1) + "." + className);
-	 }
-
 	 // tell the symbol table about the import
 	 getSymtab().addImport(className, packageName);
     }

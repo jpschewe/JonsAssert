@@ -1,3 +1,21 @@
+2000-10-05  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* java.g: Removed unused code from identifierStar that sets the
+	text of the token, then tosses the token. 
+
+	* AssertClass.java: Started laying framework for handling
+	interfaces.
+
+	* Symtab.java: Commented out currrently unused methods
+	resolveClass and parseClass to avoid confusion when looking for
+	usages of methods.  Should remove these after further analysis.
+	Also modified extendsObject check to also make sure the list of
+	implemented interfaces is empty as well when deciding to skip
+	assertion checks.
+
+	* JonsAssert.java: Added --debug and --debugLexer to command line
+	to make debugging easier.  Continued finalizing variables.
+
 2000-10-02  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* CodeGenerator.java: Added checks to make sure assertions don't

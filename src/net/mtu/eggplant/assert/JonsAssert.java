@@ -7,6 +7,8 @@
 */
 package org.tcfreenet.schewe.assert;
 
+import org.tcfreenet.schewe.utils.Debug;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -25,19 +27,30 @@ public class JonsAssert {
   /** the symbol table */
   static private Symtab _symtab;
   static /*pacakge*/ boolean _ignoreTimeStamp = false;
-  
-  public static void main(String[] args) {
-    Configuration config = new Configuration();
-    LongOpt[] longopts = new LongOpt[4];
+  static private boolean _debugLexer = false;
 
+  /**
+     Starts up the parser and instruments all of the files listed in args as
+     well as recursively looks in directories listed in args as well.  See
+     usage for more details.
+
+     @param args see usage for details
+   **/
+  public static void main(final String[] args) {
+    final Configuration config = new Configuration();
+
+    //Setup all of the options
+    final LongOpt[] longopts = new LongOpt[6];
     longopts[0] = new LongOpt("force", LongOpt.NO_ARGUMENT, null, 'f');
     longopts[1] = new LongOpt("destination", LongOpt.REQUIRED_ARGUMENT, null, 'd');
     longopts[2] = new LongOpt("sourceExtension", LongOpt.REQUIRED_ARGUMENT, null, 's');
     longopts[3] = new LongOpt("instrumentedExtension", LongOpt.REQUIRED_ARGUMENT, null, 'i');
-    Getopt g = new Getopt("JonsAssert", args, "fd:s:i:", longopts);
+    //Undocumented features for debugging
+    longopts[4] = new LongOpt("debugLexer", LongOpt.NO_ARGUMENT, null, 300);
+    longopts[5] = new LongOpt("debug", LongOpt.NO_ARGUMENT, null, 301);
+    final Getopt g = new Getopt("JonsAssert", args, "fd:s:i:", longopts);
 
     int c;
-    String arg;
     while((c = g.getopt()) != -1) {
       switch(c) {
       case 'f':
@@ -51,6 +64,12 @@ public class JonsAssert {
         break;
       case 'i':
         AssertTools.setInstrumentedExtension(g.getOptarg());
+        break;
+      case 300:
+        _debugLexer = true;
+        break;
+      case 301:
+        Debug.setDebugMode(true);
         break;
       default:
         //Print out usage and exit
@@ -85,15 +104,14 @@ public class JonsAssert {
 
   // This method decides what action to take based on the type of
   //   file we are looking at
-  public static void doFile(File f) {
-    // If this is a directory, walk each file/dir in that directory
+  public static void doFile(final File f) {
     if (f.isDirectory()) {
-      String files[] = f.list();
+      // If this is a directory, walk each file/dir in that directory      
+      final String files[] = f.list();
       for(int i=0; i < files.length; i++)
         doFile(new File(f, files[i]));
-    }
-    // otherwise, if this is a java file, parse it!
-    else if(f.getName().endsWith("." + AssertTools.getSourceExtension())) {
+    } else if(f.getName().endsWith("." + AssertTools.getSourceExtension())) {
+      // otherwise, if this is a java file, parse it!      
       if(getSymtab().startFile(f)) {
         boolean success = true;
         try {
@@ -120,13 +138,13 @@ public class JonsAssert {
   }
 
   // Here's where we do the real work...
-  public static void parseFile(InputStream s) throws Exception {
+  public static void parseFile(final InputStream s) throws Exception {
       // Create a scanner that reads from the input stream passed to us
       javaLexer = new JavaLexer(s);
       javaLexer.setTokenObjectClass("org.tcfreenet.schewe.assert.MyToken");
       assertLexer = new AssertLexer(javaLexer.getInputState());
       assertLexer.setTokenObjectClass("org.tcfreenet.schewe.assert.MyToken");
-      ColumnTracker ct = new ColumnTracker();
+      final ColumnTracker ct = new ColumnTracker();
       assertLexer.setColumnTracker(ct);
       javaLexer.setColumnTracker(ct);
       
@@ -135,20 +153,22 @@ public class JonsAssert {
       selector.select(javaLexer);
                   
       // Create a parser that reads from the scanner
-      JavaRecognizer parser = new JavaRecognizer(selector);
+      final JavaRecognizer parser = new JavaRecognizer(selector);
       
-      //for debugging the lexer      
-//       antlr.Token tok = selector.nextToken();
-//       while(tok.getText() != null) {
-//         System.out.print("JonsAssert: " + tok);
-//         System.out.println(" name=" + parser.getTokenName(tok.getType()));
-//         tok = selector.nextToken();
-//       }
-//       System.exit(0);
-      
-       parser.setSymtab(getSymtab());
-       // start parsing at the compilationUnit rule
-       parser.compilationUnit();
+      //for debugging the lexer
+      if(_debugLexer) {
+        antlr.Token tok = selector.nextToken();
+        while(tok.getText() != null) {
+          System.out.print("JonsAssert: " + tok);
+          System.out.println(" name=" + parser.getTokenName(tok.getType()));
+          tok = selector.nextToken();
+        }
+        System.exit(0);
+      } else {
+        parser.setSymtab(getSymtab());
+        // start parsing at the compilationUnit rule
+        parser.compilationUnit();
+      }
   }
 
   final static public Symtab getSymtab() {

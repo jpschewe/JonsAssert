@@ -11,6 +11,8 @@ import org.tcfreenet.schewe.utils.Named;
 
 import java.util.Vector;
 import java.util.List;
+import java.util.Set;
+import java.util.Map;
 
 /**
    Object to represent an instrumented class.
@@ -27,13 +29,23 @@ public class AssertClass implements Named {
      @param enclosingClass the enclosing class, this can not be another anonymous class
      @param isAnonymous true if this class represents an anonymous class
      @param superclass name of the superclass, null if none listed in the .java file
+     @param interfaces list of interfaces implemented, this is where the list
+     of extended interfaces appear if this object represents an interface itself.
+     These names may not be fully qualified.  They should be checked against the
+     imports list.
+     @param imports map of imports for this class key = package, value = class/null
+
+     @pre (interfaces != null)
+     @pre (imports != null)
   **/
   public AssertClass(final String name,
                      final String packageName,
                      final boolean isInterface,
                      final AssertClass enclosingClass,
                      final boolean isAnonymous,
-                     final String superclass) {
+                     final String superclass,
+                     final Set interfaces,
+                     final Map imports) {
     _name = name;
     _packageName = packageName;
     _isInterface = isInterface;
@@ -43,8 +55,27 @@ public class AssertClass implements Named {
     _isAnonymous = isAnonymous;
     _enclosingClass = enclosingClass;
     _superclass = superclass;
+    _interfaces = interfaces;
+    _imports = imports;
   }
 
+  private Set _interfaces;
+  /**
+     The Set of interfaces implemented/extended by this class/interface.  
+  **/
+  final public Set getInterfaces() {
+    return _interfaces;
+  }
+
+  private Map _imports;
+  /**
+    The list of imports from the file this class is defined in.  key =
+    package, value = class or null for a star import
+  **/
+  final public Map getImports() {
+    return _imports;
+  }
+  
   private String _superclass;
   final public String getSuperclass() {
     return _superclass;
