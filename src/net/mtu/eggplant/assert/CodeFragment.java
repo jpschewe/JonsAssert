@@ -97,7 +97,13 @@ public class CodeFragment implements Comparable {
       CodeFragment other = (CodeFragment)o;
       int test = getLocation().compareTo(other.getLocation());
       if(test == 0) {
-        return getType().compareTo(other.getType());
+        int typeTest = getType().compareTo(other.getType());
+        if(typeTest == 0) {
+          return getCode().compareTo(other.getCode());
+        }
+        else {
+          return typeTest;
+        }
       }
       else {
         return test;

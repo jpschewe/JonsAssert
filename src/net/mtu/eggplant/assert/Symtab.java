@@ -631,19 +631,24 @@ public class Symtab {
           while(exits.hasNext()) {
             StringBuffer insertedCode = new StringBuffer();
             CodePointPair exit = (CodePointPair)exits.next();
-            
-            if(!method.isStatic() && !method.isPrivate()) {      
-              //Add a call to the invariant at each exit
-              ifile.getFragments().add(new CodeFragment(exit.getCodePointOne(), invariantCall, CodeFragmentType.INVARIANT));
-            }
 
+            //create a new scope around each exit
+            if(!method.isStatic() && !method.isPrivate()) {
+              //Add a call to the invariant at each exit
+              String myinvariantCall = "{" + invariantCall;
+              ifile.getFragments().add(new CodeFragment(exit.getCodePointOne(), myinvariantCall, CodeFragmentType.INVARIANT));
+            }
+            else {
+              ifile.getFragments().add(new CodeFragment(exit.getCodePointOne(), "{", CodeFragmentType.INVARIANT));
+            }
+            
             //Add a call to the postCondition at each exit
+            //save the return value
             ifile.getFragments().add(new CodeModification(exit.getCodePointOne(), "return", postSetup, CodeFragmentType.POSTCONDITION));
 
-            //create a new scope around the post call
-            String myPostCall = "{" + postCall + "}";
+            //finish the scope we just created and call the post condition method
+            String myPostCall = postCall + "}";
             ifile.getFragments().add(new CodeFragment(exit.getCodePointTwo(), myPostCall, CodeFragmentType.POSTCONDITION2));
-
           }
         }
         else {

@@ -1,3 +1,11 @@
+2000-04-18  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* Symtab.java: Fixed scoping on post conditions.  One line else
+	return statements should work now.
+
+	* CodeFragment.java: Fixed comparator to also check the code
+	string in case everything else is equal.
+
 2000-04-17  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* CodeGenerator.java: Removed old value stuff.  Temporarily
