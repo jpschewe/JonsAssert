@@ -13,7 +13,7 @@
   <property name="release.html.dir" value="/home/jpschewe/public_html/mtu.net/public_html" />
 
   <!-- some CVS properties -->
-  <property name="cvs.root" value="/net/CVS-Repository" />
+  <property name="cvs.root" value="/export/CVS-Repository" />
   <property name="cvs.module" value="assert" />
 
   <!-- used for *.javadoc -->
