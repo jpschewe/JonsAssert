@@ -41,26 +41,27 @@ import net.mtu.eggplant.util.algorithms.Copying;
  * Object that contains the data needed to generate instrumented code for a
  * method.
  * 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class AssertMethod implements Named {
 
   /**
-     @param theClass the class that this method is contained in
-     @param name the name of this method, will match the name of the class if a constructor
-     @param preConditions the preconditions for this method
-     @param postConditions the postconditions for this method
-     @param params List of {@link StringPair StringPairs, (class, parameter name)}
-     @param retType the return type of this method, null signals this method is a constructor
-     @param mods a Set of Strings that are the modifiers for this method
-     
-     @pre (theClass != null)
-     @pre (name != null)
-     @pre (preConditions != null && net.mtu.eggplant.util.JPSCollections.elementsInstanceOf(postConditions, AssertToken.class))
-     @pre (postConditions != null && net.mtu.eggplant.util.JPSCollections.elementsInstanceOf(preConditions, AssertToken.class))
-     @pre (params != null && net.mtu.eggplant.util.JPSCollections.elementsInstanceOf(StringPair.class))
-     @pre (mods != null)
-  **/
+   * @param theClass the class that this method is contained in
+   * @param name the name of this method, will match the name of the class if
+   * a constructor
+   * @param preConditions the preconditions for this method
+   * @param postConditions the postconditions for this method
+   * @param params List of {@link StringPair StringPairs} (class, parameter name)
+   * @param retType the return type of this method, null signals this method is a constructor
+   * @param mods a Set of Strings that are the modifiers for this method
+   *  
+   * @pre (theClass != null)
+   * @pre (name != null)
+   * @pre (preConditions != null && net.mtu.eggplant.util.JPSCollections.elementsInstanceOf(postConditions, AssertToken.class))
+   * @pre (postConditions != null && net.mtu.eggplant.util.JPSCollections.elementsInstanceOf(preConditions, AssertToken.class))
+   * @pre (params != null && net.mtu.eggplant.util.JPSCollections.elementsInstanceOf(StringPair.class))
+   * @pre (mods != null)
+   */
   public AssertMethod(final AssertClass theClass,
                       final String name,
                       final List preConditions,
@@ -165,9 +166,9 @@ public class AssertMethod implements Named {
   private List /*StringPair*/ _params;
 
   /**
-     @return List of {@link StringPair StringPairs, (class, parameter name)}, don't modify this
-     List
-  **/
+   * @return List of {@link StringPair StringPairs} (class, parameter name),
+   * don't modify this List
+   */
   public final List getParams() {
     return _params;
   }
