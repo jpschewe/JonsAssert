@@ -1,4 +1,6 @@
 2004-04-04  Jon Schewe  <jpschewe@mtu.net>
+	
+	* Release 0.6
 
 	* src/net/mtu/eggplant/dbc/CodeGenerator.java
 	(getClassObjectForClass): Use full class names when constructing
