@@ -97,9 +97,20 @@
 
     <!-- run tests -->
     <java fork="yes" classname="junit.textui.TestRunner" 
-	  taskname="junit" failonerror="true">
+	  taskname="junit" failonerror="false">
       <sysproperty key="ASSERT_BEHAVIOR" value="EXCEPTION" />
       <arg value="net.mtu.eggplant.assert.test.TestAssert"/>
+      <classpath>
+        <pathelement location="${basedir}/src"/>
+        <path refid="base.classpath"/>
+      </classpath>
+    </java>
+
+    <java fork="yes" classname="junit.textui.TestRunner" 
+	  taskname="junit" failonerror="false">
+      <sysproperty key="ASSERT_BEHAVIOR" value="EXCEPTION" />
+      <sysproperty key="ENFORCE_INHERITED_CONDITIONS" value="FALSE" />
+      <arg value="net.mtu.eggplant.assert.test.TestEnforceInherited"/>
       <classpath>
         <pathelement location="${basedir}/src"/>
         <path refid="base.classpath"/>

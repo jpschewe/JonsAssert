@@ -1,5 +1,9 @@
 2002-05-27  Jon Schewe  <jpschewe@mtu.net>
 
+	* src/net/mtu/eggplant/assert/testcases/TestEnforceInherited.java:
+	Added test for ENFORCE_INHERITED_CONDITIONS.  This functionality
+	is now working.
+
 	* src/net/mtu/eggplant/assert/testcases/TestAssert.java: Now works
 	properly with ant and all expected tests pass.
 

@@ -41,6 +41,7 @@ import junit.textui.TestRunner;
 
 /**
    This is a test class for testing my assertions.  Tests all kinds of things.
+   Must be called with ASSERT_BEHAVIOR_CONDITIONS set to EXCEPTION.
    
    @invariant (_invariant), "This is an invariant";
 **/

@@ -1,3 +1,8 @@
+Changes since 0.3
+- added support for turning off inherited conditions
+
+- changed name of system properties checked so they make more sense
+
 Bugs fixed since version 0.1:
 - Pre and postconditions for package methods are checked too often.  If a
 public/protected method has the same signature as a package method in it's
