@@ -338,6 +338,7 @@
     <!-- build the jar -->
     <jar jarfile="${release.html.dir}/${app.name}/${app.version}/${app.name}-${app.version}.jar"
          basedir="${basedir}/build"
+         index="true"
          />
     
     <!-- generate javadoc -->
