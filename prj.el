@@ -2,7 +2,7 @@
 (jde-set-project-name "JonsAssert")
 (let ((project-root (file-name-directory load-file-name)))
   (jde-set-variables
-   '(jde-run-working-directory (expand-file-name "src/" project-root))
+   '(jde-run-working-directory (expand-file-name "build/" project-root))
    '(jde-compile-option-directory (expand-file-name "src/" project-root))
    '(jde-compile-option-debug (quote ("all")))
    '(jde-run-read-app-args t)

@@ -1,7 +1,13 @@
+2004-04-04  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/net/mtu/eggplant/dbc/CodeGenerator.java
+	(getClassObjectForClass): Use full class names when constructing
+	instances of primitive wrappers.
+
 2004-01-31  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/net/mtu/eggplant/dbc/JonsAssert.java (parseFile): Switched
-	from werken.opt to COmmons CLI.
+	from werken.opt to Commons CLI.
 
 2003-12-29  Jon Schewe  <jpschewe@mtu.net>
 

@@ -73,7 +73,7 @@ import org.apache.log4j.Logger;
  * {@link #instrument(Configuration, Collection) instrument} with a Configuration
  * object and a Collection of files.</p>
  *
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class JonsAssert {
 
@@ -98,7 +98,7 @@ public class JonsAssert {
     options.addOption("d", "destination", true, "<dir> the destination directory (default: instrumented)");
     options.addOption("s", "sourceExtension", true, "<ext> the extension of the source files (default: java)");
     options.addOption("i", "instrumentedExtension", true, "<ext> the extension used for the instrumented files (default: java)");
-    options.addOption("source", true, "<release> Provide source compatibility with specified release (just like javac)");
+    options.addOption("source", "source", true, "<release> Provide source compatibility with specified release (just like javac)");
     options.addOption("debugLexer", false, "");
     options.addOption("debug", false, "");
     options.addOption("prettyOutput", "prettyOutput", false, "put in carriage returns in the generated code.  This makes the output easier to read, but screws up line numbers");
@@ -112,17 +112,19 @@ public class JonsAssert {
       final CommandLineParser parser = new PosixParser();
       final CommandLine cmd = parser.parse(options, args);
 
-      if(cmd.hasOption("force")) {
+      if(cmd.hasOption("f")) {
+        LOG.debug("Overwriting all files");
         config.setIgnoreTimeStamp(true);
       }
-      if(cmd.hasOption("destination")) {
-        config.setDestinationDirectory(cmd.getOptionValue("destination"));
+      if(cmd.hasOption("d")) {
+        LOG.debug("Setting destination directory to: " + cmd.getOptionValue("d"));
+        config.setDestinationDirectory(cmd.getOptionValue("d"));
       }
-      if(cmd.hasOption("sourceExtension")) {
-        config.setSourceExtension(cmd.getOptionValue("sourceExtension"));
+      if(cmd.hasOption("s")) {
+        config.setSourceExtension(cmd.getOptionValue("s"));
       }
-      if(cmd.hasOption("instrumentedExtension")) {
-        config.setInstrumentedExtension(cmd.getOptionValue("instrumentedExtension"));
+      if(cmd.hasOption("i")) {
+        config.setInstrumentedExtension(cmd.getOptionValue("i"));
       }
       if(cmd.hasOption("debugLexer")) {
         _debugLexer = true;
@@ -142,10 +144,11 @@ public class JonsAssert {
           return;
         }
       }
-      if(cmd.hasOption("pretty-output")) {
+      if(cmd.hasOption("prettyOutput")) {
+        LOG.debug("Pretty output turned on");
         config.setPrettyOutput(true);
       }
-      if(cmd.hasOption("disable-exit")) {
+      if(cmd.hasOption("disableExit")) {
         _disableExit = true;
       }
       
@@ -294,7 +297,7 @@ public class JonsAssert {
           success = false;
           writeFile = false;
         } catch(final FileAlreadyParsedException fape) {
-          //System.out.println("Source file is older than instrumented file, skipping: " + f.getName());
+          LOG.debug("Source file is older than instrumented file, skipping: " + f.getName());
           success = true;
           writeFile = false;
         } catch (final TokenStreamException tse) {

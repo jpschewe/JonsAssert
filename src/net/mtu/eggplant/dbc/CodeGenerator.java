@@ -34,7 +34,7 @@ import net.mtu.eggplant.util.StringPair;
 import net.mtu.eggplant.util.StringUtils;
 
 /**
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class CodeGenerator {
 
@@ -1139,21 +1139,21 @@ public class CodeGenerator {
   **/
   static public String getClassObjectForClass(final String cl) {
     if(cl.equals("int")) {
-      return "Integer.TYPE";
+      return "java.lang.Integer.TYPE";
     } else if(cl.equals("long")) {
-      return "Long.TYPE";
+      return "java.lang.Long.TYPE";
     } else if(cl.equals("float")) {
-      return "Float.TYPE";
+      return "java.lang.Float.TYPE";
     } else if(cl.equals("double")) {
-      return "Double.TYPE";
+      return "java.lang.Double.TYPE";
     } else if(cl.equals("boolean")) {
-      return "Boolean.TYPE";
+      return "java.lang.Boolean.TYPE";
     } else if(cl.equals("byte")) {
-      return "Byte.TYPE";
+      return "java.lang.Byte.TYPE";
     } else if(cl.equals("char")) {
-      return "Character.TYPE";
+      return "java.lang.Character.TYPE";
     } else if(cl.equals("short")) {
-      return "Short.TYPE";
+      return "java.lang.Short.TYPE";
     }
 
     return cl + ".class";
@@ -1167,21 +1167,21 @@ public class CodeGenerator {
   static public String getObjectForParam(final String paramType,
                                          final String paramName) {
     if(paramType.equals("int")) {
-      return "new Integer(" + paramName + ")";
+      return "new java.lang.Integer(" + paramName + ")";
     } else if(paramType.equals("long")) {
-      return "new Long(" + paramName + ")";
+      return "new java.lang.Long(" + paramName + ")";
     } else if(paramType.equals("float")) {
-      return "new Float(" + paramName + ")";
+      return "new java.lang.Float(" + paramName + ")";
     } else if(paramType.equals("double")) {
-      return "new Double(" + paramName + ")";
+      return "new java.lang.Double(" + paramName + ")";
     } else if(paramType.equals("boolean")) {
-      return "new Boolean(" + paramName + ")";
+      return "new java.lang.Boolean(" + paramName + ")";
     } else if(paramType.equals("byte")) {
-      return "new Byte(" + paramName + ")";
+      return "new java.lang.Byte(" + paramName + ")";
     } else if(paramType.equals("char")) {
-      return "new Character(" + paramName + ")";
+      return "new java.lang.Character(" + paramName + ")";
     } else if(paramType.equals("short")) {
-      return "new Short(" + paramName + ")";
+      return "new java.lang.Short(" + paramName + ")";
     }
 
     return paramName;
