@@ -243,6 +243,7 @@ public class Symtab {
      instrument all of the files we've parsed so far.
   **/
   public void instrument() {
+    String packageName = null;
     System.out.println("\nInstrumentation");
     /*
       walk over _allFiles and parse each class writing out to the instrument directory.
@@ -254,6 +255,7 @@ public class Symtab {
       Iterator classIter = ifile.getClasses().iterator();
       while(classIter.hasNext()) {
         AssertClass aClass = (AssertClass)classIter.next();
+        packageName = aClass.getPackage();
         addClassInstrumentation(ifile, aClass);
         System.out.println(aClass);
       }
@@ -262,12 +264,15 @@ public class Symtab {
       //dump out the fragments and instrument the file
       try {
         LineNumberReader reader = new LineNumberReader(new FileReader(ifile.getFile()));
-        String filename = ifile.getFile().getName();
-        int indexOfDot = filename.lastIndexOf('.');
-        String ifilename = filename.substring(0, indexOfDot) + "." + AssertTools.getInstrumentedExtension();
-        String abPath = ifile.getFile().getAbsolutePath();
-        int indexOfSlash = abPath.lastIndexOf(File.separatorChar);
-        String path = abPath.substring(0, indexOfSlash);
+        String filename = ifile.getFile().getAbsolutePath();
+        int indexOfSlash = filename.lastIndexOf(File.separatorChar);
+        String shortFilename = filename.substring(indexOfSlash);
+          
+        String path = AssertTools.createDirectoryForPackage(packageName);
+        
+        int indexOfDot = shortFilename.lastIndexOf('.');
+        String ifilename = shortFilename.substring(0, indexOfDot) + "." + AssertTools.getInstrumentedExtension();
+
         FileWriter writer = new FileWriter(path + File.separatorChar + ifilename);
 
         // instrument lines

@@ -315,21 +315,21 @@ public class CodeGenerator {
     code.append(assertMethod.getName());
     code.append("PreConditions(");
 
+    boolean first = true;
+    Iterator paramIter = assertMethod.getParams().iterator();
+    while(paramIter.hasNext()) {
+      if(! first) {
+        code.append(",");
+        first = false;
+      }
+      StringPair sp = (StringPair)paramIter.next();
+      code.append(sp.getStringOne());
+      code.append(' ');
+      code.append(sp.getStringTwo());
+    }
+    code.append(") {\n");
     if(!assertMethod.isPrivate()) {
       //[jpschewe:20000220.0933CST] don't check super class conditions if the method is private
-      boolean first = true;
-      Iterator paramIter = assertMethod.getParams().iterator();
-      while(paramIter.hasNext()) {
-        if(! first) {
-          code.append(",");
-          first = false;
-        }
-        StringPair sp = (StringPair)paramIter.next();
-        code.append(sp.getStringOne());
-        code.append(' ');
-        code.append(sp.getStringTwo());
-      }
-      code.append(") {\n");
       code.append("Object retVal = null;\n");
       code.append("Class thisClass = null;\n");
       code.append("String className = \"");
@@ -441,8 +441,6 @@ public class CodeGenerator {
     code.append("_check");
     code.append(assertMethod.getName());
     code.append("PostConditions(");
-    if(assertMethod.isPrivate()) {
-      //[jpschewe:20000220.0934CST] don't bother checking for super method if we're private
       boolean first = true;
       if(!assertMethod.isVoid()) {
         code.append(assertMethod.getReturnType());
@@ -469,6 +467,8 @@ public class CodeGenerator {
         code.append(paramName);
       }
       code.append(") {\n");
+    if(assertMethod.isPrivate()) {
+      //[jpschewe:20000220.0934CST] don't bother checking for super method if we're private
       code.append("Object retVal = null;\n");
       code.append("Class thisClass = null;\n");
       code.append("String className = \"");

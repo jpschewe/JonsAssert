@@ -214,6 +214,8 @@ final public class AssertTools {
   /**
      Take a package name that's passed in and turn it into a directory name
      and create the directories relative to the instrumented directory path.
+
+     @return the directory to put the file in
   **/
   static public String createDirectoryForPackage(final String packageName) {
     if(packageName == null) {
@@ -256,5 +258,5 @@ final public class AssertTools {
   
   static private String _destination = "instrumented";
   static private String _sourceExtension = "java";
-  static private String _instrumentedExtension = "ijava";
+  static private String _instrumentedExtension = "ijava.java";
 }
