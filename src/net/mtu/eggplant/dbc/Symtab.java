@@ -105,7 +105,7 @@ import org.apache.commons.logging.LogFactory;
  * This is the place where most of the work for instrumentation gets done.
  * All lookups are done here.
  * 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class Symtab {
 
@@ -330,11 +330,11 @@ public class Symtab {
           final StringBuffer buf = new StringBuffer(line);        
           int offset = 0;
           while(curFrag != null && reader.getLineNumber() == curFrag.getLocation().getLine()) {
-            //instrument line
             if(JonsAssert.getSymtab().getConfiguration().isPrettyOutput()) {
               buf.append("//DBC Line: ");
               buf.append(String.valueOf(reader.getLineNumber()));
             }
+            //instrument line
             offset = curFrag.instrumentLine(offset, buf);
             if(fragIter.hasNext()) {
               curFrag = (CodeFragment)fragIter.next();
@@ -603,73 +603,64 @@ public class Symtab {
           //Subtract 1 so that we add just before the '}'
           final CodePoint insertFinallyAt = new CodePoint(method.getClose().getLine(), method.getClose().getColumn() - 1);
           final StringBuffer codeToInsert = new StringBuffer();
-          //catch programmers exceptions first so my catches are reachable
-          boolean catchRuntime = true;
-          boolean catchError = true;
-          //FIX need to check for thrown exceptions
-//           final Iterator exceptionIter = method.getThrownExceptions().iterator();
-//           while(exceptionIter.hasNext()) {
-//             final String exception = (String)exceptionIter.next();
-//             //Make sure we don't try and catch some exceptions twice
-//             if(exception.equals("RuntimeException")
-//                || exception.equals("java.lang.RuntimeException")
-//                || exception.equals("Exception")
-//                || exception.equals("java.lang.RuntimeException")) {
-//               catchRuntime = false;
-//             } else if(exception.equals("Error")
-//                     || exception.equals("java.lang.Error")) {
-//               catchError = false;
-//             } else if(exception.equals("Throwable")
-//                     || exception.equals("java.lang.Throwable")) {
-//               catchError = false;
-//               catchRuntime = false;
-//             }
-//             codeToInsert.append("} catch(");
-//             codeToInsert.append(exception);
-//             codeToInsert.append(" jps_exception");
-//             codeToInsert.append(shortmclassName);
-//             codeToInsert.append(") {");
-//             CodeGenerator.carriageReturn(codeToInsert);
-//             codeToInsert.append("jps_foundException");
-//             codeToInsert.append(shortmclassName);
-//             codeToInsert.append(" = true;");
-//             CodeGenerator.carriageReturn(codeToInsert);
-//             codeToInsert.append("throw jps_exception");
-//             codeToInsert.append(shortmclassName);
-//             codeToInsert.append(";");
-//             CodeGenerator.carriageReturn(codeToInsert);
-//           } //end while
+          //catch exceptions and set jps_foundException<shortmclassName>... to
+          //true if caught so that conditions aren't checked when they
+          //shouldn't be.
+          codeToInsert.append("} catch(Throwable jps_exception");
+          codeToInsert.append(shortmclassName);
+          codeToInsert.append(") {");
+          CodeGenerator.carriageReturn(codeToInsert);
+          codeToInsert.append("jps_foundException");
+          codeToInsert.append(shortmclassName);
+          codeToInsert.append("= true;");
+          CodeGenerator.carriageReturn(codeToInsert);
+
+
+          //catch java.lang.Error
+          codeToInsert.append("if(jps_exception");
+          codeToInsert.append(shortmclassName);
+          codeToInsert.append(" instanceof Error) {");
+          CodeGenerator.carriageReturn(codeToInsert);
+          codeToInsert.append("throw (Error)jps_exception");
+          codeToInsert.append(shortmclassName);
+          codeToInsert.append(";");
+          CodeGenerator.carriageReturn(codeToInsert);
           
-          if(catchError) {
-            //catch java.lang.Error
-            codeToInsert.append("} catch(Error jps_exception");
+          //catch java.lang.RuntimeException
+          codeToInsert.append("} else if(jps_exception");
+          codeToInsert.append(shortmclassName);
+          codeToInsert.append(" instanceof RuntimeException) {");
+          CodeGenerator.carriageReturn(codeToInsert);
+          codeToInsert.append("throw (RuntimeException)jps_exception");
+          codeToInsert.append(shortmclassName);
+          codeToInsert.append(";");
+          CodeGenerator.carriageReturn(codeToInsert);
+          
+          // need to check for thrown exceptions
+          final Iterator exceptionIter = method.getThrownExceptions().iterator();
+          while(exceptionIter.hasNext()) {
+            final String exception = (String)exceptionIter.next();
+            codeToInsert.append("} else if(jps_exception");
             codeToInsert.append(shortmclassName);
+            codeToInsert.append(" instanceof ");
+            codeToInsert.append(exception);
             codeToInsert.append(") {");
             CodeGenerator.carriageReturn(codeToInsert);
-            codeToInsert.append("jps_foundException");
-            codeToInsert.append(shortmclassName);
-            codeToInsert.append("= true;");
-            CodeGenerator.carriageReturn(codeToInsert);
-            codeToInsert.append("throw jps_exception");
+            codeToInsert.append("throw (");
+            codeToInsert.append(exception);
+            codeToInsert.append(")jps_exception");
             codeToInsert.append(shortmclassName);
             codeToInsert.append(";");
             CodeGenerator.carriageReturn(codeToInsert);
-          }
-          if(catchRuntime) {
-            //catch java.lang.RuntimeException
-            codeToInsert.append("} catch(RuntimeException jps_exception");
-            codeToInsert.append(shortmclassName);
-            codeToInsert.append(") {");
-            CodeGenerator.carriageReturn(codeToInsert);
-            codeToInsert.append("jps_foundException");
-            codeToInsert.append(shortmclassName);
-            codeToInsert.append(" = true;");
-            CodeGenerator.carriageReturn(codeToInsert);
-            codeToInsert.append("throw jps_exception");
-            codeToInsert.append(shortmclassName);
-            codeToInsert.append(";");
-            CodeGenerator.carriageReturn(codeToInsert);
-          }
+          } //end while
+
+          codeToInsert.append("} else {");
+          CodeGenerator.carriageReturn(codeToInsert);
+          codeToInsert.append("throw new RuntimeException(\"JonsAssert DBC - Invalid code: Checked exception found, but not declared in throws clause\");");
+          CodeGenerator.carriageReturn(codeToInsert);
+          codeToInsert.append("}");
+          CodeGenerator.carriageReturn(codeToInsert);
+          
           codeToInsert.append("} finally { ");
           CodeGenerator.carriageReturn(codeToInsert);
           codeToInsert.append("if(!jps_foundException");

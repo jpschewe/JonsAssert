@@ -27,10 +27,8 @@
  */
 package net.mtu.eggplant.dbc.test;
 
-import net.mtu.eggplant.dbc.AssertTools;
-import net.mtu.eggplant.dbc.AssertionViolation;
-
 import java.io.IOException;
+
 import java.util.Vector;
 
 import junit.framework.TestCase;
@@ -38,12 +36,15 @@ import junit.framework.TestSuite;
 
 import junit.textui.TestRunner;
 
+import net.mtu.eggplant.dbc.AssertTools;
+import net.mtu.eggplant.dbc.AssertionViolation;
+
 /**
  * This is a test class for testing my assertions.  Tests all kinds of things.
  * Must be called with ASSERT_BEHAVIOR_CONDITIONS set to EXCEPTION.
  *  
  * @invariant (_invariant), "This is an invariant";
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class TestAssert extends TestCase {
 
@@ -446,6 +447,15 @@ public class TestAssert extends TestCase {
    */
   public void multiException()
     throws NullPointerException, IllegalArgumentException {
+
+  }
+
+  /**
+   * Test methods with throws clauses for checked exceptions that aren't
+   * actually thrown
+   */
+  public void checkedExceptions()
+    throws IOException {
 
   }
   

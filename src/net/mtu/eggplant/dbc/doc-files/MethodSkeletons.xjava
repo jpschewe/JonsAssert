@@ -33,15 +33,58 @@ public Object methodFoo(Object param1) {
   if(!jps__<packageName>_<className>_check<methodName>PreConditions(param1, param2, ...)) {
     AssertTools.preConditionFailed(AssertTools.getCurrentAssertionViolation());
   }
-  final Object jps__retVal<classname> = b;
+  {
+    final Object jps__retVal<classname> = param1;
     
+    if(!jps__<packageName>_<className>_checkInvariant()) {
+      AssertTools.invariantFailed(AssertTools.getCurrentAssertionViolation());
+    }
+    if(!jps__<packageName>_<className>_check<methodName>PostConditions(jps__retVal<classname>, param1, ...)) {
+      AssertTools.postConditionFailed(AssertTools.getCurrentAssertionViolation());
+    }
+    return jps__retVal<classname>;
+  }
+}
+
+//before
+public void methodFoo(Object param1)
+  throws IOException {
+  System.out.println("test");
+}
+
+//after
+public void methodFoo(Object param1)
+  throws IOException {
   if(!jps__<packageName>_<className>_checkInvariant()) {
     AssertTools.invariantFailed(AssertTools.getCurrentAssertionViolation());
   }
-  if(!jps__<packageName>_<className>_check<methodName>PostConditions(jps__retVal<classname>, param1, ...)) {
-    AssertTools.postConditionFailed(AssertTools.getCurrentAssertionViolation());
+  if(!jps__<packageName>_<className>_check<methodName>PreConditions(param1, param2, ...)) {
+    AssertTools.preConditionFailed(AssertTools.getCurrentAssertionViolation());
   }
-  return jps__retVal<classname>;
+  boolean jps_foundException<classname> = false;
+  try {
+    System.out.println("test");
+  } catch(final Throwable jps_throwable<classname>) {
+    jps_foundException<classname> = true;
+    if(jps_throwable<classname> instanceof Error) {
+      throw (Error)jps_throwable<classname>;
+    } else if(jps_throwable<classname> instanceof RuntimeException) {
+      throw (RuntimeException)jps_throwable<classname>;
+    } else if(jps_throwable<classname> instanceof IOException) {
+      throw (IOException)jps_throwable<classname>;
+    } else {
+      throw new RuntimeException("JonsAssert DBC - Invalid code: Checked exception found, but not declared in throws clause");
+    }
+  } finally {
+    if(!jps_foundException<classname>) {
+      if(!jps__<packageName>_<className>_checkInvariant()) {
+        AssertTools.invariantFailed(AssertTools.getCurrentAssertionViolation());
+      }
+      if(!jps__<packageName>_<className>_check<methodName>PostConditions(jps__retVal<classname>, param1, ...)) {
+        AssertTools.postConditionFailed(AssertTools.getCurrentAssertionViolation());
+      }
+    }
+  }
 }
 
 /**
