@@ -198,7 +198,7 @@ public class CodeGenerator {
      
      @pre (assertMethod.isConstructor())
   **/
-  static public String generateConstrauctorAssertions(final AssertMethod assertMethod) {
+  static public String generateConstructorAssertions(final AssertMethod assertMethod) {
     StringBuffer code = new StringBuffer();
     String dummyClassName = assertMethod.getContainingClass().createDummyConstructorClassName();
     
