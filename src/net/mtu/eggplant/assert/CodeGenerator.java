@@ -10,7 +10,7 @@ package org.tcfreenet.schewe.assert;
 import org.tcfreenet.schewe.utils.StringPair;
 import org.tcfreenet.schewe.utils.StringUtils;
 
-import java.util.Set;
+import java.util.List;
 import java.util.Iterator;
 
 public class CodeGenerator {
@@ -760,7 +760,7 @@ public class CodeGenerator {
      @param postCondition true if we're adding checks for a postcondition method. 
   **/
   static private void addConditionChecks(final StringBuffer code,
-                                         final Set tokens,
+                                         final List tokens,
                                          final boolean postCondition) {
     final Iterator iter = tokens.iterator();
     while(iter.hasNext()) {

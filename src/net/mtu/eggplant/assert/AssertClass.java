@@ -12,6 +12,7 @@ import org.tcfreenet.schewe.utils.Named;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.List;
 
 /**
    Object to represent an instrumented class.
@@ -44,7 +45,7 @@ public class AssertClass implements Named {
                      final AssertClass enclosingClass,
                      final boolean isAnonymous,
                      final String superclass,
-                     final Set interfaces,
+                     final List interfaces,
                      final Map imports,
                      final Set starImports) {
     _name = name;
@@ -60,11 +61,12 @@ public class AssertClass implements Named {
     _imports = imports;
   }
 
-  private Set _interfaces;
+  private List _interfaces;
   /**
-     The Set of interfaces implemented/extended by this class/interface.  
+     The List of interfaces implemented/extended by this class/interface, in
+     the order that they are declared on the implements line.
   **/
-  final public Set getInterfaces() {
+  final public List getInterfaces() {
     return _interfaces;
   }
 
@@ -151,16 +153,21 @@ public class AssertClass implements Named {
     return "[AssertClass] " + getFullName();
   }
 
-  private Set /*Token*/ _invariants;
+  private List /*Token*/ _invariants;
   
   /**
+     List of invariants for this class, ordered as they appear in the code.
+     
      @pre (invariants != null)
   **/
-  final public void setInvariants(final Set invariants) {
+  final public void setInvariants(final List invariants) {
     _invariants = invariants;
   }
 
-  final public Set getInvariants() {
+  /**
+     List of invariants for this class, ordered as they appear in the code.
+  **/
+  final public List getInvariants() {
     return _invariants;
   }
 

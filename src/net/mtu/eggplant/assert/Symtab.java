@@ -25,6 +25,9 @@ import java.util.SortedSet;
 import java.util.Enumeration;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.List;
+import java.util.LinkedList;
+
 
 /*
   Need to read the PDF again to make sure I've got these right.
@@ -196,16 +199,18 @@ public class Symtab {
 
      @param name the name of the class, can be null in the case of anonomous
      classes
-     @param invariants the invariants for this class
+     @param invariants the invariants for this class, ordered as they appear
+     in the source file
      
      @pre (invariants != null)
   **/
   public void startClass(final String name,
-                         final Set invariants,
+                         final List invariants,
                          final boolean isInterface,
                          final boolean isAnonymous,
                          final String superclass) {
-    final Set interfaces = new HashSet();
+    //[jpschewe:20001017.2330CST] Note this list should be read in from the parser
+    final List interfaces = new LinkedList();
     
     AssertClass enclosingClass = _currentClass;
     if(_currentClass != null) {
@@ -397,9 +402,9 @@ public class Symtab {
      @pre (mods != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(String.class))
   **/
   public void startMethod(final String name,
-                          final Set preConditions,
-                          final Set postConditions,
-                          final Set params,
+                          final List preConditions,
+                          final List postConditions,
+                          final List params,
                           final String retType,
                           final Set mods) {
     
