@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+<!--DOCTYPE project PUBLIC "-//Apache//DTD Ant 1.0//EN" "/usr/src/ant/project.dtd"-->
+
+<project name="assert" default="compile" basedir=".">
+
+  <property file="${user.home}/.ant.properties" />
+
+  <property name="app.name"   value="JonsAssert" />
+  <property name="instrument.dir"  value="instrumented" />
+  
+  <target name="init">
+    <tstamp />
+    <available property="assert.present" classname="net.mtu.eggplant.assert.JonsAssert" />
+  </target>
+
+  <path id="base.classpath">
+    <pathelement location="${basedir}"/>
+    <pathelement location="${basedir}/lib/JonsInfra-0.1.jar"/>
+    <pathelement location="${basedir}/lib/antlr.jar"/>
+    <pathelement location="${basedir}/lib/java-getopt-1.0.7.jar"/>
+    <pathelement location="${basedir}/lib/junit-3.4.jar"/>
+  </path>
+  
+  <target name="compile" depends="init">
+    <java classname="antlr.Tool"
+	  fork="yes"
+	  failonerror="true"
+	  taskname="antlr"
+	  dir="${basedir}/src/net/mtu/eggplant/assert">
+      <classpath>
+  	<pathelement location="${basedir}/lib/antlr.jar" />
+      </classpath>
+      <arg value="java.g" />
+    </java>
+
+    <java classname="antlr.Tool"
+	  fork="yes"
+	  failonerror="true"
+	  taskname="antlr"
+	  dir="${basedir}/src/net/mtu/eggplant/assert">
+      <classpath>
+        <pathelement location="${basedir}/lib/antlr.jar" />
+      </classpath>
+      <arg value="assert.g" />
+    </java>
+
+    <javac srcdir="${basedir}/src" destdir="${basedir}/src">
+      <classpath>
+        <path refid="base.classpath"/>
+      </classpath>
+      <include name="net/**/*.java"/>
+      <exclude name="net/mtu/eggplant/assert/testcases/**"/>
+    </javac>
+  </target>
+
+  <target name="jar" depends="compile">
+    <jar jarfile="${app.name}.jar"
+	 basedir="${basedir}/src" includes="**" />
+  </target>
+
+  <target name="runtests" depends="compile">
+    <java fork="yes" classname="junit.textui.TestRunner" 
+	  taskname="junit" failonerror="true">
+      <arg value="net.mtu.eggplant.assert.test.AllTests"/>
+      <classpath>
+        <path refid="base.classpath"/>
+      </classpath>
+    </java>
+  </target>
+
+  <target name="instrument" depends="init" if="assert.present">
+    <java fork="yes"
+	  classname="net.mtu.eggplant.assert.JonsAssert"
+	  taskname="assert"
+	  failonerror="true">
+      <arg value="${basedir}/src/net" />
+      <arg value="-d ${basedir}/${instrument.dir}" />
+    </java>
+  </target>
+
+  <target name="compile-assert" depends="init,instrument">
+    <java classname="antlr.Tool"
+	  fork="yes"
+	  failonerror="true"
+	  taskname="antlr"
+	  dir="${basedir}/src/net/mtu/eggplant/assert">
+      <classpath>
+  	<pathelement location="${basedir}/lib/antlr.jar" />
+      </classpath>
+      <arg value="java.g" />
+    </java>
+
+    <java classname="antlr.Tool"
+	  fork="yes"
+	  failonerror="true"
+	  taskname="antlr"
+	  dir="${basedir}/src/net/mtu/eggplant/assert">
+      <classpath>
+        <pathelement location="${basedir}/lib/antlr.jar" />
+      </classpath>
+      <arg value="assert.g" />
+    </java>
+
+    <javac srcdir="${instrument.dir}" destdir="${basedir}" >
+      <classpath>
+        <path refid="base.classpath"/>
+      </classpath>
+      <include name="net/**/*.java"/>
+      <exclude name="net/mtu/eggplant/assert/testcases/**"/>
+    </javac>
+  </target>
+
+  <target name="clean">
+    <delete>
+      <fileset dir="${basedir}/src">
+  	<patternset>
+  	  <include name="**/*.class" />
+  	</patternset>
+  	<patternset>
+  	  <include name="net/mtu/eggplant/assert/AssertLexer.*" />
+  	</patternset>
+  	<patternset>
+  	  <include name="net/mtu/eggplant/assert/AssertLexerTokenTypes.*" />
+  	</patternset>
+  	<patternset>
+  	  <include name="net/mtu/eggplant/assert/JavaLexer.*" />
+  	</patternset>
+  	<patternset>
+  	  <include name="net/mtu/eggplant/assert/JavaRecognizer.*" />
+  	</patternset>
+  	<patternset>
+      	  <include name="net/mtu/eggplant/assert/JavaTokenTypes.*" />
+  	</patternset>
+      </fileset>
+    </delete>
+  </target>
+  
+</project>

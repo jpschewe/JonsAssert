@@ -37,13 +37,13 @@ import java.util.Iterator;
 public class CodeGenerator {
 
   /**
-     This should be inserted right after the close of the javadoc comment.
-     
-     @param tok the token that represents the assertion
-     @return a String of code that checks this assert condition
-
-     @pre (tok != null)
-  **/
+   * This should be inserted right after the close of the javadoc comment.
+   *  
+   *  @param tok the token that represents the assertion
+   *  @return a String of code that checks this assert condition
+   *
+   *  @pre (tok != null)
+   */
   static public String generateAssertion(final AssertToken tok) {
     final String condition = tok.getCondition();
     final String message = tok.getMessage();
@@ -72,12 +72,12 @@ public class CodeGenerator {
 
 
   /**
-     This should be added at the start and end of all instance methods, except
-     for private ones and should be at the end of constructors that aren't
-     private.
-     
-     @return a string of code that will call the checkInvariant method
-  **/
+   * This should be added at the start and end of all instance methods, except
+   *  for private ones and should be at the end of constructors that aren't
+   *  private.
+   *  
+   *  @return a string of code that will call the checkInvariant method
+   */
   static public String generateInvariantCall(final AssertClass aClass) {
     String mclassName = aClass.getFullName().replace('.', '_');
     mclassName = mclassName.replace('$', '_');
@@ -92,26 +92,36 @@ public class CodeGenerator {
   }
 
   /**
-     This should be inserted right at the end of a class, just before the
-     closing curly.
-     
-     @param assertClass the class to generate the invariant check for
-     @return a string of code that actually checks the invariant conditions
-
-     @pre (assertClass != null)
-  **/
+   * This should be inserted right at the end of a class, just before the
+   *  closing curly.
+   *  
+   *  @param assertClass the class to generate the invariant check for
+   *  @return a string of code that actually checks the invariant conditions
+   *
+   *  @pre (assertClass != null)
+   */
   static public String generateInvariantMethod(final AssertClass assertClass) {
     final String className = assertClass.getFullName();
     String mclassName = className.replace('.', '_');
     mclassName = mclassName.replace('$', '_');
     final String methodName = "jps__" + mclassName + "_checkInvariant";
+    final String methodVariableName = "_" + methodName;
+    String methodKey = methodName; //for lock and unlock method calls
     
     final StringBuffer code = new StringBuffer();
+    
+    //create a variable to hold the super method
+    code.append("private java.lang.reflect.Method ");
+    code.append(methodVariableName);
+    code.append(';');
+                
     code.append("final protected boolean ");
     code.append(methodName);
     code.append("() {");
+    
+    //check for recursive calls
     code.append("if(!net.mtu.eggplant.assert.AssertTools.lockMethod(\"");
-    code.append(methodName);
+    code.append(methodKey);
     code.append("\")) { return true; }");
     code.append("Object jps__retval = null;");
     
@@ -123,29 +133,51 @@ public class CodeGenerator {
     code.append("if(jps_thisClass == null) {");
     code.append("net.mtu.eggplant.assert.AssertTools.internalError(\"Could not find class \" + jps_className);");
     code.append("}");
-      
-  
+    
+    //find the super method
+    code.append("if(");
+    code.append(methodVariableName);
+    code.append(" == null) {");
+    //create the argument list
     code.append("final Class[] jps_methodArgs = new Class[0];");
-    code.append("final java.lang.reflect.Method jps_superMethod = net.mtu.eggplant.assert.AssertTools.findSuperMethod(jps_thisClass, \"checkInvariant\", jps_methodArgs);");
+    code.append(methodVariableName);
+    code.append(" = net.mtu.eggplant.assert.AssertTools.findSuperMethod(jps_thisClass, \"checkInvariant\", jps_methodArgs);");
 
-    code.append("if(jps_superMethod != null) {");
+    code.append("if(");
+    code.append(methodVariableName);
+    code.append(" == null) {");
+    code.append(methodVariableName);
+    code.append(" = net.mtu.eggplant.assert.AssertTools.NO_METHOD;");
+    code.append("}");
+    code.append("}");
+
+    code.append("if(!");
+    code.append(methodVariableName);
+    code.append(".equals(net.mtu.eggplant.assert.AssertTools.NO_METHOD)) {");
+    
     //invoke it, pass on exceptions
     code.append("final Object[] jps_args = new Object[0];");
     code.append("try {");
-    code.append("jps__retval = jps_superMethod.invoke(this, jps_args);");
+    code.append("jps__retval = ");
+    code.append(methodVariableName);
+    code.append(".invoke(this, jps_args);");
     code.append("}");
+    
     code.append("catch(IllegalAccessException jps_iae) {");
     //just means that the super method is private and we really shouldn't be calling it in the first place          
     //code.append("net.mtu.eggplant.assert.AssertTools.internalError(\"Not enough access executing checkInvariant method on super class: \" + jps_iae.getMessage());");
-    //Pretend it returned true :)
+    //Pretend it returned true, which is just like not calling it
     code.append("jps__retval = Boolean.TRUE;");
     code.append("}");
+    
     code.append("catch(IllegalArgumentException jps_iae) {");
-    code.append("net.mtu.eggplant.assert.AssertTools.internalError(\"IllegalArgument executing checkInvariant method on super class: \" + jps_iae.getMessage() + \" methodArgs \" + net.mtu.eggplant.util.Functions.printArray(jps_methodArgs) + \" args \" + net.mtu.eggplant.util.Functions.printArray(jps_args));");
+    code.append("net.mtu.eggplant.assert.AssertTools.internalError(\"IllegalArgument executing checkInvariant method on super class: \" + jps_iae.getMessage());");
     code.append("}");
+    
     code.append("catch(java.lang.reflect.InvocationTargetException jps_ite) {");
     code.append("jps_ite.getTargetException().printStackTrace();");
     code.append("}");
+    
     code.append("if(jps__retval == null) {");
     code.append("net.mtu.eggplant.assert.AssertTools.internalError(\"got null from checkInvariant\");");
     code.append("}");
@@ -155,11 +187,11 @@ public class CodeGenerator {
 
     code.append("if(jps__retval != null && !((Boolean)jps__retval).booleanValue()) {");
     code.append("net.mtu.eggplant.assert.AssertTools.unlockMethod(\"");
-    code.append(methodName);
+    code.append(methodKey);
     code.append("\");");
     code.append("return false;");
     code.append("}");
-    code.append("}");
+    code.append("}"); //end if(superMethod != AssertTools.NO_METHOD)
 
   
     //[jpschewe:20000116.1749CST] FIX still need to add to this to do interface
@@ -168,7 +200,7 @@ public class CodeGenerator {
     addConditionChecks(code, assertClass.getInvariants(), false);
 
     code.append("net.mtu.eggplant.assert.AssertTools.unlockMethod(\"");
-    code.append(methodName);
+    code.append(methodKey);
     code.append("\");");
     code.append("return jps__retval == null || ((Boolean)jps__retval).booleanValue();");
     code.append("}");
@@ -437,9 +469,19 @@ public class CodeGenerator {
     String mclassName = className.replace('.', '_');
     mclassName = mclassName.replace('$', '_');
     final String methodName = "jps__" + mclassName + "_check" + assertMethod.getName() + "PreConditions";
+    final String methodVariableName = "_" + methodName;
+    String methodKey = methodName; //for lock and unlock method calls
     
     final StringBuffer code = new StringBuffer();
 
+    //create a variable to cache the super method
+    if(assertMethod.isStatic() || assertMethod.isConstructor()) {
+      code.append("static ");
+    }
+    code.append("private java.lang.reflect.Method ");
+    code.append(methodVariableName);
+    code.append(';');
+    
     code.append("final ");
     
     if(assertMethod.isStatic() || assertMethod.isConstructor()) {
@@ -462,13 +504,17 @@ public class CodeGenerator {
       final StringPair sp = (StringPair)paramIter.next();
       code.append("final ");
       code.append(sp.getStringOne());
+      methodKey += "_" + sp.getStringOne();
       code.append(' ');
       code.append(sp.getStringTwo());
     }
     code.append(") {");
+
+    //check for recursive calls
     code.append("if(!net.mtu.eggplant.assert.AssertTools.lockMethod(\"");
-    code.append(methodName);
+    code.append(methodKey);
     code.append("\")) { return true; }");
+    
     if(!assertMethod.isPrivate() && !assertMethod.isConstructor()) {
       //don't check super class conditions if the method is private or a constructor
       code.append("Object jps__retval = null;");
@@ -482,6 +528,11 @@ public class CodeGenerator {
       code.append("net.mtu.eggplant.assert.AssertTools.internalError(\"Could not find class \" + jps_className);");
       code.append("}");      
 
+      //check if we need to find the super method
+      code.append("if(");
+      code.append(methodVariableName);
+      code.append(" == null) {");
+        
       //need method parameters here, just the class objects, use getClassObjectForClass
       code.append("final Class[] jps_methodArgs = {");
       first = true;
@@ -496,14 +547,25 @@ public class CodeGenerator {
         code.append(getClassObjectForClass(sp.getStringOne()));
       }
       code.append("};");
-                
-      code.append("final java.lang.reflect.Method jps_superMethod = net.mtu.eggplant.assert.AssertTools.findSuperMethod(jps_thisClass, \"check");
+
+      //find super method
+      code.append(methodVariableName);
+      code.append(" = net.mtu.eggplant.assert.AssertTools.findSuperMethod(jps_thisClass, \"check");
       code.append(assertMethod.getName());
       code.append("PreConditions\", jps_methodArgs);");
-
-      code.append("if(jps_superMethod != null) {");
-      code.append("final Object[] jps_args = {");
+      code.append("if(");
+      code.append(methodVariableName);
+      code.append(" == null) {");
+      code.append(methodVariableName);
+      code.append(" = net.mtu.eggplant.assert.AssertTools.NO_METHOD;");
+      code.append("}");
+      code.append("}");
+        
+      code.append("if(!");
+      code.append(methodVariableName);
+      code.append(".equals(net.mtu.eggplant.assert.AssertTools.NO_METHOD)) {");
       
+      code.append("final Object[] jps_args = {");
       first = true;      
       //Need parameters here, just the parameter names
       paramIter = assertMethod.getParams().iterator();
@@ -518,7 +580,9 @@ public class CodeGenerator {
       }    
       code.append("};");
       code.append("try {");
-      code.append("jps__retval = jps_superMethod.invoke(");
+      code.append("jps__retval = ");
+      code.append(methodVariableName);
+      code.append(".invoke(");
       if(assertMethod.isStatic() || assertMethod.isConstructor()) {
         code.append("null");
       } else {
@@ -537,7 +601,7 @@ public class CodeGenerator {
       code.append("catch(IllegalArgumentException jps_iae) {");
       code.append("net.mtu.eggplant.assert.AssertTools.internalError(\"IllegalArgument executing superClass check");
       code.append(assertMethod.getName());
-      code.append("PreConditions: \" + jps_iae.getMessage() + \" methodArgs \" + net.mtu.eggplant.util.Functions.printArray(jps_methodArgs) + \" args \" + net.mtu.eggplant.util.Functions.printArray(jps_args));");
+      code.append("PreConditions: \" + jps_iae.getMessage());");
       code.append("}");
       code.append("catch(java.lang.reflect.InvocationTargetException jps_ite) {");
       code.append("jps_ite.getTargetException().printStackTrace();");
@@ -548,7 +612,7 @@ public class CodeGenerator {
       //PreConditions are ORed
       code.append("else if(((Boolean)jps__retval).booleanValue()) {");
       code.append("net.mtu.eggplant.assert.AssertTools.unlockMethod(\"");
-      code.append(methodName);
+      code.append(methodKey);
       code.append("\");");
       code.append("return true;");
       code.append("}");
@@ -564,7 +628,7 @@ public class CodeGenerator {
     addConditionChecks(code, assertMethod.getPreConditions(), false);
     
     code.append("net.mtu.eggplant.assert.AssertTools.unlockMethod(\"");
-    code.append(methodName);
+    code.append(methodKey);
     code.append("\");");
     if(assertMethod.isPrivate() || assertMethod.isConstructor()) {
       code.append("return true;");
@@ -584,8 +648,19 @@ public class CodeGenerator {
     String mclassName = className.replace('.', '_');
     mclassName = mclassName.replace('$', '_');
     final String methodName = "jps__" + mclassName + "_check" + assertMethod.getName() + "PostConditions";
+    final String methodVariableName = "_" + methodName;
+    String methodKey = methodName; //for lock and unlock method calls
+    
     StringBuffer code = new StringBuffer();
 
+    //create a variable to cache the super method
+    if(assertMethod.isStatic() || assertMethod.isConstructor()) {
+      code.append("static ");
+    }
+    code.append("private java.lang.reflect.Method ");
+    code.append(methodVariableName);
+    code.append(';');
+    
     code.append("final ");
     if(assertMethod.isStatic() || assertMethod.isConstructor()) {
       code.append("static ");
@@ -598,11 +673,13 @@ public class CodeGenerator {
     boolean first = true;
     if(!assertMethod.isVoid()) {
       code.append(assertMethod.getReturnType());
+      methodKey += "_" + assertMethod.getReturnType();
       code.append(" ");
       code.append("jps__retVal");
       first = false;
     } else {
       code.append("final Object jps__dummyretVal");
+      methodKey += "_Object";
       first = false;
     }
       
@@ -623,13 +700,17 @@ public class CodeGenerator {
       //         code.append(", ");
       code.append("final ");
       code.append(paramType);
+      methodKey += "_" + paramType;
       code.append(' ');
       code.append(paramName);
     }
     code.append(") {");
+
+    //check for recursive calls
     code.append("if(!net.mtu.eggplant.assert.AssertTools.lockMethod(\"");
-    code.append(methodName);
+    code.append(methodKey);
     code.append("\")) { return true; }");
+    
     if(!assertMethod.isPrivate() && !assertMethod.isConstructor()) {
       //don't bother checking for super method if we're private or a constructor
       code.append("Object jps__retval = null;");
@@ -642,7 +723,12 @@ public class CodeGenerator {
       code.append("if(jps_thisClass == null) {");
       code.append("net.mtu.eggplant.assert.AssertTools.internalError(\"Could not find class \" + jps_className);");
       code.append("}");
-    
+
+      //check if we need to find the super method
+      code.append("if(");
+      code.append(methodVariableName);
+      code.append(" == null) {");
+      
       //need method parameters here, just the class objects, use getClassObjectForClass
       code.append("final Class[] jps_methodArgs = {");
       first = true;
@@ -670,12 +756,24 @@ public class CodeGenerator {
         //         code.append(classObj);
       }
       code.append("};");
-                
-      code.append("final java.lang.reflect.Method jps_superMethod = net.mtu.eggplant.assert.AssertTools.findSuperMethod(jps_thisClass, \"check");
+
+      //find super method
+      code.append(methodVariableName);
+      code.append(" = net.mtu.eggplant.assert.AssertTools.findSuperMethod(jps_thisClass, \"check");
       code.append(assertMethod.getName());
       code.append("PostConditions\", jps_methodArgs);");
+      code.append("if(");
+      code.append(methodVariableName);
+      code.append(" == null) {");
+      code.append(methodVariableName);
+      code.append(" = net.mtu.eggplant.assert.AssertTools.NO_METHOD;");
+      code.append("}");
+      code.append("}");
 
-      code.append("if(jps_superMethod != null) {");
+      code.append("if(!");
+      code.append(methodVariableName);
+      code.append(".equals(net.mtu.eggplant.assert.AssertTools.NO_METHOD)) {");
+      
       code.append("final Object[] jps_args = {");
       first = true;      
       //need parameters here, just the parameter names
@@ -702,7 +800,9 @@ public class CodeGenerator {
       }
       code.append("};");
       code.append("try {");
-      code.append("jps__retval = jps_superMethod.invoke(");
+      code.append("jps__retval = ");
+      code.append(methodVariableName);
+      code.append(".invoke(");
       if(assertMethod.isStatic() || assertMethod.isConstructor()) {
         code.append("null");
       } else {
@@ -721,7 +821,7 @@ public class CodeGenerator {
       code.append("catch(IllegalArgumentException jps_iae) {");
       code.append("net.mtu.eggplant.assert.AssertTools.internalError(\"IllegalArgument executing superClass check");
       code.append(assertMethod.getName());
-      code.append("PostConditions: \" + jps_iae.getMessage() + \" methodArgs \" + net.mtu.eggplant.util.Functions.printArray(jps_methodArgs) + \" args: \" + net.mtu.eggplant.util.Functions.printArray(jps_args));");
+      code.append("PostConditions: \" + jps_iae.getMessage());");
       code.append("}");
       code.append("catch(java.lang.reflect.InvocationTargetException jps_ite) {");
       code.append("jps_ite.getTargetException().printStackTrace();");
@@ -732,7 +832,7 @@ public class CodeGenerator {
       //PostConditions are ANDed
       code.append("else if(!((Boolean)jps__retval).booleanValue()) {");
       code.append("net.mtu.eggplant.assert.AssertTools.unlockMethod(\"");
-      code.append(methodName);
+      code.append(methodKey);
       code.append("\");");
       code.append("return false;");
       code.append("}");
@@ -747,7 +847,7 @@ public class CodeGenerator {
     
     addConditionChecks(code, assertMethod.getPostConditions(), true);
     code.append("net.mtu.eggplant.assert.AssertTools.unlockMethod(\"");
-    code.append(methodName);
+    code.append(methodKey);
     code.append("\");");
     if(assertMethod.isPrivate() || assertMethod.isConstructor()) {
       code.append("return true;");

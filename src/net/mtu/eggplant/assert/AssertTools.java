@@ -35,8 +35,6 @@ import java.lang.reflect.Method;
 
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
@@ -49,35 +47,24 @@ import java.util.Iterator;
 **/
 final public class AssertTools {
 
-  static private Map _superMethods = new HashMap();
-  
   /**
-     find the superclasses method, this is my version of a superClass method,
-     this means that the method name is __<packageName>_<className>_methodName
-     where packageName is the package the class is in with the '.'s replaced
-     with '_' and className is the name of the class.
-     
-     @return the method found, null for no such method.
-
-     @pre (thisClass != null)
-     @pre (methodName != null)
-     @pre (methodArgs != null)
-  **/
+   * find the superclasses method, this is my version of a superClass method,
+   * this means that the method name is __<packageName>_<className>_methodName
+   * where packageName is the package the class is in with the '.'s replaced
+   * with '_' and className is the name of the class.
+   * 
+   * @return the method found, null for no such method.
+   * 
+   * @pre (thisClass != null)
+   * @pre (methodName != null)
+   * @pre (methodArgs != null)
+   */
   static public Method findSuperMethod(final Class thisClass, final String methodName, final Class[] methodArgs) {
-    //     System.out.println("findSuperMethod:"
-    //                        + " thisClass: " + thisClass
-    //                        + " methodName: " + methodName
-    //                        + " methodArgs: " + methodArgs
-    //                        );
-    //Use a scratch class for the key
-    ScratchMethod sm = new ScratchMethod(thisClass, methodName, methodArgs);
-
-    //Now see if it's cached
-    if(_superMethods.containsKey(sm)) {
-      //       System.out.println("Found in table");
-      return (Method)_superMethods.get(sm);
-    }
-    
+//          System.out.println("findSuperMethod:"
+//                             + " thisClass: " + thisClass
+//                             + " methodName: " + methodName
+//                             + " methodArgs: " + net.mtu.eggplant.util.Functions.printArray(methodArgs)
+//                             );
     Class superClass = thisClass.getSuperclass();
     Method superMethod = null;
     if(superClass != null) {
@@ -85,7 +72,7 @@ final public class AssertTools {
         try {
           String fullSuperClassName = superClass.getName().replace('.', '_');
           fullSuperClassName = fullSuperClassName.replace('$', '_');          
-          String supermname = "__" + fullSuperClassName + "_" + methodName;
+          final String supermname = "jps__" + fullSuperClassName + "_" + methodName;
           superMethod = superClass.getDeclaredMethod(supermname, methodArgs);
         }
         catch(NoSuchMethodException nsme) {
@@ -100,11 +87,6 @@ final public class AssertTools {
         }
       }
     }
-    
-    //put it in the cache
-    _superMethods.put(sm, superMethod);
-
-    //     System.out.println("had to lookup");
     return superMethod;
   }
 
@@ -237,21 +219,16 @@ final public class AssertTools {
 
 
 
-  //   static private HashMap _classMap = new HashMap();
   /**
-     Get the class object for this class name.  Just like {@link
-     Class#forName(String) Class.forName()}, but returns null on an exception.
-
-     @return null for no such class found
-  **/
+   * Get the class object for this class name.  Just like {@link
+   * Class#forName(String) Class.forName()}, but returns null on an exception.
+   * 
+   * @return null for no such class found
+   */
   static public Class classForName(final String className) {
     if(className == null) {
       return null;
     }
-    //     if(_classMap.containsKey(className)) {
-    //       return (Class)_classMap.get(className);
-    //     }
-    //     else {
     Class thisClass;
     try {
       thisClass = Class.forName(className);
@@ -259,10 +236,8 @@ final public class AssertTools {
       //ignore it, return null instead
       thisClass = null;
     }
-    //       _classMap.put(className, thisClass);
       
     return thisClass;
-    //     }
   }
 
   static private Set _lockedMethods = new HashSet(20);
@@ -540,5 +515,24 @@ final public class AssertTools {
      that a class has been checked for and not found.
   **/
   final static public NONE NO_CLASS = new NONE();
-  static private class NONE { }
+  static private class NONE {
+    public void noMethod() {} //used for no super method
+  }
+
+  /**
+   * Used in caching to represent that no super method can be found.
+   */
+  final static public Method NO_METHOD;
+  static {
+    Method noMethod = null;
+    try {
+      noMethod = NONE.class.getDeclaredMethod("noMethod", new Class[0]);
+    } catch(final NoSuchMethodException nsme) {
+      internalError("Cannot find method NONE.noMethod");
+    } catch(final SecurityException se) {
+      internalError("Cannot access method NONE.noMethod");
+    }
+    NO_METHOD = noMethod;
+  }
+  
 }

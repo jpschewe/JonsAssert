@@ -10,7 +10,7 @@
 			 (expand-file-name "src/" assert-root)
 			 (expand-file-name "lib/JonsInfra-0.1.jar" assert-root)
 			 (expand-file-name "lib/antlr.jar" assert-root)
-			 (expand-file-name "lib/junit.jar" assert-root)
+			 (expand-file-name "lib/junit-3.4.jar" assert-root)
 			 (expand-file-name "lib/java-getopt-1.0.7.jar" assert-root)
 			 (expand-file-name "jre/lib/rt.jar" java-home)
 			 ))

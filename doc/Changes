@@ -5,3 +5,10 @@ superclass the pre and post conditions on the package method will be checked,
 even though the public/protected method doesn't actually override the package
 method.
 
+- hook up to ant for builds
+
+- changed license from LGPL to BSD style license.
+
+- removed dependancy on gnu-regexp
+
+- changed package names since I'm moving sites

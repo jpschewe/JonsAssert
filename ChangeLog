@@ -1,3 +1,10 @@
+2001-01-07  Jon Schewe  <jpschewe@mtu.net>
+
+	* prj.el: Upgraded to junit-3.4
+
+	* src/net/mtu/eggplant/assert/CodeGenerator.java: Added caching of
+	super methods at the class level.  This should improve performance.
+
 2000-12-29  Jon Schewe  <jpschewe@mtu.net>
 	*: Moved all files into the package net.mtu.eggplant.  Also
 	changed all file headers for new licensing, BSD style rather than

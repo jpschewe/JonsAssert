@@ -17,7 +17,6 @@
 
   Each time a method is called it is "locked".  When a method is called and it
   is ready locked it returns true immediatly to avoid infinite recursion.
-
 */
 
 //before
@@ -47,29 +46,6 @@ public Object methodFoo(Object param1) {
 
 
 /**
-   Logic:  if(!super preconditions) {
-              return false;
-           }
-           if( !AND(interface preconditions) ) {
-             return false;
-           }
-           return AND(pre condtitions for this class);
-              
-**/
-protected boolean jps__<packageName>_<methodName>_check<methodname>PostConditions(jps__retVal, param1, ...) {
-
-  /* Just like check checkPreconditions, except that the superclass conditions
-    as ANDed rather then ORed. */
-
-  // AND, as soon as a false is seen, return false, looking up superclasses and interfaces
-  
-  if(! ((Boolean)retVal).booleanValue()) {
-    return false;
-  }
-
-}
-
-/**
    Logic:  if(super preconditions) {
               return true;
            }
@@ -79,24 +55,33 @@ protected boolean jps__<packageName>_<methodName>_check<methodname>PostCondition
            return AND(pre condtitions for this class);
               
 **/
+private java.lang.reflect.Method _jps__<packageName>_<methodName>_check<methodname>PreConditions;
 protected boolean jps__<packageName>_<methodName>_check<methodname>PreConditions(param1, param2, ...) {
+  //FIX this needs to take method params into account otherwise the string isn't unique
+  if(!AssertTools.lockMethod("jps__<packageName>_<methodName>_check<methodname>PreConditions") { return true; }
+     
   Class thisClass;
   try {
-    String className = "<fill in class name>";
+    final String className = "<fill in class name>";
     thisClass = Class.forName(className);
   }
   catch(ClassNotFoundException cnfe) {
     org.tcfreenet.schewe.Assert.AssertTools.internalError("Got error getting the class object for class " + className + " " + cnfe);
   }
 
-  Class[] methodArgs = new Class[0];
-  Method superMethod = org.tcfreenet.schewe.Assert.AssertTools.findSuperMethod(thisClass, "check<methodname>PreConditions", methodArgs);
+  if(_jps__<packageName>_<methodName>_check<methodname>PreConditions == null) {
+    final Class[] methodArgs = {param1Type.class, param2Type.class, ...};
+     _jps__<packageName>_<methodName>_check<methodname>PreConditions = org.tcfreenet.schewe.Assert.AssertTools.findSuperMethod(thisClass, "check<methodname>PreConditions", methodArgs);
+     if(_jps__<packageName>_<methodName>_check<methodname>PreConditions == null) {
+       _jps__<packageName>_<methodName>_check<methodname>PreConditions = AssertTools.NO_METHOD;
+     }
+  }
 
-  if(superMethod != null) {
+  if(!_jps__<packageName>_<methodName>_check<methodname>PreConditions.equals(AssertTools.NO_METHOD)) {
     //invoke it, bail on exceptions
     Object[] args = new Object[0];
     try {
-      retVal = superMethod.invoke(this, args);
+      retVal = _jps__<packageName>_<methodName>_check<methodname>PreConditions.invoke(this, args);
     }
     catch(IllegalAccessException iae) {
       org.tcfreenet.schewe.Assert.AssertTools.internalError("Not enough access executing superClass check<methodName>PreConditions: " + iae.getMessage());
@@ -140,6 +125,31 @@ protected boolean jps__<packageName>_<methodName>_check<methodname>PreConditions
 
 
 /**
+   Logic:  if(!super postconditions) {
+              return false;
+           }
+           if( !AND(interface postconditions) ) {
+             return false;
+           }
+           return AND(postcondtitions for this class);
+              
+**/
+private java.lang.reflect.Method _jps__<packageName>_<methodName>_check<methodname>PostConditions;
+protected boolean jps__<packageName>_<methodName>_check<methodname>PostConditions(jps__retVal, param1, ...) {
+
+  /* Just like check checkPreconditions, except that the superclass conditions
+    as ANDed rather then ORed. */
+
+  // AND, as soon as a false is seen, return false, looking up superclasses and interfaces
+  
+  if(! ((Boolean)retVal).booleanValue()) {
+    return false;
+  }
+
+}
+
+
+/**
    Logic:  if(!super invariants) {
               return false;
            }
@@ -149,24 +159,33 @@ protected boolean jps__<packageName>_<methodName>_check<methodname>PreConditions
            return AND(invariants for this class);
               
 **/
+private java.lang.reflect.Method _jps__<packageName>_<methodName>_checkInvariant;
 protected boolean jps__<packageName>_<methodName>_checkInvariant() {
+  if(!AssertTools.lockMethod("jps__<packageName>_<methodName>_checkInvariant") { return true; }
+     
   Class thisClass;
   try {
-    String className = "<fill in class name>";
+    final String className = "<fill in class name>";
     thisClass = Class.forName(className);
   }
   catch(ClassNotFoundException cnfe) {
     org.tcfreenet.schewe.Assert.AssertTools.internalError("Got error getting the class object for class " + className + " " + cnfe);
   }
-  
-  Class[] methodArgs = new Class[0];
-  Method superMethod = org.tcfreenet.schewe.Assert.AssertTools.findSuperMethod(thisClass, "checkInvariant", methodArgs);
 
-  if(superMethod != null) {
+  //find the super method
+  if(_jps__<packageName>_<methodName>_checkInvariant == null) {
+    final Class[] methodArgs = new Class[0];
+    _jps__<packageName>_<methodName>_checkInvariant = org.tcfreenet.schewe.Assert.AssertTools.findSuperMethod(thisClass, "checkInvariant", methodArgs);
+    if(_jps__<packageName>_<methodName>_checkInvariant == null) {
+      _jps__<packageName>_<methodName>_checkInvariant = AssertTools.NO_METHOD;
+    }
+  }
+
+  if(!_jps__<packageName>_<methodName>_checkInvariant.equals(AssertTools.NO_METHOD)) {
     //invoke it, bail on exceptions
     Object[] args = new Object[0];
     try {
-      retVal = superMethod.invoke(this, args);
+      retVal = _jps__<packageName>_<methodName>_checkInvariant.invoke(this, args);
     }
     catch(IllegalAccessException iae) {
       org.tcfreenet.schewe.Assert.AssertTools.internalError("Not enough access executing superClass checkInvariant: " + iae.getMessage());

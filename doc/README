@@ -109,7 +109,7 @@ public class A {
 
 
 - Reporting bugs.  If you happen to find a bug in the software, please send me
-a message, schewe@tcfreenet.org.  At least include the message that was output
+a message, jpschewe@mtu.net.  At least include the message that was output
 and a description of what condition was being checked.  A stand alone test
 case that causes the error is REALLY helpful if you can do such a thing.
 
@@ -125,8 +125,6 @@ hard to insert code into the C.  One idea is to create another method that
 calls the new native method...
 
 - Get assertions off of implemented interfaces.
-
-- hook up to ant for builds
 
 - Build patch for Jikes that allows Assert to be called as files are compiled
 with Jikes.  Would be really nice if it could keep the same JVM running so

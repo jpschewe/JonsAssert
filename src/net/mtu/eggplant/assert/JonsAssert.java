@@ -164,7 +164,7 @@ public class JonsAssert {
       System.out.println("Parsing testcases...");
       config.setIgnoreTimeStamp(true);
       //Test case
-      success &= doFile(new File("org/tcfreenet/schewe/assert/testcases/")); // parse it
+      success &= doFile(new File("net/mtu/eggplant/assert/testcases/")); // parse it
     }
 
     return success;
