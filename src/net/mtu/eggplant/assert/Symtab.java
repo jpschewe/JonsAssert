@@ -313,8 +313,7 @@ public class Symtab {
             offset = curFrag.instrumentLine(offset, buf);
             if(fragIter.hasNext()) {
               curFrag = (CodeFragment)fragIter.next();
-            }
-            else {
+            } else {
               curFrag = null;
             }
           }
@@ -459,8 +458,7 @@ public class Symtab {
     
     if(!_methodStack.isEmpty()) {
       _currentMethod = (AssertMethod)_methodStack.pop();
-    }
-    else {
+    } else {
       _currentMethod = null;
     }
   }
@@ -503,8 +501,7 @@ public class Symtab {
         //[jpschewe:20000416.2142CST] FIX skip constructors for now, still needs some thought
         //ifile.getFragments().add(new CodeFragment(method.getEntrance(), CodeGenerator.generateConstrauctorAssertions(method), CodeFragmentType.PRECONDITION));
 
-      }
-      else if(!method.isAbstract()) {
+      } else if(!method.isAbstract()) {
         //can't put calls inside abstract methods        
         final CodePoint entrance = method.getEntrance();      
 
@@ -520,10 +517,10 @@ public class Symtab {
           ifile.getFragments().add(new CodeFragment(entrance, " boolean _JPS_foundException" + shortmclassName + " = false; try { ", CodeFragmentType.OLDVALUES));
         }
 
-        
+
+        //Add a call to the invariant method at entrance to methods that need it        
         if(!method.isStatic() && !method.isPrivate() && !method.isConstructor()
            && !(extendsObject && method.getContainingClass().getInvariants().isEmpty()) ) {
-          //Add a call to the invariant method at entrance
           ifile.getFragments().add(new CodeFragment(entrance, invariantCall, CodeFragmentType.INVARIANT));
         }
 
@@ -542,8 +539,7 @@ public class Symtab {
                 //Add a call to the invariant at each exit
                 final String myinvariantCall = "{" + invariantCall;
                 ifile.getFragments().add(new CodeFragment(exit.getCodePointOne(), myinvariantCall, CodeFragmentType.INVARIANT));
-              }
-              else {
+              } else {
                 ifile.getFragments().add(new CodeFragment(exit.getCodePointOne(), "{", CodeFragmentType.INVARIANT));
               }
             }
@@ -561,8 +557,8 @@ public class Symtab {
               ifile.getFragments().add(new CodeFragment(exit.getCodePointTwo(), myPostCall, CodeFragmentType.POSTCONDITION2));
             }
           }
-        }
-        else if( !(extendsObject && method.getContainingClass().getInvariants().isEmpty() && method.getPostConditions().isEmpty()) ) {
+          //end not void
+        } else if( !(extendsObject && method.getContainingClass().getInvariants().isEmpty() && method.getPostConditions().isEmpty()) ) {
           //Add in a finally clause
           //finally {
           //checkInvariant
@@ -570,27 +566,25 @@ public class Symtab {
           //}
 
           //Subtract 1 so that we add just before the '}'
-          CodePoint insertFinallyAt = new CodePoint(method.getClose().getLine(), method.getClose().getColumn() - 1);
-          StringBuffer codeToInsert = new StringBuffer();
+          final CodePoint insertFinallyAt = new CodePoint(method.getClose().getLine(), method.getClose().getColumn() - 1);
+          final StringBuffer codeToInsert = new StringBuffer();
           codeToInsert.append("}");
           //catch programmers exceptions first so my catches are reachable
           boolean catchRuntime = true;
           boolean catchError = true;
-          Iterator exceptionIter = method.getThrownExceptions().iterator();
+          final Iterator exceptionIter = method.getThrownExceptions().iterator();
           while(exceptionIter.hasNext()) {
-            String exception = (String)exceptionIter.next();
+            final String exception = (String)exceptionIter.next();
             //Make sure we don't try and catch some exceptions twice
             if(exception.equals("RuntimeException")
                || exception.equals("java.lang.RuntimeException")
                || exception.equals("Exception")
                || exception.equals("java.lang.RuntimeException")) {
               catchRuntime = false;
-            }
-            else if(exception.equals("Error")
+            } else if(exception.equals("Error")
                     || exception.equals("java.lang.Error")) {
               catchError = false;
-            }
-            else if(exception.equals("Throwable")
+            } else if(exception.equals("Throwable")
                     || exception.equals("java.lang.Throwable")) {
               catchError = false;
               catchRuntime = false;
@@ -652,12 +646,9 @@ public class Symtab {
 
       final CodePoint close = method.getClose();
       //Add the pre and post check methods at the end of the method      
-      if(!method.isConstructor()) {
-        //[jpschewe:20001008.2209CST] skip on constructor for now
-        if(!(extendsObject && method.getPreConditions().isEmpty())) {
-          final String preMethod = CodeGenerator.generatePreConditionMethod(method);
-          ifile.getFragments().add(new CodeFragment(close, preMethod, CodeFragmentType.PRECONDITION));
-        }
+      if(!(extendsObject && method.getPreConditions().isEmpty())) {
+        final String preMethod = CodeGenerator.generatePreConditionMethod(method);
+        ifile.getFragments().add(new CodeFragment(close, preMethod, CodeFragmentType.PRECONDITION));
       }
       if(!(extendsObject && method.getPostConditions().isEmpty())) {
         final String postMethod = CodeGenerator.generatePostConditionMethod(method);

@@ -264,7 +264,10 @@ public class AssertMethod implements Named {
      /&#42;package&#42;/ is returned for package visibility
   **/
   final public String getAssertMethodVisibility() {
-    if(_mods.contains("private")) {
+    if(isConstructor()) {
+      //Constructors are a special case, never called from subclass
+      return "private";
+    } else if(_mods.contains("private")) {
       return "private";
     } else if(_mods.contains("protected")) {
       return "protected";

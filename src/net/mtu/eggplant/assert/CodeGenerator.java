@@ -116,7 +116,7 @@ public class CodeGenerator {
     code.append("_JPS_retVal = _JPS_superMethod.invoke(this, _JPS_args);");
     code.append("}");
     code.append("catch(IllegalAccessException _JPS_iae) {");
-    //[jpschewe:20000220.0936CST] just means that the super method is private and we really shouldn't be calling it in the first place          
+    //just means that the super method is private and we really shouldn't be calling it in the first place          
     //code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"Not enough access executing checkInvariant method on super class: \" + _JPS_iae.getMessage());");
     //Pretend it returned true :)
     code.append("_JPS_retVal = Boolean.TRUE;");
@@ -184,8 +184,7 @@ public class CodeGenerator {
       while(paramIter.hasNext()) {
         if(!first) {
           code.append(", ");
-        }
-        else {
+        } else {
           first = false;
         }
         final StringPair sp = (StringPair)paramIter.next();
@@ -214,16 +213,16 @@ public class CodeGenerator {
     
     /*
       insert:
-      this(param0, param1, new AssertDummy#(param0, param1));
-      checkInvariant();
-      checkPostConditions(param0, param0, param1, param1);
+      this(param0, param1, new AssertDummy#(param0, param1), true, ...);
+      checkInvariant(); //standard
+      checkPostConditions(param0, param0, param1, param1); //standard
       }
-      static private class AssertDummy# {
+      final static private class AssertDummy# {
       public AssertDummy#(param0, param1) {
-      checkPreConditions(param0, param1);
+      checkPreConditions(param0, param1); //standard
       }
       }
-      private className(param0, param1) {
+      private className(param0, param1, AssertDummy#, boolean, ...) {
     */
     code.append("this(");
     //put param names in here once
@@ -233,8 +232,7 @@ public class CodeGenerator {
       while(paramIter.hasNext()) {
         if(!first) {
           code.append(", ");
-        }
-        else {
+        } else {
           first = false;
         }
         final StringPair sp = (StringPair)paramIter.next();
@@ -257,8 +255,7 @@ public class CodeGenerator {
       while(paramIter.hasNext()) {
         if(!first) {
           code.append(", ");
-        }
-        else {
+        } else {
           first = false;
         }
         final StringPair sp = (StringPair)paramIter.next();
@@ -290,8 +287,7 @@ public class CodeGenerator {
       while(paramIter.hasNext()) {
         if(!first) {
           code.append(", ");
-        }
-        else {
+        } else {
           first = false;
         }
         final StringPair sp = (StringPair)paramIter.next();
@@ -321,8 +317,7 @@ public class CodeGenerator {
       while(paramIter.hasNext()) {
         if(!first) {
           code.append(", ");
-        }
-        else {
+        } else {
           first = false;
         }
         final StringPair sp = (StringPair)paramIter.next();
@@ -401,8 +396,7 @@ public class CodeGenerator {
       code.append("__retVal");
       code.append(shortmclassName);
       first = false;
-    }
-    else {
+    } else {
       //Need dummy slot
       code.append("null");
       first = false;
@@ -414,17 +408,9 @@ public class CodeGenerator {
       final String paramName = sp.getStringTwo();
       if(! first) {
         code.append(", ");
-      }
-      else {
+      } else {
         first = false;
       }
-      //       if(!assertMethod.isConstructor()) {
-      //         //constructors just pass the param name in twice since they're inside
-      //         //a special class anyway
-      //         code.append("__old");
-      //       }
-      //       code.append(paramName);
-      //       code.append(", ");
       code.append(paramName);
     }
     code.append(")) {");
@@ -467,8 +453,7 @@ public class CodeGenerator {
     while(paramIter.hasNext()) {
       if(! first) {
         code.append(",");
-      }
-      else {
+      } else {
         first = false;
       }
       final StringPair sp = (StringPair)paramIter.next();
@@ -482,7 +467,7 @@ public class CodeGenerator {
     code.append(methodName);
     code.append("\")) { return true; }");
     if(!assertMethod.isPrivate() && !assertMethod.isConstructor()) {
-      //[jpschewe:20000220.0933CST] don't check super class conditions if the method is private or a constructor
+      //don't check super class conditions if the method is private or a constructor
       code.append("Object _JPS_retVal = null;");
 
       //Get the class object
@@ -494,15 +479,14 @@ public class CodeGenerator {
       code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"Could not find class \" + _JPS_className);");
       code.append("}");      
 
-      //[jpschewe:20000213.1552CST] need method parameters here, just the class objects, use getClassObjectForClass
+      //need method parameters here, just the class objects, use getClassObjectForClass
       code.append("final Class[] _JPS_methodArgs = {");
       first = true;
       paramIter = assertMethod.getParams().iterator();
       while(paramIter.hasNext()) {
         if(! first) {
           code.append(", ");
-        }
-        else {
+        } else {
           first = false;
         }
         final StringPair sp = (StringPair)paramIter.next();
@@ -523,8 +507,7 @@ public class CodeGenerator {
       while(paramIter.hasNext()) {
         if(! first) {
           code.append(", ");
-        }
-        else {
+        } else {
           first = false;
         }
         final StringPair sp = (StringPair)paramIter.next();
@@ -535,14 +518,13 @@ public class CodeGenerator {
       code.append("_JPS_retVal = _JPS_superMethod.invoke(");
       if(assertMethod.isStatic() || assertMethod.isConstructor()) {
         code.append("null");
-      }
-      else {
+      } else {
         code.append("this");
       }
       code.append(", _JPS_args);");
       code.append("}");
       code.append("catch(IllegalAccessException _JPS_iae) {");
-      //[jpschewe:20000220.0936CST] just means that the super method is private and we really shouldn't be calling it in the first place      
+      //just means that the super method is private and we really shouldn't be calling it in the first place      
       //code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"Not enough access executing superClass check");
       //code.append(assertMethod.getName());
       //code.append("PreConditions: \" + _JPS_iae.getMessage());");
@@ -583,8 +565,7 @@ public class CodeGenerator {
     code.append("\");");
     if(assertMethod.isPrivate() || assertMethod.isConstructor()) {
       code.append("return true;");
-    }
-    else {
+    } else {
       code.append("return _JPS_retVal == null || ((Boolean)_JPS_retVal).booleanValue();");
     }
     code.append("}");
@@ -617,9 +598,8 @@ public class CodeGenerator {
       code.append(" ");
       code.append("__retVal");
       first = false;
-    }
-    else {
-      code.append("Object __dummyretVal");
+    } else {
+      code.append("final Object __dummyretVal");
       first = false;
     }
       
@@ -630,8 +610,7 @@ public class CodeGenerator {
       final String paramName = sp.getStringTwo();
       if(! first) {
         code.append(",");
-      }
-      else {
+      } else {
         first = false;
       }
       //         code.append(paramType);
@@ -669,8 +648,7 @@ public class CodeGenerator {
       if(!assertMethod.isVoid()) {
         code.append(getClassObjectForClass(assertMethod.getReturnType()));
         first = false;
-      }
-      else {
+      } else {
         code.append("Object.class"); //For dummy return value
         first = false;
       }
@@ -678,8 +656,7 @@ public class CodeGenerator {
       while(paramIter.hasNext()) {
         if(! first) {
           code.append(", ");
-        }
-        else {
+        } else {
           first = false;
         }
         final StringPair sp = (StringPair)paramIter.next();
@@ -698,12 +675,11 @@ public class CodeGenerator {
       code.append("if(_JPS_superMethod != null) {");
       code.append("final Object[] _JPS_args = {");
       first = true;      
-      //[jpschewe:20000213.1552CST] need parameters here, just the parameter names
+      //need parameters here, just the parameter names
       if(!assertMethod.isVoid()) {
         code.append(getObjectForParam(assertMethod.getReturnType(), "__retVal"));
         first = false;
-      }
-      else {
+      } else {
         code.append("null");
         first = false;
       }
@@ -712,8 +688,7 @@ public class CodeGenerator {
       while(paramIter.hasNext()) {
         if(! first) {
           code.append(", ");
-        }
-        else {
+        } else {
           first = false;
         }
         StringPair sp = (StringPair)paramIter.next();
@@ -727,14 +702,13 @@ public class CodeGenerator {
       code.append("_JPS_retVal = _JPS_superMethod.invoke(");
       if(assertMethod.isStatic() || assertMethod.isConstructor()) {
         code.append("null");
-      }
-      else {
+      } else {
         code.append("this");
       }
       code.append(", _JPS_args);");
       code.append("}");
       code.append("catch(IllegalAccessException _JPS_iae) {");
-      //[jpschewe:20000220.0936CST] just means that the super method is private and we really shouldn't be calling it in the first place
+      //just means that the super method is private and we really shouldn't be calling it in the first place
       //code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"Not enough access executing superClass check");
       //code.append(assertMethod.getName());
       //code.append("PostConditions: \" + _JPS_iae.getMessage());");
@@ -774,8 +748,7 @@ public class CodeGenerator {
     code.append("\");");
     if(assertMethod.isPrivate() || assertMethod.isConstructor()) {
       code.append("return true;");
-    }
-    else {
+    } else {
       code.append("return _JPS_retVal == null || ((Boolean)_JPS_retVal).booleanValue();");
     }
     code.append("}");
@@ -795,8 +768,7 @@ public class CodeGenerator {
     try {
       _postConditionRewrite = new RE("\\$return");
       _escapeQuotes = new RE("(\"|\')");
-    }
-    catch(REException re) {
+    } catch(final REException re) {
       System.err.println("This is really bad!");
       re.printStackTrace();
       System.exit(1);
@@ -820,8 +792,7 @@ public class CodeGenerator {
       code.append("if(!");
       if(postCondition) {
         code.append(_postConditionRewrite.substituteAll(condition, "__retVal"));
-      }
-      else {
+      } else {
         if(_postConditionRewrite.getMatch(condition) != null) {
           System.err.println("$return found in precondition! " + token.getText());
         }
@@ -855,26 +826,19 @@ public class CodeGenerator {
   static public String getClassObjectForClass(final String cl) {
     if(cl.equals("int")) {
       return "Integer.TYPE";
-    }
-    else if(cl.equals("long")) {
+    } else if(cl.equals("long")) {
       return "Long.TYPE";
-    }
-    else if(cl.equals("float")) {
+    } else if(cl.equals("float")) {
       return "Float.TYPE";
-    }
-    else if(cl.equals("double")) {
+    } else if(cl.equals("double")) {
       return "Double.TYPE";
-    }
-    else if(cl.equals("boolean")) {
+    } else if(cl.equals("boolean")) {
       return "Boolean.TYPE";
-    }
-    else if(cl.equals("byte")) {
+    } else if(cl.equals("byte")) {
       return "Byte.TYPE";
-    }
-    else if(cl.equals("char")) {
+    } else if(cl.equals("char")) {
       return "Character.TYPE";
-    }
-    else if(cl.equals("short")) {
+    } else if(cl.equals("short")) {
       return "Short.TYPE";
     }
 
@@ -890,26 +854,19 @@ public class CodeGenerator {
                                          final String paramName) {
     if(paramType.equals("int")) {
       return "new Integer(" + paramName + ")";
-    }
-    else if(paramType.equals("long")) {
+    } else if(paramType.equals("long")) {
       return "new Long(" + paramName + ")";
-    }
-    else if(paramType.equals("float")) {
+    } else if(paramType.equals("float")) {
       return "new Float(" + paramName + ")";
-    }
-    else if(paramType.equals("double")) {
+    } else if(paramType.equals("double")) {
       return "new Double(" + paramName + ")";
-    }
-    else if(paramType.equals("boolean")) {
+    } else if(paramType.equals("boolean")) {
       return "new Boolean(" + paramName + ")";
-    }
-    else if(paramType.equals("byte")) {
+    } else if(paramType.equals("byte")) {
       return "new Byte(" + paramName + ")";
-    }
-    else if(paramType.equals("char")) {
+    } else if(paramType.equals("char")) {
       return "new Character(" + paramName + ")";
-    }
-    else if(paramType.equals("short")) {
+    } else if(paramType.equals("short")) {
       return "new Short(" + paramName + ")";
     }
 

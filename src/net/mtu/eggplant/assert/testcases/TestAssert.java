@@ -39,10 +39,18 @@ public class TestAssert extends TestCase {
     
   }
 
-  public TestAssert(String name) {
+  public TestAssert(final String name) {
     super(name);
   }
 
+  /**
+     @pre (j > 10)
+  **/
+  public TestAssert(final int j) {
+    super("null");
+  }
+
+  
   static public TestSuite suite() {
     return new TestSuite(TestAssert.class);
   }
@@ -93,13 +101,6 @@ public class TestAssert extends TestCase {
     
   }
   
-  /**
-     @pre (j > 10)
-  **/
-  public TestAssert(final int j) {
-    super("null");
-  }
-
   /**
      Check if general preconditions work.
   **/
