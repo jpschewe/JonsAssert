@@ -17,7 +17,7 @@ import antlr.TokenStreamSelector;
 import gnu.getopt.Getopt;
 import gnu.getopt.LongOpt;
 
-public class Main {
+public class JonsAssert {
 
   static /* package */ TokenStreamSelector selector = new TokenStreamSelector();
   static /* package */ JavaLexer javaLexer;

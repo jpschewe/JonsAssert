@@ -1,6 +1,6 @@
 2000-04-19  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
-	* Main.java: Started adding command line parameters.  Added the
+	* JonsAssert.java: Started adding command line parameters.  Added the
 	important -f for forcing instrumentation even if the file already exists.
 
 	* AssertClass.java: I think I've got anonymous class names finally
@@ -23,7 +23,7 @@
 	* assert.g: Added code to handle carriage returns in an assertion
 	condition.
 
-	* Main.java: Added code to track column information across
+	* JonsAssert.java: Added code to track column information across
 	multiple lexers.  This makes sure that the instrumentation gets
 	inserted at the right column.
 
@@ -60,7 +60,7 @@
 
 2000-03-05  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
-	* Main.java: Modified control structure so that files are
+	* JonsAssert.java: Modified control structure so that files are
 	instrumented right away.  Shouldn't need to store everything in
 	memory anymore either.
 
@@ -86,7 +86,7 @@
 	* Symtab.java: Added bit to create the Hashtable for the default
 	package when needed.
 
-	* Main.java: Moved exception handling to a more useful place and
+	* JonsAssert.java: Moved exception handling to a more useful place and
 	make sure that a file isn't written out if the parser fails.
 
 	* AssertTools.java: If the base instrumented directory doesn't
@@ -100,7 +100,7 @@
 
 2000-03-03  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
-	* Main.java: Added code to correctly check destination file dates
+	* JonsAssert.java: Added code to correctly check destination file dates
 	so we can short circuit the parse.  Also now the unit tests all
 	pass, except for the interface test, which I haven't implemented yet.
 
@@ -127,7 +127,7 @@
 	into another directory rather than just changing the extension and
 	confusing compilers.
 
-	* Main.java: Added code to check modification times of files
+	* JonsAssert.java: Added code to check modification times of files
 	before parsing, so we don't parse extra files.  
 
 	* AssertMethod.java: Added flag to tell if this method is abstract/native.
@@ -206,7 +206,7 @@
 	* Symtab.java: Added code to actually create the CodeFragments for
 	the checkInvariant method.
 
-	* Main.java: Added in the call to instrument everything.  I can
+	* JonsAssert.java: Added in the call to instrument everything.  I can
 	actually instrument a file now!  Granted it only does @assert, but
 	that's a start.
 
