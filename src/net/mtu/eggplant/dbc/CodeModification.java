@@ -25,7 +25,7 @@
  *
  * I'd appreciate comments/suggestions on the code jpschewe@mtu.net
  */
-package net.mtu.eggplant.assert;
+package net.mtu.eggplant.dbc;
 
 /**
    Used for representing a modification to code, rather than just a chunck of

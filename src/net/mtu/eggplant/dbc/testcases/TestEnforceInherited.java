@@ -25,10 +25,10 @@
  *
  * Send appreciate comments/suggestions on the code to jpschewe@mtu.net
  */
-package net.mtu.eggplant.assert.test;
+package net.mtu.eggplant.dbc.test;
 
-import net.mtu.eggplant.assert.AssertTools;
-import net.mtu.eggplant.assert.AssertionViolation;
+import net.mtu.eggplant.dbc.AssertTools;
+import net.mtu.eggplant.dbc.AssertionViolation;
 
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -75,6 +75,6 @@ public class TestEnforceInherited extends TestCase {
     catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a1:This should not throw an assertion violation", !exception); 
+    assertTrue("a1:This should not throw an assertion violation", !exception); 
   }
 }

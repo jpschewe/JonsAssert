@@ -25,7 +25,7 @@
  *
  * I'd appreciate comments/suggestions on the code jpschewe@mtu.net
  */
-package net.mtu.eggplant.assert;
+package net.mtu.eggplant.dbc;
 
 final public class CodePoint implements Comparable {
 

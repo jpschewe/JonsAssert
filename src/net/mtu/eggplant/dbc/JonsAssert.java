@@ -25,7 +25,7 @@
  *
  * I'd appreciate comments/suggestions on the code jpschewe@mtu.net
  */
-package net.mtu.eggplant.assert;
+package net.mtu.eggplant.dbc;
 
 import net.mtu.eggplant.util.Debug;
 import net.mtu.eggplant.util.Function;
@@ -196,7 +196,7 @@ public class JonsAssert {
    * @return exit status
    *
    * @pre (config != null)
-   * @pre (files != null && net.mtu.eggplant.assert.CollectionUtils.checkInstanceOf(files, File.class))
+   * @pre (files != null && net.mtu.eggplant.util.CollectionUtils.checkInstanceOf(files, File.class))
    *
    */
   static public boolean instrument(final Configuration config,
@@ -279,30 +279,30 @@ public class JonsAssert {
    * @param s a stream to parse  
    */
   static public void parseFile(final InputStream s) throws Exception {
-      // Create a scanner that reads from the input stream passed to us
-      javaLexer = new JavaLexer(s);
-      assertLexer = new AssertLexer(javaLexer.getInputState());
+    // Create a scanner that reads from the input stream passed to us
+    javaLexer = new JavaLexer(s);
+    assertLexer = new AssertLexer(javaLexer.getInputState());
       
-      selector.addInputStream(javaLexer, "java");
-      selector.addInputStream(assertLexer, "assert");
-      selector.select(javaLexer);
+    selector.addInputStream(javaLexer, "java");
+    selector.addInputStream(assertLexer, "assert");
+    selector.select(javaLexer);
                   
-      // Create a parser that reads from the scanner
-      final JavaRecognizer parser = new JavaRecognizer(selector);
+    // Create a parser that reads from the scanner
+    final JavaRecognizer parser = new JavaRecognizer(selector);
       
-      //for debugging the lexer
-      if(_debugLexer) {
-        antlr.Token tok = selector.nextToken();
-        while(tok.getText() != null) {
-          System.out.print("JonsAssert: " + tok);
-          System.out.println(" name=" + parser.getTokenName(tok.getType()));
-          tok = selector.nextToken();
-        }
-      } else {
-        parser.setSymtab(getSymtab());
-        // start parsing at the compilationUnit rule
-        parser.compilationUnit();
+    //for debugging the lexer
+    if(_debugLexer) {
+      antlr.Token tok = selector.nextToken();
+      while(tok.getText() != null) {
+        System.out.print("JonsAssert: " + tok);
+        System.out.println(" name=" + parser.getTokenName(tok.getType()));
+        tok = selector.nextToken();
       }
+    } else {
+      parser.setSymtab(getSymtab());
+      // start parsing at the compilationUnit rule
+      parser.compilationUnit();
+    }
   }
 
   final static public Symtab getSymtab() {

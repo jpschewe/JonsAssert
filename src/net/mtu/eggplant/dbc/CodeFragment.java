@@ -25,7 +25,7 @@
  *
  * I'd appreciate comments/suggestions on the code jpschewe@mtu.net
  */
-package net.mtu.eggplant.assert;
+package net.mtu.eggplant.dbc;
 
 /**
    Class that represents a fragment of code that needs to be inserted into a

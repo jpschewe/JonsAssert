@@ -25,13 +25,13 @@
  *
  * I'd appreciate comments/suggestions on the code jpschewe@mtu.net
  */
-package net.mtu.eggplant.assert.test.sub;
+package net.mtu.eggplant.dbc.test.sub;
 
 /**
    This class will get instrumented into test/sub so that the package method
    test is valid.
 **/
-public class CheckWrongPreconditionsSubClass extends net.mtu.eggplant.assert.test.CheckWrongPreconditionsSuperClass {
+public class CheckWrongPreconditionsSubClass extends net.mtu.eggplant.dbc.test.CheckWrongPreconditionsSuperClass {
 
   public void testPrivateMethod(final int i) {
     privateMethod(i);

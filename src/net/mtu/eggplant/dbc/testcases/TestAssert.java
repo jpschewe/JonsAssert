@@ -25,18 +25,17 @@
  *
  * I'd appreciate comments/suggestions on the code jpschewe@mtu.net
  */
-package net.mtu.eggplant.assert.test;
+package net.mtu.eggplant.dbc.test;
 
-import DefaultPackage;
+import net.mtu.eggplant.dbc.AssertTools;
+import net.mtu.eggplant.dbc.AssertionViolation;
 
-import net.mtu.eggplant.assert.AssertionViolation;
-import net.mtu.eggplant.assert.AssertTools;
-
+import java.io.IOException;
 import java.util.Vector;
-import java.io.*;
 
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
 import junit.textui.TestRunner;
 
 /**
@@ -97,7 +96,7 @@ public class TestAssert extends TestCase {
     finally {
       _invariant = true;
     }
-    assert("a1:This should throw an assertion violation", exception); 
+    assertTrue("a1:This should throw an assertion violation", exception); 
           
   }
 
@@ -116,7 +115,7 @@ public class TestAssert extends TestCase {
     catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a1:This should throw an assertion violation", exception); 
+    assertTrue("a1:This should throw an assertion violation", exception); 
 
     exception = false;
     try {
@@ -125,7 +124,7 @@ public class TestAssert extends TestCase {
     catch(final AssertionViolation av) {
       exception=true;
     }
-    assert("a2:This should not throw an assertion violation", !exception);
+    assertTrue("a2:This should not throw an assertion violation", !exception);
     
   }
   
@@ -140,7 +139,7 @@ public class TestAssert extends TestCase {
     catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a1:This should throw an assertion violation", exception);
+    assertTrue("a1:This should throw an assertion violation", exception);
 
     exception = false;
     try {
@@ -149,7 +148,7 @@ public class TestAssert extends TestCase {
     catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a2:This not should throw an assertion violation", !exception);
+    assertTrue("a2:This not should throw an assertion violation", !exception);
   }
 
   /**
@@ -163,7 +162,7 @@ public class TestAssert extends TestCase {
     catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a3:This should not throw an assertion violation", !exception); 
+    assertTrue("a3:This should not throw an assertion violation", !exception); 
 
     exception = false;
     try {
@@ -172,7 +171,7 @@ public class TestAssert extends TestCase {
     catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a4:This should throw an assertion violation", exception); 
+    assertTrue("a4:This should throw an assertion violation", exception); 
       
   }
 
@@ -204,7 +203,7 @@ public class TestAssert extends TestCase {
     catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a1:This should throw an assertion violation", exception); 
+    assertTrue("a1:This should throw an assertion violation", exception); 
 
   }
 
@@ -224,7 +223,7 @@ public class TestAssert extends TestCase {
     catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a1:This should throw an assertion violation", exception); 
+    assertTrue("a1:This should throw an assertion violation", exception); 
 
     exception = false;
     try {
@@ -233,7 +232,7 @@ public class TestAssert extends TestCase {
     catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a2:This should not throw an assertion violation", !exception); 
+    assertTrue("a2:This should not throw an assertion violation", !exception); 
 
     exception = false;
     try {
@@ -242,7 +241,7 @@ public class TestAssert extends TestCase {
     catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a3:This should not throw an assertion violation", !exception); 
+    assertTrue("a3:This should not throw an assertion violation", !exception); 
 
     exception = false;
     try {
@@ -251,7 +250,7 @@ public class TestAssert extends TestCase {
     catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a4:This should throw an assertion violation", exception); 
+    assertTrue("a4:This should throw an assertion violation", exception); 
     
     
   }
@@ -269,7 +268,7 @@ public class TestAssert extends TestCase {
     catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a1:This should throw an assertion violation", exception); 
+    assertTrue("a1:This should throw an assertion violation", exception); 
 
     exception = false;
     try {
@@ -278,7 +277,7 @@ public class TestAssert extends TestCase {
     catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a2:This should not throw an assertion violation", !exception); 
+    assertTrue("a2:This should not throw an assertion violation", !exception); 
 
     exception = false;
     try {
@@ -287,7 +286,7 @@ public class TestAssert extends TestCase {
     catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a3:This should not throw an assertion violation", !exception); 
+    assertTrue("a3:This should not throw an assertion violation", !exception); 
 
     exception = false;
     try {
@@ -296,7 +295,7 @@ public class TestAssert extends TestCase {
     catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a4:This should throw an assertion violation", exception); 
+    assertTrue("a4:This should throw an assertion violation", exception); 
     
 
   }
@@ -316,7 +315,7 @@ public class TestAssert extends TestCase {
     } catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a1:This should not throw an assertion violation", !exception); 
+    assertTrue("a1:This should not throw an assertion violation", !exception); 
 
     exception = false;
     try {
@@ -324,7 +323,7 @@ public class TestAssert extends TestCase {
     } catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a2:This should throw an assertion violation", exception); 
+    assertTrue("a2:This should throw an assertion violation", exception); 
     
   }
 
@@ -339,7 +338,7 @@ public class TestAssert extends TestCase {
     } catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a1:This should not throw an assertion violation", !exception); 
+    assertTrue("a1:This should not throw an assertion violation", !exception); 
 
     exception = false;
     try {
@@ -347,7 +346,7 @@ public class TestAssert extends TestCase {
     } catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a2:This should throw an assertion violation", exception); 
+    assertTrue("a2:This should throw an assertion violation", exception); 
   }
 
   /**
@@ -361,7 +360,7 @@ public class TestAssert extends TestCase {
     } catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a1:This should not throw an assertion violation", !exception); 
+    assertTrue("a1:This should not throw an assertion violation", !exception); 
 
     exception = false;
     try {
@@ -369,7 +368,7 @@ public class TestAssert extends TestCase {
     } catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a2:This should throw an assertion violation", exception); 
+    assertTrue("a2:This should throw an assertion violation", exception); 
   }  
 
   /**
@@ -382,7 +381,7 @@ public class TestAssert extends TestCase {
     } catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a1:This should not throw an assertion violation", !exception); 
+    assertTrue("a1:This should not throw an assertion violation", !exception); 
 
     exception = false;
     try {
@@ -390,7 +389,7 @@ public class TestAssert extends TestCase {
     } catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a2:This should throw an assertion violation", exception); 
+    assertTrue("a2:This should throw an assertion violation", exception); 
   }
 
   /**
@@ -408,8 +407,8 @@ public class TestAssert extends TestCase {
     } catch(final java.io.IOException ioe) {
       ioexception = true;
     }
-    assert("a1:This should not throw an assertion violation", !exception); 
-    assert("a3:This shuld throw an IOException", ioexception);
+    assertTrue("a1:This should not throw an assertion violation", !exception); 
+    assertTrue("a3:This shuld throw an IOException", ioexception);
 
     exception = false;
     ioexception = false;
@@ -421,8 +420,8 @@ public class TestAssert extends TestCase {
     } catch(final IOException ioe) {
       ioexception = true;
     }
-    assert("a2:This should not throw an assertion violation", !exception);
-    assert("a4:This should not throw an IOException", !ioexception);
+    assertTrue("a2:This should not throw an assertion violation", !exception);
+    assertTrue("a4:This should not throw an IOException", !ioexception);
   }
 
   /**
@@ -431,14 +430,14 @@ public class TestAssert extends TestCase {
      for package methods.
   **/
   public void testExtraConditionChecks() {
-    final net.mtu.eggplant.assert.test.sub.CheckWrongPreconditionsSubClass c = new net.mtu.eggplant.assert.test.sub.CheckWrongPreconditionsSubClass();
+    final net.mtu.eggplant.dbc.test.sub.CheckWrongPreconditionsSubClass c = new net.mtu.eggplant.dbc.test.sub.CheckWrongPreconditionsSubClass();
     boolean exception = false;
     try {
       c.testPrivateMethod(0);
     } catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a1:Preconditions are being checked on superclass of private method", !exception);
+    assertTrue("a1:Preconditions are being checked on superclass of private method", !exception);
 
     exception = false;
     try {
@@ -446,7 +445,7 @@ public class TestAssert extends TestCase {
     } catch(final AssertionViolation av) {
       exception = true;
     }
-    assert("a2:Precondditions are being checked on superclass of package method with subclass in different package", !exception);
+    assertTrue("a2:Precondditions are being checked on superclass of package method with subclass in different package", !exception);
     
   }
 

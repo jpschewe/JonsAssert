@@ -11,11 +11,11 @@
 
   <target name="init">
     <tstamp />
-    <uptodate property="buildJavaLexer" targetfile="${basedir}/src/net/mtu/eggplant/assert/java.g">
-      <srcfiles dir="${basedir}/src/net/mtu/eggplant/assert" includes="JavaLexer.java" />
+    <uptodate property="buildJavaLexer" targetfile="${basedir}/src/net/mtu/eggplant/dbc/java.g">
+      <srcfiles dir="${basedir}/src/net/mtu/eggplant/dbc" includes="JavaLexer.java" />
     </uptodate>
-    <uptodate property="buildAssertLexer" targetfile="${basedir}/src/net/mtu/eggplant/assert/assert.g">
-      <srcfiles dir="${basedir}/src/net/mtu/eggplant/assert" includes="AssertLexer.java" />
+    <uptodate property="buildAssertLexer" targetfile="${basedir}/src/net/mtu/eggplant/dbc/assert.g">
+      <srcfiles dir="${basedir}/src/net/mtu/eggplant/dbc" includes="AssertLexer.java" />
     </uptodate>
   </target>
 
@@ -23,7 +23,7 @@
     <pathelement location="${basedir}/lib/JonsInfra-0.1.jar"/>
     <pathelement location="${basedir}/lib/antlr.jar"/>
     <pathelement location="${basedir}/lib/werken.opt.jar"/>
-    <pathelement location="${basedir}/lib/junit-3.6.jar"/>
+    <pathelement location="${basedir}/lib/junit-3.7.jar"/>
   </path>
 
 
@@ -32,7 +32,7 @@
 	  fork="yes"
 	  failonerror="true"
 	  taskname="antlr"
-	  dir="${basedir}/src/net/mtu/eggplant/assert">
+	  dir="${basedir}/src/net/mtu/eggplant/dbc">
       <classpath>
   	<pathelement location="${basedir}/lib/antlr.jar" />
       </classpath>
@@ -45,7 +45,7 @@
 	  fork="yes"
 	  failonerror="true"
 	  taskname="antlr"
-	  dir="${basedir}/src/net/mtu/eggplant/assert">
+	  dir="${basedir}/src/net/mtu/eggplant/dbc">
       <classpath>
         <pathelement location="${basedir}/lib/antlr.jar" />
       </classpath>
@@ -54,15 +54,19 @@
   </target>
   
   <target name="compile" depends="init,buildJavaLexer,buildAssertLexer">
-    <!-- broken until 1.5 <antlr target="${basedir}/src/net/mtu/eggplant/assert/java.g" /> -->
-    <!-- broken until 1.5 <antlr target="${basedir}/src/net/mtu/eggplant/assert/assert.g" /> -->
+    <!-- broken until 1.5 <antlr target="${basedir}/src/net/mtu/eggplant/dbc/java.g" /> -->
+    <!-- broken until 1.5 <antlr target="${basedir}/src/net/mtu/eggplant/dbc/assert.g" /> -->
 
-    <javac srcdir="${basedir}/src" destdir="${basedir}/src" debug="true">
+    <javac srcdir="${basedir}/src"
+	   destdir="${basedir}/src"
+	   debug="true"
+	   source="1.4"
+	   deprecation="true">
       <classpath>
         <path refid="base.classpath"/>
       </classpath>
       <include name="net/**/*.java"/>
-      <exclude name="net/mtu/eggplant/assert/testcases/**"/>
+      <exclude name="net/mtu/eggplant/dbc/testcases/**"/>
     </javac>
   </target>
 
@@ -75,12 +79,12 @@
     <echo message="Look at the output to determine if the tests passed, the build will always succeed" />
     <!-- first instrument the test files -->
     <java fork="yes"
-	  classname="net.mtu.eggplant.assert.JonsAssert"
+	  classname="net.mtu.eggplant.dbc.JonsAssert"
 	  taskname="DBC"
 	  failonerror="false"> <!-- so we can see what all needs fixing -->
       <arg value="-d ${basedir}/${instrument.dir}" />
       <arg value="-f" />
-      <arg value="${basedir}/src/net/mtu/eggplant/assert/testcases" />
+      <arg value="${basedir}/src/net/mtu/eggplant/dbc/testcases" />
       <classpath>
         <pathelement location="${basedir}/src"/>
         <path refid="base.classpath"/>
@@ -88,18 +92,23 @@
     </java>
 
     <!-- compile newly instrumented files -->
-    <javac srcdir="${basedir}/${instrument.dir}" destdir="${basedir}/src" debug="true">
+    <javac srcdir="${basedir}/${instrument.dir}"
+	   destdir="${basedir}/src"
+	   debug="true"
+	   deprecation="true">
       <classpath>
         <path refid="base.classpath"/>
       </classpath>
-      <include name="net/mtu/eggplant/assert/test/**/*.java"/>
+      <include name="**/*.java" />
+      <!--<include name="DefaultPackage.java" />
+      <include name="net/mtu/eggplant/dbc/test/**/*.java" />-->
     </javac>
 
     <!-- run tests -->
     <java fork="yes" classname="junit.textui.TestRunner" 
 	  taskname="junit" failonerror="false">
       <sysproperty key="ASSERT_BEHAVIOR" value="EXCEPTION" />
-      <arg value="net.mtu.eggplant.assert.test.TestAssert"/>
+      <arg value="net.mtu.eggplant.dbc.test.TestAssert"/>
       <classpath>
         <pathelement location="${basedir}/src"/>
         <path refid="base.classpath"/>
@@ -110,7 +119,7 @@
 	  taskname="junit" failonerror="false">
       <sysproperty key="ASSERT_BEHAVIOR" value="EXCEPTION" />
       <sysproperty key="ENFORCE_INHERITED_CONDITIONS" value="FALSE" />
-      <arg value="net.mtu.eggplant.assert.test.TestEnforceInherited"/>
+      <arg value="net.mtu.eggplant.dbc.test.TestEnforceInherited"/>
       <classpath>
         <pathelement location="${basedir}/src"/>
         <path refid="base.classpath"/>
@@ -120,7 +129,7 @@
 
   <target name="instrument" depends="init" if="assert.present">
     <java fork="yes"
-	  classname="net.mtu.eggplant.assert.JonsAssert"
+	  classname="net.mtu.eggplant.dbc.JonsAssert"
 	  taskname="assert"
 	  failonerror="true">
       <arg value="${basedir}/src/net" />
@@ -133,7 +142,7 @@
 	  fork="yes"
 	  failonerror="true"
 	  taskname="antlr"
-	  dir="${basedir}/src/net/mtu/eggplant/assert">
+	  dir="${basedir}/src/net/mtu/eggplant/dbc">
       <classpath>
   	<pathelement location="${basedir}/lib/antlr.jar" />
       </classpath>
@@ -144,19 +153,22 @@
 	  fork="yes"
 	  failonerror="true"
 	  taskname="antlr"
-	  dir="${basedir}/src/net/mtu/eggplant/assert">
+	  dir="${basedir}/src/net/mtu/eggplant/dbc">
       <classpath>
         <pathelement location="${basedir}/lib/antlr.jar" />
       </classpath>
       <arg value="assert.g" />
     </java>
 
-    <javac srcdir="${instrument.dir}" destdir="${basedir}/src" debug="true">
+    <javac srcdir="${instrument.dir}"
+	   destdir="${basedir}/src"
+	   debug="true"
+	   deprecation="true">
       <classpath>
         <path refid="base.classpath"/>
       </classpath>
       <include name="net/**/*.java"/>
-      <exclude name="net/mtu/eggplant/assert/testcases/**"/>
+      <exclude name="net/mtu/eggplant/dbc/testcases/**"/>
     </javac>
   </target>
 
@@ -167,19 +179,19 @@
   	  <include name="**/*.class" />
   	</patternset>
   	<patternset>
-  	  <include name="net/mtu/eggplant/assert/AssertLexer.*" />
+  	  <include name="net/mtu/eggplant/dbc/AssertLexer.*" />
   	</patternset>
   	<patternset>
-  	  <include name="net/mtu/eggplant/assert/AssertLexerTokenTypes.*" />
+  	  <include name="net/mtu/eggplant/dbc/AssertLexerTokenTypes.*" />
   	</patternset>
   	<patternset>
-  	  <include name="net/mtu/eggplant/assert/JavaLexer.*" />
+  	  <include name="net/mtu/eggplant/dbc/JavaLexer.*" />
   	</patternset>
   	<patternset>
-  	  <include name="net/mtu/eggplant/assert/JavaRecognizer.*" />
+  	  <include name="net/mtu/eggplant/dbc/JavaRecognizer.*" />
   	</patternset>
   	<patternset>
-      	  <include name="net/mtu/eggplant/assert/JavaTokenTypes.*" />
+      	  <include name="net/mtu/eggplant/dbc/JavaTokenTypes.*" />
   	</patternset>
       </fileset>
     </delete>

@@ -25,7 +25,7 @@
  *
  * I'd appreciate comments/suggestions on the code jpschewe@mtu.net
  */
-package net.mtu.eggplant.assert;
+package net.mtu.eggplant.dbc;
 
 import net.mtu.eggplant.util.UnaryPredicate;
 import net.mtu.eggplant.util.StringPair;
@@ -49,42 +49,42 @@ final public class AssertTools {
   /**
    * if inherited conditions should be enforced
    * 
-   * @see net.mtu.eggplant.assert#systemProperties
+   * @see net.mtu.eggplant.dbc#systemProperties
    */
   public static final boolean ENFORCE_INHERITED_CONDITIONS = "TRUE".equalsIgnoreCase(System.getProperty("ENFORCE_INHERITED_CONDITIONS", "TRUE"));
   
   /**
    * if assert conditions should be enforced
    * 
-   * @see net.mtu.eggplant.assert#systemProperties
+   * @see net.mtu.eggplant.dbc#systemProperties
    */
   public static final boolean ENFORCE_ASSERT_CONDITION = "TRUE".equalsIgnoreCase(System.getProperty("ENFORCE_ASSERT_CONDITION", "TRUE"));
 
   /**
    * if invariant conditions should be enforced
    * 
-   * @see net.mtu.eggplant.assert#systemProperties
+   * @see net.mtu.eggplant.dbc#systemProperties
    */
   public static final boolean ENFORCE_INVARIANT_CONDITION = "TRUE".equalsIgnoreCase(System.getProperty("ENFORCE_INVARIANT_CONDITION", "TRUE"));
 
   /**
    * if pre conditions should be enforced
    *
-   * @see net.mtu.eggplant.assert#systemProperties
+   * @see net.mtu.eggplant.dbc#systemProperties
    */
   public static final boolean ENFORCE_PRE_CONDITION = "TRUE".equalsIgnoreCase(System.getProperty("ENFORCE_PRE_CONDITION", "TRUE"));
 
   /**
    * if post conditions should be enforced
    * 
-   * @see net.mtu.eggplant.assert#systemProperties
+   * @see net.mtu.eggplant.dbc#systemProperties
    */
   public static final boolean ENFORCE_POST_CONDITION = "TRUE".equalsIgnoreCase(System.getProperty("ENFORCE_POST_CONDITION", "TRUE"));
 
   /**
    * what to do if an assertion violation is raised
    * 
-   * @see net.mtu.eggplant.assert#systemProperties
+   * @see net.mtu.eggplant.dbc#systemProperties
    */
   public static final String ASSERT_BEHAVIOR = System.getProperty("ASSERT_BEHAVIOR", "EXIT");
 

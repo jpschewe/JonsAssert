@@ -25,7 +25,7 @@
  *
  * I'd appreciate comments/suggestions on the code jpschewe@mtu.net
  */
-package net.mtu.eggplant.assert.test;
+package net.mtu.eggplant.dbc.test;
 
 public class CheckWrongPreconditionsSuperClass {
 

@@ -26,7 +26,7 @@ header {
  *
  * I'd appreciate comments/suggestions on the code jpschewe@mtu.net
  */
-package net.mtu.eggplant.assert;
+package net.mtu.eggplant.dbc;
 
 import net.mtu.eggplant.util.StringPair;
 import net.mtu.eggplant.util.Pair;
@@ -86,10 +86,10 @@ import java.util.LinkedList;
  *
  * BUGS
  *</pre>
-
-<p>This parser has been modified from the original Recognizer to a pre-parser
-that implents assertions in java.</p>
-**/
+ *
+ * <p>This parser has been modified from the original Recognizer to a pre-parser
+ * that implements assertions in java.</p>
+ */
 class JavaRecognizer extends Parser;
 options {
   k=2;                           // k token lookahead
@@ -873,7 +873,7 @@ parameterModifier
 assertOrInvariantCondition
 { List assertTokens = new LinkedList(); }
   : (JAVADOC_OPEN
-    ( assert:ASSERT_CONDITION { assertTokens.add(assert); clearInvariants(); }
+    ( assertCondition:ASSERT_CONDITION { assertTokens.add(assertCondition); clearInvariants(); }
       | PRE_CONDITION
       | POST_CONDITION
       | iv:INVARIANT_CONDITION { addInvariant(iv); assertTokens = new LinkedList(); }

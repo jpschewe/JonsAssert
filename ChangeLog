@@ -1,5 +1,18 @@
 2002-05-27  Jon Schewe  <jpschewe@mtu.net>
 
+	* src/net/mtu/eggplant/dbc/testcases/TestAssert.java: Verified
+	that things work ok with JDK 1.4.  There's something funky with
+	the 1.4 compiler that doesn't like the DefaultPackage test, can't
+	seem to find the class when compiling.  The 1.4 specific lines are
+	commented out of java.g and TestAssert.java until I figure out how
+	to support both parers.  Should have that figured out tomorrow
+	morning when I wake up.  Oh wait, it is tomorrow!  Anyway, after I
+	get some sleep I should have that all worked out, except for the
+	DefaultPackage thing...
+
+        * Moved all files into package dbc (Design By Contract) instead of
+	assert.  This is to facilitate JDK 1.4.
+	
 	* src/net/mtu/eggplant/assert/testcases/TestEnforceInherited.java:
 	Added test for ENFORCE_INHERITED_CONDITIONS.  This functionality
 	is now working.
