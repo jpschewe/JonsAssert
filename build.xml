@@ -19,6 +19,7 @@
     <pathelement location="${basedir}/lib/JonsInfra-0.1.jar"/>
     <pathelement location="${basedir}/lib/antlr.jar"/>
     <pathelement location="${basedir}/lib/java-getopt-1.0.7.jar"/>
+    <pathelement location="${basedir}/lib/werken.opt.jar"/>
     <pathelement location="${basedir}/lib/junit-3.6.jar"/>
   </path>
 

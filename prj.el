@@ -12,6 +12,7 @@
 			 (expand-file-name "lib/antlr.jar" assert-root)
 			 (expand-file-name "lib/junit-3.6.jar" assert-root)
 			 (expand-file-name "lib/java-getopt-1.0.7.jar" assert-root)
+			 (expand-file-name "lib/werken.opt.jar" assert-root)
 			 (expand-file-name "jre/lib/rt.jar" java-home)
 			 ))
  '(jde-compile-option-deprecation t)
