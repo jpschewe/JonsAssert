@@ -27,24 +27,21 @@
  */
 package net.mtu.eggplant.dbc;
 
-import net.mtu.eggplant.util.Debug;
-
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.IOException;
-import java.io.LineNumberReader;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.LineNumberReader;
 
-
-import java.util.Stack;
-import java.util.Iterator;
 import java.util.HashMap;
-import java.util.SortedSet;
-import java.util.Set;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.Stack;
 
 
 /*
@@ -108,7 +105,7 @@ import java.util.LinkedList;
  * This is the place where most of the work for instrumentation gets done.
  * All lookups are done here.
  * 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Symtab {
 

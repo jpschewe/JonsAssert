@@ -27,30 +27,32 @@
  */
 package net.mtu.eggplant.dbc;
 
-import net.mtu.eggplant.util.Debug;
-import net.mtu.eggplant.util.Function;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
-
 import antlr.Parser;
 import antlr.RecognitionException;
 import antlr.TokenStreamException;
 import antlr.TokenStreamSelector;
 
-import com.werken.opt.CommandLine;
-import com.werken.opt.DuplicateOptionException;
-import com.werken.opt.MissingArgumentException;
-import com.werken.opt.Option;
-import com.werken.opt.Options;
-import com.werken.opt.UnrecognizedOptionException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+
+import net.mtu.eggplant.util.Function;
 
 import net.mtu.eggplant.util.algorithms.Applying;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 /**
  * <p>Class that starts everything off.</p>
@@ -71,7 +73,7 @@ import net.mtu.eggplant.util.algorithms.Applying;
  * {@link #instrument(Configuration, Collection) instrument} with a Configuration
  * object and a Collection of files.</p>
  *
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class JonsAssert {
 
@@ -80,7 +82,8 @@ public class JonsAssert {
   static /* package */ AssertLexer assertLexer;
   /** the symbol table */
   static private boolean _debugLexer = false;
-
+  private static final Logger LOG = Logger.getLogger(JonsAssert.class);
+  
   /**
    * Parses the command line then calls {@link #instrument(Configuration, Collection) instrument}.
    *
@@ -91,53 +94,44 @@ public class JonsAssert {
 
     //Setup all of the options
     final Options options = new Options();
-    try {
-      options.addOption('f', "force", false, "force instrumentation");
-      options.addOption('d', "destination", true, "<dir> the destination directory (default: instrumented)");
-      options.addOption('s', "sourceExtension", true, "<ext> the extension of the source files (default: java)");
-      options.addOption('i', "instrumentedExtension", true, "<ext> the extension used for the instrumented files (default: java)");
-      options.addOption('@', "source", true, "<release> Provide source compatibility with specified release (just like javac");
-      options.addOption('~', "debugLexer", false, "");
-      options.addOption('!', "debug", false, "");
-      options.addOption('#', "pretty-output", false, "put in carriage returns in the generated code.  This makes the output easier to read, but screws up line numbers");
-      options.addOption('$', "disable-exit", false, "Disable System.exit during instrumentation");
-    } catch(final DuplicateOptionException doe) {
-      System.err.println("Someone specified duplicate options in the code!");
-      _exitCode = 1;
-      if(!_disableExit) {
-        System.exit(1);
-      } else {
-        return;
-      }
-    }
+    options.addOption("f", "force", false, "force instrumentation");
+    options.addOption("d", "destination", true, "<dir> the destination directory (default: instrumented)");
+    options.addOption("s", "sourceExtension", true, "<ext> the extension of the source files (default: java)");
+    options.addOption("i", "instrumentedExtension", true, "<ext> the extension used for the instrumented files (default: java)");
+    options.addOption("source", true, "<release> Provide source compatibility with specified release (just like javac)");
+    options.addOption("debugLexer", false, "");
+    options.addOption("debug", false, "");
+    options.addOption("prettyOutput", false, "put in carriage returns in the generated code.  This makes the output easier to read, but screws up line numbers");
+    options.addOption("disableExit", "disable-exit", false, "Disable System.exit during instrumentation");
 
     //list to hold files/directories to instrument
     final Collection files = new LinkedList();
 
     //parse options
     try {
-      final CommandLine cl = options.parse(args);
+      final CommandLineParser parser = new PosixParser();
+      final CommandLine cmd = parser.parse(options, args);
 
-      if(cl.optIsSet('f')) {
+      if(cmd.hasOption("force")) {
         config.setIgnoreTimeStamp(true);
       }
-      if(cl.optIsSet('d')) {
-        config.setDestinationDirectory(cl.getOptValue('d'));
+      if(cmd.hasOption("destination")) {
+        config.setDestinationDirectory(cmd.getOptionValue("destination"));
       }
-      if(cl.optIsSet('s')) {
-        config.setSourceExtension(cl.getOptValue('s'));
+      if(cmd.hasOption("sourceExtension")) {
+        config.setSourceExtension(cmd.getOptionValue("sourceExtension"));
       }
-      if(cl.optIsSet('i')) {
-        config.setInstrumentedExtension(cl.getOptValue('i'));
+      if(cmd.hasOption("instrumentedExtension")) {
+        config.setInstrumentedExtension(cmd.getOptionValue("instrumentedExtension"));
       }
-      if(cl.optIsSet('~')) {
+      if(cmd.hasOption("debugLexer")) {
         _debugLexer = true;
       }
-      if(cl.optIsSet('!')) {
-        Debug.setDebugMode(true);
+      if(cmd.hasOption("debug")) {
+        Logger.getRootLogger().setLevel(Level.DEBUG);
       }
-      if(cl.optIsSet('@')) {
-        final String sourceCompatibility = cl.getOptValue('@');
+      if(cmd.hasOption("source")) {
+        final String sourceCompatibility = cmd.getOptionValue("source");
         if(Configuration.JAVA_1_4.getName().equals(sourceCompatibility)) {
           config.setSourceCompatibility(Configuration.JAVA_1_4);
         } else if(Configuration.JAVA_1_3.getName().equals(sourceCompatibility)) {
@@ -148,14 +142,14 @@ public class JonsAssert {
           return;
         }
       }
-      if(cl.optIsSet('#')) {
+      if(cmd.hasOption("pretty-output")) {
         config.setPrettyOutput(true);
       }
-      if(cl.optIsSet('$')) {
+      if(cmd.hasOption("disable-exit")) {
         _disableExit = true;
       }
       
-      final Iterator iter = cl.getArgs().iterator();
+      final Iterator iter = cmd.getArgList().iterator();
       while(iter.hasNext()) {
         final String obj = (String)iter.next();
         final File file = new File((String)obj);
@@ -168,17 +162,8 @@ public class JonsAssert {
         }
       }
       
-    } catch(final MissingArgumentException mae) {
-      System.err.println(mae.getMessage());
-      usage(options);
-      _exitCode = 1;
-      if(!_disableExit) {
-        System.exit(1);
-      } else {
-        return;
-      }
-    } catch(final UnrecognizedOptionException ure) {
-      System.err.println(ure.getMessage());
+    } catch(final ParseException pe) {
+      System.err.println(pe.getMessage());
       usage(options);
       _exitCode = 1;
       if(!_disableExit) {
@@ -201,37 +186,40 @@ public class JonsAssert {
    * @pre (options != null)
    */
   private static void usage(final Options options) {
-    final StringBuffer sb = new StringBuffer(256);
-    sb.append("Usage: JonsAssert [options] files");
-    sb.append(System.getProperty("line.separator"));
+    final HelpFormatter formatter = new HelpFormatter();
+    formatter.printHelp("JonsAssert", options);
+    
+//     final StringBuffer sb = new StringBuffer(256);
+//     sb.append("Usage: JonsAssert [options] files");
+//     sb.append(System.getProperty("line.separator"));
 
-    final Iterator iter = options.getOptions().iterator();
-    while(iter.hasNext()) {
-      final Option option = (Option)iter.next();
+//     final Iterator iter = options.getOptions().iterator();
+//     while(iter.hasNext()) {
+//       final Option option = (Option)iter.next();
 
-      //only short options that are characters should be shown
-      if(Character.isLetter(option.getOpt())) {
-        sb.append('-');
-        sb.append(option.getOpt());
-        if(option.hasLongOpt()) {
-          sb.append(", ");
-        }
-      } else {
-        sb.append("    ");
-      }
+//       //only short options that are characters should be shown
+//       if(Character.isLetter(option.getOpt())) {
+//         sb.append('-');
+//         sb.append(option.getOpt());
+//         if(option.hasLongOpt()) {
+//           sb.append(", ");
+//         }
+//       } else {
+//         sb.append("    ");
+//       }
       
-      if(option.hasLongOpt()) {
-        sb.append("--");
-        sb.append(option.getLongOpt());
-      }
+//       if(option.hasLongOpt()) {
+//         sb.append("--");
+//         sb.append(option.getLongOpt());
+//       }
       
-      sb.append("  ");
-      if(option.getDescription() != null) {
-        sb.append(option.getDescription());
-      }
-      sb.append(System.getProperty("line.separator"));
-    }
-    System.err.print(sb.toString());
+//       sb.append("  ");
+//       if(option.getDescription() != null) {
+//         sb.append(option.getDescription());
+//       }
+//       sb.append(System.getProperty("line.separator"));
+//     }
+//     System.err.print(sb.toString());
   }
 
   /**
@@ -300,8 +288,8 @@ public class JonsAssert {
           success = true;
           writeFile = true;
         } catch(final IOException ioe) {
-          if(Debug.isDebugMode()) {
-            System.err.println("Caught exception getting file input stream: " + ioe);
+          if(LOG.isDebugEnabled()) {
+            LOG.debug("Caught exception getting file input stream", ioe);
           }
           success = false;
           writeFile = false;
@@ -311,15 +299,15 @@ public class JonsAssert {
           writeFile = false;
         } catch (final TokenStreamException tse) {
           System.err.println("parser exception: " + tse);
-          if(Debug.isDebugMode()) {
-            tse.printStackTrace();   // so we can figure out what went wrong
+          if(LOG.isDebugEnabled()) {
+            LOG.debug(tse);
           }
           success = false;
           writeFile = false;
         } catch (final RecognitionException re) {
           System.err.println("parser exception: " + re);
-          if(Debug.isDebugMode()) {
-            re.printStackTrace();   // so we can figure out what went wrong
+          if(LOG.isDebugEnabled()) {
+            LOG.debug(re);
           }
           success = false;
           writeFile = false;

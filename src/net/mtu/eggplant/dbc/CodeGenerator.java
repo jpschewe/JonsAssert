@@ -27,15 +27,14 @@
  */
 package net.mtu.eggplant.dbc;
 
+import java.util.Iterator;
+import java.util.List;
+
 import net.mtu.eggplant.util.StringPair;
 import net.mtu.eggplant.util.StringUtils;
-import net.mtu.eggplant.util.Debug;
-
-import java.util.List;
-import java.util.Iterator;
 
 /**
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class CodeGenerator {
 

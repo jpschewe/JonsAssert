@@ -23,30 +23,43 @@
 
   <target name="init">
     <tstamp />
-    <uptodate property="buildJavaLexer" targetfile="${basedir}/src/net/mtu/eggplant/dbc/java.g">
-      <srcfiles dir="${basedir}/src/net/mtu/eggplant/dbc" includes="JavaRecognizer.java" />
+
+    <uptodate property="buildJavaLexer.notRequired"
+              >
+      <mapper type="merge" to="${basedir}/src/net/mtu/eggplant/dbc/JavaRecognizer.java" />
+      <srcfiles dir="${basedir}/src/net/mtu/eggplant/dbc" includes="java.g" />
     </uptodate>
-    <uptodate property="buildJava14Lexer" targetfile="${basedir}/src/net/mtu/eggplant/dbc/java14.g">
+
+    <uptodate property="buildJava14Lexer.notRequired"
+              >
+      <mapper type="merge" to="${basedir}/src/net/mtu/eggplant/dbc/Java14Recognizer.java" />
       <srcfiles dir="${basedir}/src/net/mtu/eggplant/dbc">
-        <include name="Java14Recognizer.java" />
+        <include name="java14.g" />
         <include name="java.g" />
       </srcfiles>
+
     </uptodate>
-    <uptodate property="buildAssertLexer" targetfile="${basedir}/src/net/mtu/eggplant/dbc/assert.g">
-      <srcfiles dir="${basedir}/src/net/mtu/eggplant/dbc" includes="AssertLexer.java" />
+
+    <uptodate property="buildAssertLexer.notRequired"
+              >
+      <mapper type="merge" to="${basedir}/src/net/mtu/eggplant/dbc/AssertLexer.java" />
+      <srcfiles dir="${basedir}/src/net/mtu/eggplant/dbc" includes="assert.g" />
+
     </uptodate>
+
   </target>
 
   <path id="base.classpath">
-    <pathelement location="${basedir}/lib/JonsInfra-0.2.jar"/>
+    <pathelement location="${basedir}/lib/JonsInfra-0.4.jar"/>
     <pathelement location="${basedir}/lib/antlr.jar"/>
-    <pathelement location="${basedir}/lib/werken.opt.jar"/>
+    <pathelement location="${basedir}/lib/log4j-1.2.8.jar"/>
+    <pathelement location="${basedir}/lib/commons-cli-1.0.jar"/>
     <pathelement location="${basedir}/lib/junit-3.8.jar"/>
   </path>
 
   <target name="antlrTasks" depends="init,buildJavaLexer,buildJava14Lexer,buildAssertLexer" />
 
-  <target name="buildJavaLexer" if="buildJavaLexer">
+  <target name="buildJavaLexer" unless="buildJavaLexer.notRequired">
     <java classname="antlr.Tool"
 	  fork="yes"
 	  failonerror="true"
@@ -59,7 +72,7 @@
     </java>
   </target>
 
-  <target name="buildJava14Lexer" if="buildJava14Lexer" depends="buildJavaLexer">
+  <target name="buildJava14Lexer" unless="buildJava14Lexer.notRequired" depends="buildJavaLexer">
     <java classname="antlr.Tool"
 	  fork="yes"
 	  failonerror="true"
@@ -73,7 +86,7 @@
     </java>
   </target>
   
-  <target name="buildAssertLexer" if="buildAssertLexer">
+  <target name="buildAssertLexer" unless="buildAssertLexer.notRequired">
     <java classname="antlr.Tool"
 	  fork="yes"
 	  failonerror="true"
@@ -248,6 +261,7 @@
       	  <include name="net/mtu/eggplant/dbc/JavaTokenTypes.*" />
   	  <include name="net/mtu/eggplant/dbc/Java14Recognizer.*" />
       	  <include name="net/mtu/eggplant/dbc/Java14RecognizerTokenTypes.*" />
+      	  <include name="net/mtu/eggplant/dbc/expandedjava14.g" />
       </fileset>
     </delete>
   </target>
@@ -286,7 +300,7 @@
         <include name="prj.el" />
         <include name="build.xml" />
         <include name="ChangeLog" />
-      </zipfilset>
+      </zipfileset>
     </zip>
 
     <!-- now compile everything -->
@@ -318,7 +332,7 @@
         <link href="http://java.sun.com/j2se/1.4/docs/api/" />
 
         <!-- JonsInfra -->
-        <link href="${mtu.net}/JonsInfra/0.2/api" />
+        <link href="${mtu.net}/JonsInfra/0.4/api" />
 
         <!-- junit -->
         <link href="http://www.junit.org/junit/javadoc/3.8" />
@@ -379,7 +393,7 @@
 	<pathelement location="${basedir}/${temp.dir}/assert/lib/junit-3.8.jar" />
 	<pathelement location="${basedir}/${temp.dir}/assert/lib/JonsInfra-0.2.jar" />
 	<pathelement location="${basedir}/${temp.dir}/assert/lib/antlr.jar" />
-	<pathelement location="${basedir}/${temp.dir}/assert/lib/werken.opt.jar" />
+	<pathelement location="${basedir}/${temp.dir}/assert/lib/commons-cli-1.0.jar" />
       </classpath>
       <!-- core java -->
       <link href="http://java.sun.com/j2se/1.3/docs/api/" />

@@ -30,13 +30,14 @@ package net.mtu.eggplant.dbc;
 
 import net.mtu.eggplant.util.StringPair;
 import net.mtu.eggplant.util.Pair;
-import net.mtu.eggplant.util.Debug;
 
 import java.util.Iterator;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
 import java.util.LinkedList;
+
+import org.apache.log4j.Logger;
 }
 
 /**
@@ -91,7 +92,7 @@ import java.util.LinkedList;
  * <p>This parser has been modified from the original Recognizer to a pre-parser
  * that implements assertions in java as well as support JDK 1.4.</p>
  *
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 class JavaRecognizer extends Parser;
 options {
@@ -116,6 +117,9 @@ tokens {
 
 // Define some helper methods
 {
+
+  private static final Logger LOG = Logger.getLogger(JavaRecognizer.class);
+
   public void print(final String s) {
     System.out.println("Parser: " + s);
   }
@@ -299,7 +303,7 @@ compilationUnit
     )
     {//stuff to do after finding packageName
       getSymtab().setCurrentPackageName(packageName);
-      Debug.println("just found the package: " + packageName);
+      LOG.debug("just found the package: " + packageName);
       //Now we just need to check to make sure the destination file is older
       if(!getSymtab().getConfiguration().ignoreTimeStamp()) {
         if(!getSymtab().isDestinationOlderThanCurrentFile(packageName)) {
@@ -1502,7 +1506,7 @@ SL_COMMENT
 JAVADOC_OPEN
   : "/**"
     {
-      //Debug.println("java: got start of javadoc comment #" + text + "#");
+      //LOG.debug("java: got start of javadoc comment #" + text + "#");
       JonsAssert.selector.push(JonsAssert.assertLexer);
     }
   ;

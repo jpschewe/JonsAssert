@@ -28,8 +28,7 @@ header {
  */
 package net.mtu.eggplant.dbc;
 
-import net.mtu.eggplant.util.Debug;
-  
+import org.apache.log4j.Logger;
 }
 
 //----------------------------------------------------------------------------
@@ -55,6 +54,11 @@ options {
     k=4;                   // four characters of lookahead
     filter=true; //ignore things we can't match
     defaultErrorHandler = false;     // generate parser error handlers
+}
+
+{
+
+  private static final Logger LOG = Logger.getLogger(AssertLexer.class);
 }
 
 // a dummy rule to force vocabulary to be all characters (except special
@@ -96,7 +100,7 @@ CONDITION
     //    : '(' ( ~('('|')') )* ')'
     //    | '(' CONDITION ')'
     //    : '(' ( ~('('|')') )* (CONDITION)? ( ~('('|')') )* ')'
-        { Debug.println("Assert: got CONDITION #" + text + "#"); }
+        { LOG.debug("Assert: got CONDITION #" + text + "#"); }
   ;
 
 protected
@@ -112,7 +116,7 @@ SEMI
 protected
 STRING_LITERAL 
     :  '"' (ESC|~('"'|'\\'))* '"'
-        { Debug.println("Assert: got MESSAGE #" + text + "#"); }
+        { LOG.debug("Assert: got MESSAGE #" + text + "#"); }
     ;
 
 protected
@@ -233,7 +237,7 @@ ESC
             :   ('0'..'9')
             )?
         )
-        //{ Debug.println("Assert: got ESC #" + text + "#"); }
+        //{ LOG.debug("Assert: got ESC #" + text + "#"); }
     ;
 
 
@@ -241,7 +245,7 @@ ESC
 protected
 HEX_DIGIT
     :   ('0'..'9'|'A'..'F'|'a'..'f')
-        //{ Debug.println("Assert: got HEX_DIGIT #" + text + "#"); }
+        //{ LOG.debug("Assert: got HEX_DIGIT #" + text + "#"); }
     ;
 
 STAR_TEXT
@@ -259,7 +263,7 @@ JAVADOC_CLOSE
     :
     "*/"
         {
-          Debug.println("Assert: got end of javadoc comment #" + text + "#");
+          LOG.debug("Assert: got end of javadoc comment #" + text + "#");
           JonsAssert.selector.pop();
       //JonsAssert.selector.push(JonsAssert.javaLexer);
         }

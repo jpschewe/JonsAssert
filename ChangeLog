@@ -1,3 +1,8 @@
+2004-01-31  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/net/mtu/eggplant/dbc/JonsAssert.java (parseFile): Switched
+	from werken.opt to COmmons CLI.
+
 2003-12-29  Jon Schewe  <jpschewe@mtu.net>
 
 	* Release 0.5.4
