@@ -9,11 +9,11 @@ header {
   Notes: Check invariants where ever pre and post conditions are checked
 
   */
-  package org.tcfreenet.schewe.assert;
+  package net.mtu.eggplant.assert;
 
-  import org.tcfreenet.schewe.utils.StringPair;
-  import org.tcfreenet.schewe.utils.Pair;
-  import org.tcfreenet.schewe.utils.Debug;
+  import net.mtu.eggplant.util.StringPair;
+  import net.mtu.eggplant.util.Pair;
+  import net.mtu.eggplant.util.Debug;
   
   import java.util.Iterator;
   import java.util.Set;

@@ -5,7 +5,7 @@
 
   I'd appreciate comments/suggestions on the code schewe@tcfreenet.org
 */
-package org.tcfreenet.schewe.assert;
+package net.mtu.eggplant.assert;
 
 /**
    Exception thrown to break out of the parser if the destination file is

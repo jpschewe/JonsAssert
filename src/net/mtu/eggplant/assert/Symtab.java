@@ -5,9 +5,9 @@
 
   I'd appreciate comments/suggestions on the code schewe@tcfreenet.org
 */
-package org.tcfreenet.schewe.assert;
+package net.mtu.eggplant.assert;
 
-import org.tcfreenet.schewe.utils.Debug;
+import net.mtu.eggplant.util.Debug;
 
 import java.io.File;
 import java.io.IOException;
@@ -393,10 +393,10 @@ public class Symtab {
      @param retType the return type of this method, null signals this method is a constructor
      @param mods the modifiers for the method, Set of Strings
      
-     @pre (preConditions != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(postConditions, AssertToken.class))
-     @pre (postConditions != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(preConditions, AssertToken.class))
-     @pre (params != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(StringPair.class))
-     @pre (mods != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(String.class))
+     @pre (preConditions != null && net.mtu.eggplant.util.JPSCollections.elementsInstanceOf(postConditions, AssertToken.class))
+     @pre (postConditions != null && net.mtu.eggplant.util.JPSCollections.elementsInstanceOf(preConditions, AssertToken.class))
+     @pre (params != null && net.mtu.eggplant.util.JPSCollections.elementsInstanceOf(StringPair.class))
+     @pre (mods != null && net.mtu.eggplant.util.JPSCollections.elementsInstanceOf(String.class))
   **/
   public void startMethod(final String name,
                           final List preConditions,

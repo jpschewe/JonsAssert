@@ -5,10 +5,10 @@
 
   I'd appreciate comments/suggestions on the code jpschewe@eggplant.mtu.net
 */
-package org.tcfreenet.schewe.assert.test;
+package net.mtu.eggplant.assert.test;
 
-import org.tcfreenet.schewe.assert.Configuration;
-import org.tcfreenet.schewe.assert.JonsAssert;
+import net.mtu.eggplant.assert.Configuration;
+import net.mtu.eggplant.assert.JonsAssert;
 
 import java.io.File;
 import java.io.FilenameFilter;

@@ -5,9 +5,9 @@
 
   I'd appreciate comments/suggestions on the code schewe@tcfreenet.org
 */
-package org.tcfreenet.schewe.assert;
+package net.mtu.eggplant.assert;
 
-import org.tcfreenet.schewe.utils.Debug;
+import net.mtu.eggplant.util.Debug;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -124,7 +124,7 @@ public class JonsAssert {
    * @return exit status
    *
    * @pre (config != null)
-   * @pre (files != null && org.tcfreenet.schewe.assert.CollectionUtils.checkInstanceOf(files, File.class))
+   * @pre (files != null && net.mtu.eggplant.assert.CollectionUtils.checkInstanceOf(files, File.class))
    *
    */
   static public boolean instrument(final Configuration config,
@@ -204,9 +204,9 @@ public class JonsAssert {
   static public void parseFile(final InputStream s) throws Exception {
       // Create a scanner that reads from the input stream passed to us
       javaLexer = new JavaLexer(s);
-      javaLexer.setTokenObjectClass("org.tcfreenet.schewe.assert.MyToken");
+      javaLexer.setTokenObjectClass("net.mtu.eggplant.assert.MyToken");
       assertLexer = new AssertLexer(javaLexer.getInputState());
-      assertLexer.setTokenObjectClass("org.tcfreenet.schewe.assert.MyToken");
+      assertLexer.setTokenObjectClass("net.mtu.eggplant.assert.MyToken");
       final ColumnTracker ct = new ColumnTracker();
       assertLexer.setColumnTracker(ct);
       javaLexer.setColumnTracker(ct);

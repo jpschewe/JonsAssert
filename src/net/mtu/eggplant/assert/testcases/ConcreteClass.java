@@ -5,7 +5,7 @@
 
   I'd appreciate comments/suggestions on the code schewe@tcfreenet.org
 */
-package org.tcfreenet.schewe.assert.test;
+package net.mtu.eggplant.assert.test;
 
 
 /**

@@ -5,9 +5,9 @@
 
   I'd appreciate comments/suggestions on the code schewe@tcfreenet.org
 */
-package org.tcfreenet.schewe.assert.test;
+package net.mtu.eggplant.assert.test;
 
-import org.tcfreenet.schewe.assert.AssertionViolation;
+import net.mtu.eggplant.assert.AssertionViolation;
 
 import java.util.Vector;
 import java.io.*;
@@ -425,7 +425,7 @@ public class TestAssert extends TestCase {
      for package methods.
   **/
   public void testExtraConditionChecks() {
-    final org.tcfreenet.schewe.assert.test.sub.CheckWrongPreconditionsSubClass c = new org.tcfreenet.schewe.assert.test.sub.CheckWrongPreconditionsSubClass();
+    final net.mtu.eggplant.assert.test.sub.CheckWrongPreconditionsSubClass c = new net.mtu.eggplant.assert.test.sub.CheckWrongPreconditionsSubClass();
     boolean exception = false;
     try {
       c.testPrivateMethod(0);

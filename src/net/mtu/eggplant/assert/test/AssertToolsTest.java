@@ -5,13 +5,13 @@
 
   I'd appreciate comments/suggestions on the code jpschewe@eggplant.mtu.net
 */
-package org.tcfreenet.schewe.assert.test;
+package net.mtu.eggplant.assert.test;
 
-import org.tcfreenet.schewe.assert.AssertTools;
-import org.tcfreenet.schewe.assert.AssertClass;
-import org.tcfreenet.schewe.assert.AssertMethod;
+import net.mtu.eggplant.assert.AssertTools;
+import net.mtu.eggplant.assert.AssertClass;
+import net.mtu.eggplant.assert.AssertMethod;
 
-import org.tcfreenet.schewe.utils.StringPair;
+import net.mtu.eggplant.util.StringPair;
 
 import java.util.LinkedList;
 import java.util.LinkedList;

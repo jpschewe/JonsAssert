@@ -5,9 +5,9 @@
 
   I'd appreciate comments/suggestions on the code schewe@tcfreenet.org
 */
-package org.tcfreenet.schewe.assert;
+package net.mtu.eggplant.assert;
 
-import org.tcfreenet.schewe.utils.Named;
+import net.mtu.eggplant.util.Named;
 
 /**
    Represents a type of assertion.

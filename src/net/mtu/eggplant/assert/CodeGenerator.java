@@ -5,11 +5,11 @@
 
   I'd appreciate comments/suggestions on the code schewe@tcfreenet.org
 */
-package org.tcfreenet.schewe.assert;
+package net.mtu.eggplant.assert;
 
-import org.tcfreenet.schewe.utils.StringPair;
-import org.tcfreenet.schewe.utils.StringUtils;
-import org.tcfreenet.schewe.utils.Debug;
+import net.mtu.eggplant.util.StringPair;
+import net.mtu.eggplant.util.StringUtils;
+import net.mtu.eggplant.util.Debug;
 
 import java.util.List;
 import java.util.Iterator;
@@ -39,7 +39,7 @@ public class CodeGenerator {
     code.append("if(! ");
     code.append(condition);
     code.append(") { ");
-    code.append("org.tcfreenet.schewe.assert.AssertTools.assertFailed(new org.tcfreenet.schewe.assert.AssertionViolation(");
+    code.append("net.mtu.eggplant.assert.AssertTools.assertFailed(new net.mtu.eggplant.assert.AssertionViolation(");
     //code.append("\"");
     code.append(errorMessage.toString());
     //code.append("\"");
@@ -65,7 +65,7 @@ public class CodeGenerator {
     code.append("if(!jps__");
     code.append(mclassName);
     code.append("_checkInvariant()) {");
-    code.append("org.tcfreenet.schewe.assert.AssertTools.invariantFailed(org.tcfreenet.schewe.assert.AssertTools.getCurrentAssertionViolation());");
+    code.append("net.mtu.eggplant.assert.AssertTools.invariantFailed(net.mtu.eggplant.assert.AssertTools.getCurrentAssertionViolation());");
     code.append("}");
     
     return code.toString();
@@ -90,7 +90,7 @@ public class CodeGenerator {
     code.append("final protected boolean ");
     code.append(methodName);
     code.append("() {");
-    code.append("if(!org.tcfreenet.schewe.assert.AssertTools.lockMethod(\"");
+    code.append("if(!net.mtu.eggplant.assert.AssertTools.lockMethod(\"");
     code.append(methodName);
     code.append("\")) { return true; }");
     code.append("Object jps__retval = null;");
@@ -99,14 +99,14 @@ public class CodeGenerator {
     code.append("final String jps_className = \"");
     code.append(className);
     code.append("\";");
-    code.append("final Class jps_thisClass = org.tcfreenet.schewe.assert.AssertTools.classForName(jps_className);");
+    code.append("final Class jps_thisClass = net.mtu.eggplant.assert.AssertTools.classForName(jps_className);");
     code.append("if(jps_thisClass == null) {");
-    code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"Could not find class \" + jps_className);");
+    code.append("net.mtu.eggplant.assert.AssertTools.internalError(\"Could not find class \" + jps_className);");
     code.append("}");
       
   
     code.append("final Class[] jps_methodArgs = new Class[0];");
-    code.append("final java.lang.reflect.Method jps_superMethod = org.tcfreenet.schewe.assert.AssertTools.findSuperMethod(jps_thisClass, \"checkInvariant\", jps_methodArgs);");
+    code.append("final java.lang.reflect.Method jps_superMethod = net.mtu.eggplant.assert.AssertTools.findSuperMethod(jps_thisClass, \"checkInvariant\", jps_methodArgs);");
 
     code.append("if(jps_superMethod != null) {");
     //invoke it, pass on exceptions
@@ -116,25 +116,25 @@ public class CodeGenerator {
     code.append("}");
     code.append("catch(IllegalAccessException jps_iae) {");
     //just means that the super method is private and we really shouldn't be calling it in the first place          
-    //code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"Not enough access executing checkInvariant method on super class: \" + jps_iae.getMessage());");
+    //code.append("net.mtu.eggplant.assert.AssertTools.internalError(\"Not enough access executing checkInvariant method on super class: \" + jps_iae.getMessage());");
     //Pretend it returned true :)
     code.append("jps__retval = Boolean.TRUE;");
     code.append("}");
     code.append("catch(IllegalArgumentException jps_iae) {");
-    code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"IllegalArgument executing checkInvariant method on super class: \" + jps_iae.getMessage() + \" methodArgs \" + org.tcfreenet.schewe.utils.Functions.printArray(jps_methodArgs) + \" args \" + org.tcfreenet.schewe.utils.Functions.printArray(jps_args));");
+    code.append("net.mtu.eggplant.assert.AssertTools.internalError(\"IllegalArgument executing checkInvariant method on super class: \" + jps_iae.getMessage() + \" methodArgs \" + net.mtu.eggplant.util.Functions.printArray(jps_methodArgs) + \" args \" + net.mtu.eggplant.util.Functions.printArray(jps_args));");
     code.append("}");
     code.append("catch(java.lang.reflect.InvocationTargetException jps_ite) {");
     code.append("jps_ite.getTargetException().printStackTrace();");
     code.append("}");
     code.append("if(jps__retval == null) {");
-    code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"got null from checkInvariant\");");
+    code.append("net.mtu.eggplant.assert.AssertTools.internalError(\"got null from checkInvariant\");");
     code.append("}");
     code.append("else if(! (jps__retval instanceof Boolean) ) {");
-    code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"got something odd from checkInvariant: \" + jps__retval.getClass());");
+    code.append("net.mtu.eggplant.assert.AssertTools.internalError(\"got something odd from checkInvariant: \" + jps__retval.getClass());");
     code.append("}");
 
     code.append("if(jps__retval != null && !((Boolean)jps__retval).booleanValue()) {");
-    code.append("org.tcfreenet.schewe.assert.AssertTools.unlockMethod(\"");
+    code.append("net.mtu.eggplant.assert.AssertTools.unlockMethod(\"");
     code.append(methodName);
     code.append("\");");
     code.append("return false;");
@@ -147,7 +147,7 @@ public class CodeGenerator {
 
     addConditionChecks(code, assertClass.getInvariants(), false);
 
-    code.append("org.tcfreenet.schewe.assert.AssertTools.unlockMethod(\"");
+    code.append("net.mtu.eggplant.assert.AssertTools.unlockMethod(\"");
     code.append(methodName);
     code.append("\");");
     code.append("return jps__retval == null || ((Boolean)jps__retval).booleanValue();");
@@ -193,7 +193,7 @@ public class CodeGenerator {
     }
     
     code.append(")) {");
-    code.append("org.tcfreenet.schewe.assert.AssertTools.preConditionFailed(org.tcfreenet.schewe.assert.AssertTools.getCurrentAssertionViolation());");
+    code.append("net.mtu.eggplant.assert.AssertTools.preConditionFailed(net.mtu.eggplant.assert.AssertTools.getCurrentAssertionViolation());");
     code.append("}");
     
     return code.toString();
@@ -397,7 +397,7 @@ public class CodeGenerator {
       code.append(paramName);
     }
     code.append(")) {");
-    code.append("org.tcfreenet.schewe.assert.AssertTools.postConditionFailed(org.tcfreenet.schewe.assert.AssertTools.getCurrentAssertionViolation());");
+    code.append("net.mtu.eggplant.assert.AssertTools.postConditionFailed(net.mtu.eggplant.assert.AssertTools.getCurrentAssertionViolation());");
     code.append("}");
 
     if(!assertMethod.isVoid()) {
@@ -446,7 +446,7 @@ public class CodeGenerator {
       code.append(sp.getStringTwo());
     }
     code.append(") {");
-    code.append("if(!org.tcfreenet.schewe.assert.AssertTools.lockMethod(\"");
+    code.append("if(!net.mtu.eggplant.assert.AssertTools.lockMethod(\"");
     code.append(methodName);
     code.append("\")) { return true; }");
     if(!assertMethod.isPrivate() && !assertMethod.isConstructor()) {
@@ -457,9 +457,9 @@ public class CodeGenerator {
       code.append("final String jps_className = \"");
       code.append(className);
       code.append("\";");
-      code.append("final Class jps_thisClass = org.tcfreenet.schewe.assert.AssertTools.classForName(jps_className);");
+      code.append("final Class jps_thisClass = net.mtu.eggplant.assert.AssertTools.classForName(jps_className);");
       code.append("if(jps_thisClass == null) {");
-      code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"Could not find class \" + jps_className);");
+      code.append("net.mtu.eggplant.assert.AssertTools.internalError(\"Could not find class \" + jps_className);");
       code.append("}");      
 
       //need method parameters here, just the class objects, use getClassObjectForClass
@@ -477,7 +477,7 @@ public class CodeGenerator {
       }
       code.append("};");
                 
-      code.append("final java.lang.reflect.Method jps_superMethod = org.tcfreenet.schewe.assert.AssertTools.findSuperMethod(jps_thisClass, \"check");
+      code.append("final java.lang.reflect.Method jps_superMethod = net.mtu.eggplant.assert.AssertTools.findSuperMethod(jps_thisClass, \"check");
       code.append(assertMethod.getName());
       code.append("PreConditions\", jps_methodArgs);");
 
@@ -508,26 +508,26 @@ public class CodeGenerator {
       code.append("}");
       code.append("catch(IllegalAccessException jps_iae) {");
       //just means that the super method is private and we really shouldn't be calling it in the first place      
-      //code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"Not enough access executing superClass check");
+      //code.append("net.mtu.eggplant.assert.AssertTools.internalError(\"Not enough access executing superClass check");
       //code.append(assertMethod.getName());
       //code.append("PreConditions: \" + jps_iae.getMessage());");
       //Pretend it returned true :)
       code.append("jps__retval = Boolean.TRUE;");
       code.append("}");
       code.append("catch(IllegalArgumentException jps_iae) {");
-      code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"IllegalArgument executing superClass check");
+      code.append("net.mtu.eggplant.assert.AssertTools.internalError(\"IllegalArgument executing superClass check");
       code.append(assertMethod.getName());
-      code.append("PreConditions: \" + jps_iae.getMessage() + \" methodArgs \" + org.tcfreenet.schewe.utils.Functions.printArray(jps_methodArgs) + \" args \" + org.tcfreenet.schewe.utils.Functions.printArray(jps_args));");
+      code.append("PreConditions: \" + jps_iae.getMessage() + \" methodArgs \" + net.mtu.eggplant.util.Functions.printArray(jps_methodArgs) + \" args \" + net.mtu.eggplant.util.Functions.printArray(jps_args));");
       code.append("}");
       code.append("catch(java.lang.reflect.InvocationTargetException jps_ite) {");
       code.append("jps_ite.getTargetException().printStackTrace();");
       code.append("}");
       code.append("if(jps__retval == null) {");
-      code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"got null from checkPreConditions\");");
+      code.append("net.mtu.eggplant.assert.AssertTools.internalError(\"got null from checkPreConditions\");");
       code.append("}");
       //PreConditions are ORed
       code.append("else if(((Boolean)jps__retval).booleanValue()) {");
-      code.append("org.tcfreenet.schewe.assert.AssertTools.unlockMethod(\"");
+      code.append("net.mtu.eggplant.assert.AssertTools.unlockMethod(\"");
       code.append(methodName);
       code.append("\");");
       code.append("return true;");
@@ -543,7 +543,7 @@ public class CodeGenerator {
 
     addConditionChecks(code, assertMethod.getPreConditions(), false);
     
-    code.append("org.tcfreenet.schewe.assert.AssertTools.unlockMethod(\"");
+    code.append("net.mtu.eggplant.assert.AssertTools.unlockMethod(\"");
     code.append(methodName);
     code.append("\");");
     if(assertMethod.isPrivate() || assertMethod.isConstructor()) {
@@ -607,7 +607,7 @@ public class CodeGenerator {
       code.append(paramName);
     }
     code.append(") {");
-    code.append("if(!org.tcfreenet.schewe.assert.AssertTools.lockMethod(\"");
+    code.append("if(!net.mtu.eggplant.assert.AssertTools.lockMethod(\"");
     code.append(methodName);
     code.append("\")) { return true; }");
     if(!assertMethod.isPrivate() && !assertMethod.isConstructor()) {
@@ -618,9 +618,9 @@ public class CodeGenerator {
       code.append("final String jps_className = \"");
       code.append(className);
       code.append("\";");
-      code.append("final Class jps_thisClass = org.tcfreenet.schewe.assert.AssertTools.classForName(jps_className);");
+      code.append("final Class jps_thisClass = net.mtu.eggplant.assert.AssertTools.classForName(jps_className);");
       code.append("if(jps_thisClass == null) {");
-      code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"Could not find class \" + jps_className);");
+      code.append("net.mtu.eggplant.assert.AssertTools.internalError(\"Could not find class \" + jps_className);");
       code.append("}");
     
       //need method parameters here, just the class objects, use getClassObjectForClass
@@ -651,7 +651,7 @@ public class CodeGenerator {
       }
       code.append("};");
                 
-      code.append("final java.lang.reflect.Method jps_superMethod = org.tcfreenet.schewe.assert.AssertTools.findSuperMethod(jps_thisClass, \"check");
+      code.append("final java.lang.reflect.Method jps_superMethod = net.mtu.eggplant.assert.AssertTools.findSuperMethod(jps_thisClass, \"check");
       code.append(assertMethod.getName());
       code.append("PostConditions\", jps_methodArgs);");
 
@@ -692,26 +692,26 @@ public class CodeGenerator {
       code.append("}");
       code.append("catch(IllegalAccessException jps_iae) {");
       //just means that the super method is private and we really shouldn't be calling it in the first place
-      //code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"Not enough access executing superClass check");
+      //code.append("net.mtu.eggplant.assert.AssertTools.internalError(\"Not enough access executing superClass check");
       //code.append(assertMethod.getName());
       //code.append("PostConditions: \" + jps_iae.getMessage());");
       //Pretend it returned true :)
       code.append("jps__retval = Boolean.TRUE;");
       code.append("}");
       code.append("catch(IllegalArgumentException jps_iae) {");
-      code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"IllegalArgument executing superClass check");
+      code.append("net.mtu.eggplant.assert.AssertTools.internalError(\"IllegalArgument executing superClass check");
       code.append(assertMethod.getName());
-      code.append("PostConditions: \" + jps_iae.getMessage() + \" methodArgs \" + org.tcfreenet.schewe.utils.Functions.printArray(jps_methodArgs) + \" args: \" + org.tcfreenet.schewe.utils.Functions.printArray(jps_args));");
+      code.append("PostConditions: \" + jps_iae.getMessage() + \" methodArgs \" + net.mtu.eggplant.util.Functions.printArray(jps_methodArgs) + \" args: \" + net.mtu.eggplant.util.Functions.printArray(jps_args));");
       code.append("}");
       code.append("catch(java.lang.reflect.InvocationTargetException jps_ite) {");
       code.append("jps_ite.getTargetException().printStackTrace();");
       code.append("}");
       code.append("if(jps__retval == null) {");
-      code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"got null from checkPostConditions\");");
+      code.append("net.mtu.eggplant.assert.AssertTools.internalError(\"got null from checkPostConditions\");");
       code.append("}");
       //PostConditions are ANDed
       code.append("else if(!((Boolean)jps__retval).booleanValue()) {");
-      code.append("org.tcfreenet.schewe.assert.AssertTools.unlockMethod(\"");
+      code.append("net.mtu.eggplant.assert.AssertTools.unlockMethod(\"");
       code.append(methodName);
       code.append("\");");
       code.append("return false;");
@@ -726,7 +726,7 @@ public class CodeGenerator {
     }
     
     addConditionChecks(code, assertMethod.getPostConditions(), true);
-    code.append("org.tcfreenet.schewe.assert.AssertTools.unlockMethod(\"");
+    code.append("net.mtu.eggplant.assert.AssertTools.unlockMethod(\"");
     code.append(methodName);
     code.append("\");");
     if(assertMethod.isPrivate() || assertMethod.isConstructor()) {
@@ -769,10 +769,10 @@ public class CodeGenerator {
 
       errorMessage += "\" " + StringUtils.searchAndReplace(StringUtils.searchAndReplace(condition, "\"", "\\\""), "\'", "\\\'") + "\"";
       
-      code.append("org.tcfreenet.schewe.assert.AssertionViolation jps_av = new org.tcfreenet.schewe.assert.AssertionViolation(");
+      code.append("net.mtu.eggplant.assert.AssertionViolation jps_av = new net.mtu.eggplant.assert.AssertionViolation(");
       code.append(errorMessage);
       code.append(");");
-      code.append("org.tcfreenet.schewe.assert.AssertTools.setCurrentAssertionViolation(jps_av);");
+      code.append("net.mtu.eggplant.assert.AssertTools.setCurrentAssertionViolation(jps_av);");
     
       code.append("return false;");
       code.append("}");

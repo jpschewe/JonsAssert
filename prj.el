@@ -8,7 +8,7 @@
  '(jde-run-read-app-args t)
  '(jde-global-classpath (list
 			 (expand-file-name "src/" assert-root)
-			 (expand-file-name "src/" infra-root)
+			 (expand-file-name "lib/JonsInfra.jar" assert-root)
 			 (expand-file-name "lib/antlr.jar" assert-root)
 			 (expand-file-name "lib/junit.jar" assert-root)
 			 (expand-file-name "lib/java-getopt-1.0.7.jar" assert-root)

@@ -5,11 +5,11 @@
 
   I'd appreciate comments/suggestions on the code schewe@tcfreenet.org
 */
-package org.tcfreenet.schewe.assert;
+package net.mtu.eggplant.assert;
 
-import org.tcfreenet.schewe.utils.UnaryPredicate;
-import org.tcfreenet.schewe.utils.StringPair;
-import org.tcfreenet.schewe.utils.algorithms.Filtering;
+import net.mtu.eggplant.util.UnaryPredicate;
+import net.mtu.eggplant.util.StringPair;
+import net.mtu.eggplant.util.algorithms.Filtering;
 
 import java.lang.reflect.Method;
 

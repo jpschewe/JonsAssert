@@ -5,12 +5,12 @@
 
   I'd appreciate comments/suggestions on the code schewe@tcfreenet.org
 */
-package org.tcfreenet.schewe.assert;
+package net.mtu.eggplant.assert;
 
-import org.tcfreenet.schewe.utils.StringPair;
-import org.tcfreenet.schewe.utils.Named;
-import org.tcfreenet.schewe.utils.Pair;
-import org.tcfreenet.schewe.utils.algorithms.Copying;
+import net.mtu.eggplant.util.StringPair;
+import net.mtu.eggplant.util.Named;
+import net.mtu.eggplant.util.Pair;
+import net.mtu.eggplant.util.algorithms.Copying;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -34,9 +34,9 @@ public class AssertMethod implements Named {
      
      @pre (theClass != null)
      @pre (name != null)
-     @pre (preConditions != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(postConditions, AssertToken.class))
-     @pre (postConditions != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(preConditions, AssertToken.class))
-     @pre (params != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(StringPair.class))
+     @pre (preConditions != null && net.mtu.eggplant.util.JPSCollections.elementsInstanceOf(postConditions, AssertToken.class))
+     @pre (postConditions != null && net.mtu.eggplant.util.JPSCollections.elementsInstanceOf(preConditions, AssertToken.class))
+     @pre (params != null && net.mtu.eggplant.util.JPSCollections.elementsInstanceOf(StringPair.class))
      @pre (mods != null)
   **/
   public AssertMethod(final AssertClass theClass,

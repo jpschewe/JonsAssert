@@ -5,7 +5,7 @@
 
   I'd appreciate comments/suggestions on the code jpschewe@eggplant.mtu.net
 */
-package org.tcfreenet.schewe.assert.test;
+package net.mtu.eggplant.assert.test;
 
 import junit.framework.TestSuite;
 import junit.framework.Test;
