@@ -108,8 +108,7 @@ public class Configuration {
       if(!dirf.mkdir()) {
         throw new RuntimeException("Couldn't create directory and it doesn't exist: " + dirf.toString());
       }
-    }
-    else if(!dirf.isDirectory()) {
+    } else if(!dirf.isDirectory()) {
       throw new RuntimeException("Error creating destination directories, file found where directory expected: " + dir.toString());
     }
       
@@ -146,13 +145,14 @@ public class Configuration {
   }
 
   /**
-     @return the instrumented filename to use, without the path
-  **/
+   * @return the instrumented filename to use, without the path
+   */
   public String getInstrumentedFilename(final File sourceFile,
                                         final String packageName) {
     final String filename = sourceFile.getAbsolutePath();
-    final int indexOfSlash = filename.lastIndexOf(File.separatorChar);
-    final String shortFilename = filename.substring(indexOfSlash+1);
+    //final int indexOfSlash = filename.lastIndexOf(File.separatorChar);
+    //final String shortFilename = filename.substring(indexOfSlash+1);
+    final String shortFilename = sourceFile.getName();
     int indexOfDot = shortFilename.lastIndexOf('.');
     final String ifilename = shortFilename.substring(0, indexOfDot) + "." + getInstrumentedExtension();
     final String path = createDirectoryForPackage(packageName);

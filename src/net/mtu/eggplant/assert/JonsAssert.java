@@ -142,8 +142,6 @@ public class JonsAssert {
       return;
     }
 
-    _symtab = new Symtab(config);
-
     //Set the exit status based on errors
     instrument(config, files);
     //System.exit(instrument(config, files) ? 0 : 1);
@@ -188,7 +186,9 @@ public class JonsAssert {
   }
 
   /**
-   * Entry point.  Starts up the parser and instruments all files.
+   * Entry point.  Starts up the parser and instruments all files.  This is
+   * the method to call if one wants to invoke the application from another
+   * Java program.
    *
    * @param config the {@link Configuration configuration} object
    * @param files Collection of {@link java.io.File files/directories} to
@@ -233,7 +233,8 @@ public class JonsAssert {
    * @return true for success
    */
   static public boolean doFile(final File f) {
-    boolean success = true;
+    boolean success = true; //did the run pass?
+    boolean writeFile = false; //do we need to write the file 
     if (f.isDirectory()) {
       // If this is a directory, walk each file/dir in that directory      
       final String files[] = f.list();
@@ -246,22 +247,26 @@ public class JonsAssert {
         try {
           parseFile(new FileInputStream(f));
           success = true;
+          writeFile = true;
         } catch(final IOException ioe) {
           if(Debug.isDebugMode()) {
             System.err.println("Caught exception getting file input stream: " + ioe);
           }
           success = false;
+          writeFile = false;
         } catch(final FileAlreadyParsedException fape) {
           //System.out.println("Source file is older than instrumented file, skipping: " + f.getName());
           success = true;
+          writeFile = false;
         } catch (final Exception e) {
           System.err.println("parser exception: "+e);
           if(Debug.isDebugMode()) {
             e.printStackTrace();   // so we can get a stack trace
           }
           success = false;
+          writeFile = false;
         } finally {
-          getSymtab().finishFile(success);
+          getSymtab().finishFile(writeFile);
         }
       }
     }

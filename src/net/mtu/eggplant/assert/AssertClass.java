@@ -148,9 +148,9 @@ public class AssertClass implements Named {
     }
   }
 
-  final public void setPackage(final String packageName) {
-    _packageName = packageName;
-  }
+//   final public void setPackage(final String packageName) {
+//     _packageName = packageName;
+//   }
 
   final public String getPackage() {
     return _packageName;

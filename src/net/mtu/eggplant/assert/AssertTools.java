@@ -43,10 +43,53 @@ import java.util.Iterator;
 
 /**
    class of static helper methods for assertions.
-
 **/
 final public class AssertTools {
 
+  /**
+   * if inherited conditions should be enforced
+   * 
+   * @see net.mtu.eggplant.assert#systemProperties
+   */
+  public static final boolean ENFORCE_INHERITED_CONDITIONS = "TRUE".equalsIgnoreCase(System.getProperty("ENFORCE_INHERITED_CONDITIONS", "TRUE"));
+  
+  /**
+   * if assert conditions should be enforced
+   * 
+   * @see net.mtu.eggplant.assert#systemProperties
+   */
+  public static final boolean ENFORCE_ASSERT_CONDITION = "TRUE".equalsIgnoreCase(System.getProperty("ENFORCE_ASSERT_CONDITION", "TRUE"));
+
+  /**
+   * if invariant conditions should be enforced
+   * 
+   * @see net.mtu.eggplant.assert#systemProperties
+   */
+  public static final boolean ENFORCE_INVARIANT_CONDITION = "TRUE".equalsIgnoreCase(System.getProperty("ENFORCE_INVARIANT_CONDITION", "TRUE"));
+
+  /**
+   * if pre conditions should be enforced
+   *
+   * @see net.mtu.eggplant.assert#systemProperties
+   */
+  public static final boolean ENFORCE_PRE_CONDITION = "TRUE".equalsIgnoreCase(System.getProperty("ENFORCE_PRE_CONDITION", "TRUE"));
+
+  /**
+   * if post conditions should be enforced
+   * 
+   * @see net.mtu.eggplant.assert#systemProperties
+   */
+  public static final boolean ENFORCE_POST_CONDITION = "TRUE".equalsIgnoreCase(System.getProperty("ENFORCE_POST_CONDITION", "TRUE"));
+
+  /**
+   * what to do if an assertion violation is raised
+   * 
+   * @see net.mtu.eggplant.assert#systemProperties
+   */
+  private static final String ASSERT_BEHAVIOR = System.getProperty("ASSERT_BEHAVIOR", "EXIT");
+
+  private AssertTools() {} //no instances
+  
   /**
    * find the superclasses method, this is my version of a superClass method,
    * this means that the method name is __<packageName>_<className>_methodName
@@ -104,105 +147,74 @@ final public class AssertTools {
   }
 
   /**
-     called when an assert fails.  Checks the system property ASSERT_CONDITION
-     to decide what to do.
-
-     <ul>
-     <li>TRUE - signal the failure (default)</li>
-     <li>FALSE - ignore the failure</li>
-     </ul>
+     Called when an assert fails.
      
      @param av AssertionViolation with information about the failure
+     @see #ENFORCE_ASSERT_CONDITION
      
      @pre (av != null)
   **/
   static public void assertFailed(final AssertionViolation av) {
-    String behavior = System.getProperty("ASSERT_CONDITION", "TRUE");
-    if(behavior.equalsIgnoreCase("TRUE")) {
-      fail(av);
-    }
-  }
-
-  /**
-     called when an invariant fails.  Checks the system property INVARIANT_CONDITION
-     to decide what to do.
-
-     <ul>
-     <li>TRUE - signal the failure (default)</li>
-     <li>FALSE - ignore the failure</li>
-     </ul>
-     
-     @param av AssertionViolation with information about the failure
-     
-     @pre (av != null)
-  **/
-  static public void invariantFailed(final AssertionViolation av) {
-    String behavior = System.getProperty("INVARIANT_CONDITION", "TRUE");
-    if(behavior.equalsIgnoreCase("TRUE")) {
+    if(ENFORCE_ASSERT_CONDITION) {
       fail(av);
     }
   }
   
   /**
-     called when a post condition fails.  Checks the system property
-     POST_CONDITION to decide what to do.
-
-     <ul>
-     <li>TRUE - signal the failure (default)</li>
-     <li>FALSE - ignore the failure</li>
-     </ul>
+     called when an invariant fails.
      
      @param av AssertionViolation with information about the failure
+     @see #ENFORCE_INVARIANT_CONDITION
+     
+     @pre (av != null)
+  **/
+  static public void invariantFailed(final AssertionViolation av) {
+    if(ENFORCE_INVARIANT_CONDITION) {
+      fail(av);
+    }
+  }
+  
+  /**
+     called when a post condition fails.
+     
+     @param av AssertionViolation with information about the failure
+     @see #ENFORCE_POST_CONDITION
      
      @pre (av != null)
   **/
   static public void postConditionFailed(final AssertionViolation av) {
-    String behavior = System.getProperty("POST_CONDITION", "TRUE");
-    if(behavior.equalsIgnoreCase("TRUE")) {
+    if(ENFORCE_POST_CONDITION) {
       fail(av);
     }
   }
 
   /**
-     Called when a precondition fails.  Checks the system property
-     PRE_CONDITION to decide what to do.
-
-     <ul>
-     <li>TRUE - signal the failure (default)</li>
-     <li>FALSE - ignore the failure</li>
-     </ul>
+     Called when a precondition fails.
      
      @param av AssertionViolation with information about the failure
+     @see #ENFORCE_PRE_CONDITION
 
      @pre (av != null)
   **/
   static public void preConditionFailed(final AssertionViolation av) {
-    String behavior = System.getProperty("PRE_CONDITION", "TRUE");
-    if(behavior.equalsIgnoreCase("TRUE")) {
+    if(ENFORCE_PRE_CONDITION) {
       fail(av);
     }
   }
 
   /**
-     Called to signal an assertion failure.  This checks the system property
-     ASSERT_BEHAVIOR to decide what to do.
+     Called to signal an assertion failure.
      
-     <ul>
-     <li>EXIT - print out the stack trace and exit (default)</li>
-     <li>CONTINUE - print out the stack trace and continue on</li>
-     <li>EXCEPTION - throw the AssertionViolation</li>
-     </ul>
+     @see #ASSERT_BEHAVIOR
+
+     @pre (null != av)
   **/
   static public void fail(final AssertionViolation av) {
-    String assertBehavior = System.getProperty("ASSERT_BEHAVIOR", "EXIT");    
-    if(assertBehavior.equalsIgnoreCase("CONTINUE")) {
+    if("CONTINUE".equalsIgnoreCase(ASSERT_BEHAVIOR)) {
       av.printStackTrace();
-    }
-    else if(assertBehavior.equalsIgnoreCase("EXCEPTION")) {
+    } else if("EXCEPTION".equalsIgnoreCase(ASSERT_BEHAVIOR)) {
       throw av;
-    }
-    //default behavior
-    else {//(assertBehavior.equalsIgnoreCase("EXIT")) {
+    } else {//("EXIT".equalsIgnoreCase(ASSERT_BEHAVIOR)) {
       av.printStackTrace();
       System.exit(1);
     }

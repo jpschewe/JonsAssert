@@ -1,3 +1,18 @@
+2002-05-26  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/net/mtu/eggplant/assert/JonsAssert.java (main): Fixed bug
+	with files being instrumented into the destination directory,
+	without package structure, when the destination file is newer
+
+2002-05-19  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/net/mtu/eggplant/assert/CodeGenerator.java: Added system
+	property, ENFORCE_INHERITED_CONDITIONS, to allow the user to gain
+	speed by sacrificing checking of conditions on superclasses.  Also
+	changed names of properties to turn off various condition checks
+	to be easier to understand.  See package level documentation for
+	more information.
+
 2002-04-17  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/net/mtu/eggplant/assert/JonsAssert.java: Changed System.exit

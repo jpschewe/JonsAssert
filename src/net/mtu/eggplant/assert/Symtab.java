@@ -188,14 +188,12 @@ public class Symtab {
   }
 
   /**
-     Just resets the internal pointers to files to be the last file we pushed
-     on the file stack, or null if no other files are being processed.
-  **/
-  public void finishFile(final boolean success) {
-    if(success) {
+   * Just resets the internal pointers to files to be the last file we pushed
+   * on the file stack, or null if no other files are being processed.
+   */
+  public void finishFile(final boolean writeFile) {
+    if(writeFile) {
       instrument(_currentFile);
-    } else {
-      _allFiles.remove(_currentFile.getFile());
     }
 
     if(!_fileStack.isEmpty()) {

@@ -1009,6 +1009,10 @@ statement
       
       //assertion, checks invariants too for the class definitions allowed in statement
     |   assertOrInvariantCondition
+
+    //JDK 1.4 assert keyword
+    //| "assert" expression (COLON expression)? SEMI
+
     ;
 
 
@@ -1076,37 +1080,37 @@ handler
    the mother of all expressions
 
 <pre>
-// expressions
-// Note that most of these expressions follow the pattern
-//   thisLevelExpression :
-//       nextHigherPrecedenceExpression
-//           (OPERATOR nextHigherPrecedenceExpression)*
-// which is a standard recursive definition for a parsing an expression.
-// The operators in java have the following precedences:
-//    lowest  (13)  = *= /= %= += -= <<= >>= >>>= &= ^= |=
-//            (12)  ?:
-//            (11)  ||
-//            (10)  &&
-//            ( 9)  |
-//            ( 8)  ^
-//            ( 7)  &
-//            ( 6)  == !=
-//            ( 5)  < <= > >=
-//            ( 4)  << >>
-//            ( 3)  +(binary) -(binary)
-//            ( 2)  * / %
-//            ( 1)  ++ -- +(unary) -(unary)  ~  !  (type)
-//                  []   () (method call)  . (dot -- identifier qualification)
-//                  new   ()  (explicit parenthesis)
-//
-// the last two are not usually on a precedence chart; I put them in
-// to point out that new has a higher precedence than '.', so you
-// can validy use
-//     new Frame().show()
-// 
-// Note that the above precedence levels map to the rules below...
-// Once you have a precedence chart, writing the appropriate rules as below
-//   is usually very straightfoward
+ expressions
+ Note that most of these expressions follow the pattern
+   thisLevelExpression :
+       nextHigherPrecedenceExpression
+           (OPERATOR nextHigherPrecedenceExpression)*
+ which is a standard recursive definition for a parsing an expression.
+ The operators in java have the following precedences:
+    lowest  (13)  = *= /= %= += -= <<= >>= >>>= &= ^= |=
+            (12)  ?:
+            (11)  ||
+            (10)  &&
+            ( 9)  |
+            ( 8)  ^
+            ( 7)  &
+            ( 6)  == !=
+            ( 5)  < <= > >=
+            ( 4)  << >>
+            ( 3)  +(binary) -(binary)
+            ( 2)  * / %
+            ( 1)  ++ -- +(unary) -(unary)  ~  !  (type)
+                  []   () (method call)  . (dot -- identifier qualification)
+                  new   ()  (explicit parenthesis)
+
+ the last two are not usually on a precedence chart; I put them in
+ to point out that new has a higher precedence than '.', so you
+ can validy use
+     new Frame().show()
+ 
+ Note that the above precedence levels map to the rules below...
+ Once you have a precedence chart, writing the appropriate rules as below
+   is usually very straightfoward
 </pre>
 
 

@@ -5,6 +5,7 @@
   (jde-set-variables
    '(jde-run-working-directory (expand-file-name "src/" project-root))
    '(jde-run-read-app-args t)
+   '(jde-compile-option-directory (expand-file-name "src/" project-root))
    '(jde-global-classpath (list
 			   (expand-file-name "src/" project-root)
 			   (expand-file-name "lib/JonsInfra-0.1.jar" project-root)

@@ -15,7 +15,6 @@
   </target>
 
   <path id="base.classpath">
-    <pathelement location="${basedir}"/>
     <pathelement location="${basedir}/lib/JonsInfra-0.1.jar"/>
     <pathelement location="${basedir}/lib/antlr.jar"/>
     <pathelement location="${basedir}/lib/werken.opt.jar"/>
@@ -24,6 +23,7 @@
 
   
   <target name="compile" depends="init">
+    <!--<antlr target="${basedir}/src/net/mtu/eggplant/assert/java.g" />-->
     <java classname="antlr.Tool"
 	  fork="yes"
 	  failonerror="true"
@@ -46,7 +46,7 @@
       <arg value="assert.g" />
     </java>
 
-    <javac srcdir="${basedir}/src" destdir="${basedir}/src">
+    <javac srcdir="${basedir}/src" destdir="${basedir}/src" debug="true">
       <classpath>
         <path refid="base.classpath"/>
       </classpath>
@@ -60,14 +60,38 @@
 	 basedir="${basedir}/src" includes="**" />
   </target>
 
-  <target name="runtests" depends="compile">
-    <java fork="yes" classname="junit.textui.TestRunner" 
-	  taskname="junit" failonerror="true">
-      <arg value="net.mtu.eggplant.assert.test.AllTests"/>
+  <target name="test" depends="compile">
+    <!-- first instrument the test files -->
+    <java fork="yes"
+	  classname="net.mtu.eggplant.assert.JonsAssert"
+	  taskname="DBC"
+	  failonerror="false"> <!-- so we can see what all needs fixing -->
+      <arg value="-d ${basedir}/${instrument.dir}" />
+      <arg value="-f" />
+      <arg value="${basedir}/src/net/mtu/eggplant/assert/testcases" />
       <classpath>
+        <pathelement location="${basedir}/src"/>
         <path refid="base.classpath"/>
       </classpath>
     </java>
+
+    <!-- compile newly instrumented files -->
+    <!--<javac srcdir="${basedir}/${instrument.dir}" destdir="${basedir}/src" debug="true">
+      <classpath>
+        <path refid="base.classpath"/>
+      </classpath>
+      <include name="net/mtu/eggplant/assert/test/**/*.java"/>
+    </javac>-->
+
+    <!-- run tests -->
+    <!--<java fork="yes" classname="junit.textui.TestRunner" 
+	  taskname="junit" failonerror="true">
+      <arg value="net.mtu.eggplant.assert.test.TestAssert"/>
+      <classpath>
+        <pathelement location="${basedir}/src"/>
+        <path refid="base.classpath"/>
+      </classpath>
+    </java>-->
   </target>
 
   <target name="instrument" depends="init" if="assert.present">
@@ -103,7 +127,7 @@
       <arg value="assert.g" />
     </java>
 
-    <javac srcdir="${instrument.dir}" destdir="${basedir}" >
+    <javac srcdir="${instrument.dir}" destdir="${basedir}/src" debug="true">
       <classpath>
         <path refid="base.classpath"/>
       </classpath>

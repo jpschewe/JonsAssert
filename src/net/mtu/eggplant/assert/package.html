@@ -62,7 +62,67 @@
 	  <td>Name of class generated to check conditions on interfaces</td>
 	</tr>
 
+      </table>
+      
+      <h2><a name="systemProperties">System properties</a></h2>
+      
+      <p>This table shows the properties that are used by the instrumented
+      code and their meanings.  That is these properties are checked when the
+      instrumented code is run, NOT when the code is instrumented by
+      JonsAssert.</p>
+
+      <p><b>Note</b>: These properties must be set on the commandline.</p>
+
+      <table>
+	<tr>
+	  <th>property</th>
+	  <th>description</th>
+	</tr>
+
+	<tr>
+	  <td>ENFORCE_ASSERT_CONDITION</td>
+	  <td>If "FALSE", then ignore inline assert checks.  Default value is
+	  "TRUE".</td>
+	</tr>
+
+	<tr>
+	  <td>ENFORCE_INVARIANT_CONDITION</td>
+	  <td>If "FALSE", then ignore invariant checks.  Default value is
+	  "TRUE".</td>
+	</tr>
+
+	<tr>
+	  <td>ENFORCE_POST_CONDITION</td>
+	  <td>If "FALSE", then ignore post condition checks.  Default value is
+	  "TRUE".</td>
+	</tr>
+
+	<tr>
+	  <td>ENFORCE_PRE_CONDITION</td>
+	  <td>If "FALSE", then ignore pre condition checks.  Default value is
+	  "TRUE".</td>
+	</tr>
+
+	<tr>
+	  <td>ENFORCE_INHERITED_CONDITIONS</td>
+	  <td>If "FALSE", then the instrumented code will not walk the
+	  inheritance heirarchy looking for pre/post/invariant conditions when
+	  checking the conditions for a class.  Default value is "TRUE".  This
+	  is useful for speeding up the instrumented code while sacrificing a
+	  completly accurate run.  One way to use this is to set this to FALSE
+	  when doing every day development and leave it at TRUE when running
+	  in nightly test runs. <i><b>FIX put performance number here.</b></i></td>
+	    
+	<tr>
+	  <td>ASSERT_BEHAVIOR</td>
+	  <td>If "CONTINUE", print out a stack trace and continue.
+	    If "EXCEPTION", throw an
+	    {@link net.mtu.eggplant.assert.AssertionViolation}
+	    If "EXIT" or unset, print a stack trace and call
+	    System.exit(1).  Default value is "EXIT"</td>
+	</tr>
 	
       </table>
+      
   </body>
 </html>
