@@ -1,3 +1,9 @@
+2000-04-24  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* CodeGenerator.java: Switched pre and post conditions to do the
+	inheritance logic corrrectly, preconditions are ORed,
+	postconditions are ANDed.
+
 2000-04-19  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* JonsAssert.java: Started adding command line parameters.  Added the

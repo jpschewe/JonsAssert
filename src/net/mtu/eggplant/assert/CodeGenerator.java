@@ -545,10 +545,11 @@ public class CodeGenerator {
       code.append("_JPS_ite.getTargetException().printStackTrace();");
       code.append("}");
       code.append("if(_JPS_retVal == null) {");
-      code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"got null from checkInvariant\");");
+      code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"got null from checkPreConditions\");");
       code.append("}");
-      code.append("else if(!((Boolean)_JPS_retVal).booleanValue()) {");
-      code.append("return false;");
+      //PreConditions are ORed
+      code.append("else if(((Boolean)_JPS_retVal).booleanValue()) {");
+      code.append("return true;");
       code.append("}");
       
       code.append("}");
@@ -726,8 +727,9 @@ public class CodeGenerator {
       code.append("if(_JPS_retVal == null) {");
       code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"got null from checkInvariant\");");
       code.append("}");
-      code.append("else if(((Boolean)_JPS_retVal).booleanValue()) {");
-      code.append("return true;");
+      //PostConditions are ANDed
+      code.append("else if(!((Boolean)_JPS_retVal).booleanValue()) {");
+      code.append("return false;");
       code.append("}");
       
       code.append("}");

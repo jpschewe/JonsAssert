@@ -11,8 +11,8 @@
   All variables created here will have _JPS_ in front of them except for __retVal and __old*
 
   invariants are ANDed with super class
-  preconditions are ANDed with super class
-  postconditions are ORed with super class
+  preconditions are ORed with super class
+  postconditions are ANDed with super class
   This puts the burden on the person using the instrumented method rather than the person writing the method.
 */
 
@@ -50,9 +50,9 @@ protected boolean __<packageName>_<methodName>_check<methodname>PostConditions(_
 
     //[jpschewe:20000213.1603CST] FIX do interface post conditions first and keep track of which interface they're from
     
-  // OR, as soon as a true is seen, return true
-  if(((Boolean)retVal).booleanValue()) {
-    return true;
+  // AND, as soon as a true is seen, return true
+  if(! ((Boolean)retVal).booleanValue()) {
+    return false;
   }
 
 }
@@ -101,9 +101,9 @@ protected boolean __<packageName>_<methodName>_check<methodname>PreConditions(pa
 
   //[jpschewe:20000213.1603CST] FIX do interface pre conditions first and keep track of which interface they're from
 
-  // AND, as soon as a false is seen, return false;  
-  if(!((Boolean)retVal).booleanValue()) {
-    return false;
+  // OR, as soon as a false is seen, return false;  
+  if(((Boolean)retVal).booleanValue()) {
+    return true;
   }
 
   //for <condition> (conditions)
