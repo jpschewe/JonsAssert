@@ -38,9 +38,9 @@ public class CodeGenerator {
     code.append(condition);
     code.append(") { ");
     code.append("org.tcfreenet.schewe.assert.AssertTools.assertFailed(new org.tcfreenet.schewe.assert.AssertionViolation(");
-    code.append('"');
+    //code.append("\"");
     code.append(errorMessage);
-    code.append('"');
+    //code.append("\"");
     code.append("));");
     code.append(" }");
     code.append("}");
@@ -330,33 +330,33 @@ public class CodeGenerator {
   }
   
     
-  /**
-     This code should be inserted right after the precondition and invariant calls.
+//   /**
+//      This code should be inserted right after the precondition and invariant calls.
      
-     @param assertMethod the method to generate the old values for
-     @return the code to generate all of the old values to be used when calling the post condition check
+//      @param assertMethod the method to generate the old values for
+//      @return the code to generate all of the old values to be used when calling the post condition check
 
-     @pre (assertMethod != null)
-  **/
-  static public String generateOldValues(final AssertMethod assertMethod) {
-    StringBuffer code = new StringBuffer();
+//      @pre (assertMethod != null)
+//   **/
+//   static public String generateOldValues(final AssertMethod assertMethod) {
+//     StringBuffer code = new StringBuffer();
 
-    Iterator paramIter = assertMethod.getParams().iterator();
-    while(paramIter.hasNext()) {
-      StringPair sp = (StringPair)paramIter.next();
-      String paramType = sp.getStringOne();
-      String paramName = sp.getStringTwo();
-      code.append("final ");
-      code.append(paramType);
-      code.append(" __old");
-      code.append(paramName);
-      code.append(" = ");
-      code.append(paramName);
-      code.append(";");
-    }
+//     Iterator paramIter = assertMethod.getParams().iterator();
+//     while(paramIter.hasNext()) {
+//       StringPair sp = (StringPair)paramIter.next();
+//       String paramType = sp.getStringOne();
+//       String paramName = sp.getStringTwo();
+//       code.append("final ");
+//       code.append(paramType);
+//       code.append(" __old");
+//       code.append(paramName);
+//       code.append(" = ");
+//       code.append(paramName);
+//       code.append(";");
+//     }
 
-    return code.toString();
-  }
+//     return code.toString();
+//   }
 
   /**
      @param assertMethod the method to generate the post condition check call for
@@ -397,17 +397,17 @@ public class CodeGenerator {
       else {
         first = false;
       }
-      if(!assertMethod.isConstructor()) {
-        //constructors just pass the param name in twice since they're inside
-        //a special class anyway
-        code.append("__old");
-      }
-      code.append(paramName);
-      code.append(", ");
+//       if(!assertMethod.isConstructor()) {
+//         //constructors just pass the param name in twice since they're inside
+//         //a special class anyway
+//         code.append("__old");
+//       }
+//       code.append(paramName);
+//       code.append(", ");
       code.append(paramName);
     }
     code.append(")) {");
-    code.append("org.tcfreenet.schewe.assert.AssertTools.preConditionFailed(org.tcfreenet.schewe.assert.AssertTools.getCurrentAssertionViolation());");
+    code.append("org.tcfreenet.schewe.assert.AssertTools.postConditionFailed(org.tcfreenet.schewe.assert.AssertTools.getCurrentAssertionViolation());");
     code.append("}");
 
     if(!assertMethod.isVoid()) {
@@ -605,11 +605,11 @@ public class CodeGenerator {
         else {
           first = false;
         }
-        code.append(paramType);
-        code.append(" ");
-        code.append("__old");
-        code.append(paramName);
-        code.append(", ");
+//         code.append(paramType);
+//         code.append(" ");
+//         code.append("__old");
+//         code.append(paramName);
+//         code.append(", ");
         code.append(paramType);
         code.append(' ');
         code.append(paramName);
@@ -651,8 +651,8 @@ public class CodeGenerator {
         String classObj = getClassObjectForClass(sp.getStringOne());
         code.append(classObj);
         //for old value
-        code.append(", ");
-        code.append(classObj);
+//         code.append(", ");
+//         code.append(classObj);
       }
       code.append("};");
                 
@@ -678,9 +678,9 @@ public class CodeGenerator {
         }
         StringPair sp = (StringPair)paramIter.next();
         code.append(getObjectForParam(sp.getStringOne(), sp.getStringTwo()));
-        // once for old
-        code.append(", ");
-        code.append(getObjectForParam(sp.getStringOne(), "__old" + sp.getStringTwo()));
+//         // once for old
+//         code.append(", ");
+//         code.append(getObjectForParam(sp.getStringOne(), "__old" + sp.getStringTwo()));
       }
       code.append("};");
       code.append("try {");

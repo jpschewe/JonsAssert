@@ -49,10 +49,6 @@ FEATURES:
 
 - Does design by contract correct, except where noted in the BUGS.
 
-- Allows checking of old values for variables in a method __old<paramName>
-where <paramName> is the name of the parameter.  This includes checking in
-post conditions and assertion conditions in the method.
-
 -- Allows for checking of return value in post condition via the variable
 __retVal.
 
@@ -77,8 +73,6 @@ calls the new native method.
 - javadoc comments cannot exist above import statements
 
 - Interface assertions are not yet checked
-
-- Old values are not available in constructor post condition checks
 
 - Reporting bugs.  If you happen to find a bug in the software, please send me
 a message, schewe@tcfreenet.org.  At least include the message that was output

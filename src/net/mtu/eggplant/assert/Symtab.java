@@ -598,7 +598,8 @@ public class Symtab {
       //System.out.println("method: " + method);
 
       if(method.isConstructor()) {
-        ifile.getFragments().add(new CodeFragment(method.getEntrance(), CodeGenerator.generateConstrauctorAssertions(method), CodeFragmentType.PRECONDITION));
+        //[jpschewe:20000416.2142CST] FIX skip constructors for now, still needs some thought
+        //ifile.getFragments().add(new CodeFragment(method.getEntrance(), CodeGenerator.generateConstrauctorAssertions(method), CodeFragmentType.PRECONDITION));
 
       }
       else if(!method.isAbstract()) {
@@ -609,12 +610,12 @@ public class Symtab {
         String preCall = CodeGenerator.generatePreConditionCall(method);      
         ifile.getFragments().add(new CodeFragment(entrance, preCall, CodeFragmentType.PRECONDITION));
 
-        String oldValues = CodeGenerator.generateOldValues(method);
+//         String oldValues = CodeGenerator.generateOldValues(method);
         //Put a try-finally around void methods for post condition checks
         if(method.isVoid()) {
-          oldValues = oldValues + " try { ";
+          ifile.getFragments().add(new CodeFragment(entrance, " try { ", CodeFragmentType.OLDVALUES));
         }
-        ifile.getFragments().add(new CodeFragment(entrance, oldValues, CodeFragmentType.OLDVALUES));
+
         
         if(!method.isStatic() && !method.isPrivate() && !method.isConstructor()) {
           //Add a call to the invariant method at entrance
@@ -631,20 +632,16 @@ public class Symtab {
             StringBuffer insertedCode = new StringBuffer();
             CodePointPair exit = (CodePointPair)exits.next();
             
-            //before the invariant call we need to start a new scope
             if(!method.isStatic() && !method.isPrivate()) {      
               //Add a call to the invariant at each exit
-              String myInvariantCall = "{" + invariantCall;
-              ifile.getFragments().add(new CodeFragment(exit.getCodePointOne(), myInvariantCall, CodeFragmentType.INVARIANT));
+              ifile.getFragments().add(new CodeFragment(exit.getCodePointOne(), invariantCall, CodeFragmentType.INVARIANT));
             }
-            else {
-              ifile.getFragments().add(new CodeFragment(exit.getCodePointOne(), "{", CodeFragmentType.INVARIANT));
-            }
+
             //Add a call to the postCondition at each exit
             ifile.getFragments().add(new CodeModification(exit.getCodePointOne(), "return", postSetup, CodeFragmentType.POSTCONDITION));
 
-            //finish the new scope
-            String myPostCall = postCall + "}";
+            //create a new scope around the post call
+            String myPostCall = "{" + postCall + "}";
             ifile.getFragments().add(new CodeFragment(exit.getCodePointTwo(), myPostCall, CodeFragmentType.POSTCONDITION2));
 
           }
@@ -667,13 +664,15 @@ public class Symtab {
           ifile.getFragments().add(new CodeFragment(insertFinallyAt, myPostCall, CodeFragmentType.POSTCONDITION));
         }
       }//end if not abstract
-      
-      //Add the pre and post check methods at the end of the method
-      CodePoint close = method.getClose();
-      String preMethod = CodeGenerator.generatePreConditionMethod(method);
-      String postMethod = CodeGenerator.generatePostConditionMethod(method);
-      ifile.getFragments().add(new CodeFragment(close, preMethod, CodeFragmentType.PRECONDITION));
-      ifile.getFragments().add(new CodeFragment(close, postMethod, CodeFragmentType.POSTCONDITION));
+
+      if(!method.isConstructor()) {
+        //Add the pre and post check methods at the end of the method
+        CodePoint close = method.getClose();
+        String preMethod = CodeGenerator.generatePreConditionMethod(method);
+        String postMethod = CodeGenerator.generatePostConditionMethod(method);
+        ifile.getFragments().add(new CodeFragment(close, preMethod, CodeFragmentType.PRECONDITION));
+        ifile.getFragments().add(new CodeFragment(close, postMethod, CodeFragmentType.POSTCONDITION));
+      }
     }
 
   }

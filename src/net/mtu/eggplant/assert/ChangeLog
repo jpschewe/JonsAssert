@@ -1,3 +1,9 @@
+2000-04-17  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* CodeGenerator.java: Removed old value stuff.  Temporarily
+	disabled checking of pre/post/invariant conditions in constructor
+	so perhaps I can get a release out sooner.
+
 2000-03-22  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* CodeGenerator.java: append class name on the end of __retval for
