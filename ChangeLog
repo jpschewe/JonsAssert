@@ -1,3 +1,8 @@
+2000-12-29  Jon Schewe  <jpschewe@mtu.net>
+	*: Moved all files into the package net.mtu.eggplant.  Also
+	changed all file headers for new licensing, BSD style rather than
+	LGPL.
+	
 2000-12-09  Jon Schewe  <jpschewe@mtu.net>
 
 	* CodeGenerator.java: Updated generated variable/method/class
