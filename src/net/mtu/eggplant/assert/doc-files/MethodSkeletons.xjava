@@ -1,8 +1,8 @@
 /*
   This file is meant to let others know how I intend to instrument files so
   that they know what types of method names may cause problems and to ease in
-  debugging the code that is generated.
-  
+  debugging the code that is generated.  The code generated isn't exactly what
+  I have here, but it should be close.
 
   remember only to check invariants on public instance methods, protected methods, constructor exit
 
@@ -13,8 +13,7 @@
   invariants are ANDed with super class
   preconditions are ORed with super class
   postconditions are ANDed with super class
-  This puts the burden on the person using the instrumented method rather than the person writing the method.
-*/
+  This puts the burden on the person using the instrumented method rather than the person writing the method.  */
 
 //before
 public Object methodFoo(Object param1) {
@@ -44,12 +43,11 @@ public Object methodFoo(Object param1) {
 }
 
 
-//[jpschewe:20000213.1555CST] FIX still need code, it's in CodeGenerator, copy it to here or from checkPreConditions
 protected boolean __<packageName>_<methodName>_check<methodname>PostConditions(__retVal, oldParam1, param1, ...) {
 
+  /* Just like check checkPreconditions, except that the superclass conditions
+    as ANDed rather then ORed. */
 
-    //[jpschewe:20000213.1603CST] FIX do interface post conditions first and keep track of which interface they're from
-  
   // AND, as soon as a true is seen, return true
   if(! ((Boolean)retVal).booleanValue()) {
     return false;
@@ -68,13 +66,11 @@ protected boolean __<packageName>_<methodName>_check<methodname>PreConditions(pa
     org.tcfreenet.schewe.Assert.AssertTools.internalError("Got error getting the class object for class " + className + " " + cnfe);
   }
 
-  //[jpschewe:20000213.1552CST] FIX need method parameters here, just the class objects
   Class[] methodArgs = new Class[0];
   Method superMethod = org.tcfreenet.schewe.Assert.AssertTools.findSuperMethod(thisClass, "check<methodname>PreConditions", methodArgs);
 
   if(superMethod != null) {
     //invoke it, bail on exceptions
-    //[jpschewe:20000213.1552CST] FIX need parameters here, just the parameter names
     Object[] args = new Object[0];
     try {
       retVal = superMethod.invoke(this, args);
@@ -100,7 +96,13 @@ protected boolean __<packageName>_<methodName>_check<methodname>PreConditions(pa
 
 
   //[jpschewe:20000213.1603CST] FIX do interface pre conditions first and keep track of which interface they're from
+  Class[] interfaces = thisClass.getInterfaces();
+  for(int i=0; i<interfaces.length; i++) {
+    final String interfaceName = interfaces[i].getName();
+    final Class assertInterfaceClass =  AssertTools.classForName(__interfaceName + '$' + __<packageName>_<interfaceName>_checkAssertions);
+  }
 
+  
   // OR, as soon as a false is seen, return false;  
   if(((Boolean)retVal).booleanValue()) {
     return true;

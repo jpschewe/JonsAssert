@@ -115,6 +115,9 @@ case that causes the error is REALLY helpful if you can do such a thing.
 
 
 TODO:
+- optimizations.  One idea is to cache the methods to be called at the
+class level so the lookup only happens once.
+
 - fix bugs!
 
 - Assertions on native methods are not checked.  It seems like it'd be pretty

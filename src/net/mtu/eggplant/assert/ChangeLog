@@ -1,3 +1,16 @@
+2000-10-14  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* testcases/TestAssert.java: Added comments to unit tests.  Added
+	unit tests for extra precondition checks.  Bug fixed! 
+	
+
+	* AssertMethod.java: modified to store the whole list of modifiers
+	so that I can check for any modifier I want later on.  Also added
+	methods that determine the visibility of the method and the method
+	to used check assertions.  This fixed a one of the bugs in the
+	previous version.
+	
+
 2000-10-05  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* java.g: Removed unused code from identifierStar that sets the
