@@ -44,6 +44,19 @@ public Object methodFoo(Object param1) {
   return jps__retVal<classname>;
 }
 
+/**
+ * Cache the interfaces
+ */
+transient private Object[] _jps__interfaceInstanceCache;
+private void jps__initializeInterfaceInstanceCache() {
+  if(null == _jps__interfaceInstanceCache) {
+    final Class[] dbcInterfaces = AssertTools.findAssertClassInterfaces(<className>.class.getInterfaces());
+    //FIX should dbcInterfaces contain ALL DBC interfaces, all the way up the
+    //heirarchy?  The only problem I can think of is memory overhead.  Can't
+    //do that or we might not get the inheritance correct.  That means we need
+    //to do the search in the methods.
+  }
+}
 
 /**
    Logic:  if(super preconditions) {
@@ -55,8 +68,8 @@ public Object methodFoo(Object param1) {
            return AND(pre condtitions for this class);
               
 **/
-transient private java.lang.reflect.Method _jps__<packageName>_<methodName>_check<methodname>PreConditions;
-protected boolean jps__<packageName>_<methodName>_check<methodname>PreConditions(param1, param2, ...) {
+transient private java.lang.reflect.Method _jps__<packageName>_<className>_<methodName>_check<methodname>PreConditions;
+protected boolean jps__<packageName>_<className>_check<methodname>PreConditions(param1, param2, ...) {
   if(!AssertTools.ENFORCE_PRE_CONDITION) { return true; }
 
   final MethodLock jps__methodLock = AssertTools.lockMethod("jps__<packageName>_<methodName>_check<methodname>PreConditions_paramType1_paramType2_...", this/*null*/);
@@ -81,7 +94,7 @@ protected boolean jps__<packageName>_<methodName>_check<methodname>PreConditions
       }
     }
 
-    if(!_jps__<packageName>_<methodName>_check<methodname>PreConditions == AssertTools.NO_METHOD) {
+    if(_jps__<packageName>_<methodName>_check<methodname>PreConditions != AssertTools.NO_METHOD) {
       //invoke it, bail on exceptions
       Object[] args = new Object[0];
       try {
@@ -107,24 +120,27 @@ protected boolean jps__<packageName>_<methodName>_check<methodname>PreConditions
     }
 
 
-    //[jpschewe:20000213.1603CST] FIX do interface pre conditions first and keep track of which interface they're from
-    final Class[] interfaces = thisClass.getInterfaces();
-    for(int i=0; i<interfaces.length; i++) {
-      //find method son super interfaces to call.  This return value needs to
-      //be cached.  Perhaps we should also have a flag that allows us to skip
-      //checking on interfaces all together that is separate from
-      //CHECK_INHERITED_CONDITIONS
+    if(!staticMethod && publicMethod) {
+      //[jpschewe:20000213.1603CST] FIX do interface pre conditions first and
+      //keep track of which interface they're from
+         
+      final Class[] interfaces = thisClass.getInterfaces();
+      for(int i=0; i<interfaces.length; i++) {
+        //find methods on super interfaces to call.  This return value needs to
+        //be cached.  Perhaps we should also have a flag that allows us to skip
+        //checking on interfaces all together that is separate from
+        //ENFORCE_INHERITED_CONDITIONS
 
-      //actually should probably create an instance of ..._AssertClass with
-      //this and then cache those instances.  We should then be able to call
-      //the check_... methods directly without reflection.
+        //actually should probably create an instance of ..._AssertClass with
+        //this and then cache those instances.
       
-      //This method should look first for the dbc class, then for the
-      //appropriate method on the given interface, if not found continue to
-      //search up each super interface until a method is found and return the
-      //union of all methods.
-      final Method[] methods = AssertTools.findInterfaceMethod(interfaces[i], "check<methodname>PreConditions", methodArgs);
-      //invoke on each method ORing the result
+        //This method should look first for the dbc class, then for the
+        //appropriate method on the given interface, if not found continue to
+        //search up each super interface until a method is found and return the
+        //union of all methods.
+        final Method[] methods = AssertTools.findInterfaceMethod(interfaces[i], "check<methodname>PreConditions", methodArgs);
+        //invoke on each method ORing the result
+      }
     }
   
     // OR, as soon as a true is seen, return true;  
@@ -159,8 +175,8 @@ protected boolean jps__<packageName>_<methodName>_check<methodname>PreConditions
            return AND(postcondtitions for this class);
               
 **/
-transient private java.lang.reflect.Method _jps__<packageName>_<methodName>_check<methodname>PostConditions;
-protected boolean jps__<packageName>_<methodName>_check<methodname>PostConditions(jps__retVal, param1, ...) {
+transient private java.lang.reflect.Method _jps__<packageName>_<className>_<methodName>_check<methodname>PostConditions;
+protected boolean jps__<packageName>_<className>_check<methodname>PostConditions(jps__retVal, param1, ...) {
 
   /* Just like check checkPreconditions, except that the superclass conditions
      as ANDed rather then ORed. */
@@ -211,7 +227,7 @@ protected boolean jps__<packageName>_<methodName>_checkInvariant() {
       }
     }
 
-    if(!_jps__<packageName>_<methodName>_checkInvariant == AssertTools.NO_METHOD) {
+    if(_jps__<packageName>_<methodName>_checkInvariant != AssertTools.NO_METHOD) {
       //invoke it, bail on exceptions
       Object[] args = new Object[0];
       try {
@@ -297,8 +313,8 @@ public class Test {
   //Put all check pre/post methods at end of class along with any AssertDummy classes
   
   //Standard preCondition and postCondition methods here, these will be static though
-  static final class JPS_<packageName>_Test_AssertDummy0 {
-    public JPS_<packageName>_Test_AssertDummy0(int i) {
+  static final class JPS_<packageName>_Test_AssertDummy {
+    public JPS_<packageName>_Test_AssertDummy(int i) {
       //Standard precondition call    
       if(!jps__<packageName>_Test_checkTestPreConditions(i)) {
         AssertTools.preConditionFailed(AssertTools.getCurrentAssertionViolation());
@@ -332,39 +348,21 @@ public interface Interface {
 
   public boolean foo(int i);
   
-  static final public class JPS__<packageName>_Interface_AssertClass implements Interface {
-    private Class[] _interfaceCache;
+  final class JPS__<packageName>_<interfaceName>_DBCClass implements Interface {
+    
+    //FIX needs to implement methods from superinterfaces, but not the
+    //pre/post conditions.  Just need to handle the delegate part.  This is
+    //probably a good place for a proxy, otherwise we need to know all of the
+    //methods at compile time.  This would require that I make an interface
+    //out of the DBC class and delegate to it...
+    
+    private Class[] _dbcInterfaceCache;
     private Interface _delegate;
-    public JPS__<packageName>_<className>_AssertClass(final Interface delegate) {
+    public JPS__<packageName>_<interfaceName>_AssertClass(final Interface delegate) {
       _delegate = delegate;
       //Do some caching
       final Class[] interfaces = Interface.class.getInterfaces();
-      _interfaceCache = new Class[interfaces.length];
-      for(int i=0; i<interfaces.length; i++) {
-        //FIX do a depth first search of each interface heirarchy and cache
-        //the class object, if found.  This may return multiple interfaces in
-        //the case where the direct superinterface doesn't have DBC, but its
-        //superinterface does.
-        final Class[] dbcInterfaces = AssertTools.findAssertClassInterfaces(interfaces[i]);
-        //FIX add each interface to the cache
-          
-        final String interfaceName = "JPS_" +
-          StringUtils.searchAndReplace(interfaces[i].getName(), ".", "_") + "_AssertClass";
-        
-        final Class iface = AssertTools.classForName(interfaceName);
-        //Perhaps create instances here...
-        if(iface == null) {
-          _interfaceCache[i] = AssertTools.NO_CLASS;
-        } else {
-          _interfaceCache[i] = iface;
-        }
-      }
-      if() {
-        
-      } else {
-        _interfaceCache[i] = AssertTools.NO_CLASS;
-      }
-      
+      _dbcInterfaceCache = AssertTools.findAssertClassInterfaces(interfaces);
     }
 
     public boolean preCond(int i) {

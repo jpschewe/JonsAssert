@@ -39,13 +39,15 @@ import java.util.TreeSet;
 
 import net.mtu.eggplant.util.StringPair;
 import net.mtu.eggplant.util.UnaryPredicate;
-
 import net.mtu.eggplant.util.algorithms.Filtering;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * class of static helper methods for assertions.
  * 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public final class AssertTools {
 
@@ -91,6 +93,8 @@ public final class AssertTools {
    */
   public static final String ASSERT_BEHAVIOR = System.getProperty("ASSERT_BEHAVIOR", "EXIT");
 
+  private static final Log LOG = LogFactory.getLog(JonsAssert.class);
+  
   private AssertTools() {} //no instances
 
   /**
@@ -106,10 +110,28 @@ public final class AssertTools {
    */
   public static Class[] findAssertClassInterfaces(final Class[] interfaces) {
     final Set dbcInterfaces = new HashSet();
+    findAssertClassInterfacesInternal(interfaces, dbcInterfaces);
+    return (Class[])dbcInterfaces.toArray(new Class[dbcInterfaces.size()]);
+  }
+
+  /**
+   * Do the work for findAssertClassInterfaces.
+   *
+   * @param interfaces the interfaces to look in
+   * @param dbcInterfaces the Set of interfaces that implement the DBC
+   * conditions.  This Set will be changed by this method.
+   */
+  private static void findAssertClassInterfacesInternal(final Class[] interfaces,
+                                                        final Set dbcInterfaces) {
     for(int i=0; i<interfaces.length; i++) {
-      
+      final String dbcClassName = interfaces[i].getName() + ".JPS_" + interfaces[i].getName().replace('.', '_') + "_DBCClass";
+      final Class dbcClass = classForName(dbcClassName);
+      if(null != dbcClass) {
+        dbcInterfaces.add(dbcClass);
+      } else {
+        findAssertClassInterfacesInternal(interfaces[i].getInterfaces(), dbcInterfaces);
+      }
     }
-    throw new RuntimeException("Not implemented");
   }
     
   /**
@@ -118,18 +140,23 @@ public final class AssertTools {
    * where packageName is the package the class is in with the characters '.'
    * and '$' replaced with '_' and className is the name of the class.
    * 
-   * @return the method found, if no such method can be found
+   * @return the method found, if no such method can be found null is returned
    * 
    * @pre (thisClass != null)
    * @pre (methodName != null)
    * @pre (methodArgs != null)
    */
-  public static Method findSuperMethod(final Class thisClass, final String methodName, final Class[] methodArgs) {
-//          System.out.println("findSuperMethod:"
-//                             + " thisClass: " + thisClass
-//                             + " methodName: " + methodName
-//                             + " methodArgs: " + net.mtu.eggplant.util.Functions.printArray(methodArgs)
-//                             );
+  public static Method findSuperMethod(final Class thisClass,
+                                       final String methodName,
+                                       final Class[] methodArgs) {
+    if(LOG.isDebugEnabled()) {
+      LOG.debug("findSuperMethod:"
+                + " thisClass: " + thisClass
+                + " methodName: " + methodName
+                + " methodArgs: " + net.mtu.eggplant.util.Functions.printArray(methodArgs)
+                );
+    }
+    
     Class superClass = thisClass.getSuperclass();
     Method superMethod = null;
     if(superClass != null) {
@@ -252,8 +279,9 @@ public final class AssertTools {
 
 
   /**
-   * Get the class object for this class name.  Just like {@link
-   * Class#forName(String) Class.forName()}, but returns null on an exception.
+   * Get the class object for this class name.  Just like
+   * {@link Class#forName(String) Class.forName()}, but returns
+   * null on an exception.
    * 
    * @return null for no such class found
    */
