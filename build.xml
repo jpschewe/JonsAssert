@@ -339,7 +339,7 @@
 	 tag="JonsAssert-0_5" />
     <!-- run javadoc on the source -->
     <mkdir dir="${mtu.net.offline}/JonsAssert/api" />
-    <javadoc packagenames="net.mtu.eggplant.*"
+    <javadoc packagenames="net.mtu.eggplant.dbc"
 	     sourcepath="${temp.dir}/assert/src"
 	     use="true"
 	     splitindex="true"

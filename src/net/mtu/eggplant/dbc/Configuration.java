@@ -39,13 +39,13 @@ public class Configuration {
   /**
    * Enum for 1.4 source compatibility.
    *
-   * @see #setSourceCompatibility(SourceCompatibilityEnum)
+   * @see #setSourceCompatibility(Configuration.SourceCompatibilityEnum)
    */
   public static final SourceCompatibilityEnum JAVA_1_4 = new SourceCompatibilityEnum("1.4");
   /**
    * Enum for 1.3 source compatibility.
    *
-   * @see #setSourceCompatibility(SourceCompatibilityEnum)
+   * @see #setSourceCompatibility(Configuration.SourceCompatibilityEnum)
    */
   public static final SourceCompatibilityEnum JAVA_1_3 = new SourceCompatibilityEnum("1.3");
 
