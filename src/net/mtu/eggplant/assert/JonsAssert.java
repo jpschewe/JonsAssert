@@ -27,27 +27,6 @@ public class JonsAssert {
   static /*pacakge*/ boolean _ignoreTimeStamp = false;
   
   public static void main(String[] args) {
-
-
-    _symtab = new Symtab(parseCommandLine(args));
-    
-    // if we have at least one command-line argument
-    if (args.length > 0 ) {
-      System.err.println("Parsing...");
-      // for each directory/file specified on the command line
-      for(int i=0; i< args.length;i++) {
-        doFile(new File(args[i])); // parse it
-      }
-    }
-    else {
-      System.err.println("Parsing...");
-      //Test case
-      doFile(new File("org/tcfreenet/schewe/assert/testcases/")); // parse it
-    }
-    
-  }
-
-  static private Configuration parseCommandLine(String[] args) {
     Configuration config = new Configuration();
     LongOpt[] longopts = new LongOpt[1];
 
@@ -70,9 +49,23 @@ public class JonsAssert {
       }
     }
 
-    return config;
+    _symtab = new Symtab(config);
+    
+    // if we have at least one command-line argument
+    if (args.length - g.getOptind() > 0 ) {
+      System.err.println("Parsing...");
+      // for each directory/file specified on the command line
+      for(int i=g.getOptind(); i< args.length;i++) {
+        doFile(new File(args[i])); // parse it
+      }
+    }
+    else {
+      System.err.println("Parsing...");
+      //Test case
+      doFile(new File("org/tcfreenet/schewe/assert/testcases/")); // parse it
+    }
+    
   }
-  
 
   // This method decides what action to take based on the type of
   //   file we are looking at

@@ -20,7 +20,7 @@ header {
 }
 /** Java 1.1 Recognizer Grammar
  *<pre>
- * Run 'java Main <directory full of java files>'
+ * Run 'java JonsAssert <directory full of java files>'
  *
  * Contributing authors:
  *		John Mitchell		johnm@non.net
@@ -1442,7 +1442,7 @@ JAVADOC_OPEN
   : "/**"
     {
       //System.out.println("java: got start of javadoc comment #" + text + "#");
-      Main.selector.push(Main.assertLexer);
+      JonsAssert.selector.push(JonsAssert.assertLexer);
     }
   ;
 

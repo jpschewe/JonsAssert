@@ -242,7 +242,7 @@ JAVADOC_CLOSE
     ('*')+ '/'
 	{
 	    //System.out.println("assert: got end of javadoc comment #" + text + "#");
-	    Main.selector.pop();
+	    JonsAssert.selector.pop();
 	}
     ;
 
