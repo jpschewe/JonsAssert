@@ -27,8 +27,6 @@
  */
 package net.mtu.eggplant.dbc.test;
 
-import DefaultPackage;
-
 import net.mtu.eggplant.dbc.AssertTools;
 import net.mtu.eggplant.dbc.AssertionViolation;
 
@@ -45,7 +43,7 @@ import junit.textui.TestRunner;
  * Must be called with ASSERT_BEHAVIOR_CONDITIONS set to EXCEPTION.
  *  
  * @invariant (_invariant), "This is an invariant";
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class TestAssert extends TestCase {
 

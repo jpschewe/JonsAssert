@@ -9,6 +9,14 @@
   <property name="app.name"   value="JonsAssert-0.5" />
   <property name="instrument.dir"  value="instrumented" />
 
+  <property name="cvs.root" value="disk:/export/CVS-Repository" />
+  <property name="cvs.module" value="assert" />
+
+  <!-- used for *.javadoc -->
+  <property name="local.java.packages" value="http://disk.mn.mtu.net/package-docs/java" />
+  <property name="local.java.projects" value="http://disk.mn.mtu.net/package-docs/projects" />
+  <property name="nightly.html.dir" value="/net/package-docs/projects" />
+  
   <target name="init">
     <tstamp />
     <uptodate property="buildJavaLexer" targetfile="${basedir}/src/net/mtu/eggplant/dbc/java.g">
@@ -370,5 +378,42 @@
     
     <!-- delete the temp files -->
     <delete dir="${temp.dir}" />
-  </target>  
+  </target>
+
+  <!-- do a nightly build to my fileserver -->
+  <target name="nightly.javadoc">
+    <mkdir dir="${temp.dir}" />    
+    <!-- get the source out of cvs -->
+    <cvs cvsRoot="${cvs.root}"
+         package="${cvs.module}"
+         dest="${temp.dir}"
+         quiet="true" />
+    
+    <!-- run javadoc on the source -->
+    <mkdir dir="${nightly.html.dir}/JonsAssert" />
+    <javadoc packagenames="net.mtu.eggplant.*"
+             sourcepath="${temp.dir}/assert/src"
+             use="true"
+             splitindex="true"
+             version="true"
+             windowtitle="JonsAssert"
+             destdir="${nightly.html.dir}/JonsAssert"
+             source="1.4"
+             additionalparam="-tag beaninfo:a:BeanInfo -tag test:a:Tests -tag pre:cm:PreConditions -tag post:cm:PostConditions -tag invariant:tc:Invariants -breakiterator"
+             >
+      <classpath>
+        <path refid="base.classpath"/>
+      </classpath>
+      <!-- core java -->
+      <link href="${local.java.packages}/jdk-1.4.0/api/"/>
+      <!-- junit -->
+      <link href="${local.java.packages}/junit-3.8/" />
+      <!-- infra -->
+      <link href="${local.java.projects}/JonsInfra/" />
+    </javadoc>
+    
+    <!-- delete the temp files -->
+    <delete dir="${temp.dir}" />
+  </target>
+  
 </project>
