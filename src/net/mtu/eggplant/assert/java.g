@@ -258,7 +258,7 @@ compilationUnit
 
     // A compilation unit starts with an optional package definition and
     // possibly some javadoc comments
-    ( {_parseSection==0}? (invariantConditions)* packageName=packageDefinition )?
+    ( {_parseSection==0}? (invariantCondition)* packageName=packageDefinition )?
     {
       //Now we just need to check to make sure the destination file is older
       if(!getSymtab().isDestinationOlderThanCurrentFile(packageName)) {
@@ -270,19 +270,19 @@ compilationUnit
 
     // Next we have a series of zero or more import statements with
     // intermingled javadoc comments
-    ( /* (invariantConditions)* */ importDefinition )*
+    ( /* (invariantCondition)* */ importDefinition )*
     {
       clearInvariants();
     }
 
     // Wrapping things up with any number of class or interface definitions
     // with their corresponding invariants
-     ( (invariantConditions)* typeDefinition )*
+     ( (invariantCondition)* typeDefinition )*
 
     EOF
   ;
 
-invariantConditions
+invariantCondition
   : JAVADOC_OPEN ( iv:INVARIANT_CONDITION { addInvariant(iv); } | PRE_CONDITION | POST_CONDITION | ASSERT_CONDITION )* JAVADOC_CLOSE
   ;
 
@@ -539,7 +539,11 @@ classBlock [ String name, boolean isInterface ]
     //this should just be methods and constructors,
     //but can't find a better place for it.
     ( prePostField | SEMI )*
-    rc:RCURLY { getSymtab().finishClass(new CodePoint(rc.getLine(), rc.getColumn())); }
+    rc:RCURLY
+    {
+      clearInvariants();
+      getSymtab().finishClass(new CodePoint(rc.getLine(), rc.getColumn()));
+    }
   ;
 
 prePosts 
@@ -785,27 +789,13 @@ parameterModifier
 
 // should be before all statements and most compoundStatements, but not all
 // so this needs to be added to the places that call compoundStatement
-assertCondition
+assertOrInvariantCondition
 { Vector assertTokens = new Vector(); }
   : (JAVADOC_OPEN
-    (assert:ASSERT_CONDITION { assertTokens.addElement(assert); }
+    ( assert:ASSERT_CONDITION { assertTokens.addElement(assert); }
       | PRE_CONDITION
       | POST_CONDITION
-      | INVARIANT_CONDITION
-    )*
-    jdc:JAVADOC_CLOSE 
-    { addAsserts(assertTokens, jdc); }
-      )
-  ;
-
-// Handles assertions, but doesn't do anything
-dummyAssertCondition
-{ Vector assertTokens = new Vector(); }
-  : (JAVADOC_OPEN
-      ( ASSERT_CONDITION
-      | PRE_CONDITION
-      | POST_CONDITION
-      | INVARIANT_CONDITION
+      | iv:INVARIANT_CONDITION { addInvariant(iv); }
     )*
     jdc:JAVADOC_CLOSE 
     { addAsserts(assertTokens, jdc); }
@@ -833,8 +823,6 @@ compoundStatement returns [CodePointPair startEnd]
       lc:LCURLY
       // include the (possibly-empty) list of statements
       (statement)*
-	    //[jpschewe:20000305.1341CST] FIX still need to fix this
-    //| (assertCondition)+
       rc:RCURLY
     )
     {
@@ -846,12 +834,11 @@ compoundStatement returns [CodePointPair startEnd]
 
 
 statement
-// A list of statements in curly braces -- start a new scope!
-    :
-	//(assertCondition)*
-	
-	(
-	compoundStatement
+
+  :
+
+    // A list of statements in curly braces -- start a new scope!    
+    compoundStatement
 
 	// class definition
     |	classDefinition
@@ -937,9 +924,8 @@ statement
 	// empty statement
     |	SEMI
       
-      //assertion
-    |   assertCondition
-	)
+      //assertion, checks invariants too for the class definitions allowed in statement
+    |   assertOrInvariantCondition
     ;
 
 
