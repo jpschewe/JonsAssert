@@ -40,6 +40,7 @@
     <pathelement location="${basedir}/lib/junit-3.7.jar"/>
   </path>
 
+  <target name="antlrTasks" depends="buildJavaLexer,buildJava14Lexer,buildAssertLexer" />
 
   <target name="buildJavaLexer" if="buildJavaLexer">
     <java classname="antlr.Tool"
@@ -81,10 +82,14 @@
     </java>
   </target>
   
-  <target name="compile" depends="init,buildJavaLexer,buildJava14Lexer,buildAssertLexer">
-    <!-- broken until 1.5 <antlr target="${basedir}/src/net/mtu/eggplant/dbc/java.g" /> -->
-    <!-- broken until 1.5 <antlr target="${basedir}/src/net/mtu/eggplant/dbc/assert.g" /> -->
-
+  <target name="compile" depends="init,antlrTasks">
+  <!-- broken
+  <target name="compile" depends="init">
+    <antlr target="${basedir}/src/net/mtu/eggplant/dbc/java.g" />
+    <antlr target="${basedir}/src/net/mtu/eggplant/dbc/java14.g" />
+    <antlr target="${basedir}/src/net/mtu/eggplant/dbc/assert.g" />
+    -->
+    
     <javac srcdir="${basedir}/src"
 	   destdir="${basedir}/src"
 	   debug="true"
@@ -388,7 +393,10 @@
          package="${cvs.module}"
          dest="${temp.dir}"
          quiet="true" />
-    
+
+    <!-- build the lexers -->
+    <!--<antcall target="antlrTasks" />-->
+      
     <!-- run javadoc on the source -->
     <mkdir dir="${nightly.html.dir}/JonsAssert" />
     <javadoc packagenames="net.mtu.eggplant.*"
