@@ -285,6 +285,14 @@ public class Test {
   public Test(int i) {
     System.out.println("in constructor " + i);
   }
+
+  /**
+     @pre (i > 0)
+     @pre (checkValue(i))
+  **/
+  public Test(int i, float t) {
+    System.out.println("in constructor " + i + " " + t);
+  }
 }
   
 //After
@@ -295,7 +303,7 @@ public class Test {
   **/
   public Test (int i) {
     // -- start output from generatePreCondtitionCall 
-    this(i, new JPS_<packageName>_Test_AssertDummy0(i), true, ...);
+    this(i, new JPS_<packageName>_Test_AssertDummy(i), true, ...);
     //standard check invariant call
     if(!jps__<packageName>_Test_checkInvariant()) {
       AssertTools.invariantFailed(AssertTools.getCurrentAssertionViolation());
@@ -305,11 +313,32 @@ public class Test {
       AssertTools.postConditionFailed(AssertTools.getCurrentAssertionViolation());
     }
   }
-  private Test(int i, JPS_<packageName>_Test_AssertDummy0 ad, <some number of extra boolean parameters to uniquify signature>) {
+  private Test(int i, JPS_<packageName>_Test_AssertDummy ad, <some number of extra boolean parameters to uniquify signature>) {
     // -- end output from generatePreConditionCall
     System.out.println("in constructor " + i);
   }
 
+  /**
+     @pre (i > 0)
+     @pre (checkValue(i))
+  **/
+  public Test (int i, float t) {
+    // -- start output from generatePreCondtitionCall 
+    this(i, new JPS_<packageName>_Test_AssertDummy(i, t), true, ...);
+    //standard check invariant call
+    if(!jps__<packageName>_Test_checkInvariant()) {
+      AssertTools.invariantFailed(AssertTools.getCurrentAssertionViolation());
+    }
+    //standard post condition call for void method
+    if(!jps__<packageName>_Test_checkTestPostConditions(i, t)) {
+      AssertTools.postConditionFailed(AssertTools.getCurrentAssertionViolation());
+    }
+  }
+  private Test(int i, float t, JPS_<packageName>_Test_AssertDummy ad, <some number of extra boolean parameters to uniquify signature>) {
+    // -- end output from generatePreConditionCall
+    System.out.println("in constructor " + i + " " + t);
+  }
+  
   //Put all check pre/post methods at end of class along with any AssertDummy classes
   
   //Standard preCondition and postCondition methods here, these will be static though
@@ -317,6 +346,12 @@ public class Test {
     public JPS_<packageName>_Test_AssertDummy(int i) {
       //Standard precondition call    
       if(!jps__<packageName>_Test_checkTestPreConditions(i)) {
+        AssertTools.preConditionFailed(AssertTools.getCurrentAssertionViolation());
+      }
+    }
+    public JPS_<packageName>_Test_AssertDummy(int i, float t) {
+      //Standard precondition call    
+      if(!jps__<packageName>_Test_checkTestPreConditions(i, t)) {
         AssertTools.preConditionFailed(AssertTools.getCurrentAssertionViolation());
       }
     }
