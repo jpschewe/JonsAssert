@@ -6,7 +6,7 @@
   <property file="${user.home}/.ant.properties" />
   <property name="temp.dir"  value="${basedir}/tmp" />
   
-  <property name="app.name"   value="JonsAssert" />
+  <property name="app.name"   value="JonsAssert-0.5" />
   <property name="instrument.dir"  value="instrumented" />
 
   <target name="init">
@@ -329,5 +329,46 @@
     <!-- delete the temp files -->
     <delete dir="${temp.dir}" />
   </target>
+
+  <!-- 0.5 javadoc -->
+  <target name="0.5_javadoc" depends="init_javadoc">
+    <!-- get the source out of cvs -->
+    <cvs cvsRoot="/home/CVS-Repository"
+	 package="assert"
+	 dest="${temp.dir}"
+	 tag="JonsAssert-0_5" />
+    <!-- run javadoc on the source -->
+    <mkdir dir="${mtu.net.offline}/JonsAssert/api" />
+    <javadoc packagenames="net.mtu.eggplant.*"
+	     sourcepath="${temp.dir}/assert/src"
+	     use="true"
+	     splitindex="true"
+	     version="true"
+	     windowtitle="JonsAssert 0.5"
+	     destdir="${mtu.net.offline}/JonsAssert/api" >
+      <doclet name="${doclet.name}"
+	      path="${doclet.path}">
+      </doclet>
+      <classpath>
+	<pathelement location="${temp.dir}/assert/src/" />
+	<pathelement location="${temp.dir}/assert/lib/junit-3.7.jar" />
+	<pathelement location="${temp.dir}/assert/lib/JonsInfra-0.1.jar" />
+	<pathelement location="${temp.dir}/assert/lib/antlr.jar" />
+	<pathelement location="${temp.dir}/assert/lib/werken.opt.jar" />
+      </classpath>
+      <!-- core java -->
+      <link href="http://java.sun.com/j2se/1.3/docs/api/" />
+      <!-- infra -->
+      <link offline="true" href="${mtu.net}/JonsInfra/0.1/api" packagelistLoc="${mtu.net.offline}/JonsInfra/0.1/api" />
+      <!-- junit -->
+      <link offline="true" href="${mtu.net}/java/junit/3.7" packagelistLoc="${mtu.net.offline}/java/junit/3.7" />
+      <!-- antlr -->
+      <link offline="true" href="${mtu.net}/java/antlr/2.7.1" packagelistLoc="${mtu.net.offline}/java/antlr/2.7.1" />
+      <!-- werken.opt -->
+      <link href="http://code.werken.com/werken.opt/build/apidocs/" />
+    </javadoc>
     
+    <!-- delete the temp files -->
+    <delete dir="${temp.dir}" />
+  </target>  
 </project>

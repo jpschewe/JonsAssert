@@ -1,81 +1,144 @@
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
-<html>
+<?xml version="1.0" encoding="us-ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
   <head>
-    <title>Jon's Assertion Package</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />	
+      <title>Jon's Assertion Package</title>
+      <link rel="stylesheet" type="text/css" href="style.css" />
   </head>
 
   <body>
     <h1>Jon's Assertion Package</h1>
 
-    <p>
-      This page is still very much under construction, but I figured that since
-      I'm ready for my first release I should get something out.  So here's a
-      start.  Check out the <a href="README">README</a> for more ifnormation.
-    </p>
+    <p>Jon's Assertion Package is tool that allows the use of Design by
+    Contract with Java.  More information can be found in the <a
+    href="README">README</a> and in the <a href="api/index.html">api
+    documentation</a>.</p>
 
     <ul>
-      <li><a href="#assertions">What are assertions?</a></li>
+      <li><a href="#assertions">What is Design by Contract?</a></li>
       <li><a href="#write">Why write this?</a></li>
-      <li><a href="#credits">Credits</a></li>
-      <li><a href="#download">Download</a></li>      
+      <li><a href="#download">Download</a></li>
+      <li><a href="#olderVersions">Older Versions</a></li>
     </ul>
 
 
-    <name="assertions"><h2>What are assertions?</h2>
-    <p>
-      Assertions are checks that one wants to apply during debugging or
-      testing and should be compiled out of the program for final deployment.
-      These condition checks are pre and postconditions, which check to make
-      sure certain conditions are true at the beginning and end of a method.
-      Invariants that must be true at the entrace and exit of all instance
-      methods and inline assertions that must hold true when a particular line
-      of code is reached.
-    </p>
-    
-    <name="write"><h2>Why write this?</h2>
-    <p>
-      I wrote this program because I've used a program in thepast called
+    <h2><a name="assertions">What is Design by Contract?</a></h2>
+
+    <p>The basic idea of Design by Contract is that someone can write a
+      piece of code with a particular usage in mind and can then document the
+      usage and then enforce this during development and remove these checks
+      when releasing production code.  This is accomplised by using inline
+      assertions, just like assert.h in C, pre conditions, post conditions and
+      invariants.  Each condition is a boolean statement that "asserts" that
+      something is true when a piece of code is being executed.  Pre
+      conditions assert that a condition is true at the start of execution of
+      a method.  Post conditions are for a condition being true at the end of
+      a method.  Invariants are conditions that must be true for before and
+      after all public methods in a class are called, in the case of this tool
+      all methods that aren't private.  These conditions are also inherited so
+      that someone can define conditions for use of a superclass and all
+      subclasses follow this as well.  The way that this is done is by
+      evaluating all of the conditions for a method on one class then either
+      AND or OR this result with the next class in the inheritance tree
+      depending on the type of assertion so that the burden is placed on the
+      person using the method rather than the person writing the method.  The
+      following table shows the rules.</p>
+
+    <table border="1">
+      <tr>
+	<th>Type of assertion</th>
+	<th>Logical operation performed for inherited conditions</th>
+      </tr>
+      
+      <tr>
+	<td>invariant</td>
+	<td>AND</td>
+      </tr>
+      
+      <tr>
+	<td>precondition</td>
+	<td>OR</td>
+      </tr>
+      
+      <tr>
+	<td>postcondition</td>
+	<td>AND</td>
+      </tr>
+      
+    </table>
+
+    <h2><a name="write">Why write this?</a></h2>
+    <p>I wrote this program because I've used a program in the past called
       AssertMate and it really didn't implement assertions very well and had a
-      lot of bugs.  I talked with the people that wrote it and they decided
-      to stop development, so I decided that being the programmer that I am,
-      I'd write my own.  Little did I know how much I was getting into, I've
-      written compilers before, but this is a little more difficult, I actually
-      have to modify someone else's code and it still needs to work the way
-      they intended.
-    </p>
+      lot of bugs.  I talked with the people that wrote it and they decided to
+      stop development, so I decided that being the programmer that I am, I'd
+      write my own.  Little did I know how much I was getting into, I've
+      written compilers before, but this is a little more difficult, I
+      actually have to modify someone else's code and it still needs to work
+      the way they intended.</p>
 
-    <name="credits"><h2>Credits</h2>
-    <p>
-      I'd like to thank my co-workers John Maloney and Rick Chapman for
-      entertaining my ideas and giving me the point of view of other
-      programmers that will probably use this.  I'd also like to thank God for
-      giving me the gift to understand computers and to be able to write this.
-    </p>
+    <h2><a name="download">Download</a></h2>
 
-<name="#usage"><h2>Usage</h2>
-<p>
-java -classpath "JonsAssert.jar:gnu-regexp-1.0.8.jar:java-getopt-1.0.7.jar:antlr.jar"
-net.mtu.eggplant.dbc.JonsAssert [options] files ...
-</p>
-    <name="download"><h2>Download</h2>
-<p>
-This is just my first pass at a jar file.  I should have a real version up
-soon.  This is still pretty beta, but it's coming along.
-Here's a list of the jar files you'll need, I didn't put them all into one
-in case you already have some of them.
-<ul>
-<li><a href="JonsAssert.jar">JonsAssert.jar</a></li>
-<li><a href="gnu-regexp-1.0.8.jar">gnu-regexp-1.0.8.jar</a></li>
- <li><a href="java-getopt-1.0.7.jar">java-getopt-1.0.7.jar</a></li>
-<li><a href="antlr.jar">antlr.jar</a></li>
-</ul>
-</p>
+    <p>Ok, I've got a real release again.  At least as real as it's going to
+      get.  You need jdk-1.2.x or better to run/compile this.  You'll also
+      need the following jar files.  I've listed the primary sitesto give
+      proper credit to the authors that wrote these great packages. For a
+      full list of changes see <a href="ChangeLog">ChangeLog</a>.</p>
 
-    <hr>
-    <address><a href="mailto:jpschewe@eggplant.mtu.net">Jon Schewe</a></address>
-<!-- Created: Wed Apr 19 20:48:24 CDT 2000 -->
-<!-- hhmts start -->
-Last modified: Mon May 27 22:01:57 CDT 2002
+    <ul>
+      <li><a href="JonsAssert-0.5.jar">JonsAssert.jar</a></li>
+
+      <li><a href="JonsInfra-0.1.jar">JonsInfra-0.1.jar</a> <a href="/~jpschewe/JonsInfra">Primary Site</a></li>
+
+      <li><a href="werken.opt.jar">werken.opt.jar</a> <a href="http://code.werken.com">Primary site.</a></li>
+
+      <li><a href="antlr.jar">antlr.jar</a>This is version 2.7.1, I haven't
+      tested it with 2.7.2x yet.<a href="http://www.antlr.org">Primary
+      site</a></li>
+
+      <li><a href="junit-3.7.jar">junit.jar</a> if you want to build and run
+      	the testcases from the jar file.  This is junit-3.7.
+      	Earlier versions should work, but I'd encourage you to upgrade to the
+      	newest version because of some bugs.<a href="http://www.junit.org">Primary site</a></li>
+    </ul>
+
+    <p>If you happen to use <a href="http://jakarta.apache.org/ant/index.html">Ant</a>
+      then you'll be interested in this <a href="build-example.xml">build.xml</a>
+      file.  It's got an example of how to tie JonsAssert into an ant
+      build.</p>
+
+    <p>You can view the API documentation <a href="api/index.html">here</a>.</p>
+    
+    <h2><a name="usage">Usage</a></h2>
+    <pre>
+	java -classpath "JonsAssert-0.5.jar:JonsInfra-0.1.jar:werken.opt.jar:antlr.jar" net.mtu.eggplant.dbc.JonsAssert [options] files ...
+    </pre>
+
+
+    <h2><a name="olderVersions">Older Versions</a></h2>
+    <ul>
+      <li><a href="0.2/index.html">0.2</a></li>
+      <li><a href="0.3/index.html">0.3</a></li>
+    </ul>
+    
+    <hr />
+      <p>
+	<a href="http://validator.w3.org/check/referer">
+	  <img src="/~jpschewe/icons/valid-xhtml10.png"
+	       alt="Valid XHTML 1.0!" height="31" width="88" /></a>
+	<a href="http://jigsaw.w3.org/css-validator">
+	  <img src="/~jpschewe/icons/vcss.gif"
+	       alt="Valid CSS!" /></a>
+      </p>
+      
+      <address><a href="mailto:jpschewe@mtu.net">Jon
+	  Schewe</a></address>
+      <!-- Created: Wed Apr 19 20:48:24 CDT 2000 -->
+      <p>
+	<!-- hhmts start -->
+Last modified: Mon May 27 22:27:13 CDT 2002
 <!-- hhmts end -->
+      </p>
   </body>
 </html>
