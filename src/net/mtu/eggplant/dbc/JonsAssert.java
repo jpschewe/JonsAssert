@@ -63,6 +63,7 @@ import net.mtu.eggplant.util.algorithms.Applying;
  *   <li>-i, --instrumentedExtension &lt;ext&gt; the extension on the source files (default: java)</li>
  *   <li>--source &lt;release&gt; Provide source compatibility with specified release (just like javac</li>
  *   <li>--pretty-output put in carriage returns in the generated code.  This makes the output easier to read, but screws up line numbers</li>
+ *   <li>--disable-exit Disable System.exit during instrumentation.  This is useful for use with ant when not forking.  The exit code can be retrieved with JonsAssert.getExitCode()
  *   <li>files all other arguments are taken to be files or directories to be parsed</li>
  * </ul></p>
  *
@@ -70,7 +71,7 @@ import net.mtu.eggplant.util.algorithms.Applying;
  * {@link #instrument(Configuration, Collection) instrument} with a Configuration
  * object and a Collection of files.</p>
  *
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class JonsAssert {
 
@@ -99,10 +100,15 @@ public class JonsAssert {
       options.addOption('~', "debugLexer", false, "");
       options.addOption('!', "debug", false, "");
       options.addOption('#', "pretty-output", false, "put in carriage returns in the generated code.  This makes the output easier to read, but screws up line numbers");
+      options.addOption('$', "disable-exit", false, "Disable System.exit during instrumentation");
     } catch(final DuplicateOptionException doe) {
       System.err.println("Someone specified duplicate options in the code!");
-      //System.exit(1);
-      return;
+      _exitCode = 1;
+      if(!_disableExit) {
+        System.exit(1);
+      } else {
+        return;
+      }
     }
 
     //list to hold files/directories to instrument
@@ -145,7 +151,10 @@ public class JonsAssert {
       if(cl.optIsSet('#')) {
         config.setPrettyOutput(true);
       }
-
+      if(cl.optIsSet('$')) {
+        _disableExit = true;
+      }
+      
       final Iterator iter = cl.getArgs().iterator();
       while(iter.hasNext()) {
         final String obj = (String)iter.next();
@@ -162,19 +171,30 @@ public class JonsAssert {
     } catch(final MissingArgumentException mae) {
       System.err.println(mae.getMessage());
       usage(options);
-      //System.exit(1);
-      return;
+      _exitCode = 1;
+      if(!_disableExit) {
+        System.exit(1);
+      } else {
+        return;
+      }
     } catch(final UnrecognizedOptionException ure) {
       System.err.println(ure.getMessage());
       usage(options);
-      //System.exit(1);
-      return;
+      _exitCode = 1;
+      if(!_disableExit) {
+        System.exit(1);
+      } else {
+        return;
+      }
     }
 
     //Set the exit status based on errors
-    instrument(config, files);
-    //System.exit(instrument(config, files) ? 0 : 1);
-    return;
+    _exitCode = instrument(config, files) ? 0 : 1;
+    if(!_disableExit) {
+      System.exit(_exitCode);
+    } else {
+      return;
+    }
   }
 
   /**
@@ -370,4 +390,11 @@ public class JonsAssert {
       tok = selector.nextToken();
     }
   }
+
+  private static boolean _disableExit = false;
+  private static int _exitCode = 0;
+  /**
+   * Get the exit code.
+   */
+  public static int getExitCode() { return _exitCode; }
 }
