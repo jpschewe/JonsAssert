@@ -1,13 +1,15 @@
 header {
-    /*
+/*
   This file is licensed through the GNU public License.  Please read it.
   Basically you can modify this code as you wish, but you need to distribute
   the source code for all applications that use this code.
 
   I'd appreciate comments/suggestions on the code schewe@tcfreenet.org
 */
-    package org.tcfreenet.schewe.assert;
+  package org.tcfreenet.schewe.assert;
 
+  import org.tcfreenet.schewe.utils.Debug;
+  
 }
 
 //----------------------------------------------------------------------------
@@ -32,7 +34,7 @@ options {
     testLiterals=false;    // don't automatically test for literals
     k=4;                   // four characters of lookahead
     filter=true; //ignore things we can't match
-	defaultErrorHandler = true;     // generate parser error handlers
+	defaultErrorHandler = false;     // generate parser error handlers
 }
 
 {
@@ -91,7 +93,7 @@ CONDITION
   : '('
     (
       options {
-	generateAmbigWarnings=false;
+		generateAmbigWarnings=false;
       }
     :
       { count > 0 }? ')' { count--; }
@@ -100,12 +102,12 @@ CONDITION
     | '\n' { newline(); }
     | '\r' { newline(); }
     | ~('('|')'|'\n'|'\r')
-    )*
+    )+
     ')'
     //    : '(' ( ~('('|')') )* ')'
     //    | '(' CONDITION ')'
     //    : '(' ( ~('('|')') )* (CONDITION)? ( ~('('|')') )* ')'
-    //	{ System.out.println("Assert: got CONDITION #" + text + "#"); }
+	{ Debug.println("Assert: got CONDITION #" + text + "#"); }
   ;
 
 protected
@@ -119,9 +121,9 @@ SEMI
   ;
 
 protected
-MESSAGE
+STRING_LITERAL 
     :  '"' (ESC|~('"'|'\\'))* '"'
-	//	{ System.out.println("Assert: got MESSAGE #" + text + "#"); }
+	{ Debug.println("Assert: got MESSAGE #" + text + "#"); }
     ;
 
 protected
@@ -134,11 +136,11 @@ POST_CONDITION
   String c = null;
   String m = null;
 }
-    :	"@post" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:MESSAGE { m = mesg.getText(); } SEMI)?
+    :	"@post" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:STRING_LITERAL { m = mesg.getText(); } SEMI)?
     {
       if(c != null) {
         c = c.replace('\n', ' ');
-	c = c.replace('\r', ' ');
+		c = c.replace('\r', ' ');
       }
       AssertToken assertTok = new AssertToken(c, m, _ttype, $getText);
       $setToken(assertTok);
@@ -150,23 +152,25 @@ PRE_CONDITION
   String c = null;
   String m = null;
 }
-    :	"@pre" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:MESSAGE { m = mesg.getText(); } SEMI)?
+  :	"@pre" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:STRING_LITERAL { m = mesg.getText(); } SEMI)?
     {
       if(c != null) {
         c = c.replace('\n', ' ');
-	c = c.replace('\r', ' ');
-      }
-      AssertToken assertTok = new AssertToken(c, m, _ttype, $getText);
-      $setToken(assertTok);
+		c = c.replace('\r', ' ');
+		final AssertToken assertTok = new AssertToken(c, m, _ttype, $getText);
+		$setToken(assertTok);
+      } else {
+		$setType(Token.SKIP);
+	  }
     }
-    ;
+  ;
 
 ASSERT_CONDITION
 {
   String c = null;
   String m = null;
 }
-    :	"@assert" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:MESSAGE { m = mesg.getText(); } SEMI)?
+    :	"@assert" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:STRING_LITERAL { m = mesg.getText(); } SEMI)?
     {
       if(c != null) {
         c = c.replace('\n', ' ');
@@ -182,7 +186,7 @@ INVARIANT_CONDITION
   String c = null;
   String m = null;
 }
-    :	"@invariant" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:MESSAGE { m = mesg.getText(); } SEMI)?
+    :	"@invariant" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:STRING_LITERAL { m = mesg.getText(); } SEMI)?
     {
       if(c != null) {
         c = c.replace('\n', ' ');
@@ -234,7 +238,7 @@ ESC
 	    :	('0'..'9')
 	    )?
 	)
-	//{ System.out.println("Assert: got ESC #" + text + "#"); }
+	//{ Debug.println("Assert: got ESC #" + text + "#"); }
     ;
 
 
@@ -242,7 +246,7 @@ ESC
 protected
 HEX_DIGIT
     :	('0'..'9'|'A'..'F'|'a'..'f')
-	//{ System.out.println("Assert: got HEX_DIGIT #" + text + "#"); }
+	//{ Debug.println("Assert: got HEX_DIGIT #" + text + "#"); }
     ;
 
 STAR_TEXT
@@ -258,6 +262,11 @@ STAR_TEXT
 // end condition for lexer
 JAVADOC_CLOSE
     :
-    "*/" { /*System.out.println("assert: got end of javadoc comment #" + text + "#");*/ JonsAssert.selector.pop(); }
+    "*/"
+	{
+	  Debug.println("Assert: got end of javadoc comment #" + text + "#");
+	  JonsAssert.selector.pop();
+      //JonsAssert.selector.push(JonsAssert.javaLexer);
+	}
     ;
 
