@@ -8,12 +8,16 @@
 package org.tcfreenet.schewe.assert.test;
 
 /**
-   This tests the instanceof rule in the parser.
+   This tests the instanceof rule in the parser as well as an empty compound
+   statement and end of javadoc comment.
 */
 public class Node {
   public void insert(Object child, int index) {
-    if(child instanceof Node) {
+    if(!(child instanceof Node)) {
       throw new IllegalArgumentException("Tree must contain only Nodes!");
+    }
+    else {
+      /** @assert (true) **/
     }
   }
 }

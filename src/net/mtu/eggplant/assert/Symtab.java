@@ -135,6 +135,7 @@ public class Symtab {
   **/
   public boolean startFile(final File f) {
     InstrumentedFile ifile = new InstrumentedFile(f);
+    ifile.getFragments().add(_taglineFragment);
     if(_allFiles.contains(ifile)) {
       return false;
     }
@@ -675,5 +676,10 @@ public class Symtab {
      name.
   **/
   private Hashtable _imports;
+
+  /**
+     Code fragment to insert at the top of each file.
+  **/
+  static private CodeFragment _taglineFragment = new CodeFragment(new CodePoint(1, 0), "/*This file preprocessed with Jon's Assert Package*/", CodeFragmentType.PRECONDITION);
 }
 

@@ -1,3 +1,14 @@
+2000-03-05  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* java.g: Figured out how to handle javadoc comments before
+	package definitions, now I just need to get javadoc comments
+	before import statements.
+
+	* Symtab.java: Put in CodeFragment for tagline.
+
+	* java.g: Now can handle empty compound statements with assertions
+	inside.
+
 2000-03-04  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* testcases/Node.java: Added for testing of the instanceof rule

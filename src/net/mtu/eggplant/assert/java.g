@@ -71,7 +71,7 @@ that implents assertions in java.</p>
 **/
 class JavaRecognizer extends Parser;
 options {
-  k = 2;                           // k token lookahead
+  k=2;                           // k token lookahead
   exportVocab=Java;                // Call its vocabulary "Java"
   codeGenMakeSwitchThreshold = 2;  // Some optimizations
   codeGenBitsetTestThreshold = 3;
@@ -240,6 +240,10 @@ tokens {
     _postConditions = new Vector();
   }    
 
+  /**
+     Used to tell the parser where we are in the file.
+  **/ 
+  private short _parseSection;
 }
 
 // Compilation Unit: In Java, this is a single file.  This is the start
@@ -247,44 +251,52 @@ tokens {
 compilationUnit
 {
   String packageName = null;
+  _parseSection = 0;
 }
-  :	// A compilation unit starts with an optional package definition
-    (	packageName=packageDefinition
-    |	/* nothing */
-    )
+  :
+
+
+    // A compilation unit starts with an optional package definition and
+    // possibly some javadoc comments
+    ( {_parseSection==0}? (invariantConditions)* packageName=packageDefinition )?
     {
       //Now we just need to check to make sure the destination file is older
       if(!getSymtab().isDestinationOlderThanCurrentFile(packageName)) {
 	throw new FileAlreadyParsedException();
       }
+      _parseSection = 1;
+      clearInvariants();
     }
 
-    // Next we have a series of zero or more import statements
-    ( importDefinition )*
+    // Next we have a series of zero or more import statements with
+    // intermingled javadoc comments
+    ( /* (invariantConditions)* */ importDefinition )*
+    {
+      clearInvariants();
+    }
 
-    // Wrapping things up with any number of class or interface
-    //    definitions
-    ( assertTypeDefinition )*
+    // Wrapping things up with any number of class or interface definitions
+    // with their corresponding invariants
+     ( (invariantConditions)* typeDefinition )*
 
     EOF
   ;
 
-assertTypeDefinition
-  : (JAVADOC_OPEN invariantConditions JAVADOC_CLOSE)* typeDefinition
-  ;
-
 invariantConditions
-  : ( iv:INVARIANT_CONDITION { addInvariant(iv); } | PRE_CONDITION | POST_CONDITION | ASSERT_CONDITION )*
+  : JAVADOC_OPEN ( iv:INVARIANT_CONDITION { addInvariant(iv); } | PRE_CONDITION | POST_CONDITION | ASSERT_CONDITION )* JAVADOC_CLOSE
   ;
 
 // Package statement: "package" followed by an identifier.
 packageDefinition returns [String packageName]
-options {defaultErrorHandler = true;} // let ANTLR handle errors
+options {
+  defaultErrorHandler = true; // let ANTLR handle errors
+}
 {
   Token id = null;
   packageName = null;
 }
-  :	"package" id=identifier SEMI
+  :
+    "package" id=identifier SEMI
     {
       packageName = id.getText();
       getSymtab().setCurrentPackageName(packageName);
@@ -786,6 +798,20 @@ assertCondition
       )
   ;
 
+// Handles assertions, but doesn't do anything
+dummyAssertCondition
+{ Vector assertTokens = new Vector(); }
+  : (JAVADOC_OPEN
+      ( ASSERT_CONDITION
+      | PRE_CONDITION
+      | POST_CONDITION
+      | INVARIANT_CONDITION
+    )*
+    jdc:JAVADOC_CLOSE 
+    { addAsserts(assertTokens, jdc); }
+      )
+  ;
+
 // Compound statement.  This is used in many contexts:
 //   Inside a class definition prefixed with "static":
 //      it is a class initializer
@@ -807,6 +833,7 @@ compoundStatement returns [CodePointPair startEnd]
       lc:LCURLY
       // include the (possibly-empty) list of statements
       (statement)*
+	    //[jpschewe:20000305.1341CST] FIX still need to fix this
     //| (assertCondition)+
       rc:RCURLY
     )
@@ -821,7 +848,7 @@ compoundStatement returns [CodePointPair startEnd]
 statement
 // A list of statements in curly braces -- start a new scope!
     :
-	(assertCondition)*
+	//(assertCondition)*
 	
 	(
 	compoundStatement
@@ -909,6 +936,9 @@ statement
 
 	// empty statement
     |	SEMI
+      
+      //assertion
+    |   assertCondition
 	)
     ;
 
