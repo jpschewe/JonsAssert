@@ -26,7 +26,7 @@
     <uptodate property="buildJavaLexer.notRequired"
               >
       <mapper type="merge" to="${basedir}/src/net/mtu/eggplant/dbc/JavaRecognizer.java" />
-      <srcfiles dir="${basedir}/src/net/mtu/eggplant/dbc" includes="java.g" />
+      <srcfiles dir="src/net/mtu/eggplant/dbc" includes="java.g" />
     </uptodate>
 
     <uptodate property="buildJava14Lexer.notRequired"
