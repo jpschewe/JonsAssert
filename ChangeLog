@@ -1,3 +1,10 @@
+2004-04-09  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/net/mtu/eggplant/dbc/java14.g: Antlr now has inheritance
+	fixed, so the parsers are now named properly.
+
+	* build.xml: Updated to antlr 2.7.3.
+
 2004-04-08  Jon Schewe  <jpschewe@mtu.net>
 
 	* build.xml: Using commons-logging now.  The only dependancy on

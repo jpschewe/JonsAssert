@@ -50,11 +50,15 @@
 
   <path id="base.classpath">
     <pathelement location="${basedir}/lib/JonsInfra-0.4.jar"/>
-    <pathelement location="${basedir}/lib/antlr.jar"/>
+    <pathelement location="${basedir}/lib/antlr-2.7.3.jar"/>
     <pathelement location="${basedir}/lib/log4j-1.2.8.jar"/>
     <pathelement location="${basedir}/lib/commons-logging-1.0.3.jar"/>
     <pathelement location="${basedir}/lib/commons-cli-1.0.jar"/>
     <pathelement location="${basedir}/lib/junit-3.8.jar"/>
+  </path>
+
+  <path id="antlr.classpath">
+    <pathelement location="${basedir}/lib/antlr-2.7.3.jar"/>
   </path>
 
   <target name="NightlyTasks"
@@ -85,7 +89,7 @@
 	  taskname="antlr"
 	  dir="${basedir}/src/net/mtu/eggplant/dbc">
       <classpath>
-  	<pathelement location="${basedir}/lib/antlr.jar" />
+        <path refid="antlr.classpath"/>
       </classpath>
       <arg value="java.g" />
     </java>
@@ -98,7 +102,7 @@
 	  taskname="antlr"
 	  dir="${basedir}/src/net/mtu/eggplant/dbc">
       <classpath>
-  	<pathelement location="${basedir}/lib/antlr.jar" />
+        <path refid="antlr.classpath"/>
       </classpath>
       <arg line="-glib java.g" />
       <arg value="java14.g" />
@@ -112,7 +116,7 @@
 	  taskname="antlr"
 	  dir="${basedir}/src/net/mtu/eggplant/dbc">
       <classpath>
-        <pathelement location="${basedir}/lib/antlr.jar" />
+        <path refid="antlr.classpath"/>
       </classpath>
       <arg value="assert.g" />
     </java>
@@ -250,7 +254,7 @@
 	  taskname="antlr"
 	  dir="${basedir}/src/net/mtu/eggplant/dbc">
       <classpath>
-  	<pathelement location="${basedir}/lib/antlr.jar" />
+        <path refid="antlr.classpath"/>
       </classpath>
       <arg value="java.g" />
     </java>
@@ -261,7 +265,7 @@
 	  taskname="antlr"
 	  dir="${basedir}/src/net/mtu/eggplant/dbc">
       <classpath>
-        <pathelement location="${basedir}/lib/antlr.jar" />
+        <path refid="antlr.classpath"/>
       </classpath>
       <arg value="assert.g" />
     </java>
@@ -379,7 +383,7 @@
   <!-- ===================== Checkstyle =================== -->
   <taskdef resource="checkstyletask.properties">
     <classpath>
-      <pathelement location="lib/antlr.jar" />
+      <pathelement location="lib/antlr-2.7.3.jar" />
       <pathelement location="lib/ant/checkstyle-3.3.jar" />
       <pathelement location="lib/ant/commons-beanutils.jar" />
       <pathelement location="lib/commons-cli-1.0.jar" />
@@ -453,79 +457,6 @@
 
   <target name="init_javadoc">
     <mkdir dir="${basedir}/${temp.dir}" />
-  </target>
-  
-  <!-- 0.5 javadoc -->
-  <target name="0.5_javadoc" depends="init_javadoc">
-    <!-- get the source out of cvs -->
-    <cvs cvsRoot="/home/CVS-Repository"
-	 package="assert"
-	 dest="${basedir}/${temp.dir}"
-	 tag="JonsAssert-0_5" />
-    <!-- run javadoc on the source -->
-    <mkdir dir="${mtu.net.offline}/JonsAssert/api" />
-    <javadoc packagenames="net.mtu.eggplant.dbc"
-	     sourcepath="${basedir}/${temp.dir}/assert/src"
-	     use="true"
-	     splitindex="true"
-	     version="true"
-	     windowtitle="JonsAssert 0.5"
-	     destdir="${mtu.net.offline}/JonsAssert/api" >
-      <doclet name="${doclet.name}"
-	      path="${doclet.path}">
-      </doclet>
-      <classpath>
-	<pathelement location="${basedir}/${temp.dir}/assert/src/" />
-	<pathelement location="${basedir}/${temp.dir}/assert/lib/junit-3.8.jar" />
-	<pathelement location="${basedir}/${temp.dir}/assert/lib/JonsInfra-0.2.jar" />
-	<pathelement location="${basedir}/${temp.dir}/assert/lib/antlr.jar" />
-	<pathelement location="${basedir}/${temp.dir}/assert/lib/commons-cli-1.0.jar" />
-      </classpath>
-      <!-- core java -->
-      <link href="http://java.sun.com/j2se/1.3/docs/api/" />
-      <!-- infra -->
-      <link offline="true" href="${mtu.net}/JonsInfra/0.1/api" packagelistLoc="${mtu.net.offline}/JonsInfra/0.1/api" />
-      <!-- junit -->
-      <link offline="true" href="${mtu.net}/java/junit/3.7" packagelistLoc="${mtu.net.offline}/java/junit/3.7" />
-      <!-- antlr -->
-      <link offline="true" href="${mtu.net}/java/antlr/2.7.1" packagelistLoc="${mtu.net.offline}/java/antlr/2.7.1" />
-      <!-- werken.opt -->
-      <link href="http://code.werken.com/werken.opt/build/apidocs/" />
-    </javadoc>
-    
-    <!-- delete the temp files -->
-    <delete dir="${basedir}/${temp.dir}" />
-  </target>
-
-  <target name="nightly.javadoc"
-          depends="antlrTasks,checkstyle.full"
-          description="Do a nightly build of the Javadoc to my fileserver">
-
-    <!-- run javadoc on the source -->
-    <mkdir dir="${nightly.html.dir}/${app.name}" />
-    <javadoc packagenames="net.mtu.eggplant.*"
-             sourcepath="${basedir}/src"
-             use="true"
-             splitindex="true"
-             version="true"
-             windowtitle="${app.name}"
-             destdir="${nightly.html.dir}/${app.name}"
-             source="1.4"
-             additionalparam="-tag beaninfo:a:BeanInfo -tag test:a:Tests -tag pre:cm:PreConditions -tag post:cm:PostConditions -tag invariant:tc:Invariants -breakiterator"
-             >
-      <classpath>
-        <path refid="base.classpath"/>
-      </classpath>
-      <!-- core java -->
-      <link href="${local.java.packages}/jdk-1.4.0/api/"/>
-      <!-- junit -->
-      <link href="${local.java.packages}/junit-3.8/" />
-      <!-- antlr -->
-      <link href="${local.java.packages}/antlr/javadoc/" />
-      <!-- infra -->
-      <link href="${local.java.projects}/JonsInfra/" />
-    </javadoc>
-    
   </target>
 
 </project>

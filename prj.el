@@ -10,7 +10,7 @@
    '(jde-global-classpath (list
 			   (expand-file-name "build/" project-root)
 			   (expand-file-name "lib/JonsInfra-0.4.jar" project-root)
-			   (expand-file-name "lib/antlr.jar" project-root)
+			   (expand-file-name "lib/antlr-2.7.3.jar" project-root)
 			   (expand-file-name "lib/commons-cli-1.0.jar" project-root)
 			   (expand-file-name "lib/commons-logging-1.0.3.jar" project-root)
 			   (expand-file-name "lib/junit-3.8.jar" project-root)

@@ -95,7 +95,7 @@ import org.apache.commons.logging.LogFactory;
  * <p>This parser has been modified from the original Recognizer to a pre-parser
  * that implements assertions in java as well as support JDK 1.4.</p>
  *
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 class JavaRecognizer extends Parser;
 options {
@@ -149,7 +149,7 @@ tokens {
      an AssertInterface object to the current class so we can check against
      it later.
   **/
-  private void parseImplementedInterface(final Token t) {
+  protected void parseImplementedInterface(final Token t) {
     String interfaceName = t.getText();
     String packageName = "";
     if(interfaceName.indexOf('.') > 0) {
@@ -174,7 +174,7 @@ tokens {
      add an assert.  This should get cached with the file object?
      @param asserts asserts, ordered as they appear in the code. 
   **/
-  private void addAsserts(final List asserts, final Token jdClose) {
+  protected void addAsserts(final List asserts, final Token jdClose) {
     if(asserts != null && asserts.size() > 0) {
       int line = jdClose.getLine();
       int column = jdClose.getColumn()-1 + jdClose.getText().length();
@@ -202,7 +202,7 @@ tokens {
 
      @pre (invariant != null)
   **/
-  private void addInvariant(final Token invariant) {
+  protected void addInvariant(final Token invariant) {
     if(! (invariant instanceof AssertToken)) {
       throw new RuntimeException("Expecting AssertToken! " + invariant.getClass());
     }
@@ -213,14 +213,14 @@ tokens {
      get the invariants for this class.
      Invariants are in the order they appear in the source.
   **/
-  private List getInvariants() {
+  protected List getInvariants() {
     return _invariants;
   }
 
   /**
      Clear the list of invariants for this class.
   **/
-  private void clearInvariants() {
+  protected void clearInvariants() {
     _invariants = new LinkedList();
   }
 
@@ -285,10 +285,9 @@ tokens {
 compilationUnit
 {
   String packageName = null;
-  short parseSection = 0;
+  //short parseSection = 0;
 }
   :
-
 
     //FIX This parseSection bit is strange.  There's got to be a better way to
     //do this
@@ -301,8 +300,9 @@ compilationUnit
     //)
 
     // optional package name
-    ( ( /* javadocComment* */ packageName=packageDefinition )
-    | /*nothing*/
+    (
+      ( /* (javadocComment)* */ packageName=packageDefinition )
+      | /*nothing*/
     )
     {//stuff to do after finding packageName
       getSymtab().setCurrentPackageName(packageName);
@@ -326,7 +326,7 @@ compilationUnit
     
     // Next we have a series of zero or more import statements with
     // intermingled javadoc comments
-    ( /* (javadocComment)* */ importDefinition )*
+    ( /* (javadocComment)+ importDefinition | */ importDefinition )*
 
     // Wrapping things up with any number of class or interface definitions
     // with their corresponding invariants
@@ -1018,7 +1018,7 @@ statement
     |   assertOrInvariantCondition
 
     //JDK 1.4 assert keyword
-    | "assert" expression (COLON expression)? SEMI
+    //| "assert" expression (COLON expression)? SEMI
 
     ;
 

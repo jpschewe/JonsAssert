@@ -71,7 +71,7 @@ import org.apache.log4j.Logger;
  * {@link #instrument(Configuration, Collection) instrument} with a Configuration
  * object and a Collection of files.</p>
  *
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public final class JonsAssert {
 
@@ -343,11 +343,8 @@ public final class JonsAssert {
 
     // Create a parser that reads from the scanner
     final Configuration.SourceCompatibilityEnum sourceCompatibility = getSymtab().getConfiguration().getSourceCompatibility();
-    //FIX this statement is flipped because antlr is being stupid about
-    //inheritance, when antlr is fixed change java.g and java14.g to contain
-    //proper assert functionality
     if(Configuration.JAVA_1_4 == sourceCompatibility) {
-      final JavaRecognizer parser = new JavaRecognizer(_selector);
+      final Java14Recognizer parser = new Java14Recognizer(_selector);
       if(_debugLexer) {
         debugLexer(parser);
       } else {
@@ -355,7 +352,7 @@ public final class JonsAssert {
         parser.compilationUnit();
       }
     } else if(Configuration.JAVA_1_3 == sourceCompatibility) {
-      final Java14Recognizer parser = new Java14Recognizer(_selector);
+      final JavaRecognizer parser = new JavaRecognizer(_selector);
       if(_debugLexer) {
         debugLexer(parser);
       } else {
