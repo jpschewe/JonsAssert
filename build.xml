@@ -32,7 +32,7 @@
     <uptodate property="buildJava14Lexer.notRequired"
               >
       <mapper type="merge" to="${basedir}/src/net/mtu/eggplant/dbc/Java14Recognizer.java" />
-      <srcfiles dir="${basedir}/src/net/mtu/eggplant/dbc">
+      <srcfiles dir="src/net/mtu/eggplant/dbc">
         <include name="java14.g" />
         <include name="java.g" />
       </srcfiles>
@@ -42,7 +42,7 @@
     <uptodate property="buildAssertLexer.notRequired"
               >
       <mapper type="merge" to="${basedir}/src/net/mtu/eggplant/dbc/AssertLexer.java" />
-      <srcfiles dir="${basedir}/src/net/mtu/eggplant/dbc" includes="assert.g" />
+      <srcfiles dir="src/net/mtu/eggplant/dbc" includes="assert.g" />
 
     </uptodate>
 
