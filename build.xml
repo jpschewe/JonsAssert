@@ -87,7 +87,7 @@
 	  fork="yes"
 	  failonerror="true"
 	  taskname="antlr"
-	  dir="${basedir}/src/net/mtu/eggplant/dbc">
+	  dir="src/net/mtu/eggplant/dbc">
       <classpath>
         <path refid="antlr.classpath"/>
       </classpath>
