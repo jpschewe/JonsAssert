@@ -140,18 +140,19 @@
   <!-- Javadoc targets below here -->
 
   <!-- tell javadoc where to find out doclet -->
-  <property name="doclet.name" value="com.honeywell.htc.schedinfra.javadoc.Standard" />
-  <property name="doclet.path" value="/home/jpschewe/projects/java/scripts/javadoc.jar" />
+  <!--<property name="doclet.name" value="com.honeywell.htc.schedinfra.javadoc.Standard" />
+  <property name="doclet.path" value="/home/jpschewe/projects/java/scripts/javadoc.jar" />-->
+
+  <property name="doclet.name" value="net.mtu.eggplant.doclet.Standard" />
+  <property name="doclet.path" value="/home/jpschewe/projects/infra/src" />
   
   <!-- used for releases -->
-  <property name="release.home.html.dir" value="http://disk.mn.mtu.net/~jpschewe/mtu.net" />
-  <!--<property name="home.html.dir" value="http://mtu.net/~jpschewe" />-->
-  <property name="release.html.dir" value="/net/home-jpschewe/public_html/mtu.net/" />
-
+  <property name="mtu.net" value="http://mtu.net/~jpschewe" />
+  <property name="mtu.net.offline" value="/home/jpschewe/public_html/mtu.net/public_html" />
 
   <!-- used for active_javadoc -->
   <property name="active.home.html.dir" value="http://disk.mnt.mtu.net/~jpschewe" />
-  <property name="active.html.dir" value="/net/home-jpschewe/public_html/" />
+  <property name="active.html.dir" value="/home/public_html/" />
 
   <target name="init_javadoc">
     <mkdir dir="${temp.dir}" />
@@ -166,16 +167,16 @@
 	 dest="${temp.dir}"
 	 tag="JonsAssert-0_2" />
     <!-- run javadoc on the source -->
-    <mkdir dir="${release.html.dir}/JonsAssert/0.2/api" />
+    <mkdir dir="${mtu.net.offline}/JonsAssert/0.2/api" />
     <javadoc packagenames="net.mtu.eggplant.*"
 	     sourcepath="${temp.dir}/assert/src"
 	     use="true"
 	     splitindex="true"
 	     version="true"
-	     windowtitle="JonsAssert 0.2">
+	     windowtitle="JonsAssert 0.2"
+	     destdir="${mtu.net.offline}/JonsAssert/0.2/api">
       <doclet name="${doclet.name}"
 	      path="${doclet.path}">
-	<param name="-d" value="${release.html.dir}/JonsAssert/0.2/api" />
       </doclet>
       <classpath>
 	<pathelement location="${temp.dir}/assert/src/" />
@@ -187,18 +188,59 @@
       <!-- core java -->
       <link href="http://java.sun.com/j2se/1.3/docs/api/" />
       <!-- infra -->
-      <link href="${release.home.html.dir}/JonsInfra/0.1/api" />
+      <link offline="true" href="${mtu.net}/JonsInfra/0.1/api" packagelistLoc="${mtu.net.offline}/JonsInfra/0.1/api" />
       <!-- junit -->
-      <link href="${release.home.html.dir}/java/junit-3.2/" />
+      <link offline="true" href="${mtu.net}/java/junit/3.2" packagelistLoc="${mtu.net.offline}/java/junit/3.2" />
       <!-- antlr -->
-      <link href="${release.home.html.dir}/java/antlr/javadoc/" />
+      <link offline="true" href="${mtu.net}/java/antlr/2.6.0" packagelistLoc="${mtu.net.offline}/java/antlr/2.6.0" />
       <!-- gnu -->
-      <link href="${release.home.html.dir}/java/gnu/" />
+      <link offline="true" href="${mtu.net}/java/gnu" packagelistLoc="${mtu.net.offline}/java/gnu" />
     </javadoc>
     
     <!-- delete the temp files -->
     <delete dir="${temp.dir}" />
   </target>
   
-  
+  <!-- 0.3 javadoc -->
+  <target name="0.3_javadoc" depends="init_javadoc">
+    <!-- get the source out of cvs -->
+    <cvs cvsRoot="/home/CVS-Repository"
+	 package="assert"
+	 dest="${temp.dir}"
+	 tag="JonsAssert-0_3" />
+    <!-- run javadoc on the source -->
+    <mkdir dir="${mtu.net.offline}/JonsAssert/0.3/api" />
+    <javadoc packagenames="net.mtu.eggplant.*"
+	     sourcepath="${temp.dir}/assert/src"
+	     use="true"
+	     splitindex="true"
+	     version="true"
+	     windowtitle="JonsAssert 0.3"
+	     destdir="${mtu.net.offline}/JonsAssert/0.3/api" >
+      <doclet name="${doclet.name}"
+	      path="${doclet.path}">
+      </doclet>
+      <classpath>
+	<pathelement location="${temp.dir}/assert/src/" />
+	<pathelement location="${temp.dir}/assert/lib/junit-3.6.jar" />
+	<pathelement location="${temp.dir}/assert/lib/JonsInfra-0.1.jar" />
+	<pathelement location="${temp.dir}/assert/lib/antlr.jar" />
+	<pathelement location="${temp.dir}/assert/lib/werken.opt.jar" />
+      </classpath>
+      <!-- core java -->
+      <link href="http://java.sun.com/j2se/1.3/docs/api/" />
+      <!-- infra -->
+      <link offline="true" href="${mtu.net}/JonsInfra/0.1/api" packagelistLoc="${mtu.net.offline}/JonsInfra/0.1/api" />
+      <!-- junit -->
+      <link offline="true" href="${mtu.net}/java/junit/3.6" packagelistLoc="${mtu.net.offline}/java/junit/3.6" />
+      <!-- antlr -->
+      <link offline="true" href="${mtu.net}/java/antlr/2.6.0" packagelistLoc="${mtu.net.offline}/java/antlr/2.6.0" />
+      <!-- werken.opt -->
+      <link href="http://code.werken.com/werken.opt/build/apidocs/" />
+    </javadoc>
+    
+    <!-- delete the temp files -->
+    <delete dir="${temp.dir}" />
+  </target>
+    
 </project>

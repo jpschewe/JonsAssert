@@ -94,7 +94,8 @@ public class JonsAssert {
       options.addOption('!', "debug", false, "");
     } catch(final DuplicateOptionException doe) {
       System.err.println("Someone specified duplicate options in the code!");
-      System.exit(1);
+      //System.exit(1);
+      return;
     }
 
     //list to hold files/directories to instrument
@@ -132,17 +133,21 @@ public class JonsAssert {
     } catch(final MissingArgumentException mae) {
       System.err.println(mae.getMessage());
       usage(options);
-      System.exit(1);
+      //System.exit(1);
+      return;
     } catch(final UnrecognizedOptionException ure) {
       System.err.println(ure.getMessage());
       usage(options);
-      System.exit(1);
+      //System.exit(1);
+      return;
     }
 
     _symtab = new Symtab(config);
 
     //Set the exit status based on errors
-    System.exit(instrument(config, files) ? 0 : 1);
+    instrument(config, files);
+    //System.exit(instrument(config, files) ? 0 : 1);
+    return;
   }
 
   /**
