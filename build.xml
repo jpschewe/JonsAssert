@@ -383,13 +383,13 @@
   <!-- ===================== Checkstyle =================== -->
   <taskdef resource="checkstyletask.properties">
     <classpath>
-      <pathelement location="lib/antlr-2.7.3.jar" />
-      <pathelement location="lib/ant/checkstyle-3.3.jar" />
-      <pathelement location="lib/ant/commons-beanutils.jar" />
-      <pathelement location="lib/commons-cli-1.0.jar" />
-      <pathelement location="lib/ant/commons-collections.jar" />
-      <pathelement location="lib/commons-logging-1.0.3.jar" />
-      <pathelement location="lib/ant/jakarta-regexp-1.3.jar" />
+      <pathelement location="${basedir}/lib/antlr-2.7.3.jar" />
+      <pathelement location="${basedir}/lib/ant/checkstyle-3.3.jar" />
+      <pathelement location="${basedir}/lib/ant/commons-beanutils.jar" />
+      <pathelement location="${basedir}/lib/commons-cli-1.0.jar" />
+      <pathelement location="${basedir}/lib/ant/commons-collections.jar" />
+      <pathelement location="${basedir}/lib/commons-logging-1.0.3.jar" />
+      <pathelement location="${basedir}/lib/ant/jakarta-regexp-1.3.jar" />
     </classpath>
   </taskdef>
 
@@ -453,6 +453,37 @@
           <path refid="base.classpath"/>
         </classpath>
       </javadoc>
+  </target>
+
+  <target name="nightly.javadoc"
+          depends="antlrTasks,checkstyle.nightly"
+          description="Do a nightly build of the Javadoc to my fileserver">
+
+    <!-- run javadoc on the source -->
+    <mkdir dir="${nightly.html.dir}/${app.name}" />
+    <javadoc packagenames="net.mtu.eggplant.*"
+             sourcepath="${basedir}/src"
+             use="true"
+             splitindex="true"
+             version="true"
+             windowtitle="${app.name}"
+             destdir="${nightly.html.dir}/${app.name}"
+             source="1.4"
+             additionalparam="-tag beaninfo:a:BeanInfo -tag test:a:Tests -tag pre:cm:PreConditions -tag post:cm:PostConditions -tag invariant:tc:Invariants -breakiterator"
+             >
+      <classpath>
+        <path refid="base.classpath"/>
+      </classpath>
+      <!-- core java -->
+      <link href="${local.java.packages}/jdk-1.4.0/api/"/>
+      <!-- junit -->
+      <link href="${local.java.packages}/junit-3.8/" />
+      <!-- antlr -->
+      <link href="${local.java.packages}/antlr/javadoc/" />
+      <!-- infra -->
+      <link href="${local.java.projects}/JonsInfra/" />
+    </javadoc>
+    
   </target>
 
   <target name="init_javadoc">
