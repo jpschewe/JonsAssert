@@ -77,22 +77,25 @@ NEWLINE
 protected
 CONDITION
 { int count = 0; }
-    : '('
-	(
-	    options {
-		generateAmbigWarnings=false;
-	    }
-	:
-	    { count > 0 }? ')' { count--; }
-	| '(' { count++; }
-	| ~('('|')')
-	)*
-	')'
-//    : '(' ( ~('('|')') )* ')'
-//    | '(' CONDITION ')'
-//    : '(' ( ~('('|')') )* (CONDITION)? ( ~('('|')') )* ')'
-	//	{ System.out.println("Assert: got CONDITION #" + text + "#"); }
-    ;
+  : '('
+    (
+      options {
+	generateAmbigWarnings=false;
+      }
+    :
+      { count > 0 }? ')' { count--; }
+    | '(' { count++; }
+    | '\n' { newline(); }
+    | '\r' { newline(); }
+    | '\r' '\n' { newline(); }
+    | ~('('|')'|'\n'|'\r')
+    )*
+    ')'
+    //    : '(' ( ~('('|')') )* ')'
+    //    | '(' CONDITION ')'
+    //    : '(' ( ~('('|')') )* (CONDITION)? ( ~('('|')') )* ')'
+    //	{ System.out.println("Assert: got CONDITION #" + text + "#"); }
+  ;
 
 protected
 COMMA

@@ -1,4 +1,16 @@
+2000-04-19  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* CodeGenerator.java: Added check to make sure $return only
+	shows up in postconditions.  Still need to make this a better
+	message though.
+
+	* assert.g: Line count now gets updated when a <CR> is found in an
+	assertion condition.
+
 2000-04-18  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* assert.g: Added code to handle carriage returns in an assertion
+	condition.
 
 	* Main.java: Added code to track column information across
 	multiple lexers.  This makes sure that the instrumentation gets

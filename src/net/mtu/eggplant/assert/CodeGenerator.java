@@ -139,7 +139,7 @@ public class CodeGenerator {
     //[jpschewe:20000116.1749CST] FIX still need to add to this to do interface
     //invariants first and keep track of which interface they're from
 
-    addConditionChecks(code, assertClass.getInvariants());
+    addConditionChecks(code, assertClass.getInvariants(), false);
 
     code.append("return _JPS_retVal == null || ((Boolean)_JPS_retVal).booleanValue();");
     code.append("}");
@@ -553,7 +553,7 @@ public class CodeGenerator {
       //preconditions first and keep track of which interface they're from
     }
     
-    addConditionChecks(code, assertMethod.getPreConditions());
+    addConditionChecks(code, assertMethod.getPreConditions(), false);
 
     if(assertMethod.isPrivate() || assertMethod.isConstructor()) {
       code.append("return true;");
@@ -727,7 +727,7 @@ public class CodeGenerator {
       //postconditions first and keep track of which interface they're from
     }
     
-    addConditionChecks(code, assertMethod.getPostConditions());
+    addConditionChecks(code, assertMethod.getPostConditions(), true);
 
     if(assertMethod.isPrivate() || assertMethod.isConstructor()) {
       code.append("return true;");
@@ -763,16 +763,26 @@ public class CodeGenerator {
     
   /**
      Append to code code to check for the assert conditions in tokens.
+
+     @param postCondition true if we're adding checks for a postcondition method. 
   **/
   static private void addConditionChecks(final StringBuffer code,
-                                         final List tokens) {
+                                         final List tokens,
+                                         final boolean postCondition) {
     Iterator iter = tokens.iterator();
     while(iter.hasNext()) {
       AssertToken token = (AssertToken)iter.next();
       String condition = token.getCondition();
       String message = token.getMessage();
       code.append("if(!");
-      code.append(_postConditionRewrite.substituteAll(condition, "__retVal"));
+      if(postCondition) {
+        code.append(_postConditionRewrite.substituteAll(condition, "__retVal"));
+      }
+      else {
+        if(_postConditionRewrite.getMatch(condition) != null) {
+          System.err.println("$return found in precondition! " + token.getText());
+        }
+      }
       code.append(") {");
       String errorMessage = "";
       if(message != null) {
