@@ -39,7 +39,7 @@ public class CodeGenerator {
     code.append("if(! ");
     code.append(condition);
     code.append(") { ");
-    code.append("AssertTools.assertFailed(new AssertionViolation(");
+    code.append("org.tcfreenet.schewe.Assert.AssertTools.assertFailed(new org.tcfreenet.schewe.Assert.AssertionViolation(");
     code.append('"');
     code.append(errorMessage);
     code.append('"');
@@ -57,10 +57,13 @@ public class CodeGenerator {
      
      @return a string of code that will call the checkInvariant method
   **/
-  static public String generateInvariantCall() {
+  static public String generateInvariantCall(final AssertClass aClass) {
+    String mclassName = aClass.getFullName().replace('.', '_');
     StringBuffer code = new StringBuffer();
-    code.append("if(!__checkInvariant()) {");
-    code.append("AssertTools.invariantFailed(AssertTools.getCurrentAssertionViolation());");
+    code.append("if(!__");
+    code.append(mclassName);
+    code.append("_checkInvariant()) {");
+    code.append("org.tcfreenet.schewe.Assert.AssertTools.invariantFailed(org.tcfreenet.schewe.Assert.AssertTools.getCurrentAssertionViolation());");
     code.append("}");
 
     return code.toString();
@@ -77,50 +80,54 @@ public class CodeGenerator {
   **/
   static public String generateInvariantMethod(final AssertClass assertClass) {
     String className = assertClass.getFullName();
-
+    String mclassName = className.replace('.', '_');
+    
     StringBuffer code = new StringBuffer();
-    code.append("protected boolean __checkInvariant() {");
-    code.append("Class thisClass;");
-    code.append("try {");
+    code.append("protected boolean __");
+    code.append(mclassName);
+    code.append("_checkInvariant() {\n");
+    code.append("Class thisClass = null;");
+    code.append("Object retVal = null;\n");    
     code.append("String className = \"");
     code.append(className);
-    code.append("\";");
-    code.append("thisClass = Class.forName(className);");
-    code.append("}");
-    code.append("catch(ClassNotFoundException cnfe) {");
-    code.append("AssertTools.internalError(\"Got error getting the class object for class \" + className + \" \" + cnfe);");
-    code.append("}");
+    code.append("\";\n");
+    code.append("try {\n");
+    code.append("thisClass = Class.forName(className);\n");
+    code.append("}\n");
+    code.append("catch(ClassNotFoundException cnfe) {\n");
+    code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"Got error getting the class object for class \" + className + \" \" + cnfe);\n");
+    code.append("}\n");
   
-    code.append("Class[] methodArgs = new Class[0];");
-    code.append("java.lang.reflect.Method superMethod = AssertTools.findSuperMethod(thisClass, \"__checkInvariant\", methodArgs);");
+    code.append("Class[] methodArgs = new Class[0];\n");
+    code.append("java.lang.reflect.Method superMethod = org.tcfreenet.schewe.Assert.AssertTools.findSuperMethod(thisClass, \"checkInvariant\", methodArgs);\n");
 
-    code.append("if(superMethod != null) {");
+    code.append("if(superMethod != null) {\n");
     //invoke it, pass on exceptions
-    code.append("Object[] args = new Object[0];");
-    code.append("try {");
-    code.append("retVal = superMethod.invoke(this, args);");
-    code.append("}");
-    code.append("catch(IllegalAccessException iae) {");
-    code.append("AssertTools.internalError(\"Not enough access executing super.__checkInvariant: \" + iae.getMessage());");
-    code.append("}");
-    code.append("catch(IllegalArgumentException iae) {");
-    code.append("AssertTools.internalError(\"IllegalArgument executing super.__checkInvariant: \" + iae.getMessage());");
-    code.append("}");
-    code.append("catch(InvocationTargetException ite) {");
-    code.append("throw ite.getTargetException();");
-    code.append("}");
-    code.append("}");
+    code.append("Object[] args = new Object[0];\n");
+    code.append("try {\n");
+    code.append("retVal = superMethod.invoke(this, args);\n");
+    code.append("}\n");
+    code.append("catch(IllegalAccessException iae) {\n");
+    code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"Not enough access executing checkInvariant method on super class: \" + iae.getMessage());\n");
+    code.append("}\n");
+    code.append("catch(IllegalArgumentException iae) {\n");
+    code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"IllegalArgument executing checkInvariant method on super class: \" + iae.getMessage());\n");
+    code.append("}\n");
+    code.append("catch(java.lang.reflect.InvocationTargetException ite) {\n");
+    code.append("ite.getTargetException().printStackTrace();\n");
+    code.append("}\n");
+    code.append("}\n");
 
-    code.append("if(retVal == null) {");
-    code.append("AssertTools.internalError(\"got null checkInvariant\");");
-    code.append("}");
-    code.append("else if(! (retVal instanceof Boolean) ) {");
-    code.append("AssertTools.internalError(\"got something odd from checkInvariant: \" + retVal.getClass());");
-    code.append("}");
+    code.append("if(retVal == null) {\n");
+    code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"got null from checkInvariant\");\n");
+    code.append("}\n");
+    code.append("else if(! (retVal instanceof Boolean) ) {\n");
+    code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"got something odd from checkInvariant: \" + retVal.getClass());\n");
+    code.append("}\n");
 
-    code.append("if(!((Boolean)retVal).booleanValue()) {");
-    code.append("return false;");
-    code.append("}");
+    code.append("if(!((Boolean)retVal).booleanValue()) {\n");
+    code.append("return false;\n");
+    code.append("}\n");
   
 
     //[jpschewe:20000116.1749CST] FIX still need to add to this to do interface
@@ -133,24 +140,24 @@ public class CodeGenerator {
       String message = token.getMessage();
       code.append("if(!");
       code.append(condition);
-      code.append(") {");
+      code.append(") {\n");
       String errorMessage = "";
       if(message != null) {
         errorMessage = message + " ";
       }
-      errorMessage += condition;
+      errorMessage += "+ \"" + condition + "\"";
     
-      code.append("AssertionViolation av = new AssertionViolation(");
+      code.append("org.tcfreenet.schewe.Assert.AssertionViolation av = new org.tcfreenet.schewe.Assert.AssertionViolation(");
       code.append(errorMessage);
-      code.append(")");
-      code.append("AssertTools.setCurrentAssertionViolation(av);");
+      code.append(");\n");
+      code.append("org.tcfreenet.schewe.Assert.AssertTools.setCurrentAssertionViolation(av);\n");
     
-      code.append("return false;");
-      code.append("}");
+      code.append("return false;\n");
+      code.append("}\n");
     }
     
-    code.append("return true;");
-    code.append("}");
+    code.append("return true;\n");
+    code.append("}\n");
 
     return code.toString();
     
@@ -166,8 +173,11 @@ public class CodeGenerator {
   **/
   static public String generatePreConditionCall(final AssertMethod assertMethod) {
     StringBuffer code = new StringBuffer();
+    String mclassName = assertMethod.getContainingClass().getFullName().replace('.', '_');
     
-    code.append("if(!__check");
+    code.append("if(!__");
+    code.append(mclassName);
+    code.append("_check");
     code.append(assertMethod.getName());
     code.append("PreConditions(");
 
@@ -183,7 +193,7 @@ public class CodeGenerator {
       code.append(paramName);
     }
     code.append(")) {");
-    code.append("AssertTools.preConditionFailed(AssertTools.getCurrentAssertionViolation());");
+    code.append("org.tcfreenet.schewe.Assert.AssertTools.preConditionFailed(org.tcfreenet.schewe.Assert.AssertTools.getCurrentAssertionViolation());");
     code.append("}");
 
 
@@ -232,6 +242,7 @@ public class CodeGenerator {
     StringBuffer code = new StringBuffer();
     String retType = assertMethod.getReturnType();
     boolean voidMethod = retType.equals("void");
+    String mclassName = assertMethod.getContainingClass().getFullName().replace('.', '_');
     
     if(!voidMethod) {
       code.append("final ");
@@ -241,7 +252,9 @@ public class CodeGenerator {
       code.append(";");
     }
     
-    code.append("if(!__check");
+    code.append("if(!__");
+    code.append(mclassName);
+    code.append("_check");
     code.append(assertMethod.getName());
     code.append("PostConditions(");
 
@@ -264,7 +277,7 @@ public class CodeGenerator {
       code.append(paramName);
     }
     code.append(")) {");
-    code.append("AssertTools.preConditionFailed(AssertTools.getCurrentAssertionViolation());");
+    code.append("org.tcfreenet.schewe.Assert.AssertTools.preConditionFailed(org.tcfreenet.schewe.Assert.AssertTools.getCurrentAssertionViolation());");
     code.append("}");
 
     //[jpschewe:20000205.1446CST] don't actually change the return, that way we can just insert code into the file rather than modifying it.

@@ -16,7 +16,10 @@ import java.lang.reflect.Method;
 final public class AssertTools {
 
   /**
-     find the superclasses method
+     find the superclasses method, this is my version of a superClass method,
+     this means that the method name is __<packageName>_<className>_methodName
+     where packageName is the package the class is in with the '.'s replaced
+     with '_' and className is the name of the class.
      
      @return the method found, null for no such method.
 
@@ -28,28 +31,28 @@ final public class AssertTools {
     Class superClass = thisClass.getSuperclass();
     Method superMethod = null;
 
-    return superMethod;
-    //[jpschewe:20000204.2006CST] FIX this is busted, it won't work. 
-//     if(superClass != null) {
-//       while(superMethod == null && !superClass.equals(Object.class)) {
-//         try {
-//           superMethod = superClass.getDeclaredMethod(methodName, methodArgs);
-//         }
-//         catch(NoSuchMethodException nsme) {
-//           // no method, don't bother
-//           //superMethod = null;
-//           //Try up another level
-//           superClass = superClass.getSuperclass();
-//         }
-//         catch(SecurityException se) {
-//           //This is real bad, spit out internal error here
-//           System.err.println("Security exception trying to find method " + methodName + ": " + se);
-//           return null;
-//         }
-//       }
-//     }
+    if(superClass != null && !superClass.equals(Object.class)) {
+      while(superMethod == null && !superClass.equals(Object.class)) {
+        try {
+          String fullClassName = superClass.getName().replace('.', '_');
+          String mname = "__" + fullClassName + "_" + methodName;
+          superMethod = superClass.getDeclaredMethod(mname, methodArgs);
+        }
+        catch(NoSuchMethodException nsme) {
+          // no method, don't bother
+          //superMethod = null;
+          //Try up another level
+          superClass = superClass.getSuperclass();
+        }
+        catch(SecurityException se) {
+          //This is real bad, spit out internal error here
+          System.err.println("Security exception trying to find method " + methodName + ": " + se);
+          return null;
+        }
+      }
+    }
 
-//     return superMethod;
+    return superMethod;
   }
 
   static private AssertionViolation _currentAssertionViolation = null;

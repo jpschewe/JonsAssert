@@ -1,15 +1,19 @@
 /*
-
+  This file is meant to let others know how I intend to instrument files so
+  that they know what types of method names may cause problems and to ease in
+  debugging the code that is generated.
+  
   still need to check order of pre vs. invariant, or does it matter?
 
   remember only to check invariants on public instance methods, protected methods?, constructor exit
-  
+
+  Replace all of the package names '.' with '_'
 */
 public Object methodFoo(Object param1) {
-  if(!__checkInvariant()) {
+  if(!__<packageName>_<className>_checkInvariant()) {
     AssertTools.invariantFailed(AssertTools.getCurrentAssertionViolation());
   }
-  if(!__check<methodName>PreConditions(param1, param2, ...)) {
+  if(!__<packageName>_<className>_check<methodName>PreConditions(param1, param2, ...)) {
     AssertTools.preConditionFailed(AssertTools.getCurrentAssertionViolation());
   }
   final Object __oldParam1 = param1;
@@ -17,16 +21,16 @@ public Object methodFoo(Object param1) {
 
   /* was return b; */
   final Object __retVal = b;
-  if(!__checkInvariant()) {
+  if(!__<packageName>_<className>_checkInvariant()) {
     AssertTools.invariantFailed(AssertTools.getCurrentAssertionViolation());
   }
-  if(!__check<methodName>PostConditions(__retVal, __oldParam1, param1, ...)) {
+  if(!__<packageName>_<className>_check<methodName>PostConditions(__retVal, __oldParam1, param1, ...)) {
     AssertTools.postConditionFailed(AssertTools.getCurrentAssertionViolation());
   }
   return __retVal;
 }
 
-protected boolean __check<methodname>PostConditions(__retVal, oldParam1, param1, ...) {
+protected boolean __<packageName>_<methodName>_check<methodname>PostConditions(__retVal, oldParam1, param1, ...) {
     // OR, as soon as a true is seen, return true
 
     // do interface post conditions first and keep track of which interface they're from
@@ -37,7 +41,7 @@ protected boolean __check<methodname>PostConditions(__retVal, oldParam1, param1,
 
 }
 
-protected boolean __check<methodname>PreConditions(param1, param2, ...) {
+protected boolean __<packageName>_<methodName>_check<methodname>PreConditions(param1, param2, ...) {
     // AND, as soon as a false is seen, return false;
 
     // do interface pre conditions first and keep track of which interface they're from
@@ -48,7 +52,7 @@ protected boolean __check<methodname>PreConditions(param1, param2, ...) {
 }
 
   
-protected boolean __checkInvariant() {
+protected boolean __<packageName>_<methodName>_checkInvariant() {
   Class thisClass;
   try {
     String className = "<fill in class name>";
@@ -74,7 +78,7 @@ protected boolean __checkInvariant() {
       AssertTools.internalError("IllegalArgument executing super.__checkInvariant: " + iae.getMessage());
       //should never see, internal error
     }
-    catch(InvocationTargetException ite) {
+    catch(java.lang.reflect.InvocationTargetException ite) {
       throw ite.getTargetException();
     }
   }

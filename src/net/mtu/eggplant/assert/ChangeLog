@@ -1,5 +1,19 @@
 2000-02-12  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
+	* CodeGenerator.java: Actually creates compilable code now.
+
+	* MethodSkeletons.xjava: Modified skeletons to reflect name
+	changes. 
+
+	* AssertTools.java: Modified findSuperMethod to take into account
+	my new naming convention so the super calls will work.
+
+	* CodeGenerator.java: Modified current calls to generate method
+	names in the form __<packageName>_<className>_<methodName>.
+
+	* AssertMethod.java: Made getContainingClass public so that the
+	CodeGenerator can get at it.
+
 	* Symtab.java: Added code to actually create the CodeFragments for
 	the checkInvariant method.
 

@@ -17,6 +17,10 @@ here correctly.
 Preconditions on constructors are limited by the fact that they may not
 reference reference instance methods or non-static inner classes.
 
+- Methods called by assertions cannot throw exceptions.  It's rather difficult
+to find what's actually being called and what exceptions it can throw.
+
+
 BUGS:
 - Implementing an interface that is defined in the same file won't work right
 now.  This needs some seious thought.
@@ -39,8 +43,6 @@ just make it an inner class and save yourself the headache.
 message, schewe@tcfreenet.org.  At least include the message that was output
 and a description of what condition was being checked.  A stand alone test
 case that causes the error is REALLY helpful if you can do such a thing.
-
-
 
 
 FEATURES (some people might call these bugs, but I put them there on

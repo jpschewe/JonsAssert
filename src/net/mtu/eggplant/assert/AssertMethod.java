@@ -64,7 +64,10 @@ public class AssertMethod implements Named {
 
   private AssertClass _theClass;
 
-  private AssertClass getContainingClass() {
+  /**
+     @return the class that this method belongs to.
+  **/
+  public AssertClass getContainingClass() {
     return _theClass;
   }
     
