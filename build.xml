@@ -1,6 +1,3 @@
-<?xml version="1.0"?>
-<!DOCTYPE project PUBLIC "-//ANT//DTD project//EN" "project.dtd">
-
 <project name="assert" default="compile" basedir=".">
 
   <property file="${user.home}/.ant.properties" />
