@@ -38,16 +38,16 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import net.mtu.eggplant.util.StringPair;
-import net.mtu.eggplant.util.UnaryPredicate;
-import net.mtu.eggplant.util.algorithms.Filtering;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
 
 /**
  * class of static helper methods for assertions.
  * 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public final class AssertTools {
 
@@ -394,11 +394,11 @@ public final class AssertTools {
     //Sort by parameter list size    
     final SortedSet constructors = new TreeSet(CONSTRUCTOR_PARAM_COMPARATOR);
     //Filter down to just constructors    
-    Filtering.select(methods, constructors, new UnaryPredicate() {
-      public boolean execute(final Object obj) {
+    CollectionUtils.select(methods, new Predicate() {
+      public boolean evaluate(final Object obj) {
         return ((AssertMethod)obj).isConstructor();
       }
-    });
+    }, constructors);
 
 
     /* Now do the smart stuff.  Take the first constructor off the SortedSet,

@@ -46,7 +46,7 @@
 
 
   <module name="TreeWalker">
-    <property name="cacheFile" value="${basedir}/${build.dir}/checkstyle.nightly.cache" />
+    <property name="cacheFile" value="${basedir}/${dir.build}/checkstyle.cache" />
 
     <!-- Checks for Javadoc comments.           -->
     <!-- See http://checkstyle.sf.net/config_javadoc.html -->
@@ -54,7 +54,7 @@
       <property name="scope" value="public" />
       <property name="allowUndeclaredRTE" value="true" />
     </module>-->
-    <module name="JavadocType"/>
+    <!--<module name="JavadocType"/>-->
     <!-- <module name="JavadocVariable"/> -->
 
 
@@ -94,7 +94,7 @@
     <module name="AvoidStarImport"/>
     <module name="IllegalImport"/> <!-- defaults to sun.* packages -->
     <module name="RedundantImport"/>
-    <module name="UnusedImports"/>
+    <!--<module name="UnusedImports"/>-->
 
 
     <!-- Checks for whitespace                 -->
@@ -126,7 +126,7 @@
     <!-- Checks for blocks. You know, those {}'s     -->
     <!-- See http://checkstyle.sf.net/config_blocks.html -->
     <!--<module name="AvoidNestedBlocks"/>-->
-    <module name="EmptyBlock"/>
+    <!--<module name="EmptyBlock"/>-->
     <module name="LeftCurly"/>
     <module name="NeedBraces"/>
     <module name="RightCurly"/>
@@ -136,7 +136,7 @@
     <!-- See http://checkstyle.sf.net/config_coding.html -->
     <!--<module name="AvoidInlineConditionals"/>-->
     <module name="DoubleCheckedLocking"/>
-    <module name="EmptyStatement"/>
+    <!--<module name="EmptyStatement"/>-->
     <module name="EqualsHashCode"/>
     <module name="HiddenField"/>
     <module name="IllegalInstantiation"/>
@@ -149,8 +149,8 @@
     <!-- Checks for class design             -->
     <!-- See http://checkstyle.sf.net/config_design.html -->
     <!--<module name="DesignForExtension"/>-->
-    <module name="FinalClass"/>
-    <module name="HideUtilityClassConstructor"/>
+    <!--<module name="FinalClass"/>-->
+    <!--<module name="HideUtilityClassConstructor"/>-->
     <module name="InterfaceIsType"/>
     <module name="VisibilityModifier"/>
 

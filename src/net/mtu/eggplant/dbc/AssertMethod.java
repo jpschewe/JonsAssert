@@ -35,13 +35,11 @@ import java.util.Set;
 
 import net.mtu.eggplant.util.Named;
 
-import net.mtu.eggplant.util.algorithms.Copying;
-
 /**
  * Object that contains the data needed to generate instrumented code for a
  * method.
  * 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class AssertMethod implements Named {
 
@@ -75,7 +73,7 @@ public class AssertMethod implements Named {
     _theClass = theClass;
     _params = params;
     _uniqueParams = new LinkedList();
-    Copying.copy(params, _uniqueParams);
+    _uniqueParams.addAll(params);
     _retType = retType;
     _mods = mods;
     _exits = new HashSet(10);

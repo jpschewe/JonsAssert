@@ -34,7 +34,7 @@ import net.mtu.eggplant.util.StringPair;
 import net.mtu.eggplant.util.StringUtils;
 
 /**
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public final class CodeGenerator {
 
@@ -287,19 +287,17 @@ public final class CodeGenerator {
     code.append("PreConditions(");
 
     //put params in here once
-    {
-      boolean first = true;
-      final Iterator paramIter = assertMethod.getParams().iterator();
-      while(paramIter.hasNext()) {
-        if(!first) {
-          code.append(", ");
-        } else {
-          first = false;
-        }
-        final StringPair sp = (StringPair)paramIter.next();
-        final String paramName = sp.getStringTwo();
-        code.append(paramName);
+    boolean first = true;
+    final Iterator paramIter = assertMethod.getParams().iterator();
+    while(paramIter.hasNext()) {
+      if(!first) {
+        code.append(", ");
+      } else {
+        first = false;
       }
+      final StringPair sp = (StringPair)paramIter.next();
+      final String paramName = sp.getStringTwo();
+      code.append(paramName);
     }
     
     code.append(")) {");
@@ -342,19 +340,17 @@ public final class CodeGenerator {
     //generate this call
     code.append("this(");
     //put unique param names in here once
-    {
-      boolean first = true;
-      final Iterator paramIter = assertMethod.getUniqueParams().iterator();
-      while(paramIter.hasNext()) {
-        if(!first) {
-          code.append(", ");
-        } else {
-          first = false;
-        }
-        final StringPair sp = (StringPair)paramIter.next();
-        final String paramName = sp.getStringTwo();
-        code.append(paramName);
+    boolean first = true;
+    final Iterator paramIter1 = assertMethod.getUniqueParams().iterator();
+    while(paramIter1.hasNext()) {
+      if(!first) {
+        code.append(", ");
+      } else {
+        first = false;
       }
+      final StringPair sp = (StringPair)paramIter1.next();
+      final String paramName = sp.getStringTwo();
+      code.append(paramName);
     }
 
     //call to dummy class
@@ -366,19 +362,17 @@ public final class CodeGenerator {
     code.append("(");
 
     //put param names in here once
-    {
-      boolean first = true;
-      final Iterator paramIter = assertMethod.getParams().iterator();
-      while(paramIter.hasNext()) {
-        if(!first) {
-          code.append(", ");
-        } else {
-          first = false;
-        }
-        final StringPair sp = (StringPair)paramIter.next();
-        final String paramName = sp.getStringTwo();
-        code.append(paramName);
+    first = true;
+    final Iterator paramIter2 = assertMethod.getParams().iterator();
+    while(paramIter2.hasNext()) {
+      if(!first) {
+        code.append(", ");
+      } else {
+        first = false;
       }
+      final StringPair sp = (StringPair)paramIter2.next();
+      final String paramName = sp.getStringTwo();
+      code.append(paramName);
     }
     code.append("));");
     carriageReturn(code);
@@ -406,23 +400,21 @@ public final class CodeGenerator {
     code.append("(");
 
     //put params with types in here once
-    {
-      boolean first = true;
-      final Iterator paramIter = assertMethod.getParams().iterator();
-      while(paramIter.hasNext()) {
-        if(!first) {
-          code.append(", ");
-        } else {
-          first = false;
-        }
-        final StringPair sp = (StringPair)paramIter.next();
-        final String paramType = sp.getStringOne();
-        final String paramName = sp.getStringTwo();
-        code.append("final ");
-        code.append(paramType);
-        code.append(" ");
-        code.append(paramName);
+    first = true;
+    final Iterator paramIter3 = assertMethod.getParams().iterator();
+    while(paramIter3.hasNext()) {
+      if(!first) {
+        code.append(", ");
+      } else {
+        first = false;
       }
+      final StringPair sp = (StringPair)paramIter3.next();
+      final String paramType = sp.getStringOne();
+      final String paramName = sp.getStringTwo();
+      code.append("final ");
+      code.append(paramType);
+      code.append(" ");
+      code.append(paramName);
     }
     code.append(") {");
     carriageReturn(code);
@@ -443,24 +435,22 @@ public final class CodeGenerator {
     code.append("(");
 
     //put unique params with types in here
-    {
-      boolean first = true;
-      final Iterator paramIter = assertMethod.getParams().iterator();
-      while(paramIter.hasNext()) {
-        if(!first) {
-          code.append(", ");
-        } else {
-          first = false;
-        }
-        final StringPair sp = (StringPair)paramIter.next();
-        final String paramType = sp.getStringOne();
-        final String paramName = sp.getStringTwo();
-        code.append("final ");
-        code.append(paramType);
-        code.append (" ");
-        code.append(paramName);
+    first = true;
+    final Iterator paramIter4 = assertMethod.getParams().iterator();
+    while(paramIter4.hasNext()) {
+      if(!first) {
+        code.append(", ");
+      } else {
+        first = false;
       }
-    }      
+      final StringPair sp = (StringPair)paramIter4.next();
+      final String paramType = sp.getStringOne();
+      final String paramName = sp.getStringTwo();
+      code.append("final ");
+      code.append(paramType);
+      code.append (" ");
+      code.append(paramName);
+    }
 
     if(!assertMethod.getParams().isEmpty()) {
       code.append(", ");
@@ -545,13 +535,12 @@ public final class CodeGenerator {
     methodVariableNameBuf.append('_');
     methodVariableNameBuf.append(methodName);
     methodVariableNameBuf.append('_');
-    { //generate a unique name for the method variable
-      final Iterator paramIter = assertMethod.getParams().iterator();
-      while(paramIter.hasNext()) {
-        final StringPair sp = (StringPair)paramIter.next();
-        methodVariableNameBuf.append(sp.getStringOne());
-        methodVariableNameBuf.append('_');
-      }
+    //generate a unique name for the method variable
+    final Iterator paramIter1 = assertMethod.getParams().iterator();
+    while(paramIter1.hasNext()) {
+      final StringPair sp = (StringPair)paramIter1.next();
+      methodVariableNameBuf.append(sp.getStringOne());
+      methodVariableNameBuf.append('_');
     }
     final String methodVariableName = methodVariableNameBuf.toString().replace('.', '_').replace('[', 'L').replace(']', 'R');
     
@@ -795,14 +784,14 @@ public final class CodeGenerator {
     methodVariableNameBuf.append('_');
     methodVariableNameBuf.append(methodName);
     methodVariableNameBuf.append('_');
-    { //generate a unique name for the method variable
-      final Iterator paramIter = assertMethod.getParams().iterator();
-      while(paramIter.hasNext()) {
-        final StringPair sp = (StringPair)paramIter.next();
-        methodVariableNameBuf.append(sp.getStringOne());
-        methodVariableNameBuf.append('_');
-      }
+    //generate a unique name for the method variable
+    final Iterator paramIter1 = assertMethod.getParams().iterator();
+    while(paramIter1.hasNext()) {
+      final StringPair sp = (StringPair)paramIter1.next();
+      methodVariableNameBuf.append(sp.getStringOne());
+      methodVariableNameBuf.append('_');
     }
+
     final String methodVariableName = methodVariableNameBuf.toString().replace('.', '_').replace('[', 'L').replace(']', 'R');
     
     String methodKey = methodName; //for lock and unlock method calls

@@ -1,30 +1,79 @@
-<project name="assert" default="compile">
+<?xml version="1.0"?>
+<project name="JonsAssert" default="default">
 
   <!-- load build specific properties first -->
   <property file="build.properties" />
 
-  <property name="temp.dir"  value="tmp" />
-
-  <!-- used for building releases -->
-  <property name="app.name"   value="JonsAssert" />
+  <!-- basic properties for directories and the like -->
+  <property name="dir.src"     value="src" />
+  <property name="dir.compile" value="${dir.src}" />
+  <property name="dir.build"   value="build" />
+  <property name="dir.inst"    value="${dir.build}/instrumented" />
+  <property name="dir.classes" value="${dir.build}/classes" />
+  <property name="dir.api"     value="${dir.build}/api" />
+  <property name="dir.bin"     value="${dir.build}/bin" />
+  <property name="dir.reports" value="${dir.build}/reports" />
+  <property name="dir.dist"    value="${dir.build}/dist" />
+  <!-- here in case a version is required as well -->
   <property name="app.version" value="0.8" />
-  <property name="instrument.dir"  value="instrumented" />
-  <property name="build.dir"  value="build" />
+  <property name="app.name"    value="${ant.project.name}" /> 
+
+  <!-- name of main class for run -->
+  <property name="class.main"  value="net.mtu.eggplant.dbc.JonsAssert" />
+  <property name="class.main.maxmemory"  value="512M" />
+
+  <!-- name of main test class for test / test report directories -->
+  <property name="dir.junit.xml"  value="${dir.reports}/junit" />
+  <property name="dir.junit.html" value="${dir.reports}/html" />
+
+  <!-- what level of javadoc should be generated -->
+  <property name="javadoc.access" value="protected" />
+
+  <!-- file for checkstyle -->
+  <property name="checkstyle" value="checkstyle.xml" />
+  <property name="checkstyle.strict" value="checkstyle-strict.xml" />
+
+   <!-- compile options, may be overriden in other targets -->
+  <property name="compile.debug" value="true" />
+  <property name="compile.optimize" value="false" />
+                                      
+  <!-- file for emacs tags tables -->
+  <property name="tagstable" value="${dir.src}/TAGS" />
+
+  <!-- for doing releases -->
   <property name="release.html.dir" value="/home/jpschewe/public_html/mtu.net/public_html" />
 
-  <!-- some CVS properties -->
-  <property name="cvs.root" value="/export/CVS-Repository" />
-  <property name="cvs.module" value="assert" />
+  <!-- Base/default classpath; if you don't run inside ant, copy this -->
+  <path id="classpath.base">
+    <pathelement location="${basedir}/lib/JonsInfra-0.5.jar"/>
+    <pathelement location="${basedir}/lib/antlr-2.7.4.jar"/>
+    <pathelement location="${basedir}/lib/commons-cli-1.0.jar"/>
+    <pathelement location="${basedir}/lib/commons-collections-3.1.jar"/>
+    <pathelement location="${basedir}/lib/commons-logging-1.0.3.jar"/>
+    <pathelement location="${basedir}/lib/junit-3.8.1.jar"/>
+    <pathelement location="${basedir}/lib/log4j-1.2.8.jar"/>
+  </path>
 
-  <!-- used for *.javadoc -->
-  <property name="local.java.packages" value="http://workstation.mn.mtu.net/package-docs/java" />
-  <property name="local.java.projects" value="http://workstation.mn.mtu.net/package-docs/projects" />
-  <property name="nightly.html.dir" value="/srv/www/htdocs/package-docs/projects" />
-  <property name="mtu.net" value="http://mtu.net/~jpschewe" />
-  <property name="mtu.net.offline" value="/home/jpschewe/public_html/mtu.net/public_html" />
+  <path id="antlr.classpath">
+    <pathelement location="${basedir}/lib/antlr-2.7.4.jar"/>
+  </path>
+  
+  <!-- Build, Run and Test classpaths -->
+  <path id="classpath.build">
+    <pathelement location="${dir.classes}" />
+    <path refid="classpath.base" />
+  </path>
+  <path id="classpath.run" refid="classpath.build" />
+  <path id="classpath.test" refid="classpath.build" />
 
+  <!-- ==================== Setup/Prepare/Clean ==================== -->
+
+  <!-- Basic target for preparing to build / compile / run / test / etc -->
   <target name="init">
     <tstamp />
+    <mkdir dir="${dir.build}" />
+    <mkdir dir="${dir.classes}" />
+    <mkdir dir="${dir.bin}" />
 
     <uptodate property="buildJavaLexer.notRequired"
               >
@@ -48,41 +97,19 @@
       <srcfiles dir="src/net/mtu/eggplant/dbc" includes="assert.g" />
 
     </uptodate>
-
   </target>
 
-  <path id="base.classpath">
-    <pathelement location="${basedir}/lib/JonsInfra-0.4.jar"/>
-    <pathelement location="${basedir}/lib/antlr-2.7.4.jar"/>
-    <pathelement location="${basedir}/lib/commons-cli-1.0.jar"/>
-    <pathelement location="${basedir}/lib/commons-logging-1.0.3.jar"/>
-    <pathelement location="${basedir}/lib/junit-3.8.jar"/>
-    <pathelement location="${basedir}/lib/log4j-1.2.8.jar"/>
-  </path>
-
-  <path id="antlr.classpath">
-    <pathelement location="${basedir}/lib/antlr-2.7.4.jar"/>
-  </path>
-
-  <target name="NightlyTasks"
-          description="Tasks to run on a regular basis in batch">
-    <!-- delete the temp files -->
-    <delete dir="${temp.dir}" />
-    <mkdir dir="${temp.dir}" />    
-    <!-- get the source out of cvs -->
-    <cvs cvsRoot="${cvs.root}"
-         package="${cvs.module}"
-         dest="${temp.dir}"
-         quiet="true" />
-
-    <antcall target="nightly.javadoc">
-      <param name="basedir" value="${temp.dir}/${cvs.module}" />
-    </antcall>
-
-    <!-- delete the temp files -->
-    <delete dir="${temp.dir}" />
+  <target name="clean"
+          description="Clean up directories; remove ALL generated files">
+    <delete dir="${dir.build}" />
   </target>
 
+  <!-- ==================== DEFAULT ==================== -->
+  <target name="default"
+          description="Default target"
+          depends="init,compile,checkstyle,jtags" />
+
+  <!-- ==================== Antlr ==================== -->
   <target name="antlrTasks" depends="init,buildJavaLexer,buildJava14Lexer,buildAssertLexer" />
 
   <target name="buildJavaLexer" unless="buildJavaLexer.notRequired">
@@ -125,82 +152,116 @@
     </java>
   </target>
   
+  <!-- ==================== Compile ==================== -->
   <target name="compile"
-          depends="init,jtags,checkstyle,antlrTasks"
-          description="Compile everything">
-  <!-- broken
-  <target name="compile" depends="init">
-    <antlr target="${basedir}/src/net/mtu/eggplant/dbc/java.g" />
-    <antlr target="${basedir}/src/net/mtu/eggplant/dbc/java14.g" />
-    <antlr target="${basedir}/src/net/mtu/eggplant/dbc/assert.g" />
-    -->
+    description="Compile java to class files"
+    depends="init,antlrTasks">
 
-    <mkdir dir="${basedir}/${build.dir}" />
-    <javac srcdir="${basedir}/src"
-	   destdir="${build.dir}"
-	   debug="true"
-	   deprecation="true">
-      <classpath>
-        <path refid="base.classpath"/>
-      </classpath>
-      <include name="net/**/*.java"/>
+    <!-- compile - into the build directory -->
+    <echo level="info" taskname="compile" 
+          message="Compiling sources from: '${dir.compile}'"/>
+    <javac srcdir="${dir.compile}"
+           excludes="**/scratch/*.java"
+           destdir="${dir.classes}"
+           debug="${compile.debug}"
+           optimize="${compile.optimize}"
+           deprecation="true"
+           >
+      <classpath refid="classpath.base" />
+      <include name="**/*.java" />
       <exclude name="net/mtu/eggplant/dbc/testcases/**"/>
       <exclude name="net/mtu/eggplant/dbc/test14/**"/>
     </javac>
 
-    <!-- copy any resource files -->
-    <copy todir="${build.dir}">
-      <fileset dir="${basedir}/src">
+    <!-- copy any resource (non java/class) files -->
+    <copy todir="${dir.classes}">
+      <fileset dir="${dir.src}">
+        <exclude name="**/TAGS" />
         <exclude name="**/*.java" />
         <exclude name="**/*.class" />
+        <exclude name="**/*.html" />
       </fileset>
     </copy>
 
+    <!-- build scripts -->
+    <antcall target="-buildscripts">
+      <param name="-scripts.dir" value="${dir.bin}" />
+      <param name="-scripts.root" value=".." />
+      <reference torefid="-scripts.path" refid="classpath.build" />
+    </antcall>
   </target>
 
-  <target name="test" depends="compile" description="Run the unit tests">
+  <!-- ==================== Tests using JUnit ==================== -->
+  <target name="test"
+          depends="checkstyle.strict,junit,junitreport"
+          description="Run the unit tests and format the results">
+    <condition property="test.halt">
+      <and>
+        <isset property="test.failed" />
+        <!-- isset property="test.halt-if-failed" / -->
+      </and>
+    </condition>
+    <fail if="test.halt">
+      JUnit tests failed.  Check log or reports for details.
+    </fail>
+  </target>
+
+  <!-- This target requires the junit-[version].jar be available when ant starts.  
+     - You can do either: 
+     -    1. put our lib/junit-[version].jar in your CLASSPATH
+     -    2. use ant 1.6 or better and specify the -lib option
+     -  Option (1) works well in Eclipse task definitions and JDEE for Emacs.
+     -  Option (2) works well from the command line and within JDEE for Emacs.
+     -
+     -  If you want the gory details on why we must do this, see:
+     -      http://ant.apache.org/faq.html#delegating-classloader 
+     -->
+  <target name="junit"
+          depends="compile"
+          description="Run unit tests using JUnit; specify junit.test.class for single testcase."
+          >
+
     <echo message="Look at the output to determine if the tests passed, the build will always succeed" />
     <!-- first instrument the test files -->
     <java fork="yes"
-	  classname="net.mtu.eggplant.dbc.JonsAssert"
-	  taskname="DBC"
-	  failonerror="false"> <!-- so we can see what all needs fixing -->
-      <arg value="-d ${basedir}/${instrument.dir}" />
+      classname="net.mtu.eggplant.dbc.JonsAssert"
+      taskname="DBC"
+      failonerror="false"> <!-- so we can see what all needs fixing -->
+      <arg value="-d ${basedir}/${dir.inst}" />
       <arg value="-f" />
       <arg value="--prettyOutput" />
       <arg value="${basedir}/src/net/mtu/eggplant/dbc/testcases" />
       <classpath>
-        <pathelement location="${basedir}/${build.dir}"/>
-        <path refid="base.classpath"/>
+        <pathelement location="${basedir}/${dir.build}"/>
+        <path refid="classpath.build"/>
       </classpath>
     </java>
 
     <!-- instrument the 1.4 files -->
     <java fork="yes"
-	  classname="net.mtu.eggplant.dbc.JonsAssert"
-	  taskname="DBC"
-	  failonerror="false"> <!-- so we can see what all needs fixing -->
+      classname="net.mtu.eggplant.dbc.JonsAssert"
+      taskname="DBC"
+      failonerror="false"> <!-- so we can see what all needs fixing -->
       <arg value="-source 1.4" />
-      <arg value="-d ${basedir}/${instrument.dir}" />
+      <arg value="-d ${basedir}/${dir.inst}" />
       <arg value="-f" />
       <arg value="--prettyOutput" />
       <arg value="${basedir}/src/net/mtu/eggplant/dbc/test14" />
       <classpath>
-        <pathelement location="${basedir}/${build.dir}"/>
-        <path refid="base.classpath"/>
+        <pathelement location="${basedir}/${dir.build}"/>
+        <path refid="classpath.build"/>
       </classpath>
     </java>
 
     <!-- compile newly instrumented files -->
-    <javac srcdir="${basedir}/${instrument.dir}"
-	   destdir="${basedir}/${build.dir}"
-	   debug="true"
-	   deprecation="true"
-           source="1.4"
-           >
+    <javac srcdir="${basedir}/${dir.inst}"
+      destdir="${dir.classes}"
+      debug="true"
+      deprecation="true"
+      >
       <classpath>
         <pathelement location="${basedir}/${build.dir}"/>
-        <path refid="base.classpath"/>
+        <path refid="classpath.build"/>
       </classpath>
       <include name="**/*.java" />
       <!-- don't try and compile the 1.4 stuff -->
@@ -213,118 +274,199 @@
       <include name="net/mtu/eggplant/dbc/test/**/*.java" />-->
     </javac>
 
-    <!-- run tests -->
-    <java fork="yes" classname="junit.textui.TestRunner" 
-	  taskname="junit" failonerror="false">
+    <mkdir dir="${dir.junit.xml}"/>
+    <junit dir="${dir.build}"
+           fork="true"
+	   failureproperty="test.failed"
+           printsummary="on"
+           showoutput="true"
+           >
+      <classpath refid="classpath.test" />
+      <formatter type="xml" />
+      <!-- sysproperty key="docs.dir" value="${test.classes.dir}"/ -->
+      <sysproperty key="java.awt.headless" value="true" />
+      
       <sysproperty key="ASSERT_BEHAVIOR" value="EXCEPTION" />
-      <arg value="net.mtu.eggplant.dbc.test.AllTests"/>
-      <classpath>
-        <pathelement location="${basedir}/${build.dir}"/>
-        <path refid="base.classpath"/>
-      </classpath>
-    </java>
+      
+      <!-- run either ${junit.test.class} or all **/test/*.java -->
+      <test name="${junit.test.class}" if="junit.test.class"
+            todir="${dir.junit.xml}" />
+      <batchtest todir="${dir.junit.xml}" unless="junit.test.class">
+        <fileset dir="${dir.inst}">
+          <include name="**/test/TestAssert.java" />
+          <exclude name="**/test/AllTests*.java" />
+        </fileset>
+      </batchtest>
+    </junit>
 
-    <java fork="yes" classname="junit.textui.TestRunner" 
-	  taskname="junit" failonerror="false">
+    <junit dir="${dir.build}"
+           fork="true"
+	   failureproperty="test.failed"
+           printsummary="on"
+           showoutput="true"
+           >
+      <classpath refid="classpath.test" />
+      <formatter type="xml" />
+      <!-- sysproperty key="docs.dir" value="${test.classes.dir}"/ -->
+      <sysproperty key="java.awt.headless" value="true" />
+
       <sysproperty key="ASSERT_BEHAVIOR" value="EXCEPTION" />
       <sysproperty key="ENFORCE_INHERITED_CONDITIONS" value="FALSE" />
-      <arg value="net.mtu.eggplant.dbc.test.TestEnforceInherited"/>
-      <classpath>
-        <pathelement location="${basedir}/${build.dir}"/>
-        <path refid="base.classpath"/>
-      </classpath>
-    </java>
+      
+      <batchtest todir="${dir.junit.xml}" unless="junit.test.class">
+        <fileset dir="${dir.inst}">
+          <include name="**/test/TestEnforceInherited.java" />
+        </fileset>
+      </batchtest>
+    </junit>
   </target>
 
-  <target name="instrument"
-          depends="init"
-          if="assert.present">
-    <java fork="yes"
-	  classname="net.mtu.eggplant.dbc.JonsAssert"
-	  taskname="assert"
-	  failonerror="true">
-      <arg value="${basedir}/src/net" />
-      <arg value="-d ${basedir}/${instrument.dir}" />
-    </java>
-  </target>
-
-  <target name="compile.dbc"
-          depends="init,jtags,checkstyle,instrument"
-          description="Instrument the code, then compile">
-    <java classname="antlr.Tool"
-	  fork="yes"
-	  failonerror="true"
-	  taskname="antlr"
-	  dir="${basedir}/src/net/mtu/eggplant/dbc">
-      <classpath>
-        <path refid="antlr.classpath"/>
-      </classpath>
-      <arg value="java.g" />
-    </java>
-
-    <java classname="antlr.Tool"
-	  fork="yes"
-	  failonerror="true"
-	  taskname="antlr"
-	  dir="${basedir}/src/net/mtu/eggplant/dbc">
-      <classpath>
-        <path refid="antlr.classpath"/>
-      </classpath>
-      <arg value="assert.g" />
-    </java>
-
-    <javac srcdir="${instrument.dir}"
-	   destdir="${basedir}/${build.dir}"
-	   debug="true"
-	   deprecation="true">
-      <classpath>
-        <path refid="base.classpath"/>
-      </classpath>
-      <include name="net/**/*.java"/>
-      <exclude name="net/mtu/eggplant/dbc/testcases/**"/>
-    </javac>
-  </target>
-
-  <target name="clean"
-          description="Clean up any temporary files created">
-    <delete dir="${basedir}/${build.dir}" />
-    <delete dir="${basedir}/${instrument.dir}" />
-    <delete>
-      <fileset dir="${basedir}/src" >
-  	  <include name="net/mtu/eggplant/dbc/AssertLexer.*" />
-  	  <include name="net/mtu/eggplant/dbc/AssertLexerTokenTypes.*" />
-  	  <include name="net/mtu/eggplant/dbc/JavaLexer.*" />
-  	  <include name="net/mtu/eggplant/dbc/JavaRecognizer.*" />
-      	  <include name="net/mtu/eggplant/dbc/JavaTokenTypes.*" />
-  	  <include name="net/mtu/eggplant/dbc/Java14Recognizer.*" />
-      	  <include name="net/mtu/eggplant/dbc/Java14RecognizerTokenTypes.*" />
-      	  <include name="net/mtu/eggplant/dbc/expandedjava14.g" />
+  <target name="junitreport"
+          depends=""
+          description="Format the JUnit results">
+    <mkdir dir="${dir.junit.html}" />
+    <junitreport todir="${dir.junit.html}">
+      <fileset dir="${dir.junit.xml}">
+        <include name="*.xml"/>
       </fileset>
-    </delete>
+      <report format="frames" todir="${dir.junit.html}"/>
+    </junitreport>
   </target>
 
-  <target name="dist"
-          description="Make a release based on the working directory"
+  <!-- ==================== Run ! ==================== -->
+  <target name="run"
+          depends="compile"
+          description="Run the application"
           >
+    <java fork="yes"
+          classname="${class.main}"
+          taskname="run"
+          dir="${dir.build}"
+          maxmemory="${class.main.maxmemory}"
+          >
+      <classpath refid="classpath.run" />
+    </java>
+  </target>
 
-    <!-- clean out first to get clean source and good compile -->
-    <antcall target="clean" />
+  <!-- ==================== Profile ! ==================== -->
+  <target name="profile"
+          depends="compile"
+          description="Profile the application"
+          >
+    <java fork="yes"
+          classname="${class.main}"
+          taskname="profile"
+          dir="${dir.build}"
+          >
+      <classpath refid="classpath.run" />
+      <jvmarg value="-Xrunhprof:cpu=samples,depth=15,thread=y" />
+    </java>
+  </target>
 
+  <!-- ==================== Distribution ==================== -->
+  <target name="dist"
+          description="Create complete distribution file(s)"
+          depends="clean">
+    <!-- ensure a few things are set properly for a distribution -->
+    <antcall target="-dist.real">
+      <param name="javadoc.access" value="protected" />
+      <param name="compile.debug" value="false" />
+      <param name="compile.optimize" value="true" />
+    </antcall>
+  </target>
+
+  <!-- do real work of dist target -->
+  <target name="-dist.real"
+          depends="javadoc,compile">
+
+    <!-- eventually should set or generate this, perhaps from BuildNumber task -->
+    <property name="dist.jar" value="${app.name}-${app.version}.jar" />
+
+    <!-- JAR-up all of our compiled classes -->
+    <jar jarfile="${dir.build}/${dist.jar}"
+         index="true">
+      <fileset dir="${dir.classes}">
+         <exclude name="**/test/*" />
+      </fileset>
+    </jar>
+
+    <!-- copy index.html, ChangeLog, lib to web directory -->
+    <mkdir dir="${dir.build}/docs" />
+    <copy todir="${dir.build}/docs"
+          flatten="true">
+      <fileset dir="${basedir}">
+        <include name="ChangeLog" />
+        <include name="docs/*" />
+      </fileset>
+      <filterset>
+        <filter token="APP-VERSION" value="${app.version}" />
+      </filterset>
+    </copy>
+    
+    <!-- build distribution-friendly scripts -->
+    <path id="dist.classpath">
+      <path refid="classpath.base" />
+      <pathelement location="${dist.jar}" />
+    </path>
+    <antcall target="-buildscripts">
+      <param name="-scripts.dir" value="${dir.dist}/bin" />
+      <param name="-scripts.root" value="." />
+      <reference torefid="-scripts.path" refid="dist.classpath" />
+    </antcall>
+
+    <!-- create zip files of the source and distribution directories -->
+    <zip destfile="${dir.build}/${app.name}-${app.version}.zip">
+      <zipfileset dir="${dir.dist}" />
+      <zipfileset file="${dir.build}/${dist.jar}" />
+      <zipfileset dir="lib" prefix="lib" excludes="ant/**" />
+      <zipfileset dir="docs" prefix="docs" />
+      <zipfileset dir="${dir.api}" prefix="docs/api" />
+    </zip>
+    <zip destfile="${dir.build}/${app.name}-${app.version}-src.zip">
+      <zipfileset dir="${dir.src}" excludes="${tagstable}" />
+    </zip>
+  </target>
+
+
+  <target name="release"
+          description="Make a release based on the working directory"
+          depends="clean"
+          >
     <delete dir="${release.html.dir}/${app.name}/${app.version}" />
     <mkdir dir="${release.html.dir}/${app.name}/${app.version}" />
+
+    <!-- ensure a few things are set properly for a distribution -->
+    <antcall target="-release.real">
+      <param name="javadoc.access" value="protected" />
+      <param name="compile.debug" value="false" />
+      <param name="compile.optimize" value="true" />
+      <param name="dir.api" value="${release.html.dir}/${app.name}/${app.version}/api" />
+    </antcall>
+  </target>
+
+  <target name="-release.real"
+    depends="compile,javadoc">
 
     <!-- copy index.html, ChangeLog, lib to web directory -->
     <copy todir="${release.html.dir}/${app.name}/${app.version}"
           flatten="true">
       <fileset dir="${basedir}">
         <include name="ChangeLog" />
-        <include name="doc/*" />
-        <include name="lib/*" />
+        <include name="docs/*" />
       </fileset>
       <filterset>
         <filter token="APP-VERSION" value="${app.version}" />
       </filterset>
     </copy>
+
+    <copy todir="${release.html.dir}/${app.name}/${app.version}"
+          flatten="true">
+      <fileset dir="${basedir}">
+        <include name="lib/*" />
+        <exclude name="lib/ant" />
+      </fileset>
+    </copy>
+
 
     <!-- zip source to web directory -->
     <zip destfile="${release.html.dir}/${app.name}/${app.version}/${app.name}-${app.version}-src.zip">
@@ -332,7 +474,7 @@
                   prefix="${app.name}-${app.version}"
                   >
         <include name="src/**" />
-        <include name="doc/**" />
+        <include name="docs/**" />
         <include name="lib/**" />
         <include name="prj.el" />
         <include name="build.xml" />
@@ -340,181 +482,214 @@
       </zipfileset>
     </zip>
 
-    <!-- now compile everything -->
-    <antcall target="compile" />
-
     <!-- build the jar -->
     <jar jarfile="${release.html.dir}/${app.name}/${app.version}/${app.name}-${app.version}.jar"
-         basedir="${basedir}/build"
+         basedir="${basedir}/build/classes"
          index="true"
          />
     
-    <!-- generate javadoc -->
-    <!-- run javadoc on the source -->
-    <mkdir dir="${release.html.dir}/${app.name}/${app.version}/api" />
-    <javadoc packagenames="net.mtu.eggplant.*"
-             sourcepath="${basedir}/src"
-             use="true"
-             splitindex="true"
-             version="true"
-             source="1.4"
-             windowtitle="${app.name}-${app.version}"
-             destdir="${release.html.dir}/${app.name}/${app.version}/api"
-             additionalparam="-tag beaninfo:a:BeanInfo -tag test:a:Tests -tag pre:cm:PreConditions -tag post:cm:PostConditions -tag invariant:tc:Invariants -breakiterator"
-             >
-        <classpath>
-          <pathelement location="${basedir}/src/" />
-          <path refid="base.classpath" />
-        </classpath>
-        <!-- core java -->
-        <link href="http://java.sun.com/j2se/1.4/docs/api/" />
-
-        <!-- JonsInfra -->
-        <link href="${mtu.net}/JonsInfra/0.4/api" />
-
-        <!-- junit -->
-        <link href="http://www.junit.org/junit/javadoc/3.8" />
-
-        <!-- antlr -->
-        <link href="http://www.antlr.org/javadoc/" />
-      </javadoc>
-
-
     <echo message="Remember to sync out to mtu.net" />
   </target>
-
-  <!-- ===================== Checkstyle =================== -->
-  <taskdef resource="checkstyletask.properties">
-    <classpath>
-      <pathelement location="${basedir}/lib/antlr-2.7.4.jar" />
-      <pathelement location="${basedir}/lib/ant/checkstyle-3.3.jar" />
-      <pathelement location="${basedir}/lib/ant/commons-beanutils.jar" />
-      <pathelement location="${basedir}/lib/commons-cli-1.0.jar" />
-      <pathelement location="${basedir}/lib/ant/commons-collections.jar" />
-      <pathelement location="${basedir}/lib/commons-logging-1.0.3.jar" />
-      <pathelement location="${basedir}/lib/ant/jakarta-regexp-1.3.jar" />
-    </classpath>
-  </taskdef>
-
-  <target name="checkstyle"
-          description="Check for code convention violations"
-          >
-    <mkdir dir="${build.dir}/classes" />
-
-    <checkstyle config="checkstyle_checks.xml">
-      <fileset dir="${basedir}/src">
-        <include name="**/*.java" />
-        <exclude name="net/mtu/eggplant/dbc/AssertLexer.java" />
-        <exclude name="net/mtu/eggplant/dbc/AssertLexerTokenTypes.java" />
-        <exclude name="net/mtu/eggplant/dbc/JavaTokenTypes.java" />
-        <exclude name="net/mtu/eggplant/dbc/JavaLexer.java" />
-        <exclude name="net/mtu/eggplant/dbc/JavaRecognizer.java" />
-        <exclude name="net/mtu/eggplant/dbc/Java14Recognizer.java" />
-        <exclude name="net/mtu/eggplant/dbc/Java14RecognizerTokenTypes.java" />
-        <exclude name="net/mtu/eggplant/dbc/testcases/**" />
-      </fileset>
-    </checkstyle>
+  
+  <!-- ==================== JavaDoc ==================== -->
+  <target name="-javadoc.check">
+    <!-- set javadoc.access in your build.properties files to
+    change level of javadoc created (e.g. private, etc) -->
+    <condition property="javadoc.uptodate">
+      <and>
+        <available file="${dir.api}/index.html" />
+        <uptodate targetfile="${dir.api}/index.html">
+          <srcfiles dir="${dir.src}" includes="**/*.java" />
+        </uptodate>
+      </and>
+    </condition>
   </target>
 
-  <target name="checkstyle.full"
-          description="Check for code convention violations (more aggressive)"
-          depends="init"
-          >
-    <mkdir dir="${build.dir}/classes" />
-
-    <checkstyle config="checkstyle_nightly_checks.xml"
-                failOnViolation="false"
-                >
-      <fileset dir="${basedir}/src">
-        <include name="**/*.java" />
-        <exclude name="net/mtu/eggplant/dbc/AssertLexer.java" />
-        <exclude name="net/mtu/eggplant/dbc/AssertLexerTokenTypes.java" />
-        <exclude name="net/mtu/eggplant/dbc/JavaTokenTypes.java" />
-        <exclude name="net/mtu/eggplant/dbc/JavaLexer.java" />
-        <exclude name="net/mtu/eggplant/dbc/JavaRecognizer.java" />
-        <exclude name="net/mtu/eggplant/dbc/Java14Recognizer.java" />
-        <exclude name="net/mtu/eggplant/dbc/Java14RecognizerTokenTypes.java" />
-        <exclude name="net/mtu/eggplant/dbc/testcases/**" />
-      </fileset>
-    </checkstyle>
-  </target>
-
-  <!-- Javadoc targets below here -->
-  <target name="local.javadoc"
-          description="Build javadoc locally without external links">
-    <mkdir dir="${basedir}/api" />
-    <javadoc packagenames="net.mtu.eggplant.*"
-             sourcepath="${basedir}/src"
-             use="true"
-             splitindex="true"
-             version="true"
+  <target name="javadoc"
+    description="Create Javadoc API documentation"
+    depends="-javadoc.check"
+    unless="javadoc.uptodate">
+    <mkdir dir="${dir.api}" />
+    <javadoc sourcepath="${dir.src}"
+             destdir="${dir.api}"
+             packagenames="*"
+             excludepackagenames="**/test"
              windowtitle="${app.name}"
-             destdir="${basedir}/api"
-             source="1.4"
-             additionalparam="-tag beaninfo:a:BeanInfo -tag test:a:Tests -tag pre:cm:PreConditions -tag post:cm:PostConditions -tag invariant:tc:Invariants -breakiterator"
-             >
-        <classpath>
-          <path refid="base.classpath"/>
-        </classpath>
-      </javadoc>
-  </target>
-
-  <target name="nightly.javadoc"
-          depends="checkstyle.full,antlrTasks"
-          description="Do a nightly build of the Javadoc to my fileserver">
-
-    <!-- run javadoc on the source -->
-    <mkdir dir="${nightly.html.dir}/${app.name}" />
-    <javadoc packagenames="net.mtu.eggplant.*"
-             sourcepath="${basedir}/src"
-             use="true"
+             overview="${dir.src}/overview.html"
+             access="${javadoc.access}"
              splitindex="true"
-             version="true"
-             windowtitle="${app.name}"
-             destdir="${nightly.html.dir}/${app.name}"
-             source="1.4"
-             additionalparam="-tag beaninfo:a:BeanInfo -tag test:a:Tests -tag pre:cm:PreConditions -tag post:cm:PostConditions -tag invariant:tc:Invariants -breakiterator"
+             additionalparam="-tag pre:cm:PreConditions -tag post:cm:PostConditions -tag invariant:tc:Invariants -breakiterator"
              >
-      <classpath>
-        <path refid="base.classpath"/>
-      </classpath>
+      <classpath refid="classpath.base" />
       <!-- core java -->
-      <link href="${local.java.packages}/jdk-1.4.2/api/"/>
-      <!-- junit -->
-      <link href="${local.java.packages}/junit-3.8.1/" />
-      <!-- antlr -->
-      <link href="${local.java.packages}/antlr-2.7.3/" />
-      <!-- infra -->
-      <link href="${local.java.projects}/JonsInfra/" />
-      <!-- log4j -->
-      <link href="${local.java.packages}/log4j-1.2.8/" />
-      <!-- commons-logging -->
-      <link href="${local.java.packages}/commons-logging-1.0.3/" />
-      <!-- commons-cli -->
-      <link href="${local.java.packages}/commons-cli-1.0/" />
-    </javadoc>
-    
-  </target>
+      <link href="http://java.sun.com/j2se/1.4/docs/api/" />
 
-  <target name="init_javadoc">
-    <mkdir dir="${basedir}/${temp.dir}" />
+      <!-- junit -->
+      <link href="http://www.junit.org/junit/javadoc/3.8.1" />
+      
+      <!-- antlr -->
+      <link href="http://www.antlr.org/javadoc/" />
+
+      <!-- JonsInfra -->
+      <link href="${mtu.net}/JonsInfra/0.5/api" />
+      
+    </javadoc>
   </target>
 
   <!-- ==================== Emacs Tags ==================== -->
+  <!-- set jtags.executable and jtags.arguments in your 
+     - build.properties something like this:
+     -    jtags.executable=bash
+     -    jtags.arguments=-c jtags
+     - Note that ANT is somewhat too smart wrt quotes.
+    -->
+  <condition property="jtags.uptodate">
+    <and>
+      <available file="${tagstable}" />
+      <uptodate targetfile="${tagstable}">
+        <srcfiles dir="${dir.src}" includes="**/*.java" />
+      </uptodate>
+    </and>
+  </condition>
+
   <target name="jtags"
-          description="Build Emacs Tags file if jtags.executable property is set"
+          description="Build an Emacs tags table file"
           if="jtags.executable"
+          unless="jtags.uptodate"
+          >
+    <exec taskname="jtags" dir="${dir.src}" executable="${jtags.executable}">
+       <arg line="${jtags.arguments}" />
+    </exec>
+  </target>
+
+  <!-- ==================== Design By Contract (DBC) ==================== -->
+  <!-- instrument code for DBC checks --> 
+  <target name="instrument"
+          description="Instrument code for DBC checks"
           depends="init"
           >
-    <exec dir="${basedir}/src"
-          executable="${jtags.executable}"
+    <mkdir dir="${dir.inst}" />
+    <java fork="yes"
+          classname="net.mtu.eggplant.dbc.JonsAssert"
+	  taskname="instrument"
+          failonerror="true"
+          >
+      <arg value="-d ${dir.inst}" />
+      <!-- for deugging <arg value="-prettyOutput" /> -->
+      <arg value="${dir.src}" />
+      <classpath refid="classpath.base" />
+    </java>
+  </target>
+
+  <!-- compile.dbc -->
+  <target name="compile.dbc"
+          description="Compile everything with DBC checks" 
+          depends="instrument">
+    <antcall target="compile">
+      <param name="dir.compile" value="${dir.inst}"/>
+    </antcall>
+  </target>
+
+  <!-- run.dbc -->
+  <target name="run.dbc"
+          depends="compile.dbc,run"
+          description="Run the application with DBC checks"
           />
+
+  <!-- test.dbc -->
+  <target name="test.dbc"
+          depends="compile.dbc,test"
+          description="Run unit tests under DBC"
+          />
+  
+  <!-- ==================== Checkstyle ==================== -->
+  <taskdef resource="checkstyletask.properties">
+    <classpath>
+      <pathelement location="lib/antlr-2.7.4.jar" />
+      <pathelement location="lib/ant/checkstyle-3.3.jar" />
+      <pathelement location="lib/ant/commons-beanutils.jar" />
+      <pathelement location="lib/commons-cli-1.0.jar" />
+      <pathelement location="lib/commons-collections-3.1.jar" />
+      <pathelement location="lib/commons-logging-1.0.3.jar" />
+      <pathelement location="lib/ant/jakarta-regexp-1.3.jar" />
+    </classpath>
+  </taskdef>
+
+  <!-- "normal" checkstyle -->
+  <target name="checkstyle"
+          description="Check for code convention violations"
+          depends="init">
+    <echo level="info" taskname="checkstyle"
+          message="Checking code style with config: '${checkstyle}'"/>
+    <checkstyle config="${checkstyle}" failOnViolation="false">
+      <fileset dir="${dir.src}">
+        <include name="**/*.java" />
+        <exclude name="net/mtu/eggplant/dbc/AssertLexer.java" />
+        <exclude name="net/mtu/eggplant/dbc/AssertLexerTokenTypes.java" />
+        <exclude name="net/mtu/eggplant/dbc/JavaTokenTypes.java" />
+        <exclude name="net/mtu/eggplant/dbc/JavaLexer.java" />
+        <exclude name="net/mtu/eggplant/dbc/JavaRecognizer.java" />
+        <exclude name="net/mtu/eggplant/dbc/Java14Recognizer.java" />
+        <exclude name="net/mtu/eggplant/dbc/Java14RecognizerTokenTypes.java" />
+        <exclude name="net/mtu/eggplant/dbc/testcases/**" />
+      </fileset>
+    </checkstyle>
+  </target>
+
+  <!-- strict checkstyle -->
+  <target name="checkstyle.strict">
+    <antcall target="checkstyle">
+      <param name="checkstyle" value="${checkstyle.strict}"/>
+    </antcall>
+  </target>
+
+  <!-- ============ Nightly Build/Check/Test/Build/Report/Etc ============ -->
+  <target name="nightly.build"
+          description="Tasks to run during nightly build"
+          depends="clean,javadoc,checkstyle.strict,test.dbc" />
+
+  <!-- ==================== SECONDARY TARGETS ==================== -->
+  <!-- build scripts to run the application -->
+  <target name="-buildscripts.check">
+    <!-- somewhat hokey, in that we only look at one of the scripts generated -->
+    <uptodate property="-scripts.uptodate"
+              targetfile="${-scripts.dir}/${app.name}.sh">
+      <srcfiles dir="${basedir}" includes="run*.t,${ant.file}" />
+    </uptodate>
+  </target>
+            
+  <target name="-buildscripts" 
+          depends="-buildscripts.check"
+          unless="-scripts.uptodate">
+    <!-- JavaDOME  -->
+    <mkdir dir="${-scripts.dir}" />
+
+    <pathconvert targetos="unix"
+                 property="classpath.unix"
+                 refid="-scripts.path">
+      <map from="${basedir}" to="${-scripts.root}" />
+    </pathconvert>
+    <pathconvert targetos="windows"
+                 property="classpath.windows"
+                 refid="-scripts.path">
+      <map from="${basedir}" to="${-scripts.root}" />
+    </pathconvert>
+
+    <copy file="run.sh.t" tofile="${-scripts.dir}/${app.name}.sh" overwrite="true">
+      <filterset>
+        <filter token="CLASSPATH" value="${classpath.unix}" />
+        <filter token="CLASSNAME" value="${class.main}" />
+        <filter token="JAVA_ARGS" value="" />
+      </filterset>
+    </copy>
+    <copy file="run.bat.t" tofile="${-scripts.dir}/${app.name}.bat" overwrite="true">
+      <filterset>
+        <filter token="CLASSPATH" value="${classpath.windows}" />
+        <filter token="CLASSNAME" value="${class.main}" />
+        <filter token="JAVA_ARGS" value="" />
+      </filterset>
+    </copy>
+    
   </target>
 
 </project>
-
-<!--
-Local Variables:
-eval: (auto-fill-mode -1)
-End:
--->
