@@ -627,9 +627,12 @@ public class Symtab {
           //Add a call to the postCondition at each exit
           if(!method.isVoid()) {
             ifile.getFragments().add(new CodeModification(exit.getCodePointOne(), "return", postSetup, CodeFragmentType.POSTCONDITION));
+          ifile.getFragments().add(new CodeFragment(exit.getCodePointTwo(), postCall, CodeFragmentType.POSTCONDITION2));            
+          }
+          else {
+            ifile.getFragments().add(new CodeFragment(exit.getCodePointOne(), postCall, CodeFragmentType.POSTCONDITION2));            
           }
 
-          ifile.getFragments().add(new CodeFragment(exit.getCodePointTwo(), postCall, CodeFragmentType.POSTCONDITION2));
         }
       }
       
