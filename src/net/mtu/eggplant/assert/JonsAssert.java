@@ -38,9 +38,6 @@ public class Main {
       //Test case
       doFile(new File("org/tcfreenet/schewe/assert/testcases/")); // parse it
     }
-
-    //Let's see what we've found
-    getSymtab().instrument();
     
   }
 

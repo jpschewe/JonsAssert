@@ -134,13 +134,13 @@ public class Symtab {
      @return false if the file has already been seen.
   **/
   public boolean startFile(final File f) {
-    InstrumentedFile ifile = new InstrumentedFile(f);
-    ifile.getFragments().add(_taglineFragment);
-    if(_allFiles.contains(ifile)) {
+    if(_allFiles.contains(f)) {
       return false;
     }
+    InstrumentedFile ifile = new InstrumentedFile(f);
+    ifile.getFragments().add(_taglineFragment);
     
-    _allFiles.add(ifile);
+    _allFiles.add(f);
     _currentFile = ifile;
     _imports = new Hashtable();
     
@@ -165,10 +165,13 @@ public class Symtab {
      on the file stack, or null if no other files are being processed.
   **/
   public void finishFile(boolean success) {
-    if(!success) {
-      _allFiles.remove(_currentFile);
+    if(success) {
+      instrument(_currentFile);
     }
-    
+    else if(success) {
+      _allFiles.remove(_currentFile.getFile());
+    }
+
     if(!_fileStack.isEmpty()) {
       Pair p = (Pair)_fileStack.pop();
       _currentFile = (InstrumentedFile)p.getOne();
@@ -250,71 +253,63 @@ public class Symtab {
   }
 
   /**
-     instrument all of the files we've parsed so far.
+     instrument a file we've parsed.
   **/
-  public void instrument() {
+  public void instrument(final InstrumentedFile ifile) {
     String packageName = null;
-    //System.out.println("\nInstrumentation");
-    /*
-      walk over _allFiles and parse each class writing out to the instrument directory.
-    */
-    Iterator ifileIter = _allFiles.iterator();
-    while(ifileIter.hasNext()) {
-      InstrumentedFile ifile = (InstrumentedFile)ifileIter.next();
-      //Add CodeFragments from all of the classes that are in ifile
-      Iterator classIter = ifile.getClasses().iterator();
-      while(classIter.hasNext()) {
-        AssertClass aClass = (AssertClass)classIter.next();
-        packageName = aClass.getPackage();
-        addClassInstrumentation(ifile, aClass);
-        //System.out.println(aClass);
-      }
-      //System.out.println(ifile.getFragments());
-      //sort the list
-      //dump out the fragments and instrument the file
-      try {
-        LineNumberReader reader = new LineNumberReader(new FileReader(ifile.getFile()));
-        String ifilename = AssertTools.getInstrumentedFilename(ifile.getFile(), packageName);
+    //Add CodeFragments from all of the classes that are in ifile
+    Iterator classIter = ifile.getClasses().iterator();
+    while(classIter.hasNext()) {
+      AssertClass aClass = (AssertClass)classIter.next();
+      packageName = aClass.getPackage();
+      addClassInstrumentation(ifile, aClass);
+      //System.out.println(aClass);
+    }
+    //System.out.println(ifile.getFragments());
+    //sort the list
+    //dump out the fragments and instrument the file
+    try {
+      LineNumberReader reader = new LineNumberReader(new FileReader(ifile.getFile()));
+      String ifilename = AssertTools.getInstrumentedFilename(ifile.getFile(), packageName);
         
-        FileWriter writer = new FileWriter(ifilename);
+      FileWriter writer = new FileWriter(ifilename);
 
-        // instrument lines
-        Iterator fragIter = ifile.getFragments().iterator();
-        CodeFragment curFrag = null;
-        if(fragIter.hasNext()) {
-          curFrag = (CodeFragment)fragIter.next();
-        }
-        else {
-          //short-circuit and just copy the file over
-        }
-        String line = reader.readLine();
-        while(line != null) {
-          StringBuffer buf = new StringBuffer(line);        
-          int offset = 0;        
-          while(curFrag != null && reader.getLineNumber() == curFrag.getLocation().getLine()) {
-            //instrument line
-            offset = curFrag.instrumentLine(offset, buf);
-            if(fragIter.hasNext()) {
-              curFrag = (CodeFragment)fragIter.next();
-            }
-            else {
-              curFrag = null;
-            }
+      // instrument lines
+      Iterator fragIter = ifile.getFragments().iterator();
+      CodeFragment curFrag = null;
+      if(fragIter.hasNext()) {
+        curFrag = (CodeFragment)fragIter.next();
+      }
+      else {
+        //short-circuit and just copy the file over
+      }
+      String line = reader.readLine();
+      while(line != null) {
+        StringBuffer buf = new StringBuffer(line);        
+        int offset = 0;        
+        while(curFrag != null && reader.getLineNumber() == curFrag.getLocation().getLine()) {
+          //instrument line
+          offset = curFrag.instrumentLine(offset, buf);
+          if(fragIter.hasNext()) {
+            curFrag = (CodeFragment)fragIter.next();
           }
-          //now write out the modified line
-          writer.write(buf.toString() + "\n");
-          line = reader.readLine();
+          else {
+            curFrag = null;
+          }
         }
-        writer.close();
-        reader.close();
-        //while(fragIter.hasNext()) {
-        //  CodeFragment fragment = (CodeFragment)fragIter.next();
-        //  System.out.println(fragment);
-        //}
+        //now write out the modified line
+        writer.write(buf.toString() + "\n");
+        line = reader.readLine();
       }
-      catch(final IOException ioe) {
-        ioe.printStackTrace();
-      }
+      writer.close();
+      reader.close();
+      //while(fragIter.hasNext()) {
+      //  CodeFragment fragment = (CodeFragment)fragIter.next();
+      //  System.out.println(fragment);
+      //}
+    }
+    catch(final IOException ioe) {
+      ioe.printStackTrace();
     }
   }
 
@@ -663,7 +658,7 @@ public class Symtab {
   private AssertClass _currentClass;
   private Hashtable _allPackages;
   /**
-     List of InstrumentedFiles.
+     List of Files.
   **/
   private List _allFiles;
   private Stack _classStack;

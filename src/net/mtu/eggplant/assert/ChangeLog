@@ -1,5 +1,9 @@
 2000-03-05  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
+	* Main.java: Modified control structure so that files are
+	instrumented right away.  Shouldn't need to store everything in
+	memory anymore either.
+
 	* java.g: Figured out how to handle javadoc comments before
 	package definitions, now I just need to get javadoc comments
 	before import statements.
