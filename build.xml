@@ -507,7 +507,7 @@
 
   <target name="javadoc"
     description="Create Javadoc API documentation"
-    depends="-javadoc.check"
+    depends="-javadoc.check,antlrTasks"
     unless="javadoc.uptodate">
     <mkdir dir="${dir.api}" />
     <javadoc sourcepath="${dir.src}"
