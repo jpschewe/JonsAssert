@@ -43,8 +43,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.Stack;
 
-import org.apache.log4j.Logger;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /*
   Things to keep track of:
@@ -105,11 +105,11 @@ import org.apache.log4j.Logger;
  * This is the place where most of the work for instrumentation gets done.
  * All lookups are done here.
  * 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class Symtab {
 
-  private static final Logger LOG = Logger.getLogger(JonsAssert.class);
+  private static final Log LOG = LogFactory.getLog(JonsAssert.class);
   
   /**
      @pre (config != null)

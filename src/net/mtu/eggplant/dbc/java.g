@@ -38,7 +38,9 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.LinkedHashSet;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 }
 
 /**
@@ -93,7 +95,7 @@ import org.apache.log4j.Logger;
  * <p>This parser has been modified from the original Recognizer to a pre-parser
  * that implements assertions in java as well as support JDK 1.4.</p>
  *
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 class JavaRecognizer extends Parser;
 options {
@@ -119,7 +121,7 @@ tokens {
 // Define some helper methods
 {
 
-  private static final Logger LOG = Logger.getLogger(JavaRecognizer.class);
+  private static final Log LOG = LogFactory.getLog(JavaRecognizer.class);
 
   public void print(final String s) {
     System.out.println("Parser: " + s);

@@ -47,6 +47,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
@@ -69,13 +71,13 @@ import org.apache.log4j.Logger;
  * {@link #instrument(Configuration, Collection) instrument} with a Configuration
  * object and a Collection of files.</p>
  *
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public final class JonsAssert {
 
   private JonsAssert() {}
   
-  private static final Logger LOG = Logger.getLogger(JonsAssert.class);
+  private static final Log LOG = LogFactory.getLog(JonsAssert.class);
   
   /**
    * Parses the command line then calls {@link #instrument(Configuration, Collection) instrument}.

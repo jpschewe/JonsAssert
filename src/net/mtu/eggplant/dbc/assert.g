@@ -28,7 +28,9 @@ header {
  */
 package net.mtu.eggplant.dbc;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 }
 
 //----------------------------------------------------------------------------
@@ -58,7 +60,7 @@ options {
 
 {
 
-  private static final Logger LOG = Logger.getLogger(AssertLexer.class);
+  private static final Log LOG = LogFactory.getLog(AssertLexer.class);
 }
 
 // a dummy rule to force vocabulary to be all characters (except special

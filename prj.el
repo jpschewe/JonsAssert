@@ -12,6 +12,7 @@
 			   (expand-file-name "lib/JonsInfra-0.4.jar" project-root)
 			   (expand-file-name "lib/antlr.jar" project-root)
 			   (expand-file-name "lib/commons-cli-1.0.jar" project-root)
+			   (expand-file-name "lib/commons-logging-1.0.3.jar" project-root)
 			   (expand-file-name "lib/junit-3.8.jar" project-root)
 			   (expand-file-name "lib/log4j-1.2.8.jar" project-root)
 			   ))
@@ -51,7 +52,8 @@
      (list 
       "(funcall jde-gen-boilerplate-function)"
       "(jde-gen-get-package-statement)"
-      "'>\"import org.apache.log4j.Logger;\"'n"
+      "'>\"import org.apache.commons.logging.Log;\"'n"
+      "'>\"import org.apache.commons.logging.LogFactory;\"'n"
       "\"/**\" '>'n"
       "\" * Add class comment here!\" '>'n"
       "\" */\" '>'n'"
@@ -60,7 +62,7 @@
       "\" \" (jde-gen-get-extend-class)" 
       "\"{\"'>'n"
       "'>'n"
-      "'>\"private static final Logger LOG = Logger.getLogger(\"(file-name-sans-extension (file-name-nondirectory buffer-file-name))\".class);\"'n"
+      "'>\"private static final Log LOG = LogFactory.getLog(\"(file-name-sans-extension (file-name-nondirectory buffer-file-name))\".class);\"'n"
       "'>'n"
       "\"public \"" 
       "(file-name-sans-extension (file-name-nondirectory buffer-file-name))" 

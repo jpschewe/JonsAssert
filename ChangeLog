@@ -1,3 +1,8 @@
+2004-04-08  Jon Schewe  <jpschewe@mtu.net>
+
+	* build.xml: Using commons-logging now.  The only dependancy on
+	log4j is in JonsAssert.main() to set the level to debug.
+
 2004-04-05  Jon Schewe  <jpschewe@mtu.net>
 
 	* Release 0.7

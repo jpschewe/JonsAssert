@@ -2,17 +2,13 @@ package net.mtu.eggplant.dbc.test;
 
 import java.awt.geom.Dimension2D;
 
-import org.apache.log4j.Logger;
-
 /**
  * Adds a Double implementation of Dimension2D just like the one in
  * {@link java.awt.geom.Point2D}.
  *
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public final class XDimension2D {
-  
-  private static final Logger LOG = Logger.getLogger(XDimension2D.class);
   
   private XDimension2D() {
     //no instances
