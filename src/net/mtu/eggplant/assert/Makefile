@@ -1,10 +1,14 @@
-JAVA=java -green
-JAVAC=jikes
+JAVA=java -green -classpath "/home/jpschewe/lib/java/antlr.jar:/home/jpschewe/lib/java/rt.jar:/home/jpschewe/projects/java"
+JAVAC=jikes -classpath "/home/jpschewe/lib/java/antlr.jar:/home/jpschewe/lib/java/rt.jar:/home/jpschewe/projects/java"
 
 %.class : %.java
 	$(JAVAC) $<
 
-all: AssertLexer.class \
+all: \
+	CodeGenerator.class \
+	MyToken.class \
+	AssertToken.class \
+	AssertLexer.class \
 	JavaLexer.class \
 	JavaRecognizer.class \
 	JavaTokenTypes.class \

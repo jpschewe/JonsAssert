@@ -86,8 +86,10 @@ public class Main {
     try {
       // Create a scanner that reads from the input stream passed to us
       javaLexer = new JavaLexer(s);
+      javaLexer.setTokenObjectClass("org.tcfreenet.schewe.Assert.MyToken");
       assertLexer = new AssertLexer(javaLexer.getInputState());
-                  
+      assertLexer.setTokenObjectClass("org.tcfreenet.schewe.Assert.MyToken");
+      
       selector.addInputStream(javaLexer, "java");
       selector.addInputStream(assertLexer, "assert");
       selector.select(javaLexer);

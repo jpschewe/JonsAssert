@@ -11,8 +11,9 @@ import java.lang.reflect.Method;
 
 /**
    class of static helper methods for assertions.
+
 **/
-public class AssertTools {
+final public class AssertTools {
 
   /**
      find the superclasses method
@@ -23,7 +24,7 @@ public class AssertTools {
      @pre (methodName != null)
      @pre (methodArgs != null)
   **/
-  final static public Method findSuperMethod(Class thisClass, String methodName, Class[] methodArgs) {
+  static public Method findSuperMethod(final Class thisClass, final String methodName, final Class[] methodArgs) {
     Class superClass = thisClass.getSuperclass();
     Method superMethod = null;
     
@@ -45,17 +46,121 @@ public class AssertTools {
     return superMethod;
   }
 
-  final static private AssertionViolation _currentAssertionViolation = null;
+  static private AssertionViolation _currentAssertionViolation = null;
 
   /**
      set the assertion violation that should be throw next.
   **/
-  final static public void setCurrentAssertionViolation(AssertionViolation violation) {
+  static public void setCurrentAssertionViolation(final AssertionViolation violation) {
     _currentAssertionViolation = violation;
   }
 
-  final static public AssertionViolation getCurrentAssertionViolation() {
+  static public AssertionViolation getCurrentAssertionViolation() {
     return _currentAssertionViolation;
+  }
+
+  /**
+     called when an assert fails.  Checks the system property ASSERT_CONDITION
+     to decide what to do.
+
+     <ul>
+     <li>TRUE - signal the failure (default)</li>
+     <li>FALSE - ignore the failure</li>
+     </ul>
+     
+     @param av AssertionViolation with information about the failure
+     
+     @pre (av != null)
+  **/
+  static public void assertFailed(final AssertionViolation av) {
+    String behavior = System.getProperty("ASSERT_CONDITION", "TRUE");
+    if(behavior.equalsIgnoreCase("TRUE")) {
+      fail(av);
+    }
+  }
+
+  /**
+     called when an invariant fails.  Checks the system property INVARIANT_CONDITION
+     to decide what to do.
+
+     <ul>
+     <li>TRUE - signal the failure (default)</li>
+     <li>FALSE - ignore the failure</li>
+     </ul>
+     
+     @param av AssertionViolation with information about the failure
+     
+     @pre (av != null)
+  **/
+  static public void invariantFailed(final AssertionViolation av) {
+    String behavior = System.getProperty("INVARIANT_CONDITION", "TRUE");
+    if(behavior.equalsIgnoreCase("TRUE")) {
+      fail(av);
+    }
+  }
+  
+  /**
+     called when a post condition fails.  Checks the system property
+     POST_CONDITION to decide what to do.
+
+     <ul>
+     <li>TRUE - signal the failure (default)</li>
+     <li>FALSE - ignore the failure</li>
+     </ul>
+     
+     @param av AssertionViolation with information about the failure
+     
+     @pre (av != null)
+  **/
+  static public void postConditionFailed(final AssertionViolation av) {
+    String behavior = System.getProperty("POST_CONDITION", "TRUE");
+    if(behavior.equalsIgnoreCase("TRUE")) {
+      fail(av);
+    }
+  }
+
+  /**
+     Called when a precondition fails.  Checks the system property
+     PRE_CONDITION to decide what to do.
+
+     <ul>
+     <li>TRUE - signal the failure (default)</li>
+     <li>FALSE - ignore the failure</li>
+     </ul>
+     
+     @param av AssertionViolation with information about the failure
+
+     @pre (av != null)
+  **/
+  static public void preConditionFailed(final AssertionViolation av) {
+    String behavior = System.getProperty("PRE_CONDITION", "TRUE");
+    if(behavior.equalsIgnoreCase("TRUE")) {
+      fail(av);
+    }
+  }
+
+  /**
+     Called to signal a failure.  This checks the system property
+     ASSERT_BEHAVIOR to decide what to do.
+     
+     <ul>
+     <li>EXIT - print out the stack trace and exit (default)</li>
+     <li>CONTINUE - print out the stack trace and continue on</li>
+     <li>EXCEPTION - throw the AssertionViolation</li>
+     </ul>
+  **/
+  static public void fail(final AssertionViolation av) {
+    String assertBehavior = System.getProperty("ASSERT_BEHAVIOR", "EXIT");    
+    if(assertBehavior.equalsIgnoreCase("EXIT")) {
+      av.printStackTrace();
+      System.exit(1);
+    }
+    else if(assertBehavior.equalsIgnoreCase("CONTINUE")) {
+      av.printStackTrace();
+    }
+    else if(assertBehavior.equalsIgnoreCase("EXCEPTION")) {
+      throw av;
+    }
   }
   
 }

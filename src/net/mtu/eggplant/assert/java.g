@@ -150,10 +150,12 @@ tokens {
   private void addAsserts(Vector asserts, Token jdClose) {
     if(asserts != null && asserts.size() > 0) {
       System.out.println("Parser: got asserts#");
-      System.out.println("Insert code at line.column: " + jdClose.getLine() + "." + jdClose.getColumn() + " #" + jdClose.getText() + "#");
+      System.out.println("Insert code at line.column: " + jdClose.getLine() + "." + jdClose.getColumn() + " #" + jdClose.getText() + "#"  + jdClose.getClass());
       Enumeration iter = asserts.elements();
       while(iter.hasMoreElements()) {
-	Token assertToken = (Token)iter.nextElement();
+	AssertToken assertToken = (AssertToken)iter.nextElement();
+	//System.out.println(assertToken.getCondition() + " " + assertToken.getMessage());
+	System.out.println("code: " + CodeGenerator.generateAssertion(assertToken));
       }
       System.out.println("Parser: end asserts");
     }
@@ -234,6 +236,7 @@ options {defaultErrorHandler = true;} // let ANTLR handle errors
 { Token id = null; }
   :	"package" id=identifier SEMI
     {
+	    System.out.println("package id : " + id.getLine() + " " + id.getColumn());
       _symtab.setCurrentPackageName(id.getText());
     }
   ;
@@ -1057,25 +1060,31 @@ options {
 }
 
 {
-// for column tracking
-protected int tokColumn = 1;
-protected int column = 1;
-public void consume() throws IOException {
-  if ( inputState.guessing>0 ) {
-    if (text.length()==0) {
-      // remember token start column
-      tokColumn = column;
+    // for column tracking
+    protected int tokColumn = -3;
+    protected int column = -2;
+    public void consume() throws IOException {
+	if(inputState.guessing > 0) {
+	    if(text.length() == 0) {
+		// remember token start column
+		tokColumn = column;
+	    }
+	    if (LA(1) == '\n') {
+		column = -1;
+	    }
+	    else {
+		column++;
+	    }
+	}
+	super.consume();
     }
-    if (LA(1)=='\n') { column = 1; }
-    else { column++; }
-  }
-  super.consume();
-}
-protected Token makeToken(int t) {
-  Token tok = super.makeToken(t);
-  tok.setColumn(tokColumn);
-  return tok;
-}
+    
+    protected Token makeToken(int t) {
+	Token tok = super.makeToken(t);
+	tok.setColumn(tokColumn);
+	return tok;
+    }
+
 }
 
 

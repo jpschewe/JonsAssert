@@ -1,3 +1,21 @@
+2000-01-16  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* java.g: Still trying to get column numbers to work right.
+
+	* assert.g: now creates AssertTokens for the various conditions so
+	that I don't have to duplicate the work the lexer has done later.
+
+	* AssertToken.java: Added so that I don't need to reparse the
+	condition and message that are found  in the lexer.
+
+	* MyToken.java: created for keeping track of columns
+
+2000-01-15  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* CodeGenerator.java: Created to generate code for various conditions
+
+	* java.g: Now I generate code for @assert
+
 2000-01-11  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* Added some more test cases to the test directory.

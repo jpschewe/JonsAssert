@@ -36,25 +36,31 @@ options {
 }
 
 {
-// for column tracking
-protected int tokColumn = 1;
-protected int column = 1;
-public void consume() throws IOException {
-  if ( inputState.guessing>0 ) {
-    if (text.length()==0) {
-      // remember token start column
-      tokColumn = column;
+    // for column tracking
+    protected int tokColumn = -4;
+    protected int column = -5;
+    public void consume() throws IOException {
+	if(inputState.guessing > 0) {
+	    if(text.length() == 0) {
+		// remember token start column
+		tokColumn = column;
+	    }
+	    if (LA(1) == '\n') {
+		column = -6;
+	    }
+	    else {
+		column++;
+	    }
+	}
+	super.consume();
     }
-    if (LA(1)=='\n') { column = 1; }
-    else { column++; }
-  }
-  super.consume();
-}
-protected Token makeToken(int t) {
-  Token tok = super.makeToken(t);
-  tok.setColumn(tokColumn);
-  return tok;
-}
+    
+    protected Token makeToken(int t) {
+	Token tok = super.makeToken(t);
+	tok.setColumn(tokColumn);
+	return tok;
+    }
+    
 }
 
 NEWLINE
@@ -86,29 +92,72 @@ CONDITION
     ;
 
 protected
+COMMA
+  : ','
+  ;
+
+protected
+SEMI
+  : ';'
+  ;
+
+protected
 MESSAGE
-    : ',' (' '|'\t'|'\f')* '"' (ESC|~('"'|'\\'))* '"' ';'
+    :  '"' (ESC|~('"'|'\\'))* '"'
 	//	{ System.out.println("Assert: got MESSAGE #" + text + "#"); }
     ;
 
+protected
+SPACE
+  : (' '|'\t'|'\f')
+  ;
+
 POST_CONDITION
-    :	"@post" (' '|'\t'|'\f')* CONDITION (MESSAGE)? 
-	//	{ System.out.println("Assert: Got post condition #" + text + "#"); }
+{
+  String c = null;
+  String m = null;
+}
+    :	"@post" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:MESSAGE { m = mesg.getText(); } SEMI)?
+    {
+      AssertToken assertTok = new AssertToken(c, m, _ttype, $getText);
+      $setToken(assertTok);
+    }
     ;
 
 PRE_CONDITION
-    :	"@pre" (' '|'\t'|'\f')* CONDITION (MESSAGE)?
-	//	{ System.out.println("Assert: Got pre condition #" + text + "#"); }
+{
+  String c = null;
+  String m = null;
+}
+    :	"@pre" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:MESSAGE { m = mesg.getText(); } SEMI)?
+    {
+      AssertToken assertTok = new AssertToken(c, m, _ttype, $getText);
+      $setToken(assertTok);
+    }
     ;
 
 ASSERT_CONDITION
-    :	"@assert" (' '|'\t'|'\f')* CONDITION (MESSAGE)?
-	//	{ System.out.println("Assert: Got assert condition #" + text + "#"); }
+{
+  String c = null;
+  String m = null;
+}
+    :	"@assert" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:MESSAGE { m = mesg.getText(); } SEMI)?
+    {
+      AssertToken assertTok = new AssertToken(c, m, _ttype, $getText);
+      $setToken(assertTok);
+    }
     ;
 
 INVARIANT_CONDITION
-    :	"@invariant" (' '|'\t'|'\f')* CONDITION (MESSAGE)?
-	//{ System.out.println("Assert: Got invariant condition #" + text + "#"); }
+{
+  String c = null;
+  String m = null;
+}
+    :	"@invariant" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:MESSAGE { m = mesg.getText(); } SEMI)?
+    {
+      AssertToken assertTok = new AssertToken(c, m, _ttype, $getText);
+      $setToken(assertTok);
+    }
     ;
 
 // escape sequence -- note that this is protected; it can only be called
