@@ -20,12 +20,8 @@ import junit.textui.TestRunner;
    This is a test class for testing my assertions.  Tests all kinds of things.
    TODO:
    Add junit tests.
-   AnonomousClass
-   NamedInnerClass
-   NamedLocalClass
-   PrivateMethodTest
    StaticMethod
-   
+   StaticMethodInnerClass
    
    @invariant (_invariant), "This is an invariant";
 **/
@@ -50,6 +46,25 @@ public class TestAssert extends TestCase {
     return new TestSuite(TestAssert.class);
   }
 
+  public void testFailInvariant() {
+    boolean exception = false;
+    try {
+      failInvariant();
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    finally {
+      _invariant = true;
+    }
+    assert("a1:This should throw an assertion violation", exception); 
+          
+  }
+
+  public void failInvariant() {
+    _invariant = false;
+  }
+  
   public void testConstructorPreCondition() {
     boolean exception = false;
     try {
@@ -76,7 +91,6 @@ public class TestAssert extends TestCase {
   **/
   public TestAssert(final int j) {
     super("null");
-    System.out.println(j);
   }
   
   public void testPrecondition() {
@@ -134,6 +148,21 @@ public class TestAssert extends TestCase {
     return i+5;
   }
 
+  public void testInlineAssertFail() {
+    boolean exception = false;
+    try {
+      /**
+         @assert (false)
+      **/
+      ;
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("a1:This should throw an assertion violation", exception); 
+
+  }
+  
   public void testAbstractMethod() {
     boolean exception = false;
     AbstractClass ac = new ConcreteClass();
@@ -224,4 +253,110 @@ public class TestAssert extends TestCase {
   private int foo(int i) {
     return i;
   }
+
+  public void testAnonomousClass() {
+    AnonomousClass ac = new AnonomousClass();
+    boolean exception = false;
+    try {
+      ac.pass();
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("a1:This should not throw an assertion violation", !exception); 
+
+    exception = false;
+    try {
+      ac.fail();
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("a2:This should throw an assertion violation", exception); 
+    
+  }
+
+  public void testNamedInnerClass() {
+    NamedInnerClass nic = new NamedInnerClass();
+    boolean exception = false;
+    try {
+      nic.pass();
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("a1:This should not throw an assertion violation", !exception); 
+
+    exception = false;
+    try {
+      nic.fail();
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("a2:This should throw an assertion violation", exception); 
+  }
+
+  public void testNamedLocalClass() {
+    NamedLocalClass nic = new NamedLocalClass();
+    boolean exception = false;
+    try {
+      nic.pass();
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("a1:This should not throw an assertion violation", !exception); 
+
+    exception = false;
+    try {
+      nic.fail();
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("a2:This should throw an assertion violation", exception); 
+  }
+
+  public void testPrivateMethod() {
+    PrivateMethodTest nic = new PrivateMethodTest();
+    boolean exception = false;
+    try {
+      nic.pass();
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("a1:This should not throw an assertion violation", !exception); 
+
+    exception = false;
+    try {
+      nic.fail();
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("a2:This should throw an assertion violation", exception); 
+  }  
+
+  public void testStaticMethod() {
+    boolean exception = false;
+    try {
+      StaticMethod.pass();
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("a1:This should not throw an assertion violation", !exception); 
+
+    exception = false;
+    try {
+      StaticMethod.fail();
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("a2:This should throw an assertion violation", exception); 
+  }
+
 }

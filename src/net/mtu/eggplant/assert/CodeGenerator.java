@@ -178,8 +178,11 @@ public class CodeGenerator {
           code.append(paramName);
         }
       }
-      
-      code.append(", new ");
+
+      if(!assertMethod.getParams().isEmpty()) {
+        code.append(",");
+      }
+      code.append("new ");
       code.append(dummyClassName);
       code.append("(");
 
@@ -289,8 +292,10 @@ public class CodeGenerator {
           code.append(paramName);
         }
       }      
-      
-      code.append(", ");
+
+      if(!assertMethod.getParams().isEmpty()) {
+        code.append(", ");
+      }
       code.append(dummyClassName);
       code.append(" _JPS_ad) {\n");
     }

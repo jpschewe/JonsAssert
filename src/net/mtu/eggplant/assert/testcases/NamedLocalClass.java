@@ -12,18 +12,24 @@ package org.tcfreenet.schewe.Assert.test;
 **/
 public class NamedLocalClass {
 
-  public void foo() {
+  public void pass() {
     Bar2 b = new Bar2();
     b.doit(10);
   }
+
+  public void fail() {
+    Bar2 b = new Bar2();
+    b.doit(-2);
+  }
+  
 }
 
 public class Bar2 {
   /**
      @pre (i > 0)
   **/
-  public void doit(int i) {
-    System.out.println("in doit " + i);
+  public int doit(int i) {
+    return i;
   }
     
 }

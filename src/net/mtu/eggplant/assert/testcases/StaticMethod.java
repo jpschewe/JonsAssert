@@ -7,30 +7,21 @@
 */
 package org.tcfreenet.schewe.Assert.test;
 
-/**
-   checks conditions on a method in a named inner class
-**/
-public class NamedInnerClass {
+public class StaticMethod {
 
-  public void pass() {
-    Bar b = new Bar();
-    b.doit(10);
+  static public void fail() {
+    foo(10);
   }
 
-  public void fail() {
-    Bar b = new Bar();
-    b.doit(0);
+  static public void pass() {
+    foo(-10);
   }
-  
-  public class Bar {
 
-    /**
-       @pre (i > 0)
-    **/
-    public int doit(int i) {
-      return i;
-    }
-    
+  /**
+     @pre (i > 0)
+  **/
+  static public int foo(int i) {
+    return i;
   }
   
 }

@@ -500,7 +500,7 @@ prePosts
     | pre:PRE_CONDITION { addPreCondition(pre); }
     | ASSERT_CONDITION
     | INVARIANT_CONDITION
-    )* 
+    )*
   ;
 
 prePostField 
@@ -747,7 +747,7 @@ assertCondition
     )*
     jdc:JAVADOC_CLOSE 
     { addAsserts(assertTokens, jdc); }
-      )*
+      )
   ;
 
 // Compound statement.  This is used in many contexts:
@@ -767,10 +767,13 @@ compoundStatement returns [CodePointPair startEnd]
   startEnd = null;
 }
   :	
-    lc:LCURLY
-    // include the (possibly-empty) list of statements
-    (statement)*
-    rc:RCURLY
+    (
+      lc:LCURLY
+      // include the (possibly-empty) list of statements
+      (statement)*
+    //| (assertCondition)+
+      rc:RCURLY
+    )
     {
       CodePoint start = new CodePoint(lc.getLine(), lc.getColumn());
       CodePoint end = new CodePoint(rc.getLine(), rc.getColumn());
@@ -782,7 +785,7 @@ compoundStatement returns [CodePointPair startEnd]
 statement
 // A list of statements in curly braces -- start a new scope!
     :
-	(assertCondition)
+	(assertCondition)*
 	
 	(
 	compoundStatement

@@ -14,16 +14,25 @@ import java.awt.event.ActionEvent;
    test parsing of anonomous classes.
 **/
 public class AnonomousClass {
-
+  private ActionListener _al;
+  
   public AnonomousClass() {
-
-    
-    ActionListener al = new ActionListener() {
+     _al = new ActionListener() {
+         /**
+            @pre (ae != null)
+         **/
         public void actionPerformed(ActionEvent ae) {
-          System.out.println("here");
+          int j=0;
         }
       };
+  }
 
+  public void pass() {
+    _al.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "test"));
+  }
+
+  public void fail() {
+    _al.actionPerformed(null);
   }
 
 }

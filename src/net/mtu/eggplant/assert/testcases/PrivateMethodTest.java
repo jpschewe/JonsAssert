@@ -12,15 +12,19 @@ package org.tcfreenet.schewe.Assert.test;
 **/
 public class PrivateMethodTest {
 
-  public PrivateMethodTest() {
+  public void pass() {
     bar(10);
+  }
+
+  public void fail() {
+    bar(0);
   }
   
   /**
      @pre (i != 0)
   **/
-  private void bar(int i) {
-    System.out.println("bar: " + i);
+  private int bar(int i) {
+    return i;
   }
 
 }
