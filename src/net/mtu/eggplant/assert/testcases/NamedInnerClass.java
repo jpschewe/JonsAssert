@@ -24,6 +24,10 @@ public class NamedInnerClass {
   
   public class Bar {
 
+    public Bar() {
+      System.out.println("In constructor for inner class Bar");
+    }
+    
     /**
        @pre (i > 0)
     **/

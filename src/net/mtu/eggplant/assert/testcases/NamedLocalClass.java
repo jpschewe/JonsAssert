@@ -25,6 +25,11 @@ public class NamedLocalClass {
 }
 
 public class Bar2 {
+
+  public Bar2() {
+    System.out.println("In constructor for local class bar2");
+  }
+  
   /**
      @pre (i > 0)
   **/

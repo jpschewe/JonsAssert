@@ -28,9 +28,9 @@ public class CodeGenerator {
 
     String errorMessage = "";
     if(message != null) {
-      errorMessage = message + " ";
+      errorMessage = message + " + ";
     }
-    errorMessage += condition;
+    errorMessage += "\" " + condition + "\"";
 
     StringBuffer code = new StringBuffer();
     code.append("{");
@@ -754,7 +754,7 @@ public class CodeGenerator {
       if(message != null) {
         errorMessage = message + " + ";
       }
-      errorMessage += "\"" + condition + "\"";
+      errorMessage += "\" " + condition + "\"";
     
       code.append("org.tcfreenet.schewe.assert.AssertionViolation _JPS_av = new org.tcfreenet.schewe.assert.AssertionViolation(");
       code.append(errorMessage);
