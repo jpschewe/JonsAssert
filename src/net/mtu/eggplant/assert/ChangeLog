@@ -1,3 +1,8 @@
+2000-07-27  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* Symtab.java: Fixed case where the generated code would try and
+	catch exceptions after catching a Throwable. 
+
 2000-07-24  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* AssertMethod.java: more final methods
