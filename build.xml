@@ -15,7 +15,7 @@
   <property name="dir.reports" value="${dir.build}/reports" />
   <property name="dir.dist"    value="${dir.build}/dist" />
   <!-- here in case a version is required as well -->
-  <property name="app.version" value="0.8" />
+  <property name="app.version" value="0.9" />
   <property name="app.name"    value="${ant.project.name}" /> 
 
   <!-- name of main class for run -->
@@ -452,7 +452,7 @@
           flatten="true">
       <fileset dir="${basedir}">
         <include name="ChangeLog" />
-        <include name="docs/*" />
+        <include name="doc/*" />
       </fileset>
       <filterset>
         <filter token="APP-VERSION" value="${app.version}" />

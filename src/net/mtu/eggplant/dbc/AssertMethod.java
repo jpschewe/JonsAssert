@@ -39,7 +39,7 @@ import net.mtu.eggplant.util.Named;
  * Object that contains the data needed to generate instrumented code for a
  * method.
  * 
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class AssertMethod implements Named {
 
@@ -49,7 +49,8 @@ public class AssertMethod implements Named {
    * a constructor
    * @param preConditions the preconditions for this method
    * @param postConditions the postconditions for this method
-   * @param params List of {@link StringPair StringPairs} (class, parameter name)
+   * @param params List of {@link net.mtu.eggplant.util.StringPair
+   * StringPairs} (class, parameter name)
    * @param retType the return type of this method, null signals this method is a constructor
    * @param mods a Set of Strings that are the modifiers for this method
    *  
@@ -164,8 +165,8 @@ public class AssertMethod implements Named {
   private List /*StringPair*/ _params;
 
   /**
-   * @return List of {@link StringPair StringPairs} (class, parameter name),
-   * don't modify this List
+   * @return List of {@link net.mtu.eggplant.util.StringPair StringPairs}
+   * (class, parameter name), don't modify this List
    */
   public final List getParams() {
     return _params;

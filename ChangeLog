@@ -1,3 +1,7 @@
+2004-12-20  Jon Schewe  <jpschewe@mtu.net>
+
+	* Release 0.9
+
 2004-11-14  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/net/mtu/eggplant/dbc/Symtab.java (Symtab): Can now correctly
