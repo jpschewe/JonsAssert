@@ -83,11 +83,6 @@ asterisk and it is intended to be part of the assertion and not part of the
 comment, as is commonly done in emacs, then that character will be lost from
 the assertion.
 
-- javadoc comments cannot exist above import statements, or be intermingled
-with import statements.
-
-- the whole class definition in the file may not be commented out 
-
 - Interface assertions are not yet checked
 
 - Constructor preconditions don't work.  If a method in a class calls a

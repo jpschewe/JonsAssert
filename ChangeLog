@@ -1,12 +1,14 @@
 2004-04-27  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/net/mtu/eggplant/dbc/java.g: Now can handle comments above
-	imports as well as a commented out file.
+	imports as well as a commented out file thanks to Mark on teh
+	antlr-interest list.
 
 2004-04-16  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/net/mtu/eggplant/dbc/java.g: Can now handle javadoc comments
-	above the package definition thanks to Loring Craymer.
+	above the package definition thanks to Loring Craymer on the
+	antlr-interest list.
 
 2004-04-09  Jon Schewe  <jpschewe@mtu.net>
 
