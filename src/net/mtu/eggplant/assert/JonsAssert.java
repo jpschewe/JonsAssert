@@ -75,14 +75,14 @@ public class Main {
 
       // let the symbol table know what's being parsed and parse the file if we haven't already
       if(getSymtab().startFile(f)) {
-        parseFile(f.getName(), new FileInputStream(f));
+        parseFile(new FileInputStream(f));
         getSymtab().finishFile();
       }
     }
   }
 
   // Here's where we do the real work...
-  public static void parseFile(String f, InputStream s)
+  public static void parseFile(InputStream s)
     throws Exception {
     try {
       // Create a scanner that reads from the input stream passed to us

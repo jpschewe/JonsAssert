@@ -11,12 +11,17 @@ import org.tcfreenet.schewe.utils.StringPair;
 import org.tcfreenet.schewe.utils.Pair;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
+import java.net.URL;
 
 import java.util.Stack;
 import java.util.Hashtable;
 import java.util.Vector;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.Enumeration;
 
 /*
   Need to read the PDF again to make sure I've got these right.
@@ -138,10 +143,20 @@ public class Symtab {
   }
 
   /**
+     Associate this import statement with the current file being processed so
+     that it may be used to lookup class and interface names.
+  **/
+  public void addImport(final String importLine) {
+    //[jpschewe:20000129.0924CST] need to handle * imports, ewww
+    
+  }
+  
+  /**
      Just resets the internal pointers to files to be the last file we pushed
      on the file stack, or null if no other files are being processed.
   **/
   public void finishFile() {
+    //[jpschewe:20000130.0958CST] at this point we should fill out any assertions that were found in other interfaces created in this file that weren't seen known the first time through. 
     if(!_fileStack.isEmpty()) {
       Pair p = (Pair)_classStack.pop();
       _currentFile = (File)p.getOne();
@@ -219,18 +234,141 @@ public class Symtab {
   }
 
   /**
-     Resolve an interface.  Given a name of an interface, find the package it
+     Resolve a class or interface.  Given a name of a class/interface, find the package it
      belongs in.  We're assuming that if it isn't a fully qualified name it's
-     in the list of imports or in the current package.  Leave it up to the
-     real compiler to check for mistakes.
+     in the list of imports or in the current package.  
 
      @return a StringPair where the first object is the package and the second
-     is the interface name.
+     is the class/interface name.  If we can't find the class file for the
+     class/interface, return null.
+
+     @pre (name != null)
   **/
-  public StringPair resolveInterface(String name) {
+  public StringPair resolveClass(final String name) {
+    String packageName = null;
+    String className = null;
+    /*
+      Should first check if it's already been parsed.  Maybe do this at a
+      higher level?  */
+    //[jpschewe:20000130.0009CST] what about inner classes?
+    /*
+      if the base name up to the first period can be found normally, then it's
+      an innerclass.
+    */
+    if(name.indexOf('.') != -1) {
+      className = name;
+      if(findClassSource(getCurrentPackageName(), name) != null) {
+        packageName = getCurrentPackageName();
+      }
+      else if(findClassSource("java.lang", name) != null) {
+        packageName = "java.lang";
+      }
+      else {
+        Enumeration iter = _imports.keys();
+        while(iter.hasMoreElements() && packageName == null) {
+          String pn = (String)iter.nextElement();
+          Vector possibles = (Vector)_imports.get(pn);
+          if(possibles.size() > 0) {
+            if(possibles.contains(name)) {
+              packageName = pn;
+            }
+          }
+          else {
+            //star import, ewww              
+            if(findClassSource(pn, name) != null) {
+              packageName = pn;
+            }
+          }
+        }
+      }
+    }
+    else {
+      //break name at last '.' and make the first piece packageName and the second className      
+      int lastDot = name.lastIndexOf('.');
+      packageName = name.substring(0, lastDot);
+      className = name.substring(lastDot+1);
+    }
+
+    //now see if the java file exists and return based on that
+    if(packageName != null) {
+      return new StringPair(packageName, className);
+    }
     return null;
   }
 
+  /**
+     Parse the given class.
+
+     @param name the name of the interface.  If this is not a fully-qualified
+     name, it will be resolved and then parsed.
+
+     @return true on a successful parse
+     
+     @pre (name != null)
+  **/
+  public boolean parseClass(final String name) {
+    StringPair result = resolveClass(name);
+    if(result == null) {
+      return false;
+    }
+
+    String packageName = result.getStringOne();
+    String className = result.getStringTwo();
+    URL url = findClassSource(packageName, className);
+    if(url == null) {
+      return false;
+    }
+    // parse it
+    try {
+    InputStream is = url.openStream();
+    //[jpschewe:20000129.0959CST] pass off to Main
+    
+    return true;    
+    }
+    catch (IOException ioe) {
+      System.err.println("Got error parsing file: " + ioe);
+      return false;
+    }
+  }
+
+                                       
+  static public URL findClass(final String packageName, final String name) {
+    return findResource(packageName, name, "class");
+  }
+
+  static public URL findClassSource(final String packageName, final String name) {
+    return findResource(packageName, name, "java");
+  }
+  
+  /**
+     <p>Find the URL that points to the source for this package.  If it can't be
+     found return null.</p>
+
+     @param packageName the package to look in
+     @param name the name of the file
+     @param extension the extension of the file
+     
+     [jpschewe:20000129.0914CST] doesn't yet handle inner interfaces, search for '.' in name and use that for the file to look for
+     [jpschewe:20000129.0918CST] should be modified to sort results, prefer a file reference
+     [jpschewe:20000129.0919CST] how does one do local interfaces?, jikes can't do it unless the class is already compiled.
+  **/
+  static private URL findResource(final String packageName, final String name, final String extension) {
+    String fileName = packageName.replace('.', '/') + "/" + name + '.' + extension;
+    try {
+      Enumeration enum = ClassLoader.getSystemClassLoader().getResources(fileName);
+      if(enum.hasMoreElements()) {
+        return (URL)enum.nextElement();
+      }
+      else {
+        return null;
+      }
+    }
+    catch(IOException ioe) {
+      System.err.println("Got error looking for interface source " + packageName + "." + name + " skipping");
+      return null;
+    }
+  }
+                                 
   /**
      Associate this CodeFragment with the current file begin parsed.
 
@@ -243,6 +381,61 @@ public class Symtab {
     if(!fragments.add(cf)) {
       throw new RuntimeException("CodeFragment matches another one already associated with the file: " + cf);
     }
+  }
+
+  /**
+     Add to the list of imports for this class.
+  **/
+  public void addImport(final String className, final String packageName) {
+    String shortenedPackageName = packageName.substring(1);
+    System.out.println("in addImport token className " + className + " packageName " + packageName + " shortedPackageName " + shortenedPackageName);
+    if(className != null) {
+      Vector v = (Vector)_imports.get(shortenedPackageName);
+      if(v == null) {
+	v = new Vector();
+      }
+      //add the class to the list of classes for this package import
+      v.addElement(className);
+      _imports.put(shortenedPackageName, v);
+    }
+    else {
+      //empty vector means everything in this package
+      _imports.put(shortenedPackageName, new Vector());
+    }
+  }
+
+  /**
+     Creates a new AssertMethod object for the current class and sets this as
+     the current method.
+
+     @param name the name of this method, null for a constructor
+     @param preConditions the preconditions for this method
+     @param postConditions the postconditions for this method
+     @param params Vector of StringPairs, (class, parameter name)
+     @param retType the return type of this method, null signals this method is a constructor
+     @param isStatic true if this method is static
+     @param isPrivate true if this method is private
+     
+     @pre (preConditions != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(postConditions, AssertToken.class))
+     @pre (postConditions != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(preConditions, AssertToken.class))
+     @pre (params != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(StringPair.class))
+  **/
+  public void startMethod(final String name,
+                          final Vector preConditions,
+                          final Vector postConditions,
+                          final Vector params,
+                          final String retType,
+                          final boolean isStatic,
+                          final boolean isPrivate) {
+    //do something with this
+  }
+
+  /**
+     Finishes the method that is currently being parsed.  This will pop a
+     method off the method stack, if one exists.
+  **/
+  public void finishMethod() {
+
   }
   
   private AssertClass _currentClass;

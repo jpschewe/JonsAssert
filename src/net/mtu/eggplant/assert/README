@@ -15,18 +15,24 @@ I think the reasons are pretty obvious.  It's very difficult to insert code
 here correctly.
 
 BUGS:
-Implementing an interface that is defined in the same file won't work right
+- Implementing an interface that is defined in the same file won't work right
 now.  This needs some seious thought.
 
-When calling a method from an assertion the assertions in that method are
+- When calling a method from an assertion the assertions in that method are
 also checked, so calling a method from it's precondition will cause an
 infinite loop.
 
-Note that there my be no <CR>'s inside any assertions, unless they are
+- Note that there my be no <CR>'s inside any assertions, unless they are
 property escaped.  So no <CR>'s between the condition and the message.
 This may be fixed in a later version.
 
-Reporting bugs.  If you happen to find a bug in the software, please send me a
+- When interfaces are searched for, interfaces that are defined as local
+interface will not be found unless the file they are in has already been
+parsed.  Other compilers I've looked at have the same problem, plus it's just
+bad programming practice.  If you want a class to be local to another class,
+just make it an inner class and save yourself the headache.
+
+- Reporting bugs.  If you happen to find a bug in the software, please send me a
 message, schewe@tcfreenet.org.  At least include the message that was output
 and a description of what condition was being checked.  A stand alone test
 case that causes the error is REALLY helpful if you can do such a thing.
@@ -37,12 +43,16 @@ case that causes the error is REALLY helpful if you can do such a thing.
 FEATURES (some people might call these bugs, but I put them there on
 purpose :)
 
-Does design by contract correct, except where noted in the BUGS.
+- Does design by contract correct, except where noted in the BUGS.
 
-Allows checking of old values for variables in a method __old<paramName>
+- Allows checking of old values for variables in a method __old<paramName>
 where <paramName> is the name of the parameter.  This includes checking in
 post conditions and assertion conditions in the method.
 
-Preconditions can access private and package methods and
+- Preconditions can access private and package methods and
 variables, even though design by contract doesn't allow this.
 
+
+TODO:
+- Correctly call super class assertions.
+- Get assertions off of implemented interfaces.

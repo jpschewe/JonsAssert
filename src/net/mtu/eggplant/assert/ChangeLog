@@ -1,7 +1,19 @@
+2000-02-04  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* java.g: Roughed out an idea on how to do methods.  Added some
+	stubs in Symtab for this.  Still need to implement them.  Figured
+	out how to get all of the information for creating an AssertMethod
+	object.
+
+	* AssertTools.java: findSuperMethod won't work like I expected.
+	This is going to make things REAL difficult.
+
 2000-01-29  Jon Schewe  <schewe@tcfreenet.org>
 
 	* Symtab.java: added stack of files just like the class stack so
 	that multiple files can be parsed recursively.
+	Added code to find the source for an interface.  Still needs some
+	enhancements though.
 
 	* java.g: Added calls for creating inner classes too and the end
 	of classes.

@@ -13,8 +13,6 @@ import org.tcfreenet.schewe.utils.Pair;
 
 import java.util.Vector;
 
-import java.awt.Point;
-
 /**
    Object that contains the data needed to generate instrumented code for a
    method.
@@ -91,12 +89,12 @@ public class AssertMethod implements Named {
   }
   
   /** x is the line, y is the column **/
-  private Point _entrance;
+  private CodePoint _entrance;
 
   /**
      Set the entrance to this method.
   **/
-  public void setMethodEntrance(final Point entrance) {
+  public void setMethodEntrance(final CodePoint entrance) {
     _entrance = entrance;
   }
 
@@ -104,7 +102,7 @@ public class AssertMethod implements Named {
      @return the entrance to this class, ie. the location of the open brace.
      Don't modify this Point.
   **/
-  public Point getEntrance() {
+  public CodePoint getEntrance() {
     return _entrance;
   }
   
@@ -119,7 +117,7 @@ public class AssertMethod implements Named {
 
      @pre (exit != null)
   **/
-  public void addExit(final Point exit, final String statement) {
+  public void addExit(final CodePoint exit, final String statement) {
     _exits.addElement(new Pair(exit, statement));
   }
 

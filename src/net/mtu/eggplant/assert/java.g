@@ -11,13 +11,15 @@ header {
   */
   package org.tcfreenet.schewe.Assert;
 
+  import org.tcfreenet.schewe.utils.StringPair;
+  
   import java.util.Enumeration;
   import java.util.Vector;
   import java.util.Hashtable;
   
 }
 /** Java 1.1 Recognizer Grammar
- *
+ *<pre>
  * Run 'java Main <directory full of java files>'
  *
  * Contributing authors:
@@ -62,8 +64,11 @@ header {
  * This grammar is in the PUBLIC DOMAIN
  *
  * BUGS
- *
- */
+ *</pre>
+
+<p>This parser has been modified from the original Recognizer to a pre-parser
+that implents assertions in java.</p>
+**/
 class JavaRecognizer extends Parser;
 options {
   k = 2;                           // k token lookahead
@@ -134,35 +139,6 @@ tokens {
 
   }
   
-  private Hashtable _imports = new Hashtable();
-
-  /**
-       Add to the list of imports for this class.
-    **/
-  private void addImport(final Token t, final String className, final String packageName) {
-    String shortenedPackageName = packageName.substring(1);
-    if(className != null) {
-      Vector v = (Vector)_imports.get(shortenedPackageName);
-      if(v == null) {
-	v = new Vector();
-      }
-      //add the class to the list of classes for this package import
-      v.addElement(className);
-      _imports.put(shortenedPackageName, v);
-    }
-    else {
-      //empty vector means everything in this package
-      _imports.put(shortenedPackageName, new Vector());
-    }
-  }
-
-  /**
-       clear the list of imports.  Should be done at start of a file.
-    **/
-  private void clearImports() {
-    _imports = new Hashtable();
-  }
-
   /**
      add an assert.  This should get cached with the file object?
   **/
@@ -324,7 +300,7 @@ options {defaultErrorHandler = true;}
     ( classDefinition
     | interfaceDefinition
     )
-  |	SEMI!
+  |	SEMI
   ;
 
 /** A declaration is the creation of a reference or primitive-type variable
@@ -338,41 +314,61 @@ declaration
 //   place of a call to modifiers, but I thought it was a good idea to keep
 //   this rule separate so they can easily be collected in a Vector if
 //   someone so desires
-modifiers
-  :	( modifier )*
+/**
+   @returns the list of modifiers as Strings
+**/
+modifiers returns [Vector mods]
+{
+  mods = new Vector();
+  Token mod = null;
+}
+  :	( mod = modifier { mods.addElement(mod.getText()); } )*
   ;
 
 
 // A type specification is a type name with possible brackets afterwards
 //   (which would make it an array type).
-typeSpec
-  : classTypeSpec
-  | builtInTypeSpec
+/**
+   @returns the Token that represents this type spec
+**/
+typeSpec returns [Token t]
+  : t=classTypeSpec
+  | t=builtInTypeSpec
   ;
 
 // A class type specification is a class type with possible brackets afterwards
 //   (which would make it an array type).
-classTypeSpec
-{ Token id; }
+/**
+   @returns the Token that represents this class type spec
+**/
+classTypeSpec returns [Token id]
     :
 	id=identifier (LBRACK RBRACK)*
   ;
 
 // A builtin type specification is a builtin type with possible brackets
 // afterwards (which would make it an array type).
-builtInTypeSpec
-{ Token id; }
+/**
+   @returns the Token that represents this builtin type spec
+**/
+builtInTypeSpec returns [Token id]
   :	id=builtInType (LBRACK RBRACK)*
   ;
 
 // A type name. which is either a (possibly qualified) class name or
 //   a primitive (builtin) type
+/**
+   @returns the Token that represents this type
+**/
 type returns [Token t]
   :	t=identifier
   |	t=builtInType
   ;
 
 // The primitive types.
+/**
+   @returns the Token that represents this builtin type
+**/
 builtInType returns [Token t]
 { t = null; }
   :	tvoid:"void" { t = tvoid; }
@@ -386,8 +382,14 @@ builtInType returns [Token t]
   |	tdouble:"double" { t = tdouble; }
   ;
 
-// A (possibly-qualified) java identifier.  We start with the first IDENT
-//   and expand its name by adding dots and following IDENTS
+/**
+ A (possibly-qualified) java identifier.  We start with the first IDENT
+   and expand its name by adding dots and following IDENTS
+
+   @returns a Token that represents this identifier, the text of the Token is
+   equal to the whole identifier, including possible dots for a fully
+   qualified java class name.
+**/
 identifier returns [Token t]
 { t = null; }
   :
@@ -403,6 +405,10 @@ identifier returns [Token t]
 //     ( DOT STAR { t.setText(t.getText() + ".*"); )?
 //   ;
 
+/**
+   Used for import statements.  Adds this package identifier to the list of
+   imports in the symbol table.
+**/
 identifierStar
 {
   String className = "";
@@ -427,37 +433,40 @@ identifierStar
 	 }
 
 	 // tell the symbol table about the import
-	 addImport(id, className, packageName);
+	 getSymtab().addImport(className, packageName);
     }
   ;
 
 
 // modifiers for Java classes, interfaces, class/instance vars and methods
-modifier
-  :	"private"
-  |	"public"
-  |	"protected"
-  |	"static"
-  |	"transient"
-  |	"final"
-  |	"abstract"
-  |	"native"
-  |	"threadsafe"
-  |	"synchronized"
-    //	|	"const"			// reserved word; leave out
-  |	"volatile"
+modifier returns [Token t]
+{
+  t = null;
+}
+  :	tprivate:"private" { t = tprivate; }
+  |	tpublic:"public" { t = tpublic; }
+  |	tprotected:"protected" { t = tprotected; }
+  |	tstatic:"static" { t = tstatic; }
+  |	ttransient:"transient" { t = ttransient; }
+  |	tfinal:"final" { t = tfinal; }
+  |	tabstract:"abstract" { t = tabstract; }
+  |	tnative:"native" { t = tnative; }
+  |	tthreadsafe:"threadsafe" { t = tthreadsafe; }
+  |	tsynchronized:"synchronized" { t = tsynchronized; }
+    //	|	tconst:"const"	{ t = tconst; }		// reserved word; leave out
+  |	tvolatile:"volatile" { t = tvolatile; }
   ;
 
 
 // Definition of a Java class
 classDefinition
-  :	"class" id:IDENT { getSymtab().startClass(id.getText(), getInvariants()); }
+  :	"class" id:IDENT
     // it _might_ have a superclass...
     superClassClause
     // it might implement some interfaces...
     implementsClause
     // now parse the body of the class
-    classBlock
+    classBlock[id.getText()]
     //[jpschewe:19991230.2312CST] generate code to check invariants here    
   ;
 
@@ -469,19 +478,24 @@ superClassClause
 
 // Definition of a Java Interface
 interfaceDefinition
-  :	"interface" IDENT
+  :	"interface" id:IDENT
     // it might extend some other interfaces
     interfaceExtends
     // now parse the body of the interface (looks like a class...)
-    classBlock
+    classBlock[id.getText()]
   ;
 
 
 // This is the body of a class.  You can have fields and extra semicolons,
 // That's about it (until you see what a field is...)
-classBlock
+classBlock [ String name ]
   :
-    LCURLY
+    lc:LCURLY
+    //[jpschewe:20000129.0025CST] insert pre & invariant checks here
+    {
+      getSymtab().startClass(name, getInvariants());
+      clearInvariants();
+    }
     //this should just be methods and constructors,
     //but can't find a better place for it.
     ( prePostField | SEMI )*
@@ -519,37 +533,60 @@ implementsClause
     )?
   ;
 
-// Now the various things that can be defined inside a class or interface...
-// Note that not all of these are really valid in an interface (constructors,
-//   for example), and if this grammar were used for a compiler there would
-//   need to be some semantic checks to make sure we're doing the right thing...
+/**
+ Now the various things that can be defined inside a class or interface...
+ Note that not all of these are really valid in an interface (constructors,
+   for example), and if this grammar were used for a compiler there would
+   need to be some semantic checks to make sure we're doing the right thing...
+**/
 field
+{
+  Vector mods = null;
+  Token retType = null;
+  Vector params = null;
+  boolean methodOrConstructor = false;
+  boolean isStatic = false;
+  boolean isPrivate = false;
+  CodePointPair startEnd = null;
+}
   :
 
     // method, constructor, or variable declaration
-    mods:modifiers
+    mods=modifiers
+    {
+      isPrivate = mods.contains("private");
+      isStatic = mods.contains("static");
+    }
+    
     //[jpschewe:19991230.2309CST] check pre and post conditions here
-    (	ctorHead compoundStatement // constructor
+    (	params=ctorHead
+      {
+	// needs to be before compoundStatement so that I can have it set for the addExit calls
+	getSymtab().startMethod(null, getPreConditions(), getPostConditions(), params, null, isStatic, isPrivate);
+      }
+      startEnd=compoundStatement // constructor
+ 
 
     |	classDefinition       // inner class
       
     |	interfaceDefinition   // inner interface
 
-    |	typeSpec  // method or variable declaration(s)
-      (	IDENT  // the name of the method
+    |	retType=typeSpec  // method or variable declaration(s)
+      (	methodName:IDENT  // the name of the method
 
 	// parse the formal parameter declarations.
-	LPAREN parameterDeclarationList RPAREN
+	LPAREN params=parameterDeclarationList
+	{
+	  // needs to be before compoundStatement so that I can have it set for the addExit calls
+	  getSymtab().startMethod(null, getPreConditions(), getPostConditions(), params, null, isStatic, isPrivate);
+	}
+	RPAREN
 
 	returnTypeBrackersOnEndOfMethodHead
 
 	// get the list of exceptions that this method is declared to throw
 	(throwsClause)?
-	//[jpschewe:19991230.2310CST] check pre and post conditions here
-	( compoundStatement | SEMI )
-	{
-	//[jpschewe:19991230.2311CST] generate code to create check pre and post methods here
-	}
+	( startEnd=compoundStatement | SEMI )
       |	variableDefinitions SEMI
       )
     )
@@ -559,6 +596,16 @@ field
 
     // "{ ... }" instance initializer
   |	compoundStatement
+
+    {
+      if(startEnd != null) {
+	//got a method
+	//set the methods entrace to startEnd.getCodePointOne();
+	//if retType is null or is void, add an exit at startEnd.getCodePointTwo();
+
+      }
+      getSymtab().finishMethod();
+    }
   ;
 
 variableDefinitions
@@ -578,7 +625,7 @@ variableDeclarator
 
 declaratorBrackets
   :
-    (lb:LBRACK RBRACK!)*
+    (lb:LBRACK RBRACK)*
   ;
 
 varInitializer
@@ -598,7 +645,7 @@ arrayInitializer
 	  warnWhenFollowAmbig = false;
 	}
       :
-	COMMA! initializer
+	COMMA initializer
       )*
       (COMMA)?
     )?
@@ -616,11 +663,15 @@ initializer
 // This is the header of a method.  It includes the name and parameters
 //   for the method.
 //   This also watches for a list of exception classes in a "throws" clause.
-ctorHead
+//[jpschewe:20000204.2127CST] this is only used for constructors so I'm just going to return the params, the method name is known
+ctorHead returns [Vector params]
+{
+  params = null;
+}
   :	IDENT  // the name of the method
 
     // parse the formal parameter declarations.
-    LPAREN parameterDeclarationList RPAREN
+    LPAREN params=parameterDeclarationList RPAREN
 
     // get the list of exceptions that this method is declared to throw
     (throwsClause)?
@@ -635,23 +686,42 @@ throwsClause
 
 returnTypeBrackersOnEndOfMethodHead
   :
-    (LBRACK RBRACK!)*
+    (LBRACK RBRACK)*
   ;
 
 // A list of formal parameters
-parameterDeclarationList
-  :	( parameterDeclaration ( COMMA parameterDeclaration )* )?
+parameterDeclarationList returns [Vector params]
+{
+  params = new Vector();
+  StringPair pd = null;
+}
+  :	( pd=parameterDeclaration { params.addElement(pd); } ( COMMA pd=parameterDeclaration { params.addElement(pd); } )* )?
   ;
 
 // A formal parameter.
-parameterDeclaration
-  :	parameterModifier typeSpec IDENT
-    parameterDeclaratorBrackets
+parameterDeclaration returns [StringPair sp]
+{
+  StringBuffer brackets = null;
+  Token type;
+  sp = null;
+}
+  :	parameterModifier type=typeSpec name:IDENT
+    brackets=parameterDeclaratorBrackets
+    {
+      String typeText = type.getText();
+      if(brackets.length() > 0) {
+	typeText += brackets.toString();
+      }
+      sp = new StringPair(typeText, name.getText());
+    }
   ;
 
-parameterDeclaratorBrackets
+parameterDeclaratorBrackets returns [StringBuffer text]
+{
+  text = new StringBuffer();
+}
   :	
-    (LBRACK RBRACK!)*
+    (lb:LBRACK rb:RBRACK { text.append("[]"); } )*
   ;
 
 parameterModifier
@@ -677,12 +747,23 @@ assertCondition
 //   As a completely indepdent braced block of code inside a method
 //      it starts a new scope for variable definitions
 
-compoundStatement
+/**
+@return a CodePointPair that represent the open and close curly braces
+**/
+compoundStatement returns [CodePointPair startEnd]
+{
+  startEnd = null;
+}
   :	
-    LCURLY
+    lc:LCURLY
     // include the (possibly-empty) list of statements
     (statement)*
-    RCURLY
+    rc:RCURLY
+    {
+      CodePoint start = new CodePoint(lc.getLine(), lc.getColumn());
+      CodePoint end = new CodePoint(rc.getLine(), rc.getColumn());
+      startEnd = new CodePointPair(start, end);
+    }
   ;
 
 
@@ -1070,7 +1151,7 @@ primaryExpression
 newExpression
 { Token t; }
   :	"new" t=type
-    (	LPAREN argList RPAREN (classBlock { getSymtab().startClass(getSymtab().getCurrentClass().createAnonymousClassName(), new Vector()); } )?
+    (	LPAREN argList RPAREN ( classBlock[getSymtab().getCurrentClass().createAnonymousClassName()] )?
 
       //[jpschewe:20000128.0740CST] need to start an anonymous class
       //here, use t to determine what interfaces we need to check for

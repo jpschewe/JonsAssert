@@ -27,23 +27,29 @@ final public class AssertTools {
   static public Method findSuperMethod(final Class thisClass, final String methodName, final Class[] methodArgs) {
     Class superClass = thisClass.getSuperclass();
     Method superMethod = null;
-    
-    if(superClass != null) {
-      try {
-        superMethod = superClass.getDeclaredMethod(methodName, methodArgs);
-      }
-      catch(NoSuchMethodException nsme) {
-        // no method, don't bother
-        superMethod = null;
-      }
-      catch(SecurityException se) {
-        //This is real bad, spit out internal error here
-        System.err.println("Security exception trying to find method " + methodName + ": " + se);
-        return null;
-      }
-    }
 
     return superMethod;
+    //[jpschewe:20000204.2006CST] this is busted, it won't work.
+//     if(superClass != null) {
+//       while(superMethod == null && !superClass.equals(Object.class)) {
+//         try {
+//           superMethod = superClass.getDeclaredMethod(methodName, methodArgs);
+//         }
+//         catch(NoSuchMethodException nsme) {
+//           // no method, don't bother
+//           //superMethod = null;
+//           //Try up another level
+//           superClass = superClass.getSuperclass();
+//         }
+//         catch(SecurityException se) {
+//           //This is real bad, spit out internal error here
+//           System.err.println("Security exception trying to find method " + methodName + ": " + se);
+//           return null;
+//         }
+//       }
+//     }
+
+//     return superMethod;
   }
 
   static private AssertionViolation _currentAssertionViolation = null;
