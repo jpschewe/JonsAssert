@@ -52,18 +52,12 @@ FEATURES:
 - Does design by contract correct, except where noted in the BUGS.
 
 -- Allows for checking of return value in post condition via the variable
-__retVal.
+$return
 
 - Preconditions can access private and package methods and variables, even
 though design by contract doesn't normally allow this.
 
 - allows one to specify the extension of the source and instrumented files.
-
-- Some people like to put extra *'s in their comments, if you put this in the
-  middle of an assertion then they will be inserted right inline.  An example:
-   * @pre ((getPixelsPerMillisecond() * duration) <=
-   * (getBoundedRangeModel().getMaximum()-getBoundedRangeModel().getMinimum()))
-   This will put a * inside the middle of the condition between the <= and the (.
 
 - assertions are checked on the methods called from assertions, however
 assertions that end up calling the methods themselves will not cause a
@@ -132,8 +126,6 @@ calls the new native method...
 - implement pre/post conditions on constructors
 
 - handle constructor conditions on inner classes
-
-- JDK 1.4 support
 
 - ant task to delete instrumented files that coorespond to deleted source
 files

@@ -1,4 +1,6 @@
 Changes since 0.3
+- added 1.4 support, use --source 1.4
+
 - added support for turning off inherited conditions
 
 - changed name of system properties checked so they make more sense

@@ -98,7 +98,7 @@
   <target name="test" depends="compile">
     <echo message="Look at the output to determine if the tests passed, the build will always succeed" />
     <!-- first instrument the test files -->
-    <java fork="yes"
+    <java fork="no"
 	  classname="net.mtu.eggplant.dbc.JonsAssert"
 	  taskname="DBC"
 	  failonerror="false"> <!-- so we can see what all needs fixing -->
