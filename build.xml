@@ -40,7 +40,7 @@
     <pathelement location="${basedir}/lib/junit-3.7.jar"/>
   </path>
 
-  <target name="antlrTasks" depends="buildJavaLexer,buildJava14Lexer,buildAssertLexer" />
+  <target name="antlrTasks" depends="init,buildJavaLexer,buildJava14Lexer,buildAssertLexer" />
 
   <target name="buildJavaLexer" if="buildJavaLexer">
     <java classname="antlr.Tool"
@@ -395,7 +395,9 @@
          quiet="true" />
 
     <!-- build the lexers -->
-    <!--<antcall target="antlrTasks" />-->
+    <antcall target="antlrTasks">
+      <param name="basedir" value="${temp.dir}/assert" />
+    </antcall>
       
     <!-- run javadoc on the source -->
     <mkdir dir="${nightly.html.dir}/JonsAssert" />
