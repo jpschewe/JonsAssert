@@ -1,4 +1,5 @@
 2002-05-27  Jon Schewe  <jpschewe@mtu.net>
+	* Release 0.5
 
 	* src/net/mtu/eggplant/dbc/testcases/TestAssert.java: Verified
 	that things work ok with JDK 1.4.  There's something funky with
