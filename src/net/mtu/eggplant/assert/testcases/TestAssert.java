@@ -7,20 +7,75 @@
 */
 package org.tcfreenet.schewe.Assert.test;
 
+import org.tcfreenet.schewe.Assert.AssertionViolation;
+
 import java.util.Vector;
 import java.io.*;
 
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+import junit.textui.TestRunner;
+
 /**
    This is a test class for testing my assertions.  Tests all kinds of things.
+   TODO:
+   Add junit tests.
+   AnonomousClass
+   NamedInnerClass
+   NamedLocalClass
+   PrivateMethodTest
+   StaticMethod
    
-   @invariant (true), "This is an invariant";
+   
+   @invariant (_invariant), "This is an invariant";
 **/
-public class TestAssert implements Cloneable {
+public class TestAssert extends TestCase implements Cloneable {
 
+  private boolean _invariant = true;
+  
+  static public void main(final String[] args) {
+    System.setProperty("ASSERT_BEHAVIOR", "EXCEPTION");
+
+    TestSuite suite = new TestSuite();
+    suite.addTest(suite());
+    TestRunner.run(suite);
+    
+  }
+
+  public TestAssert(String name) {
+    super(name);
+  }
+
+  static public TestSuite suite() {
+    return new TestSuite(TestAssert.class);
+  }
+
+  public void testConstructorPreCondition() {
+    boolean exception = false;
+    try {
+      TestAssert ta = new TestAssert(9);
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    assert("This should throw an assertion violation", exception); 
+
+    exception = false;
+    try {
+      TestAssert ta = new TestAssert(12);
+    }
+    catch(AssertionViolation av) {
+      exception=true;
+    }
+    assert("This should not throw an assertion violation", !exception);
+    
+  }
+  
   /**
      @pre (j > 10)
   **/
   public TestAssert(final int j) {
+    super("null");
     System.out.println(j);
   }
   

@@ -45,7 +45,7 @@ public class Main {
         System.err.println("Parsing...");
 
 				// for each directory/file specified on the command line
-        doFile(new File("org/tcfreenet/schewe/Assert/test/TestAssert.java")); // parse it
+        doFile(new File("org/tcfreenet/schewe/Assert/testcases/")); // parse it
         
         //         System.err.println("Usage: java JavaRecogizer [-showtree] "+
         //                            "<directory or file name>");
