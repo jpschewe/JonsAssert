@@ -122,6 +122,10 @@ POST_CONDITION
 }
     :	"@post" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:MESSAGE { m = mesg.getText(); } SEMI)?
     {
+      if(c != null) {
+        c = c.replace('\n', ' ');
+	c = c.replace('\r', ' ');
+      }
       AssertToken assertTok = new AssertToken(c, m, _ttype, $getText);
       $setToken(assertTok);
     }
@@ -134,8 +138,13 @@ PRE_CONDITION
 }
     :	"@pre" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:MESSAGE { m = mesg.getText(); } SEMI)?
     {
+      if(c != null) {
+        c = c.replace('\n', ' ');
+	c = c.replace('\r', ' ');
+      }
       AssertToken assertTok = new AssertToken(c, m, _ttype, $getText);
       $setToken(assertTok);
+      //System.out.println("Just found a pre condition text: " + c);
     }
     ;
 
@@ -146,6 +155,10 @@ ASSERT_CONDITION
 }
     :	"@assert" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:MESSAGE { m = mesg.getText(); } SEMI)?
     {
+      if(c != null) {
+        c = c.replace('\n', ' ');
+	c = c.replace('\r', ' ');
+      }
       AssertToken assertTok = new AssertToken(c, m, _ttype, $getText);
       $setToken(assertTok);
     }
@@ -158,6 +171,10 @@ INVARIANT_CONDITION
 }
     :	"@invariant" (SPACE)* cond:CONDITION { c = cond.getText(); } (COMMA (SPACE)* mesg:MESSAGE { m = mesg.getText(); } SEMI)?
     {
+      if(c != null) {
+        c = c.replace('\n', ' ');
+	c = c.replace('\r', ' ');
+      }
       AssertToken assertTok = new AssertToken(c, m, _ttype, $getText);
       $setToken(assertTok);
     }

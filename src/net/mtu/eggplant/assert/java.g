@@ -146,6 +146,10 @@ tokens {
     if(asserts != null && asserts.size() > 0) {
       int line = jdClose.getLine();
       int column = jdClose.getColumn() + jdClose.getText().length();
+      //System.out.println("adding assert"
+      //  + " line: " + line
+      //  + " column: " + column
+      //  );
       StringBuffer codeFrag = new StringBuffer();
       Enumeration iter = asserts.elements();
       while(iter.hasMoreElements()) {

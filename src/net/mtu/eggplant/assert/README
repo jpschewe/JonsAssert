@@ -57,6 +57,12 @@ though design by contract doesn't normally allow this.
 
 - allows one to specify the extension of the source and instrumented files.
 
+- Some people like to put extra *'s in their comments, if you put this in the
+  middle of an assertion then they will be inserted right inline.  An example:
+   * @pre ((getPixelsPerMillisecond() * duration) <=
+   * (getBoundedRangeModel().getMaximum()-getBoundedRangeModel().getMinimum()))
+   This will put a * inside the middle of the condition between the <= and the (.
+
 BUGS:
 - When calling a method from an assertion the assertions in that method are
 also checked, so calling a method from it's precondition will cause an
@@ -128,3 +134,4 @@ public class A {
     //do something
   }
 }
+
