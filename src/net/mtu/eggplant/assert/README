@@ -1,0 +1,18 @@
+The grammar file used, java.g, is based off of the one from the Antlr home
+page.  The original authors comments still exist at the top of that file so
+they can recieve due credit.
+
+Note that there my be no <CR>'s inside any assertions, unless they are
+property escaped.  So no <CR>'s between the condition and the message.
+This may be fixed in a later version.
+
+Note that when calling a method as part of an assertion condition, the
+assertions on that method will be checked also, so unless you're careful
+you can get into an infinite loop.
+
+Implicit instrumentation is not yet supported, so each file needs to be
+instrumented explicitly.  Interfaces need no instrumentation, so they are
+just copied to the instrumented directory.  Interfaces will get copied to
+the instrumented directory whenever a class that implements them is
+instrumented or if the one tries to instrument the interface itself.
+

@@ -1,3 +1,7 @@
+2000-01-01  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* java.g: removed stuff to build AST
+
 1999-12-30  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* java.g (WS): Reindented with antlr-mode (should be more readable
