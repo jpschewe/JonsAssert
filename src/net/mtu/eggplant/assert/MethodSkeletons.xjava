@@ -221,3 +221,37 @@ static /*package*/ boolean __<packageName>_<className>_checkConstructorPreCondit
 // -- end output from generatePreConditionMethod 
 
 
+//ideas for implemented interface checks
+
+//when an implemented interface is found:
+/**
+  Given the name of an interface return a List of possible full names.  This
+  is a List because of the problems of finding an Interface with star imports
+  and looking in the current package and for inner classes.
+**/
+List getFullInterfaceName(final String interfaceName,
+                          final AssertClass implementingClass) {
+  List retVal = new Vector();
+  if(interfaceName.indexOf('.') == -1) { //definatly a short class name
+    String fullInterfaceName = findInterfaceInImports(interfaceName);
+    if(fullInterfaceName != null) { //found it!
+      retVal.add(fullInterfaceName);
+      return retVal;
+    }
+    else {
+      retVal.add(interfaceName); // default package
+      if(implementingClass.getPackageName() != null) {
+        retVal.add(implementingClass.getPackageName() + "." + interfaceName); //Local or other class in same package
+      }
+      retVal.add(implementingClass.getFullName() + "$" + interfaceName); //Inner class
+      if(starImports()) { // need to check each star import
+        /* Walk the list of imports and for each star import do:
+           retVal.add(starImport + "." + interfaceName); */
+      }
+      return retVal;
+    }
+  }
+  else {
+    //Whole other mess to figure out, need to figure out if it's already a full name or just an inner class
+  }
+}

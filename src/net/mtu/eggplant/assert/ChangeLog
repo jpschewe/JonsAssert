@@ -1,3 +1,8 @@
+2000-03-04  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* MethodSkeletons.xjava: Started putting down ideas for interface
+	name resolution.
+
 2000-03-03  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* Main.java: Added code to correctly check destination file dates
