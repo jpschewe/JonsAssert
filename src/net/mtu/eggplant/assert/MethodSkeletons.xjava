@@ -11,6 +11,13 @@
 
   All variables created here will have _JPS_ in front of them except for __retVal and __old*
 */
+
+//before
+public Object methodFoo(Object param1) {
+  return param1;
+}
+
+//after
 public Object methodFoo(Object param1) {
   if(!__<packageName>_<className>_checkInvariant()) {
     AssertTools.invariantFailed(AssertTools.getCurrentAssertionViolation());
@@ -19,17 +26,17 @@ public Object methodFoo(Object param1) {
     AssertTools.preConditionFailed(AssertTools.getCurrentAssertionViolation());
   }
   final Object __oldParam1 = param1;
-
-
-  /* was return b; */
-  final Object __retVal = b;
+  
+  final Object __retVal<classname> = b;
+    
   if(!__<packageName>_<className>_checkInvariant()) {
     AssertTools.invariantFailed(AssertTools.getCurrentAssertionViolation());
   }
-  if(!__<packageName>_<className>_check<methodName>PostConditions(__retVal, __oldParam1, param1, ...)) {
+  if(!__<packageName>_<className>_check<methodName>PostConditions(__retVal<classname>, __oldParam1, param1, ...)) {
     AssertTools.postConditionFailed(AssertTools.getCurrentAssertionViolation());
   }
-  return __retVal;
+  return __retVal<classname>;
+
 }
 
 
@@ -182,7 +189,7 @@ public Test(int i) {
 **/
 public Test (int i) {
 // -- start output from generatePreCondtitionCall 
-  this(i, i, new AssertDummy0(i));
+  this(i, new AssertDummy0(i));
 }
 static private class AssertDummy0 {
   public AssertDummy0(int i) {
@@ -191,8 +198,9 @@ static private class AssertDummy0 {
     }
   }
 }
-private Test(int i, int __oldi, AssertDummy0 ad) {
+private Test(int i, AssertDummy0 ad) {
 // -- end output from generatePreConditionCall
+  //-- generate old values
   System.out.println("in constructor " + i);
   //post and invariant calls here just like regular method
 }

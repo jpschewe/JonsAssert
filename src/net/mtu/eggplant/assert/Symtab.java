@@ -514,13 +514,18 @@ public class Symtab {
     boolean isStatic = mods.contains("static");
     boolean isAbstract = mods.contains("abstract");
     boolean isNative = mods.contains("native");
-    
+
     if(_currentMethod != null) {
       _methodStack.push(_currentMethod);
     }
     String theName;
     if(name == null) {
       theName = _currentClass.getName();
+      //get rid of outer classes if this is an inner class
+      int indexofdollar = theName.lastIndexOf('$');
+      if(indexofdollar > 0) {
+        theName = theName.substring(indexofdollar+1);
+      }
     } else {
       theName = name;
     }
@@ -551,14 +556,9 @@ public class Symtab {
     _currentMethod.setClose(close);
     
     //[jpschewe:20000216.0718CST] if it's a void method this is an exit
-    if(_currentMethod.isVoid()) {
-      _currentMethod.addExit(new CodePointPair(startEnd.getCodePointTwo(), startEnd.getCodePointTwo()));
-    }
-    
-    String retType = _currentMethod.getReturnType();
-    if(_currentMethod.isVoid()) {
-      //_currentMethod.addExit(startEnd.getCodePointTwo(), null);
-    }
+    //if(_currentMethod.isVoid()) {
+    //  _currentMethod.addExit(new CodePointPair(startEnd.getCodePointTwo(), startEnd.getCodePointTwo()));
+    //}
     
     _currentClass.addMethod(_currentMethod);
     
@@ -592,21 +592,29 @@ public class Symtab {
     Iterator methodIter = aClass.getMethods().iterator();
     while(methodIter.hasNext()) {
       AssertMethod method = (AssertMethod)methodIter.next();
+      String shortmclassName = method.getContainingClass().getName().replace('.', '_');
+      shortmclassName = shortmclassName.replace('$', '_');
+      
       //System.out.println("method: " + method);
 
-      //can't put calls inside abstract methods
-      if(!method.isAbstract()) {
+      if(method.isConstructor()) {
+        ifile.getFragments().add(new CodeFragment(method.getEntrance(), CodeGenerator.generateConstrauctorAssertions(method), CodeFragmentType.PRECONDITION));
+
+      }
+      else if(!method.isAbstract()) {
+        //can't put calls inside abstract methods        
         CodePoint entrance = method.getEntrance();      
       
         //Add a call to the precondition method at entrance
         String preCall = CodeGenerator.generatePreConditionCall(method);      
         ifile.getFragments().add(new CodeFragment(entrance, preCall, CodeFragmentType.PRECONDITION));
 
-        //Add old Values, only if not constructor, constructors do it differently
-        if(!method.isConstructor()) {
-          String oldValues = CodeGenerator.generateOldValues(method);      
-          ifile.getFragments().add(new CodeFragment(entrance, oldValues, CodeFragmentType.OLDVALUES));
+        String oldValues = CodeGenerator.generateOldValues(method);
+        //Put a try-finally around void methods for post condition checks
+        if(method.isVoid()) {
+          oldValues = oldValues + " try { ";
         }
+        ifile.getFragments().add(new CodeFragment(entrance, oldValues, CodeFragmentType.OLDVALUES));
         
         if(!method.isStatic() && !method.isPrivate() && !method.isConstructor()) {
           //Add a call to the invariant method at entrance
@@ -614,27 +622,51 @@ public class Symtab {
         }
 
         //build the code fragments outside the loop for effiency
-        //[jpschewe:20000216.0704CST] need to keep track of retVal      
-        String postSetup = "final " + method.getReturnType() + " __retVal ="; 
-        String postCall = CodeGenerator.generatePostConditionCall(method);      
-        Iterator exits = method.getExits().iterator();
-        while(exits.hasNext()) {
-          CodePointPair exit = (CodePointPair)exits.next();
-          if(!method.isStatic() && !method.isPrivate()) {      
-            //Add a call to the invariant at each exit
-            ifile.getFragments().add(new CodeFragment(exit.getCodePointOne(), invariantCall, CodeFragmentType.INVARIANT));
-          }
-          //Add a call to the postCondition at each exit
-          if(!method.isVoid()) {
+        //[jpschewe:20000216.0704CST] need to keep track of retVal
+        String postSetup = "final " + method.getReturnType() + " __retVal" + shortmclassName + " ="; 
+        String postCall = CodeGenerator.generatePostConditionCall(method);
+        if(!method.isVoid()) {
+          Iterator exits = method.getExits().iterator();
+          while(exits.hasNext()) {
+            StringBuffer insertedCode = new StringBuffer();
+            CodePointPair exit = (CodePointPair)exits.next();
+            
+            //before the invariant call we need to start a new scope
+            if(!method.isStatic() && !method.isPrivate()) {      
+              //Add a call to the invariant at each exit
+              String myInvariantCall = "{" + invariantCall;
+              ifile.getFragments().add(new CodeFragment(exit.getCodePointOne(), myInvariantCall, CodeFragmentType.INVARIANT));
+            }
+            else {
+              ifile.getFragments().add(new CodeFragment(exit.getCodePointOne(), "{", CodeFragmentType.INVARIANT));
+            }
+            //Add a call to the postCondition at each exit
             ifile.getFragments().add(new CodeModification(exit.getCodePointOne(), "return", postSetup, CodeFragmentType.POSTCONDITION));
-          ifile.getFragments().add(new CodeFragment(exit.getCodePointTwo(), postCall, CodeFragmentType.POSTCONDITION2));            
-          }
-          else {
-            ifile.getFragments().add(new CodeFragment(exit.getCodePointOne(), postCall, CodeFragmentType.POSTCONDITION2));            
-          }
 
+            //finish the new scope
+            String myPostCall = postCall + "}";
+            ifile.getFragments().add(new CodeFragment(exit.getCodePointTwo(), myPostCall, CodeFragmentType.POSTCONDITION2));
+
+          }
         }
-      }
+        else {
+          //Add in a finally clause
+          //finally {
+          //checkInvariant
+          //checkPost
+          //}
+          
+          //Subtract 1 so that we add just before the '}'
+          CodePoint insertFinallyAt = new CodePoint(method.getClose().getLine(), method.getClose().getColumn() - 1);
+          String myInvariantCall = "} finally { ";
+          if(!method.isStatic() && !method.isPrivate()) {
+            myInvariantCall += invariantCall;
+          }
+          String myPostCall = postCall + " }"; // end of finally
+          ifile.getFragments().add(new CodeFragment(insertFinallyAt, myInvariantCall, CodeFragmentType.INVARIANT));
+          ifile.getFragments().add(new CodeFragment(insertFinallyAt, myPostCall, CodeFragmentType.POSTCONDITION));
+        }
+      }//end if not abstract
       
       //Add the pre and post check methods at the end of the method
       CodePoint close = method.getClose();

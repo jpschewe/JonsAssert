@@ -33,7 +33,7 @@ public class CodeGenerator {
     errorMessage += condition;
 
     StringBuffer code = new StringBuffer();
-
+    code.append("{");
     code.append("if(! ");
     code.append(condition);
     code.append(") { ");
@@ -43,7 +43,8 @@ public class CodeGenerator {
     code.append('"');
     code.append("));");
     code.append(" }");
-
+    code.append("}");
+    
     return code.toString();
   }
 
@@ -57,13 +58,14 @@ public class CodeGenerator {
   **/
   static public String generateInvariantCall(final AssertClass aClass) {
     String mclassName = aClass.getFullName().replace('.', '_');
+    mclassName = mclassName.replace('$', '_');
     StringBuffer code = new StringBuffer();
     code.append("if(!__");
     code.append(mclassName);
     code.append("_checkInvariant()) {");
     code.append("org.tcfreenet.schewe.assert.AssertTools.invariantFailed(org.tcfreenet.schewe.assert.AssertTools.getCurrentAssertionViolation());");
     code.append("}");
-
+    
     return code.toString();
   }
 
@@ -79,6 +81,7 @@ public class CodeGenerator {
   static public String generateInvariantMethod(final AssertClass assertClass) {
     String className = assertClass.getFullName();
     String mclassName = className.replace('.', '_');
+    mclassName = mclassName.replace('$', '_');
     
     StringBuffer code = new StringBuffer();
     code.append("protected boolean __");
@@ -153,86 +156,7 @@ public class CodeGenerator {
   static public String generatePreConditionCall(final AssertMethod assertMethod) {
     StringBuffer code = new StringBuffer();
     String mclassName = assertMethod.getContainingClass().getFullName().replace('.', '_');
-    String dummyClassName = assertMethod.getContainingClass().createDummyConstructorClassName();
-
-    
-    if(assertMethod.isConstructor()) {
-      // add extra class call
-      code.append("this(");
-
-      //put params in here twice
-      {
-        boolean first = true;
-        Iterator paramIter = assertMethod.getParams().iterator();
-        while(paramIter.hasNext()) {
-          if(!first) {
-            code.append(", ");
-          }
-          else {
-            first = false;
-          }
-          StringPair sp = (StringPair)paramIter.next();
-          String paramName = sp.getStringTwo();
-          code.append(paramName);
-          code.append(", ");
-          code.append(paramName);
-        }
-      }
-
-      if(!assertMethod.getParams().isEmpty()) {
-        code.append(",");
-      }
-      code.append("new ");
-      code.append(dummyClassName);
-      code.append("(");
-
-      //put params in here once
-      {
-        boolean first = true;
-        Iterator paramIter = assertMethod.getParams().iterator();
-        while(paramIter.hasNext()) {
-          if(!first) {
-            code.append(", ");
-          }
-          else {
-            first = false;
-          }
-          StringPair sp = (StringPair)paramIter.next();
-          String paramName = sp.getStringTwo();
-          code.append(paramName);
-        }
-      }
-      
-      code.append("));");
-      code.append("}");
-      code.append("static private class ");
-      code.append(dummyClassName);
-      code.append(" {");
-      code.append("public ");
-      code.append(dummyClassName);
-      code.append("(");
-
-      //put params with types in here once
-      {
-        boolean first = true;
-        Iterator paramIter = assertMethod.getParams().iterator();
-        while(paramIter.hasNext()) {
-          if(!first) {
-            code.append(", ");
-          }
-          else {
-            first = false;
-          }
-          StringPair sp = (StringPair)paramIter.next();
-          String paramType = sp.getStringOne();
-          String paramName = sp.getStringTwo();
-          code.append(paramType);
-          code.append(" ");
-          code.append(paramName);
-        }
-      }
-      code.append(") {");
-    }
+    mclassName = mclassName.replace('$', '_');
     
     code.append("if(!__");
     code.append(mclassName);
@@ -260,49 +184,152 @@ public class CodeGenerator {
     code.append(")) {");
     code.append("org.tcfreenet.schewe.assert.AssertTools.preConditionFailed(org.tcfreenet.schewe.assert.AssertTools.getCurrentAssertionViolation());");
     code.append("}");
-
-    if(assertMethod.isConstructor()) {
-      code.append("}");
-      code.append("}");
-      code.append("private ");
-      code.append(assertMethod.getName());
-      code.append("(");
-
-      //put params with types in here with old values after each value
-      {
-        boolean first = true;
-        Iterator paramIter = assertMethod.getParams().iterator();
-        while(paramIter.hasNext()) {
-          if(!first) {
-            code.append(", ");
-          }
-          else {
-            first = false;
-          }
-          StringPair sp = (StringPair)paramIter.next();
-          String paramType = sp.getStringOne();
-          String paramName = sp.getStringTwo();
-          code.append(paramType);
-          code.append(" ");
-          code.append(" __old");          
-          code.append(paramName);
-          code.append(", ");
-          code.append(paramType);
-          code.append (" ");
-          code.append(paramName);
-        }
-      }      
-
-      if(!assertMethod.getParams().isEmpty()) {
-        code.append(", ");
-      }
-      code.append(dummyClassName);
-      code.append(" _JPS_ad) {");
-    }
-
+    
     return code.toString();
   }
 
+  /**
+     Generate the calls to pre, post and invariant conditions for a
+     constructor.  Constructors are different enough to need they're own
+     generator.
+     
+     @pre (assertMethod.isConstructor())
+  **/
+  static public String generateConstrauctorAssertions(final AssertMethod assertMethod) {
+    StringBuffer code = new StringBuffer();
+    String dummyClassName = assertMethod.getContainingClass().createDummyConstructorClassName();
+    
+    /*
+      insert:
+      this(param0, param1, new AssertDummy#(param0, param1));
+      checkInvariant();
+      checkPostConditions(param0, param0, param1, param1);
+      }
+      static private class AssertDummy# {
+      public AssertDummy#(param0, param1) {
+      checkPreConditions(param0, param1);
+      }
+      }
+      private className(param0, param1) {
+    */
+    code.append("this(");
+    //put param names in here once
+    {
+      boolean first = true;
+      Iterator paramIter = assertMethod.getParams().iterator();
+      while(paramIter.hasNext()) {
+        if(!first) {
+          code.append(", ");
+        }
+        else {
+          first = false;
+        }
+        StringPair sp = (StringPair)paramIter.next();
+        String paramName = sp.getStringTwo();
+        code.append(paramName);
+      }
+    }
+
+    if(!assertMethod.getParams().isEmpty()) {
+      code.append(",");
+    }
+    code.append("new ");
+    code.append(dummyClassName);
+    code.append("(");
+
+    //put param names in here once
+    {
+      boolean first = true;
+      Iterator paramIter = assertMethod.getParams().iterator();
+      while(paramIter.hasNext()) {
+        if(!first) {
+          code.append(", ");
+        }
+        else {
+          first = false;
+        }
+        StringPair sp = (StringPair)paramIter.next();
+        String paramName = sp.getStringTwo();
+        code.append(paramName);
+      }
+    }
+      
+    code.append("));");
+
+    //call checkInvariant
+    code.append(generateInvariantCall(assertMethod.getContainingClass()));
+                
+    //call post conditions
+    code.append(generatePostConditionCall(assertMethod));
+    
+    code.append("}");
+    code.append("static private class ");
+    code.append(dummyClassName);
+    code.append(" {");
+    code.append("public ");
+    code.append(dummyClassName);
+    code.append("(");
+
+    //put params with types in here once
+    {
+      boolean first = true;
+      Iterator paramIter = assertMethod.getParams().iterator();
+      while(paramIter.hasNext()) {
+        if(!first) {
+          code.append(", ");
+        }
+        else {
+          first = false;
+        }
+        StringPair sp = (StringPair)paramIter.next();
+        String paramType = sp.getStringOne();
+        String paramName = sp.getStringTwo();
+        code.append(paramType);
+        code.append(" ");
+        code.append(paramName);
+      }
+    }
+    code.append(") {");
+
+    //Just put in a call to the pre conditions
+    code.append(generatePreConditionCall(assertMethod));
+                
+    code.append("}");
+    code.append("}");
+    code.append("private ");
+    code.append(assertMethod.getName());
+    code.append("(");
+
+    //put params with types in here with old values after each value
+    {
+      boolean first = true;
+      Iterator paramIter = assertMethod.getParams().iterator();
+      while(paramIter.hasNext()) {
+        if(!first) {
+          code.append(", ");
+        }
+        else {
+          first = false;
+        }
+        StringPair sp = (StringPair)paramIter.next();
+        String paramType = sp.getStringOne();
+        String paramName = sp.getStringTwo();
+        code.append(paramType);
+        code.append (" ");
+        code.append(paramName);
+      }
+    }      
+
+    if(!assertMethod.getParams().isEmpty()) {
+      code.append(", ");
+    }
+    code.append(dummyClassName);
+    code.append(" _JPS_ad) {");
+
+    return code.toString();
+  }
+  
+    
   /**
      This code should be inserted right after the precondition and invariant calls.
      
@@ -343,7 +370,11 @@ public class CodeGenerator {
     StringBuffer code = new StringBuffer();
     String retType = assertMethod.getReturnType();
     String mclassName = assertMethod.getContainingClass().getFullName().replace('.', '_');
+    mclassName = mclassName.replace('$', '_');
+    String shortmclassName = assertMethod.getContainingClass().getName().replace('.', '_');
+    shortmclassName = shortmclassName.replace('$', '_');
 
+      
     code.append("if(!__");
     code.append(mclassName);
     code.append("_check");
@@ -353,6 +384,7 @@ public class CodeGenerator {
     boolean first = true;
     if(!assertMethod.isVoid()) {
       code.append("__retVal");
+      code.append(shortmclassName);
       first = false;
     }
     Iterator paramIter = assertMethod.getParams().iterator();
@@ -365,7 +397,11 @@ public class CodeGenerator {
       else {
         first = false;
       }
-      code.append("__old");
+      if(!assertMethod.isConstructor()) {
+        //constructors just pass the param name in twice since they're inside
+        //a special class anyway
+        code.append("__old");
+      }
       code.append(paramName);
       code.append(", ");
       code.append(paramName);
@@ -375,9 +411,11 @@ public class CodeGenerator {
     code.append("}");
 
     if(!assertMethod.isVoid()) {
-      code.append("return __retVal;");
+      code.append("return __retVal");
+      code.append(shortmclassName);
+      code.append(";");
     }
-
+    
     return code.toString();
   }
 
@@ -387,6 +425,7 @@ public class CodeGenerator {
   static public String generatePreConditionMethod(final AssertMethod assertMethod) {
     String className = assertMethod.getContainingClass().getFullName();
     String mclassName = className.replace('.', '_');
+    mclassName = mclassName.replace('$', '_');    
     StringBuffer code = new StringBuffer();
 
     if(assertMethod.isStatic() || assertMethod.isConstructor()) {
@@ -530,6 +569,7 @@ public class CodeGenerator {
   static public String generatePostConditionMethod(final AssertMethod assertMethod) {
     String className = assertMethod.getContainingClass().getFullName();
     String mclassName = className.replace('.', '_');
+    mclassName = mclassName.replace('$', '_');    
     StringBuffer code = new StringBuffer();
 
     if(assertMethod.isStatic() || assertMethod.isConstructor()) {

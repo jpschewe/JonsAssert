@@ -20,4 +20,25 @@ public class Node {
       /** @assert (true) **/
     }
   }
+
+  /**
+     Check one line if and else statements with returns as the one line.
+  **/
+  public Object method(Object o) {
+
+    if(o == null) return null;
+    else return o;
+  }
+
+  public static class FindIISResult
+  {
+    public FindIISResult(int r, int c)
+    {
+      numrows = r;
+      numcols = c;
+    }
+    public int numrows;
+    public int numcols;
+  }
+  
 }
