@@ -458,8 +458,8 @@ public class CodeGenerator {
       code.append(sp.getStringTwo());
     }
     code.append(") {");
-    if(!assertMethod.isPrivate()) {
-      //[jpschewe:20000220.0933CST] don't check super class conditions if the method is private
+    if(!assertMethod.isPrivate() && !assertMethod.isConstructor()) {
+      //[jpschewe:20000220.0933CST] don't check super class conditions if the method is private or a constructor
       code.append("Object _JPS_retVal = null;");
       code.append("Class _JPS_thisClass = null;");
       code.append("String _JPS_className = \"");
@@ -552,7 +552,7 @@ public class CodeGenerator {
     
     addConditionChecks(code, assertMethod.getPreConditions());
 
-    if(assertMethod.isPrivate()) {
+    if(assertMethod.isPrivate() || assertMethod.isConstructor()) {
       code.append("return true;");
     }
     else {
@@ -615,8 +615,8 @@ public class CodeGenerator {
         code.append(paramName);
       }
       code.append(") {");
-    if(!assertMethod.isPrivate()) {
-      //[jpschewe:20000220.0934CST] don't bother checking for super method if we're private
+    if(!assertMethod.isPrivate() && !assertMethod.isConstructor()) {
+      //[jpschewe:20000220.0934CST] don't bother checking for super method if we're private or a constructor
       code.append("Object _JPS_retVal = null;");
       code.append("Class _JPS_thisClass = null;");
       code.append("String _JPS_className = \"");
@@ -726,7 +726,7 @@ public class CodeGenerator {
     
     addConditionChecks(code, assertMethod.getPostConditions());
 
-    if(assertMethod.isPrivate()) {
+    if(assertMethod.isPrivate() || assertMethod.isConstructor()) {
       code.append("return true;");
     }
     else {

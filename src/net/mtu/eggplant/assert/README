@@ -30,7 +30,7 @@ to find what's actually being called and what exceptions it can throw, with
 the exception of RuntimeExceptions.  Since these do not have to be caught it's
 ok to throw these.
 
-Pre and Postconditions on private methods are only checked on that method.
+Pre and postconditions on private methods are only checked on that method.
 Even if a method with the same signature exists on the superclass.  This makes
 sense if you think about it a little, but I thought I should mention it.
 
@@ -96,3 +96,8 @@ files so that the extension doesn't have to be changed.
 with Jikes.  Would be really nice if it could keep the same JVM running so
 interfaces wouldn't have to be reparsed, but that could be tough.
 
+- Pre and postconditions for package methods are checked too often.  If a
+public/protected method has the same signature as a package method in it's
+superclass the pre and post conditions on the package method will be checked,
+even though the public/protected method doesn't actually override the package
+method.
