@@ -27,15 +27,14 @@ public class AssertMethod implements Named {
      @param postConditions the postconditions for this method
      @param params Set of {@link StringPair StringPairs, (class, parameter name)}
      @param retType the return type of this method, null signals this method is a constructor
-     @param isStatic true if this method is static
-     @param isPrivate true if this method is private
-     @param isAbstract true if this method is abstract or native
+     @param mods a Set of Strings that are the modifiers for this method
      
      @pre (theClass != null)
      @pre (name != null)
      @pre (preConditions != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(postConditions, AssertToken.class))
      @pre (postConditions != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(preConditions, AssertToken.class))
      @pre (params != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(StringPair.class))
+     @pre (mods != null)
   **/
   public AssertMethod(final AssertClass theClass,
                       final String name,
@@ -43,18 +42,14 @@ public class AssertMethod implements Named {
                       final Set postConditions,
                       final Set params,
                       final String retType,
-                      final boolean isStatic,
-                      final boolean isPrivate,
-                      final boolean isAbstract) {
+                      final Set mods) {
     _name = name;
     _preConditions = preConditions;
     _postConditions = postConditions;
     _theClass = theClass;
     _params = params;
     _retType = retType;
-    _static = isStatic;
-    _private = isPrivate;
-    _abstract = isAbstract;
+    _mods = mods;
     _exits = new HashSet(10);
     _thrownExceptions = new HashSet(10);
   }
@@ -160,23 +155,6 @@ public class AssertMethod implements Named {
   }
 
   /**
-     @return true if this method is static, therefore the pre and post checks
-     need to be static and the invariant condition isn't checked.
-  **/
-  final public boolean isStatic() {
-    return _static;
-  }
-  private boolean _static;
-
-  /**
-     @return true if this method is private, therefore the invariant condition isn't checked.
-  **/
-  final public boolean isPrivate() {
-    return _private;
-  }
-  private boolean _private;
-
-  /**
      @return true if this method is a constructor, therefore do the special
      processing for the preConditions and don't check the invariant at the top
      of the method, only at the bottom.
@@ -212,15 +190,7 @@ public class AssertMethod implements Named {
     return "[AssertMethod] " + getName();
   }
 
-  private boolean _abstract;
   
-  /**
-     @return true if this method is abstract or native
-  **/
-  final public boolean isAbstract() {
-    return _abstract;
-  }
-
   private Set _thrownExceptions;
   /**
      @pre (thrownExceptions != null)
@@ -232,4 +202,78 @@ public class AssertMethod implements Named {
   final public Set getThrownExceptions() {
     return _thrownExceptions;
   }
+
+  //Mods checks
+  private Set _mods;
+  /**
+     @return the set of modifiers for this method.
+  **/
+  public Set getMods() {
+    return _mods;
+  }
+  
+  /**
+     @return true if this method is static, therefore the pre and post checks
+     need to be static and the invariant condition isn't checked.
+  **/
+  final public boolean isStatic() {
+    return _mods.contains("static");
+  }
+
+  /**
+     @return true if this method is private, therefore the invariant condition isn't checked.
+  **/
+  final public boolean isPrivate() {
+    return _mods.contains("private");
+  }
+
+
+  /**
+     @return true if this method is abstract or native
+  **/
+  final public boolean isAbstract() {
+    return _mods.contains("abstract") || _mods.contains("native");
+  }
+
+  /**
+     Look at the mods list and determine the visibility of this method.
+
+     @return a string representing the visibility of this method,
+     /&#42;package&#42;/ is returned for package visibility
+  **/
+  final public String getVisibility() {
+    if(_mods.contains("private")) {
+      return "private";
+    } else if(_mods.contains("protected")) {
+      return "protected";
+    } else if(_mods.contains("public")) {
+      return "public";
+    } else {
+      //if nothing else is found, must be package
+      return "/*package*/";
+    }
+  }
+
+  /**
+     Look at the mods list and determine what the visibility of the method
+     that checks assertions should be.  This returns the visibility of the
+     method in all cases except for public.  In this case "protected" is
+     returned.
+
+     @return a string representing the visibility of this method,
+     /&#42;package&#42;/ is returned for package visibility
+  **/
+  final public String getAssertMethodVisibility() {
+    if(_mods.contains("private")) {
+      return "private";
+    } else if(_mods.contains("protected")) {
+      return "protected";
+    } else if(_mods.contains("public")) {
+      return "protected";
+    } else {
+      //if nothing else is found, must be package
+      return "/*package*/";
+    }
+  }
+  
 }

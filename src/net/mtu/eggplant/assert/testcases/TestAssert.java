@@ -30,9 +30,10 @@ public class TestAssert extends TestCase {
   private boolean _invariant = true;
   
   static public void main(final String[] args) {
+    //Make sure exceptions are thrown for assertions
     System.setProperty("ASSERT_BEHAVIOR", "EXCEPTION");
 
-    TestSuite suite = new TestSuite();
+    final TestSuite suite = new TestSuite();
     suite.addTest(suite());
     TestRunner.run(suite);
     
@@ -46,12 +47,15 @@ public class TestAssert extends TestCase {
     return new TestSuite(TestAssert.class);
   }
 
+  /**
+     Check to see if an invariant fails when it should.
+  **/
   public void testFailInvariant() {
     boolean exception = false;
     try {
       failInvariant();
     }
-    catch(AssertionViolation av) {
+    catch(final AssertionViolation av) {
       exception = true;
     }
     finally {
@@ -64,22 +68,25 @@ public class TestAssert extends TestCase {
   public void failInvariant() {
     _invariant = false;
   }
-  
+
+  /**
+     Check if constructor preconditions work.
+  **/
   public void testConstructorPreCondition() {
     boolean exception = false;
     try {
-      TestAssert ta = new TestAssert(9);
+      final TestAssert ta = new TestAssert(9);
     }
-    catch(AssertionViolation av) {
+    catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a1:This should throw an assertion violation", exception); 
 
     exception = false;
     try {
-      TestAssert ta = new TestAssert(12);
+      final TestAssert ta = new TestAssert(12);
     }
-    catch(AssertionViolation av) {
+    catch(final AssertionViolation av) {
       exception=true;
     }
     assert("a2:This should not throw an assertion violation", !exception);
@@ -92,13 +99,16 @@ public class TestAssert extends TestCase {
   public TestAssert(final int j) {
     super("null");
   }
-  
+
+  /**
+     Check if general preconditions work.
+  **/
   public void testPrecondition() {
     boolean exception = false;
     try {
       preCond(-5); // should fail
     }
-    catch(AssertionViolation av) {
+    catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a1:This should throw an assertion violation", exception);
@@ -107,18 +117,21 @@ public class TestAssert extends TestCase {
     try {
       preCond(10); // should pass
     }
-    catch(AssertionViolation av) {
+    catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a2:This not should throw an assertion violation", !exception);
   }
 
+  /**
+     Check if post conditions work.
+  **/
   public void testPostcondition() {
     boolean exception = false;
     try {
       postCond(4); // should pass
     }
-    catch(AssertionViolation av) {
+    catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a3:This should not throw an assertion violation", !exception); 
@@ -127,7 +140,7 @@ public class TestAssert extends TestCase {
     try {
       postCond(10); // should fail
     }
-    catch(AssertionViolation av) {
+    catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a4:This should throw an assertion violation", exception); 
@@ -137,17 +150,20 @@ public class TestAssert extends TestCase {
   /**
      @pre (foo(i) > 0)
   **/
-  public boolean preCond(int i) {
+  public boolean preCond(final int i) {
     return false;
   }
 
   /**
      @post (__retVal < 10), "Post condition";
   **/
-  public int postCond(int i) {
+  public int postCond(final int i) {
     return i+5;
   }
 
+  /**
+     Make sure that inline assertions work.
+  **/
   public void testInlineAssertFail() {
     boolean exception = false;
     try {
@@ -156,16 +172,19 @@ public class TestAssert extends TestCase {
       **/
       ;
     }
-    catch(AssertionViolation av) {
+    catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a1:This should throw an assertion violation", exception); 
 
   }
-  
+
+  /**
+     Test assertions on abstract methods.
+  **/
   public void testAbstractMethod() {
     boolean exception = false;
-    AbstractClass ac = new ConcreteClass();
+    final AbstractClass ac = new ConcreteClass();
 
     /**
        @assert (ac != null)
@@ -173,7 +192,7 @@ public class TestAssert extends TestCase {
     try {
       ac.preCond(-5); // should fail
     }
-    catch(AssertionViolation av) {
+    catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a1:This should throw an assertion violation", exception); 
@@ -182,7 +201,7 @@ public class TestAssert extends TestCase {
     try {
       ac.preCond(10); // should pass
     }
-    catch(AssertionViolation av) {
+    catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a2:This should not throw an assertion violation", !exception); 
@@ -191,7 +210,7 @@ public class TestAssert extends TestCase {
     try {
       ac.postCond(5); // should pass
     }
-    catch(AssertionViolation av) {
+    catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a3:This should not throw an assertion violation", !exception); 
@@ -200,7 +219,7 @@ public class TestAssert extends TestCase {
     try {
       ac.postCond(10); // should fail
     }
-    catch(AssertionViolation av) {
+    catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a4:This should throw an assertion violation", exception); 
@@ -208,14 +227,17 @@ public class TestAssert extends TestCase {
     
   }
 
+  /**
+     Test interface assertions.
+  **/
   public void testInterface() {
     boolean exception = false;
-    Interface it = new InterfaceClass();
+    final Interface it = new InterfaceClass();
 
     try {
       it.preCond(-5); // should fail
     }
-    catch(AssertionViolation av) {
+    catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a1:This should throw an assertion violation", exception); 
@@ -224,7 +246,7 @@ public class TestAssert extends TestCase {
     try {
       it.preCond(10); // should pass
     }
-    catch(AssertionViolation av) {
+    catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a2:This should not throw an assertion violation", !exception); 
@@ -233,7 +255,7 @@ public class TestAssert extends TestCase {
     try {
       it.postCond(5); // should pass
     }
-    catch(AssertionViolation av) {
+    catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a3:This should not throw an assertion violation", !exception); 
@@ -242,7 +264,7 @@ public class TestAssert extends TestCase {
     try {
       it.postCond(10); // should fail
     }
-    catch(AssertionViolation av) {
+    catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a4:This should throw an assertion violation", exception); 
@@ -250,17 +272,19 @@ public class TestAssert extends TestCase {
 
   }
 
-  private int foo(int i) {
+  private int foo(final int i) {
     return i;
   }
 
-  public void testAnonomousClass() {
-    AnonomousClass ac = new AnonomousClass();
+  /**
+     Test assertions on anonymous classes.
+  **/
+  public void testAnonymousClass() {
+    final AnonymousClass ac = new AnonymousClass();
     boolean exception = false;
     try {
       ac.pass();
-    }
-    catch(AssertionViolation av) {
+    } catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a1:This should not throw an assertion violation", !exception); 
@@ -268,21 +292,22 @@ public class TestAssert extends TestCase {
     exception = false;
     try {
       ac.fail();
-    }
-    catch(AssertionViolation av) {
+    } catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a2:This should throw an assertion violation", exception); 
     
   }
 
+  /**
+     Test assertions on named inner classes.
+  **/
   public void testNamedInnerClass() {
-    NamedInnerClass nic = new NamedInnerClass();
+    final NamedInnerClass nic = new NamedInnerClass();
     boolean exception = false;
     try {
       nic.pass();
-    }
-    catch(AssertionViolation av) {
+    } catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a1:This should not throw an assertion violation", !exception); 
@@ -290,20 +315,21 @@ public class TestAssert extends TestCase {
     exception = false;
     try {
       nic.fail();
-    }
-    catch(AssertionViolation av) {
+    } catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a2:This should throw an assertion violation", exception); 
   }
 
+  /**
+     Test assertions on named local classes.
+  **/
   public void testNamedLocalClass() {
-    NamedLocalClass nic = new NamedLocalClass();
+    final NamedLocalClass nic = new NamedLocalClass();
     boolean exception = false;
     try {
       nic.pass();
-    }
-    catch(AssertionViolation av) {
+    } catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a1:This should not throw an assertion violation", !exception); 
@@ -311,20 +337,21 @@ public class TestAssert extends TestCase {
     exception = false;
     try {
       nic.fail();
-    }
-    catch(AssertionViolation av) {
+    } catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a2:This should throw an assertion violation", exception); 
   }
 
+  /**
+     Test assertions on private methods.
+  **/
   public void testPrivateMethod() {
-    PrivateMethodTest nic = new PrivateMethodTest();
+    final PrivateMethodTest nic = new PrivateMethodTest();
     boolean exception = false;
     try {
       nic.pass();
-    }
-    catch(AssertionViolation av) {
+    } catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a1:This should not throw an assertion violation", !exception); 
@@ -332,19 +359,20 @@ public class TestAssert extends TestCase {
     exception = false;
     try {
       nic.fail();
-    }
-    catch(AssertionViolation av) {
+    } catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a2:This should throw an assertion violation", exception); 
   }  
 
+  /**
+     Test assertions on static methods.
+  **/
   public void testStaticMethod() {
     boolean exception = false;
     try {
       StaticMethod.pass();
-    }
-    catch(AssertionViolation av) {
+    } catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a1:This should not throw an assertion violation", !exception); 
@@ -352,24 +380,25 @@ public class TestAssert extends TestCase {
     exception = false;
     try {
       StaticMethod.fail();
-    }
-    catch(AssertionViolation av) {
+    } catch(final AssertionViolation av) {
       exception = true;
     }
     assert("a2:This should throw an assertion violation", exception); 
   }
 
+  /**
+     Test that exceptions are properly handled.  ie. the post condition
+     doesn't get checked.
+  **/
   public void testPostConditionException() {
     boolean exception = false;
     boolean ioexception = false;
     try {
-      Node n = new Node();
+      final Node n = new Node();
       n.exceptionMethod(10);
-    }
-    catch(AssertionViolation av) {
+    } catch(final AssertionViolation av) {
       exception = true;
-    }
-    catch(java.io.IOException ioe) {
+    } catch(final java.io.IOException ioe) {
       ioexception = true;
     }
     assert("a1:This should not throw an assertion violation", !exception); 
@@ -378,17 +407,40 @@ public class TestAssert extends TestCase {
     exception = false;
     ioexception = false;
     try {
-      Node n = new Node();
+      final Node n = new Node();
       n.exceptionMethod(-10);
-    }
-    catch(AssertionViolation av) {
+    } catch(final AssertionViolation av) {
       exception = true;
-    }
-    catch(IOException ioe) {
+    } catch(final IOException ioe) {
       ioexception = true;
     }
     assert("a2:This should not throw an assertion violation", !exception);
     assert("a4:This should not throw an IOException", !ioexception);
+  }
+
+  /**
+     This test checks to make sure that superclass assertions are not checked
+     on private methods and only checked on classes within the same package
+     for package methods.
+  **/
+  public void testExtraConditionChecks() {
+    final org.tcfreenet.schewe.assert.test.sub.CheckWrongPreconditionsSubClass c = new org.tcfreenet.schewe.assert.test.sub.CheckWrongPreconditionsSubClass();
+    boolean exception = false;
+    try {
+      c.testPrivateMethod(0);
+    } catch(final AssertionViolation av) {
+      exception = true;
+    }
+    assert("a1:Preconditions are being checked on superclass of private method", !exception);
+
+    exception = false;
+    try {
+      c.testPackageMethod(0);
+    } catch(final AssertionViolation av) {
+      exception = true;
+    }
+    assert("a2:Precondditions are being checked on superclass of package method with subclass in different package", !exception);
+    
   }
   
 }

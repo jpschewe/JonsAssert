@@ -404,11 +404,6 @@ public class Symtab {
                           final String retType,
                           final Set mods) {
     
-    boolean isPrivate = mods.contains("private");
-    boolean isStatic = mods.contains("static");
-    boolean isAbstract = mods.contains("abstract");
-    boolean isNative = mods.contains("native");
-
     if(_currentMethod != null) {
       _methodStack.push(_currentMethod);
     }
@@ -424,8 +419,7 @@ public class Symtab {
       theName = name;
     }
     
-    _currentMethod = new AssertMethod(_currentClass, theName, preConditions, postConditions, params, retType, isStatic, isPrivate, (isAbstract || isNative));
-
+    _currentMethod = new AssertMethod(_currentClass, theName, preConditions, postConditions, params, retType, mods);
   }
 
   /**

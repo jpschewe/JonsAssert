@@ -5,7 +5,7 @@
 
   I'd appreciate comments/suggestions on the code jpschewe@eggplant.mtu.net
 */
-package org.tcfreenet.schewe.assert.testcases;
+package org.tcfreenet.schewe.assert.test;
 
 import java.util.Vector;
 /**

@@ -88,7 +88,7 @@ public class CodeGenerator {
     final String methodName = "__" + mclassName + "_checkInvariant";
     
     final StringBuffer code = new StringBuffer();
-    code.append("protected boolean ");
+    code.append("final protected boolean ");
     code.append(methodName);
     code.append("() {");
     code.append("if(!org.tcfreenet.schewe.assert.AssertTools.lockMethod(\"");
@@ -451,15 +451,13 @@ public class CodeGenerator {
     
     final StringBuffer code = new StringBuffer();
 
+    code.append("final ");
+    
     if(assertMethod.isStatic() || assertMethod.isConstructor()) {
       code.append("static ");
     }
-    if(assertMethod.isPrivate()) {
-      code.append("private ");
-    }
-    else {
-      code.append("protected ");
-    }
+    code.append(assertMethod.getAssertMethodVisibility());
+    code.append(' ');
     code.append("boolean ");
     code.append(methodName);
     code.append("(");
@@ -604,16 +602,12 @@ public class CodeGenerator {
     final String methodName = "__" + mclassName + "_check" + assertMethod.getName() + "PostConditions";
     StringBuffer code = new StringBuffer();
 
+    code.append("final ");
     if(assertMethod.isStatic() || assertMethod.isConstructor()) {
       code.append("static ");
     }
-
-    if(assertMethod.isPrivate()) {
-      code.append("private ");
-    }
-    else {
-      code.append("protected ");
-    }
+    code.append(assertMethod.getAssertMethodVisibility());
+    code.append(' ');
     code.append("boolean ");
     code.append(methodName);
     code.append("(");

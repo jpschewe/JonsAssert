@@ -70,36 +70,11 @@ BUGS:
 property escaped.  So no <CR>'s between the condition and the message.  This
 may be fixed in a later version.
 
-- Assertions on native methods are not checked.  It seems like it'd be pretty
-hard to insert code into the C.  One idea is to create another method that
-calls the new native method.
-
 - javadoc comments cannot exist above import statements
 
 - Interface assertions are not yet checked
 
-- Reporting bugs.  If you happen to find a bug in the software, please send me
-a message, schewe@tcfreenet.org.  At least include the message that was output
-and a description of what condition was being checked.  A stand alone test
-case that causes the error is REALLY helpful if you can do such a thing.
-
-
-TODO:
-- Get assertions off of implemented interfaces.
-
-- hook up to ant for builds
-
-- Build patch for Jikes that allows Assert to be called as files are compiled
-with Jikes.  Would be really nice if it could keep the same JVM running so
-interfaces wouldn't have to be reparsed, but that could be tough.
-
-- Pre and postconditions for package methods are checked too often.  If a
-public/protected method has the same signature as a package method in it's
-superclass the pre and post conditions on the package method will be checked,
-even though the public/protected method doesn't actually override the package
-method.
-
-- Constructor precondision don't work.  If a method in a class calls a
+- Constructor preconditions don't work.  If a method in a class calls a
 constructor with the last argument being null and another constructor with the
 same signature, less the last argument, exists then the code will not compile
 due to a nondeterminism.  This can be worked around by casting null to the
@@ -132,3 +107,24 @@ public class A {
   }
 }
 
+
+- Reporting bugs.  If you happen to find a bug in the software, please send me
+a message, schewe@tcfreenet.org.  At least include the message that was output
+and a description of what condition was being checked.  A stand alone test
+case that causes the error is REALLY helpful if you can do such a thing.
+
+
+TODO:
+- fix bugs!
+
+- Assertions on native methods are not checked.  It seems like it'd be pretty
+hard to insert code into the C.  One idea is to create another method that
+calls the new native method...
+
+- Get assertions off of implemented interfaces.
+
+- hook up to ant for builds
+
+- Build patch for Jikes that allows Assert to be called as files are compiled
+with Jikes.  Would be really nice if it could keep the same JVM running so
+interfaces wouldn't have to be reparsed, but that could be tough.
