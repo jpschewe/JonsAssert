@@ -23,31 +23,36 @@ public class AssertMethod implements Named {
 
   /**
      @param theClass the class that this method is contained in
-     @param name the name of this method
+     @param name the name of this method, will match the name of the class if a constructor
      @param preConditions the preconditions for this method
      @param postConditions the postconditions for this method
      @param params Vector of StringPairs, (class, parameter name)
-     @param retType the return type of this method
+     @param retType the return type of this method, null signals this method is a constructor
+     @param isStatic true if this method is static
+     @param isPrivate true if this method is private
      
      @pre (theClass != null)
      @pre (name != null)
      @pre (preConditions != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(postConditions, AssertToken.class))
      @pre (postConditions != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(preConditions, AssertToken.class))
      @pre (params != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(StringPair.class))
-     @pre (retType != null)
   **/
   public AssertMethod(final AssertClass theClass,
                       final String name,
                       final Vector preConditions,
                       final Vector postConditions,
                       final Vector params,
-                      final String retType) {
+                      final String retType,
+                      final boolean isStatic,
+                      final boolean isPrivate) {
     _name = name;
     _preConditions = preConditions;
     _postConditions = postConditions;
     _theClass = theClass;
     _params = params;
     _retType = retType;
+    _static = isStatic;
+    _private = isPrivate;
     _exits = new Vector();
   }
 
@@ -145,4 +150,30 @@ public class AssertMethod implements Named {
     return _retType;
   }
 
+  /**
+     @return true if this method is static, therefore the pre and post checks
+     need to be static and the invariant condition isn't checked.
+  **/
+  public boolean isStatic() {
+    return _static;
+  }
+  private boolean _static;
+
+  /**
+     @return true if this method is private, therefore the invariant condition isn't checked.
+  **/
+  public boolean isPrivate() {
+    return _private;
+  }
+  private boolean _private;
+
+  /**
+     @return true if this method is a constructor, therefore do the special
+     processing for the preConditions and don't check the invariant at the top
+     of the method, only at the bottom.
+  **/
+  public boolean isConstructor() {
+    return (getReturnType() == null);
+  }
+  
 }

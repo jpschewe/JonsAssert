@@ -1,3 +1,8 @@
+2000-01-22  Jon Schewe  <schewe@tcfreenet.org>
+
+	* AssertMethod.java: Added stuff for static and private methods,
+	so I can tell the difference when I generate code.
+
 2000-01-22  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* CodeGenerator.java: Added roughed out version of how to handle constructors

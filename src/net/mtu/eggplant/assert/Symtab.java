@@ -56,13 +56,16 @@ import java.util.Vector;
       Static or not (boolean)
       
   At end of method build CodeFragments for all pre, post, invariants and
-  associate them with the current file being processed
+  associate them with the current file being processed at the correct lines.
+  Also put the checkPost and checkPre methods on the end of the class, right
+  after the '}'
 
   Associate asserts with the current file as they appear
 
-  At the end of a class create a CodeFragment that contains all of the extra
-  methods that need to be called and associate it with the current file, grab
-  (line, column) from the parser token for '}'
+  At the end of a class create a CodeFragment that contains the checkInvariant
+  method and associate it with the current file, put it at '}', get this from
+  the parser token.
+  
 
 */
 
