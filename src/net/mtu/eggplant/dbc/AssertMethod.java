@@ -27,21 +27,21 @@
  */
 package net.mtu.eggplant.dbc;
 
-import net.mtu.eggplant.util.StringPair;
-import net.mtu.eggplant.util.Named;
-import net.mtu.eggplant.util.Pair;
-import net.mtu.eggplant.util.algorithms.Copying;
-
 import java.util.HashSet;
-import java.util.Set;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+import net.mtu.eggplant.util.Named;
+
+import net.mtu.eggplant.util.algorithms.Copying;
 
 /**
  * Object that contains the data needed to generate instrumented code for a
  * method.
  * 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class AssertMethod implements Named {
 
@@ -78,7 +78,7 @@ public class AssertMethod implements Named {
     _retType = retType;
     _mods = mods;
     _exits = new HashSet(10);
-    _thrownExceptions = new HashSet(10);
+    _thrownExceptions = new LinkedHashSet(10);
   }
 
   //Named
@@ -94,7 +94,7 @@ public class AssertMethod implements Named {
   /**
      @return the class that this method belongs to.
   **/
-  final public AssertClass getContainingClass() {
+  public final AssertClass getContainingClass() {
     return _theClass;
   }
     
@@ -104,7 +104,7 @@ public class AssertMethod implements Named {
   /**
      @return the preConditions for this method, list of {@link AssertToken AssertTokens}
   **/
-  final public List getPreConditions() {
+  public final List getPreConditions() {
     return _preConditions;
   }
 
@@ -114,7 +114,7 @@ public class AssertMethod implements Named {
   /**
      @return the postConditions for this method, list of {@link AssertToken AssertTokens}
   **/
-  final public List getPostConditions() {
+  public final List getPostConditions() {
     return _postConditions;
   }
   
@@ -124,7 +124,7 @@ public class AssertMethod implements Named {
   /**
      Set the entrance to this method.
   **/
-  final public void setMethodEntrance(final CodePoint entrance) {
+  public final void setMethodEntrance(final CodePoint entrance) {
     _entrance = entrance;
   }
 
@@ -132,7 +132,7 @@ public class AssertMethod implements Named {
      @return the entrance to this class, ie. the location of the open brace.
      Don't modify this Point.
   **/
-  final public CodePoint getEntrance() {
+  public final CodePoint getEntrance() {
     return _entrance;
   }
   
@@ -149,7 +149,7 @@ public class AssertMethod implements Named {
      
      @pre (exit != null)
   **/
-  final public void addExit(final CodePointPair points) {
+  public final void addExit(final CodePointPair points) {
     _exits.add(points);
   }
   
@@ -158,7 +158,7 @@ public class AssertMethod implements Named {
      closing brace if this is a void method.  Don't modify this Set.
      Set of {@link CodePointPair CodePointPairs(start of return, semicolon)}
   **/
-  final public Set getExits() {
+  public final Set getExits() {
     return _exits;
   }
   
@@ -168,7 +168,7 @@ public class AssertMethod implements Named {
      @return List of {@link StringPair StringPairs, (class, parameter name)}, don't modify this
      List
   **/
-  final public List getParams() {
+  public final List getParams() {
     return _params;
   }
 
@@ -192,7 +192,7 @@ public class AssertMethod implements Named {
   /**
      @return the return type of this method, used for building post checks
   **/
-  final public String getReturnType() {
+  public final String getReturnType() {
     return _retType;
   }
 
@@ -201,14 +201,14 @@ public class AssertMethod implements Named {
      processing for the preConditions and don't check the invariant at the top
      of the method, only at the bottom.
   **/
-  final public boolean isConstructor() {
+  public final boolean isConstructor() {
     return (getReturnType() == null);
   }
 
   /**
      @return true if this method is a void method, this includes constructors.
   **/
-  final public boolean isVoid() {
+  public final boolean isVoid() {
     return (getReturnType() == null || getReturnType().equals("void"));
   }
 
@@ -217,14 +217,14 @@ public class AssertMethod implements Named {
   /**
      @return the point at which should be added to be just outside the method, location of '}' + 1
   **/
-  final public CodePoint getClose() {
+  public final CodePoint getClose() {
     return _close;
   }
 
   /**
      Set the point at which should be added to be just outside the method, location of '}' + 1
   **/
-  final public void setClose(final CodePoint close) {
+  public final void setClose(final CodePoint close) {
     _close = close;
   }
 
@@ -237,11 +237,11 @@ public class AssertMethod implements Named {
   /**
      @pre (thrownExceptions != null)
   **/
-  final public void setThrownExceptions(final Set thrownExceptions) {
+  public final void setThrownExceptions(final Set thrownExceptions) {
     _thrownExceptions = thrownExceptions;
   }
   
-  final public Set getThrownExceptions() {
+  public final Set getThrownExceptions() {
     return _thrownExceptions;
   }
 
@@ -258,14 +258,14 @@ public class AssertMethod implements Named {
      @return true if this method is static, therefore the pre and post checks
      need to be static and the invariant condition isn't checked.
   **/
-  final public boolean isStatic() {
+  public final boolean isStatic() {
     return _mods.contains("static");
   }
 
   /**
      @return true if this method is private, therefore the invariant condition isn't checked.
   **/
-  final public boolean isPrivate() {
+  public final boolean isPrivate() {
     return _mods.contains("private");
   }
 
@@ -273,7 +273,7 @@ public class AssertMethod implements Named {
   /**
      @return true if this method is abstract or native
   **/
-  final public boolean isAbstract() {
+  public final boolean isAbstract() {
     return _mods.contains("abstract") || _mods.contains("native");
   }
 
@@ -283,7 +283,7 @@ public class AssertMethod implements Named {
      @return a string representing the visibility of this method,
      /&#42;package&#42;/ is returned for package visibility
   **/
-  final public String getVisibility() {
+  public final String getVisibility() {
     if(_mods.contains("private")) {
       return "private";
     } else if(_mods.contains("protected")) {
@@ -305,7 +305,7 @@ public class AssertMethod implements Named {
      @return a string representing the visibility of this method,
      /&#42;package&#42;/ is returned for package visibility
   **/
-  final public String getAssertMethodVisibility() {
+  public final String getAssertMethodVisibility() {
     if(isConstructor()) {
       //Constructors are a special case, never called from subclass
       return "private";

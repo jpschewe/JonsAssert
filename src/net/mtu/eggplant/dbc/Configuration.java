@@ -34,7 +34,7 @@ import java.util.StringTokenizer;
 /**
  * Holds all the option values.
  * 
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class Configuration {
 
@@ -79,7 +79,7 @@ public class Configuration {
   /**
    * @see #ignoreTimeStamp()
    */
-  public void setIgnoreTimeStamp(boolean b) {
+  public void setIgnoreTimeStamp(final boolean b) {
     _ignoreTimeStamp = b;
   }
   private boolean _ignoreTimeStamp = false;
@@ -158,8 +158,7 @@ public class Configuration {
         if(!f.mkdir()) {
           throw new RuntimeException("Couldn't create directory and it doesn't exist: " + dir.toString());
         }
-      }
-      else if(!f.isDirectory()) {
+      } else if(!f.isDirectory()) {
         throw new RuntimeException("Error creating destination directories, file found where directory expected: " + dir.toString());
       }
     }
@@ -201,6 +200,9 @@ public class Configuration {
   }
 
   // Inner classes only below here
+  /**
+   * Enum for which version of source compatibility we're using.
+   */
   public static final class SourceCompatibilityEnum {
     /**
      * @pre (null != name)
@@ -223,5 +225,16 @@ public class Configuration {
    * @see #isPrettyOutput()
    */
   public final void setPrettyOutput(final boolean b) { _prettyOutput = b; }
+
   
+  private boolean _verbose = false;
+  /**
+   * Should we be verbose about what we're doing?  Defaults to false. 
+   */
+  public final boolean isVerbose() { return _verbose; }
+
+  /**
+   * @see #isVerbose()
+   */
+  public final void setVerbose(final boolean v) { _verbose = v; }
 }

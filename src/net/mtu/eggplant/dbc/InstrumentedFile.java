@@ -27,18 +27,18 @@
  */
 package net.mtu.eggplant.dbc;
 
-import java.util.Vector;
+import java.io.File;
+
 import java.util.SortedSet;
 import java.util.TreeSet;
-
-import java.io.File;
+import java.util.Vector;
 
 /**
  * Represents the instrumentation that needs to be added to a file.  This
  * contains a list of CodeFragments that are the assertions and a list of
  * classes that are parsed, but still need to be turned into CodeFragments.
  * 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 /*package*/ class InstrumentedFile {
 
@@ -54,19 +54,19 @@ import java.io.File;
     _classes = new Vector();
   }
 
-  final public File getFile() {
+  public final File getFile() {
     return _file;
   }
   
-  final public SortedSet getFragments() {
+  public final SortedSet getFragments() {
     return _fragments;
   }
 
-  final public Vector getClasses() {
+  public final Vector getClasses() {
     return _classes;
   }
 
-  public boolean equals(Object other) {
+  public boolean equals(final Object other) {
     if(other instanceof InstrumentedFile) {
       return ((InstrumentedFile)other).getFile().equals(getFile());
     }

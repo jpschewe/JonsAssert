@@ -1,3 +1,14 @@
+2004-04-05  Jon Schewe  <jpschewe@mtu.net>
+
+	* Release 0.6
+	
+	* src/net/mtu/eggplant/dbc/java.g: Use custom error handling to
+	make emacs compatible output.
+
+	* src/net/mtu/eggplant/dbc/JonsAssert.java: Added checkstyle to
+	build to clean up the code.
+	(main): Added verbose flag to minimize output during normal operations.
+
 2004-04-04  Jon Schewe  <jpschewe@mtu.net>
 	
 	* Release 0.6

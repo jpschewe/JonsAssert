@@ -27,26 +27,27 @@
  */
 package net.mtu.eggplant.dbc;
 
-import net.mtu.eggplant.util.UnaryPredicate;
-import net.mtu.eggplant.util.StringPair;
-import net.mtu.eggplant.util.algorithms.Filtering;
-
 import java.lang.reflect.Method;
 
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Comparator;
-import java.util.Iterator;
+
+import net.mtu.eggplant.util.StringPair;
+import net.mtu.eggplant.util.UnaryPredicate;
+
+import net.mtu.eggplant.util.algorithms.Filtering;
 
 /**
  * class of static helper methods for assertions.
  * 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-final public class AssertTools {
+public final class AssertTools {
 
   /**
    * if inherited conditions should be enforced
@@ -104,7 +105,7 @@ final public class AssertTools {
    * @pre (methodName != null)
    * @pre (methodArgs != null)
    */
-  static public Method findSuperMethod(final Class thisClass, final String methodName, final Class[] methodArgs) {
+  public static Method findSuperMethod(final Class thisClass, final String methodName, final Class[] methodArgs) {
 //          System.out.println("findSuperMethod:"
 //                             + " thisClass: " + thisClass
 //                             + " methodName: " + methodName
@@ -119,13 +120,11 @@ final public class AssertTools {
           fullSuperClassName = fullSuperClassName.replace('$', '_');          
           final String supermname = "jps__" + fullSuperClassName + "_" + methodName;
           superMethod = superClass.getDeclaredMethod(supermname, methodArgs);
-        }
-        catch(final NoSuchMethodException nsme) {
+        } catch(final NoSuchMethodException nsme) {
           // no method, don't bother
           //Try up another level
           superClass = superClass.getSuperclass();
-        }
-        catch(final SecurityException se) {
+        } catch(final SecurityException se) {
           //This is real bad, spit out internal error here
           internalError("Security exception trying to find method " + methodName + ": " + se);
           return null;
@@ -135,16 +134,16 @@ final public class AssertTools {
     return superMethod;
   }
 
-  static private AssertionViolation _currentAssertionViolation = null;
+  private static AssertionViolation _currentAssertionViolation = null;
 
   /**
      set the assertion violation that should be throw next.
   **/
-  static public void setCurrentAssertionViolation(final AssertionViolation violation) {
+  public static void setCurrentAssertionViolation(final AssertionViolation violation) {
     _currentAssertionViolation = violation;
   }
 
-  static public AssertionViolation getCurrentAssertionViolation() {
+  public static AssertionViolation getCurrentAssertionViolation() {
     return _currentAssertionViolation;
   }
 
@@ -156,7 +155,7 @@ final public class AssertTools {
      
      @pre (av != null)
   **/
-  static public void assertFailed(final AssertionViolation av) {
+  public static void assertFailed(final AssertionViolation av) {
     if(ENFORCE_ASSERT_CONDITION) {
       fail(av);
     }
@@ -170,7 +169,7 @@ final public class AssertTools {
      
      @pre (av != null)
   **/
-  static public void invariantFailed(final AssertionViolation av) {
+  public static void invariantFailed(final AssertionViolation av) {
     if(ENFORCE_INVARIANT_CONDITION) {
       fail(av);
     }
@@ -184,7 +183,7 @@ final public class AssertTools {
      
      @pre (av != null)
   **/
-  static public void postConditionFailed(final AssertionViolation av) {
+  public static void postConditionFailed(final AssertionViolation av) {
     if(ENFORCE_POST_CONDITION) {
       fail(av);
     }
@@ -198,7 +197,7 @@ final public class AssertTools {
 
      @pre (av != null)
   **/
-  static public void preConditionFailed(final AssertionViolation av) {
+  public static void preConditionFailed(final AssertionViolation av) {
     if(ENFORCE_PRE_CONDITION) {
       fail(av);
     }
@@ -211,7 +210,7 @@ final public class AssertTools {
 
      @pre (null != av)
   **/
-  static public void fail(final AssertionViolation av) {
+  public static void fail(final AssertionViolation av) {
     if("CONTINUE".equalsIgnoreCase(ASSERT_BEHAVIOR)) {
       av.printStackTrace();
     } else if("EXCEPTION".equalsIgnoreCase(ASSERT_BEHAVIOR)) {
@@ -227,7 +226,7 @@ final public class AssertTools {
      called whenever an erorr occurs in the code that was generated that is
      not caused by the user.  Generate some useful message and then blow up.
   **/
-  static public void internalError(final String message) {
+  public static void internalError(final String message) {
     throw new RuntimeException("You have found a bug!  Please see the README for instructions on reporting bugs." + System.getProperty("line.separator") + message);
   }
 
@@ -239,7 +238,7 @@ final public class AssertTools {
    * 
    * @return null for no such class found
    */
-  static public Class classForName(final String className) {
+  public static Class classForName(final String className) {
     if(className == null) {
       return null;
     }
@@ -254,7 +253,7 @@ final public class AssertTools {
     return thisClass;
   }
 
-  private static final Set _lockedMethods = new HashSet(20);
+  private static final Set LOCKED_METHODS = new HashSet(20);
   /**
    * Lock a method.  This is used at the top of the pre, post and invariant
    * check methods so that the methods don't get called recursively.  
@@ -264,14 +263,14 @@ final public class AssertTools {
    * static methods)
    * @return the lock if it succeeded, null if it failed
    **/
-  static synchronized public MethodLock lockMethod(final String signature,
-                                                final Object instance) {
+  public static synchronized MethodLock lockMethod(final String signature,
+                                                   final Object instance) {
     final Thread thread = Thread.currentThread();
     final MethodLock lock = new MethodLock(signature, instance, thread);
-    if(_lockedMethods.contains(lock)) {
+    if(LOCKED_METHODS.contains(lock)) {
       return null;
     } else {
-      _lockedMethods.add(lock);
+      LOCKED_METHODS.add(lock);
       return lock;
     }
   }
@@ -284,8 +283,8 @@ final public class AssertTools {
    * 
    * @see #lockMethod(String, Object)
    */
-  static synchronized public boolean unlockMethod(final MethodLock lock) {
-    return _lockedMethods.remove(lock);
+  public static synchronized boolean unlockMethod(final MethodLock lock) {
+    return LOCKED_METHODS.remove(lock);
   }
 
   /**
@@ -342,7 +341,7 @@ final public class AssertTools {
    *     
    * @pre (assertClass != null)
    */
-  static public void setUniqueParams(final AssertClass assertClass) {
+  public static void setUniqueParams(final AssertClass assertClass) {
     final Set methods = assertClass.getMethods();
 
     //Sort by parameter list size    
@@ -451,10 +450,7 @@ final public class AssertTools {
      string compare of parameter types, boolean are always last.  This makes
      my uniqueness algorithm a little quicker.
   **/
-  static private Comparator CONSTRUCTOR_PARAM_COMPARATOR = new Comparator() {
-    public boolean equals(final Object other) {
-      return other == this;
-    }
+  private static final Comparator CONSTRUCTOR_PARAM_COMPARATOR = new Comparator() {
     public int compare(final Object o1, final Object o2) {
       if(o1.equals(o2)) {
         return 0;
@@ -502,7 +498,7 @@ final public class AssertTools {
 
      @pre (type != null)
   **/
-  static public boolean isPrimative(final String type) {
+  public static boolean isPrimative(final String type) {
     return (type.equals("boolean")
             || type.equals("byte")
             || type.equals("char")
@@ -518,7 +514,7 @@ final public class AssertTools {
      This signals a case where optimizations can be done by not generated
      assertion methods.
   **/
-  static public boolean extendsObject(final AssertClass clazz) {
+  public static boolean extendsObject(final AssertClass clazz) {
     final String superclass = clazz.getSuperclass();
     return (superclass == null || superclass.equals("java.lang.Object")) &&
       clazz.getInterfaces().isEmpty();
@@ -530,15 +526,18 @@ final public class AssertTools {
      encountered it, then one can be assured that it's already been determined
      that a class has been checked for and not found.
   **/
-  final static public NONE NO_CLASS = new NONE();
-  static private class NONE {
+  public static final NONE NO_CLASS = new NONE();
+  /**
+   * Represent no class. 
+   */
+  private static class NONE {
     public void noMethod() {} //used for no super method
   }
 
   /**
    * Used in caching to represent that no super method can be found.
    */
-  final static public Method NO_METHOD;
+  public static final Method NO_METHOD;
   static {
     Method noMethod = null;
     try {

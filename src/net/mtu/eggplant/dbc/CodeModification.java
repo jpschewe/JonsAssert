@@ -31,7 +31,7 @@ package net.mtu.eggplant.dbc;
  * Used for representing a modification to code, rather than just a chunck of
  * code to be inserted.
  *
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class CodeModification extends CodeFragment {
 
@@ -53,12 +53,12 @@ public class CodeModification extends CodeFragment {
     _searchText = searchText;
   }
 
-  final public String getSearchText() {
+  public final String getSearchText() {
     return _searchText;
   }
   private String _searchText;
   
-  final public String getReplaceText() {
+  public final String getReplaceText() {
     return getCode();
   }
 

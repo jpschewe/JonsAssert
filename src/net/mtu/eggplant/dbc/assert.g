@@ -264,7 +264,7 @@ JAVADOC_CLOSE
     "*/"
         {
           LOG.debug("Assert: got end of javadoc comment #" + text + "#");
-          JonsAssert.selector.pop();
+          JonsAssert.getSelector().pop();
       //JonsAssert.selector.push(JonsAssert.javaLexer);
         }
     ;

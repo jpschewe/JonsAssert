@@ -41,10 +41,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import net.mtu.eggplant.util.Function;
-
-import net.mtu.eggplant.util.algorithms.Applying;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -73,15 +69,12 @@ import org.apache.log4j.Logger;
  * {@link #instrument(Configuration, Collection) instrument} with a Configuration
  * object and a Collection of files.</p>
  *
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
-public class JonsAssert {
+public final class JonsAssert {
 
-  static /* package */ TokenStreamSelector selector = new TokenStreamSelector();
-  static /* package */ JavaLexer javaLexer;
-  static /* package */ AssertLexer assertLexer;
-  /** the symbol table */
-  static private boolean _debugLexer = false;
+  private JonsAssert() {}
+  
   private static final Logger LOG = Logger.getLogger(JonsAssert.class);
   
   /**
@@ -89,7 +82,7 @@ public class JonsAssert {
    *
    * @param args see <a href="#commandline_doc">commandline options</a>
    */
-  static public void main(final String[] args) {
+  public static void main(final String[] args) {
     final Configuration config = new Configuration();
 
     //Setup all of the options
@@ -103,6 +96,7 @@ public class JonsAssert {
     options.addOption("debug", false, "");
     options.addOption("prettyOutput", "prettyOutput", false, "put in carriage returns in the generated code.  This makes the output easier to read, but screws up line numbers");
     options.addOption("disableExit", "disableExit", false, "Disable System.exit during instrumentation");
+    options.addOption("v", "verbose", false, "Should we be verbose?");
 
     //list to hold files/directories to instrument
     final Collection files = new LinkedList();
@@ -150,6 +144,9 @@ public class JonsAssert {
       }
       if(cmd.hasOption("disableExit")) {
         _disableExit = true;
+      }
+      if(cmd.hasOption("v")) {
+        config.setVerbose(true);
       }
       
       final Iterator iter = cmd.getArgList().iterator();
@@ -246,7 +243,9 @@ public class JonsAssert {
     boolean success = true;
     // if we have at least one file to parse
     if(!files.isEmpty()) {
-      System.out.println("Instrumenting...");
+      if(getSymtab().getConfiguration().isVerbose()) {
+        System.out.println("Instrumenting...");
+      }
       // for each directory/file specified on the command line
       final Iterator iter = files.iterator();
       while(iter.hasNext()) {
@@ -254,7 +253,9 @@ public class JonsAssert {
         success &= doFile(file); // parse it
       }
     } else {
-      System.out.println("Parsing testcases...");
+      if(getSymtab().getConfiguration().isVerbose()) {
+        System.out.println("Parsing testcases...");
+      }
       config.setIgnoreTimeStamp(true);
       //Test case
       success &= doFile(new File("net/mtu/eggplant/assert/testcases/")); // parse it
@@ -277,13 +278,15 @@ public class JonsAssert {
     boolean writeFile = false; //do we need to write the file 
     if (f.isDirectory()) {
       // If this is a directory, walk each file/dir in that directory      
-      final String files[] = f.list();
+      final String[] files = f.list();
       for(int i=0; i < files.length; i++) {
         success &= doFile(new File(f, files[i]));
       }
     } else if(f.getName().endsWith("." + getSymtab().getConfiguration().getSourceExtension())) {
       // otherwise, this is a java file, parse it!
-      System.out.println(f.getName()); //let the user know where we are
+      if(getSymtab().getConfiguration().isVerbose()) {
+        System.out.println(f.getName()); //let the user know where we are
+      }
       
       if(getSymtab().startFile(f)) {
         try {
@@ -301,14 +304,14 @@ public class JonsAssert {
           success = true;
           writeFile = false;
         } catch (final TokenStreamException tse) {
-          System.err.println("parser exception: " + tse);
+          System.err.println(f.getAbsolutePath() + ": " + tse);
           if(LOG.isDebugEnabled()) {
             LOG.debug(tse);
           }
           success = false;
           writeFile = false;
         } catch (final RecognitionException re) {
-          System.err.println("parser exception: " + re);
+          System.err.println(f.getAbsolutePath() + ":" + re.getLine() + ": " + re.getMessage());
           if(LOG.isDebugEnabled()) {
             LOG.debug(re);
           }
@@ -329,12 +332,12 @@ public class JonsAssert {
    */
   private static void parseFile(final InputStream s) throws TokenStreamException, RecognitionException {
     // Create a scanner that reads from the input stream passed to us
-    javaLexer = new JavaLexer(s);
-    assertLexer = new AssertLexer(javaLexer.getInputState());
+    _javaLexer = new JavaLexer(s);
+    _assertLexer = new AssertLexer(_javaLexer.getInputState());
       
-    selector.addInputStream(javaLexer, "java");
-    selector.addInputStream(assertLexer, "assert");
-    selector.select(javaLexer);
+    _selector.addInputStream(_javaLexer, "java");
+    _selector.addInputStream(_assertLexer, "assert");
+    _selector.select(_javaLexer);
 
     // Create a parser that reads from the scanner
     final Configuration.SourceCompatibilityEnum sourceCompatibility = getSymtab().getConfiguration().getSourceCompatibility();
@@ -342,7 +345,7 @@ public class JonsAssert {
     //inheritance, when antlr is fixed change java.g and java14.g to contain
     //proper assert functionality
     if(Configuration.JAVA_1_4 == sourceCompatibility) {
-      final JavaRecognizer parser = new JavaRecognizer(selector);
+      final JavaRecognizer parser = new JavaRecognizer(_selector);
       if(_debugLexer) {
         debugLexer(parser);
       } else {
@@ -350,7 +353,7 @@ public class JonsAssert {
         parser.compilationUnit();
       }
     } else if(Configuration.JAVA_1_3 == sourceCompatibility) {
-      final Java14Recognizer parser = new Java14Recognizer(selector);
+      final Java14Recognizer parser = new Java14Recognizer(_selector);
       if(_debugLexer) {
         debugLexer(parser);
       } else {
@@ -366,19 +369,19 @@ public class JonsAssert {
   /**
    * Get the symbol table.
    */
-  public static final Symtab getSymtab() {
+  public static Symtab getSymtab() {
     return _symtab;
   }
 
   /**
    * Just print out the tokens as they're found.
    */
-  private static final void debugLexer(final Parser parser) throws TokenStreamException {
-    antlr.Token tok = selector.nextToken();
+  private static void debugLexer(final Parser parser) throws TokenStreamException {
+    antlr.Token tok = _selector.nextToken();
     while(null != tok.getText()) {
       System.out.print("JonsAssert: " + tok);
       System.out.println(" name=" + parser.getTokenName(tok.getType()));
-      tok = selector.nextToken();
+      tok = _selector.nextToken();
     }
   }
 
@@ -388,4 +391,15 @@ public class JonsAssert {
    * Get the exit code.
    */
   public static int getExitCode() { return _exitCode; }
+
+  private static TokenStreamSelector _selector = new TokenStreamSelector();
+  /*package*/ static TokenStreamSelector getSelector() { return _selector; }
+  
+  private static JavaLexer _javaLexer;
+  
+  private static AssertLexer _assertLexer;
+  /*package*/ static AssertLexer getAssertLexer() { return _assertLexer; }
+  
+  private static boolean _debugLexer = false;
+  
 }

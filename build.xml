@@ -4,7 +4,7 @@
 
   <!-- used for building releases -->
   <property name="app.name"   value="JonsAssert" />
-  <property name="app.version" value="0.6" />
+  <property name="app.version" value="0.7" />
   <property name="instrument.dir"  value="instrumented" />
   <property name="build.dir"  value="build" />
   <property name="release.html.dir" value="/home/jpschewe/public_html/mtu.net/public_html" />
@@ -56,6 +56,25 @@
     <pathelement location="${basedir}/lib/junit-3.8.jar"/>
   </path>
 
+  <target name="NightlyTasks"
+          description="Tasks to run on a regular basis in batch">
+    <!-- delete the temp files -->
+    <delete dir="${temp.dir}" />
+    <mkdir dir="${temp.dir}" />    
+    <!-- get the source out of cvs -->
+    <cvs cvsRoot="${cvs.root}"
+         package="${cvs.module}"
+         dest="${temp.dir}"
+         quiet="true" />
+
+    <antcall target="nightly.javadoc">
+      <param name="basedir" value="${temp.dir}/${cvs.module}" />
+    </antcall>
+
+    <!-- delete the temp files -->
+    <delete dir="${temp.dir}" />
+  </target>
+
   <target name="antlrTasks" depends="init,buildJavaLexer,buildJava14Lexer,buildAssertLexer" />
 
   <target name="buildJavaLexer" unless="buildJavaLexer.notRequired">
@@ -98,7 +117,9 @@
     </java>
   </target>
   
-  <target name="compile" depends="init,antlrTasks" description="Compile everything">
+  <target name="compile"
+          depends="init,checkstyle,antlrTasks"
+          description="Compile everything">
   <!-- broken
   <target name="compile" depends="init">
     <antlr target="${basedir}/src/net/mtu/eggplant/dbc/java.g" />
@@ -219,8 +240,8 @@
     </java>
   </target>
 
-  <target name="compile.assert"
-          depends="init,instrument"
+  <target name="compile.dbc"
+          depends="init,checkstyle,instrument"
           description="Instrument the code, then compile">
     <java classname="antlr.Tool"
 	  fork="yes"
@@ -353,6 +374,61 @@
     <echo message="Remember to sync out to mtu.net" />
   </target>
 
+  <!-- ===================== Checkstyle =================== -->
+  <taskdef resource="checkstyletask.properties">
+    <classpath>
+      <pathelement location="lib/antlr.jar" />
+      <pathelement location="lib/ant/checkstyle-3.3.jar" />
+      <pathelement location="lib/ant/commons-beanutils.jar" />
+      <pathelement location="lib/commons-cli-1.0.jar" />
+      <pathelement location="lib/ant/commons-collections.jar" />
+      <pathelement location="lib/ant/commons-logging.jar" />
+      <pathelement location="lib/ant/jakarta-regexp-1.3.jar" />
+    </classpath>
+  </taskdef>
+
+  <target name="checkstyle"
+          description="Check for code convention violations"
+          >
+    <mkdir dir="${build.dir}/classes" />
+
+    <checkstyle config="checkstyle_checks.xml">
+      <fileset dir="${basedir}/src">
+        <include name="**/*.java" />
+        <exclude name="net/mtu/eggplant/dbc/AssertLexer.java" />
+        <exclude name="net/mtu/eggplant/dbc/AssertLexerTokenTypes.java" />
+        <exclude name="net/mtu/eggplant/dbc/JavaTokenTypes.java" />
+        <exclude name="net/mtu/eggplant/dbc/JavaLexer.java" />
+        <exclude name="net/mtu/eggplant/dbc/JavaRecognizer.java" />
+        <exclude name="net/mtu/eggplant/dbc/Java14Recognizer.java" />
+        <exclude name="net/mtu/eggplant/dbc/Java14RecognizerTokenTypes.java" />
+        <exclude name="net/mtu/eggplant/dbc/testcases/**" />
+      </fileset>
+    </checkstyle>
+  </target>
+
+  <target name="checkstyle.nightly"
+          description="Check for code convention violations (more aggressive)"
+          >
+    <mkdir dir="${build.dir}/classes" />
+
+    <checkstyle config="checkstyle_nightly_checks.xml"
+                failOnViolation="false"
+                >
+      <fileset dir="${basedir}/src">
+        <include name="**/*.java" />
+        <exclude name="net/mtu/eggplant/dbc/AssertLexer.java" />
+        <exclude name="net/mtu/eggplant/dbc/AssertLexerTokenTypes.java" />
+        <exclude name="net/mtu/eggplant/dbc/JavaTokenTypes.java" />
+        <exclude name="net/mtu/eggplant/dbc/JavaLexer.java" />
+        <exclude name="net/mtu/eggplant/dbc/JavaRecognizer.java" />
+        <exclude name="net/mtu/eggplant/dbc/Java14Recognizer.java" />
+        <exclude name="net/mtu/eggplant/dbc/Java14RecognizerTokenTypes.java" />
+        <exclude name="net/mtu/eggplant/dbc/testcases/**" />
+      </fileset>
+    </checkstyle>
+  </target>
+
   <!-- Javadoc targets below here -->
   <target name="local.javadoc"
           description="Build javadoc locally without external links">
@@ -420,23 +496,13 @@
   </target>
 
   <target name="nightly.javadoc"
+          depends="antlrTasks,checkstyle.nightly"
           description="Do a nightly build of the Javadoc to my fileserver">
-    <mkdir dir="${basedir}/${temp.dir}" />    
-    <!-- get the source out of cvs -->
-    <cvs cvsRoot="${cvs.root}"
-         package="${cvs.module}"
-         dest="${basedir}/${temp.dir}"
-         quiet="true" />
 
-    <!-- build the lexers -->
-    <antcall target="antlrTasks">
-      <param name="basedir" value="${basedir}/${temp.dir}/assert" />
-    </antcall>
-      
     <!-- run javadoc on the source -->
     <mkdir dir="${nightly.html.dir}/${app.name}" />
     <javadoc packagenames="net.mtu.eggplant.*"
-             sourcepath="${basedir}/${temp.dir}/assert/src"
+             sourcepath="${basedir}/src"
              use="true"
              splitindex="true"
              version="true"
@@ -458,8 +524,6 @@
       <link href="${local.java.projects}/JonsInfra/" />
     </javadoc>
     
-    <!-- delete the temp files -->
-    <delete dir="${basedir}/${temp.dir}" />
   </target>
 
 </project>

@@ -34,10 +34,12 @@ import net.mtu.eggplant.util.StringPair;
 import net.mtu.eggplant.util.StringUtils;
 
 /**
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
-public class CodeGenerator {
+public final class CodeGenerator {
 
+  private CodeGenerator() { }
+  
   //some handy constants
   private static final String ASSERT_TOOLS_CLASSNAME = AssertTools.class.getName();
   private static final String ASSERTION_VIOLATION_CLASSNAME = AssertionViolation.class.getName();
@@ -50,7 +52,7 @@ public class CodeGenerator {
    *
    *  @pre (tok != null)
    */
-  static public String generateAssertion(final AssertToken tok) {
+  public static String generateAssertion(final AssertToken tok) {
     final String condition = tok.getCondition();
     final String message = tok.getMessage();
 
@@ -89,7 +91,7 @@ public class CodeGenerator {
    *  
    *  @return a string of code that will call the checkInvariant method
    */
-  static public String generateInvariantCall(final AssertClass aClass) {
+  public static String generateInvariantCall(final AssertClass aClass) {
     String mclassName = aClass.getFullName().replace('.', '_');
     mclassName = mclassName.replace('$', '_');
     final StringBuffer code = new StringBuffer();
@@ -115,7 +117,7 @@ public class CodeGenerator {
    *
    *  @pre (assertClass != null)
    */
-  static public String generateInvariantMethod(final AssertClass assertClass) {
+  public static String generateInvariantMethod(final AssertClass assertClass) {
     final String className = assertClass.getFullName();
     String mclassName = className.replace('.', '_');
     mclassName = mclassName.replace('$', '_');
@@ -272,7 +274,7 @@ public class CodeGenerator {
 
      @pre (assertMethod != null)
   **/
-  static public String generatePreConditionCall(final AssertMethod assertMethod) {
+  public static String generatePreConditionCall(final AssertMethod assertMethod) {
     final StringBuffer code = new StringBuffer();
     carriageReturn(code);
     String mclassName = assertMethod.getContainingClass().getFullName().replace('.', '_');
@@ -317,7 +319,7 @@ public class CodeGenerator {
      
      @pre (assertMethod.isConstructor())
   **/
-  static public String generateConstructorAssertions(final AssertMethod assertMethod) {
+  public static String generateConstructorAssertions(final AssertMethod assertMethod) {
     final StringBuffer code = new StringBuffer();
     carriageReturn(code);
     final String dummyClassName = "JPS_" + assertMethod.getContainingClass().createDummyConstructorClassName();
@@ -476,7 +478,7 @@ public class CodeGenerator {
 
      @pre (assertMethod != null)
   **/
-  static public String generatePostConditionCall(final AssertMethod assertMethod) {
+  public static String generatePostConditionCall(final AssertMethod assertMethod) {
     final StringBuffer code = new StringBuffer();
     carriageReturn(code);
     final String retType = assertMethod.getReturnType();
@@ -534,7 +536,7 @@ public class CodeGenerator {
   /**
      @return the code neccessary to implement the pre conditions on this method
   **/
-  static public String generatePreConditionMethod(final AssertMethod assertMethod) {
+  public static String generatePreConditionMethod(final AssertMethod assertMethod) {
     final String className = assertMethod.getContainingClass().getFullName();
     String mclassName = className.replace('.', '_');
     mclassName = mclassName.replace('$', '_');
@@ -784,7 +786,7 @@ public class CodeGenerator {
   /**
      @return the code neccessary to implement the post conditions on this method
   **/
-  static public String generatePostConditionMethod(final AssertMethod assertMethod) {
+  public static String generatePostConditionMethod(final AssertMethod assertMethod) {
     final String className = assertMethod.getContainingClass().getFullName();
     String mclassName = className.replace('.', '_');
     mclassName = mclassName.replace('$', '_');
@@ -1064,7 +1066,7 @@ public class CodeGenerator {
    *
    * @param postCondition true if we're adding checks for a postcondition method. 
    */
-  static private void addConditionChecks(final StringBuffer code,
+  private static void addConditionChecks(final StringBuffer code,
                                          final List tokens,
                                          final boolean postCondition) {
     final Iterator iter = tokens.iterator();
@@ -1110,7 +1112,7 @@ public class CodeGenerator {
      
      @pre (assertInterface != null && assertInterface.isInterface())
   **/
-  static public String generateAssertClassForInterface(final AssertClass assertInterface) {
+  public static String generateAssertClassForInterface(final AssertClass assertInterface) {
     throw new RuntimeException("Not implemented");
   }
   
@@ -1123,7 +1125,7 @@ public class CodeGenerator {
 
      @pre (cl != null)
   **/
-  static public String getClassObjectForClass(final String cl) {
+  public static String getClassObjectForClass(final String cl) {
     if(cl.equals("int")) {
       return "java.lang.Integer.TYPE";
     } else if(cl.equals("long")) {
@@ -1150,7 +1152,7 @@ public class CodeGenerator {
      if paramType is a primative, return code that will generate a properly
      wrapped primative object, otherwise just return paramName.
   **/
-  static public String getObjectForParam(final String paramType,
+  public static String getObjectForParam(final String paramType,
                                          final String paramName) {
     if(paramType.equals("int")) {
       return "new java.lang.Integer(" + paramName + ")";
@@ -1176,8 +1178,8 @@ public class CodeGenerator {
   /**
    * Build the throws clause for assertMethod.
    */
-  private static final void insertThrowsClause(final StringBuffer code,
-                                                  final AssertMethod assertMethod) {
+  private static void insertThrowsClause(final StringBuffer code,
+                                         final AssertMethod assertMethod) {
     if(!assertMethod.getThrownExceptions().isEmpty()) {
       carriageReturn(code);
       code.append(" throws");
@@ -1197,7 +1199,7 @@ public class CodeGenerator {
   /**
    * Add a carriage return to code if pretty-output is turned on.
    */
-  private static final void carriageReturn(final StringBuffer code) {
+  /*package*/ static void carriageReturn(final StringBuffer code) {
     if(JonsAssert.getSymtab().getConfiguration().isPrettyOutput()) {
       code.append(System.getProperty("line.separator"));
     }

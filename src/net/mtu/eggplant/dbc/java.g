@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.LinkedHashSet;
 
 import org.apache.log4j.Logger;
 }
@@ -92,7 +93,7 @@ import org.apache.log4j.Logger;
  * <p>This parser has been modified from the original Recognizer to a pre-parser
  * that implements assertions in java as well as support JDK 1.4.</p>
  *
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 class JavaRecognizer extends Parser;
 options {
@@ -316,7 +317,9 @@ compilationUnit
       clearInvariants();
 
       //Put the print here so you don't see it unless we're really parsing the files
-      System.out.println("  " + getSymtab().getCurrentFile().getFile().getAbsolutePath());
+      if(getSymtab().getConfiguration().isVerbose()) {
+        System.out.println("  " + getSymtab().getCurrentFile().getFile().getAbsolutePath());
+      }
     }
     
     // Next we have a series of zero or more import statements with
@@ -347,9 +350,6 @@ invariantCondition
    Package statement: "package" followed by an identifier.
 **/
 packageDefinition returns [String packageName]
-options {
-  defaultErrorHandler = true; // let ANTLR handle errors
-}
 {
   Token id = null;
   packageName = null;
@@ -364,13 +364,11 @@ options {
 
 // Import statement: import followed by a package or class name
 importDefinition
-options {defaultErrorHandler = true;}
   : "import" identifierStar SEMI
   ;
 
 // A type definition in a file is either a class or interface definition.
 typeDefinition
-options {defaultErrorHandler = true;}
 {
   Set dummyMods;
 }
@@ -820,7 +818,7 @@ ctorHead returns [Pair p]
 // This is a list of exception classes that the method is declared to throw
 throwsClause returns [Set exceptions]
 {
-  exceptions = new HashSet(10);
+  exceptions = new LinkedHashSet();
   Token id, id2;
 }
   : "throws" id=identifier { exceptions.add(id.getText()); }
@@ -1507,7 +1505,7 @@ JAVADOC_OPEN
   : "/**"
     {
       //LOG.debug("java: got start of javadoc comment #" + text + "#");
-      JonsAssert.selector.push(JonsAssert.assertLexer);
+      JonsAssert.getSelector().push(JonsAssert.getAssertLexer());
     }
   ;
 

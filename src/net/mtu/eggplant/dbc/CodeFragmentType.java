@@ -32,17 +32,17 @@ import net.mtu.eggplant.util.Named;
 /**
  * Represents a type of assertion.
  * 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class CodeFragmentType implements Named, Comparable {
+public final class CodeFragmentType implements Named, Comparable {
 
 
-  final static public CodeFragmentType PRECONDITION = new CodeFragmentType("PRECONDITION", 0);
-  final static public CodeFragmentType OLDVALUES = new CodeFragmentType("OLDVALUES", 1);
-  final static public CodeFragmentType ASSERT = new CodeFragmentType("ASSERT", 2);
-  final static public CodeFragmentType INVARIANT = new CodeFragmentType("INVARIANT", 3);
-  final static public CodeFragmentType POSTCONDITION = new CodeFragmentType("POSTCONDITION", 4);
-  final static public CodeFragmentType POSTCONDITION2 = new CodeFragmentType("POSTCONDITION2", 5);
+  public static final CodeFragmentType PRECONDITION = new CodeFragmentType("PRECONDITION", 0);
+  public static final CodeFragmentType OLDVALUES = new CodeFragmentType("OLDVALUES", 1);
+  public static final CodeFragmentType ASSERT = new CodeFragmentType("ASSERT", 2);
+  public static final CodeFragmentType INVARIANT = new CodeFragmentType("INVARIANT", 3);
+  public static final CodeFragmentType POSTCONDITION = new CodeFragmentType("POSTCONDITION", 4);
+  public static final CodeFragmentType POSTCONDITION2 = new CodeFragmentType("POSTCONDITION2", 5);
 
   /**
      @param name the name of the type
@@ -58,7 +58,7 @@ public class CodeFragmentType implements Named, Comparable {
   }
   private long _rank;
   
-  final public String getName() {
+  public String getName() {
     return _name;
   }
   private String _name;
@@ -67,7 +67,7 @@ public class CodeFragmentType implements Named, Comparable {
     return getName();
   }
 
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     if(o instanceof CodeFragmentType) {
       return (getRank() == ((CodeFragmentType)o).getRank());
     }
@@ -88,15 +88,12 @@ public class CodeFragmentType implements Named, Comparable {
       CodeFragmentType other = (CodeFragmentType)o;
       if(other.equals(this)) {
         return 0;
-      }
-      else if(getRank() < other.getRank()) {
+      } else if(getRank() < other.getRank()) {
         return -1;
-      }
-      else {
+      } else {
         return 1;
       }
-    }
-    else {
+    } else {
       throw new ClassCastException(o.getClass() + " is not a CodeFragmentType");
     }
   }

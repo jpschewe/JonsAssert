@@ -30,15 +30,16 @@ package net.mtu.eggplant.dbc;
 import net.mtu.eggplant.util.Pair;
 
 /**
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-final public class CodePointPair extends Pair {
+public final class CodePointPair extends Pair {
 
   /**
      @pre (one != null)
      @pre (two != null)
   **/
-  public CodePointPair(CodePoint one, CodePoint two) {
+  public CodePointPair(final CodePoint one,
+                       final CodePoint two) {
     super(one, two);
   }
 

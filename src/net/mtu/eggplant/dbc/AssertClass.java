@@ -27,17 +27,17 @@
  */
 package net.mtu.eggplant.dbc;
 
-import net.mtu.eggplant.util.Named;
-
-import java.util.Set;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import net.mtu.eggplant.util.Named;
 
 /**
  * Object to represent an instrumented class.
  * 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class AssertClass implements Named {
 
@@ -90,7 +90,7 @@ public class AssertClass implements Named {
      The List of interfaces implemented/extended by this class/interface, in
      the order that they are declared on the implements line.
   **/
-  final public List getInterfaces() {
+  public final List getInterfaces() {
     return _interfaces;
   }
 
@@ -99,7 +99,7 @@ public class AssertClass implements Named {
     The Map of imports from the file this class is defined in.  key =
     package, value = class.
   **/
-  final public Map getImports() {
+  public final Map getImports() {
     return _imports;
   }
 
@@ -107,34 +107,34 @@ public class AssertClass implements Named {
   /**
      The Set of star imports from the file this class is defined in.
   **/
-  final public Set getStarImports() {
+  public final Set getStarImports() {
     return _starImports;
   }
   
   private String _superclass;
-  final public String getSuperclass() {
+  public final String getSuperclass() {
     return _superclass;
   }
   
   private AssertClass _enclosingClass;
-  final public AssertClass getEnclosingClass() {
+  public final AssertClass getEnclosingClass() {
     return _enclosingClass;
   }
 
   private boolean _isAnonymous;
-  final public boolean isAnonymous() {
+  public final boolean isAnonymous() {
     return _isAnonymous;
   }
   
   private boolean _isInterface;
-  final public boolean isInterface() {
+  public final boolean isInterface() {
     return _isInterface;
   }
   
   //Named
   private String _name;
 
-  final public String getName() {
+  public final String getName() {
     return _name;
   }
   //end Named
@@ -142,7 +142,7 @@ public class AssertClass implements Named {
   /**
      @return the fully qualified name of this class object
   **/
-  final public String getFullName() {
+  public final String getFullName() {
     if(getPackage() == null || getPackage().equals("")) {
       return getName();
     } else {
@@ -154,7 +154,7 @@ public class AssertClass implements Named {
 //     _packageName = packageName;
 //   }
 
-  final public String getPackage() {
+  public final String getPackage() {
     return _packageName;
   }
 
@@ -163,7 +163,7 @@ public class AssertClass implements Named {
   /**
      Adds this method to the list of methods defined on this class.
   **/
-  final public void addMethod(final AssertMethod am) {
+  public final void addMethod(final AssertMethod am) {
     /*
       see if this method exists in any of the implemented interfaces, if so
       add their pre and post conditions to the current list of pre and post
@@ -173,7 +173,7 @@ public class AssertClass implements Named {
 
   private Set _methods;
   
-  final public Set getMethods() {
+  public final Set getMethods() {
     return _methods;
   }
   
@@ -188,14 +188,14 @@ public class AssertClass implements Named {
      
      @pre (invariants != null)
   **/
-  final public void setInvariants(final List invariants) {
+  public final void setInvariants(final List invariants) {
     _invariants = invariants;
   }
 
   /**
      List of invariants for this class, ordered as they appear in the code.
   **/
-  final public List getInvariants() {
+  public final List getInvariants() {
     return _invariants;
   }
 
@@ -208,7 +208,7 @@ public class AssertClass implements Named {
      Create the name for the next anonymous class that is defined
      inside this class.
   **/
-  final public String createAnonymousClassName() {
+  public final String createAnonymousClassName() {
     String name = getName();
     name += "$" + _anonymousClassCounter++;
     return name;
@@ -220,7 +220,7 @@ public class AssertClass implements Named {
      Create the name for a dummy class for the next constructors pre
      conditions.
   **/
-  final public String createDummyConstructorClassName() {
+  public final String createDummyConstructorClassName() {
     return "_AssertDummy" + _constructorCounter++;
   }
 

@@ -43,10 +43,10 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.Stack;
 
+import org.apache.log4j.Logger;
+
 
 /*
-  Need to read the PDF again to make sure I've got these right.
-
   Things to keep track of:
   methods: pre/post
   classes: methods, invariants
@@ -105,10 +105,12 @@ import java.util.Stack;
  * This is the place where most of the work for instrumentation gets done.
  * All lookups are done here.
  * 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class Symtab {
 
+  private static final Logger LOG = Logger.getLogger(JonsAssert.class);
+  
   /**
      @pre (config != null)
   **/
@@ -129,7 +131,7 @@ public class Symtab {
   /**
      @return the configuration object used with this symbol table.
   **/
-  final public Configuration getConfiguration() {
+  public final Configuration getConfiguration() {
     return _config;
   }
   
@@ -137,7 +139,7 @@ public class Symtab {
   /**
      set the package the the next class(es) belong to
   **/
-  final public void setCurrentPackageName(final String packageName) {
+  public final void setCurrentPackageName(final String packageName) {
     if(_allPackages.get(packageName) == null) {
       _allPackages.put(packageName, new HashMap());
     }
@@ -147,13 +149,13 @@ public class Symtab {
   /**
      @return the package that we're currently defining classes for
   **/
-  final public String getCurrentPackageName() {
+  public final String getCurrentPackageName() {
     return _currentPackageName;
   }
   
   private InstrumentedFile _currentFile;
 
-  final public InstrumentedFile getCurrentFile() {
+  public final InstrumentedFile getCurrentFile() {
     return _currentFile;
   }
 
@@ -176,7 +178,7 @@ public class Symtab {
 
     
     final InstrumentedFile ifile = new InstrumentedFile(f);
-    ifile.getFragments().add(_taglineFragment);
+    ifile.getFragments().add(TAGLINE_FRAGMENT);
     
     _allFiles.add(f);
     _currentFile = ifile;
@@ -197,9 +199,9 @@ public class Symtab {
 
     if(!_fileStack.isEmpty()) {
       final FileState fs = (FileState)_fileStack.pop();
-      _currentFile = fs._file;
-      _imports = fs._imports;
-      _starImports = fs._starImports;
+      _currentFile = fs.getFile();
+      _imports = fs.getImports();
+      _starImports = fs.getStarImports();
     } else {
       _currentFile = null;
       _imports = null;
@@ -295,7 +297,7 @@ public class Symtab {
 
      @return the current class being parsed, may return null
   **/
-  final public AssertClass getCurrentClass() {
+  public final AssertClass getCurrentClass() {
     return _currentClass;
   }
 
@@ -395,7 +397,7 @@ public class Symtab {
     if(className != null) {
       Set v = (Set)_imports.get(shortenedPackageName);
       if(v == null) {
-	v = new HashSet(20);
+        v = new HashSet(20);
       }
       //add the class to the list of classes for this package import
       v.add(className);
@@ -523,6 +525,7 @@ public class Symtab {
       final boolean skipPostConditions = extendsObject && method.getPostConditions().isEmpty();
       
       if(method.isConstructor()) {
+        LOG.debug("Instrumentation in constructor isn't implemented yet");
         //[jpschewe:20000416.2142CST] FIX skip constructors for now, still needs some thought
         //         //Check if we really need it
         //         if(!aClass.getInvariants().isEmpty()
@@ -622,12 +625,15 @@ public class Symtab {
             codeToInsert.append(" jps_exception");
             codeToInsert.append(shortmclassName);
             codeToInsert.append(") {");
+            CodeGenerator.carriageReturn(codeToInsert);
             codeToInsert.append("jps_foundException");
             codeToInsert.append(shortmclassName);
             codeToInsert.append(" = true;");
+            CodeGenerator.carriageReturn(codeToInsert);
             codeToInsert.append("throw jps_exception");
             codeToInsert.append(shortmclassName);
             codeToInsert.append(";");
+            CodeGenerator.carriageReturn(codeToInsert);
           } //end while
           
           if(catchError) {
@@ -635,26 +641,33 @@ public class Symtab {
             codeToInsert.append("} catch(Error jps_exception");
             codeToInsert.append(shortmclassName);
             codeToInsert.append(") {");
+            CodeGenerator.carriageReturn(codeToInsert);
             codeToInsert.append("jps_foundException");
             codeToInsert.append(shortmclassName);
             codeToInsert.append("= true;");
+            CodeGenerator.carriageReturn(codeToInsert);
             codeToInsert.append("throw jps_exception");
             codeToInsert.append(shortmclassName);
             codeToInsert.append(";");
+            CodeGenerator.carriageReturn(codeToInsert);
           }
           if(catchRuntime) {
             //catch java.lang.RuntimeException
             codeToInsert.append("} catch(RuntimeException jps_exception");
             codeToInsert.append(shortmclassName);
             codeToInsert.append(") {");
+            CodeGenerator.carriageReturn(codeToInsert);
             codeToInsert.append("jps_foundException");
             codeToInsert.append(shortmclassName);
             codeToInsert.append(" = true;");
+            CodeGenerator.carriageReturn(codeToInsert);
             codeToInsert.append("throw jps_exception");
             codeToInsert.append(shortmclassName);
             codeToInsert.append(";");
+            CodeGenerator.carriageReturn(codeToInsert);
           }
           codeToInsert.append("} finally { ");
+          CodeGenerator.carriageReturn(codeToInsert);
           codeToInsert.append("if(!jps_foundException");
           codeToInsert.append(shortmclassName);
           codeToInsert.append(") {");
@@ -665,7 +678,9 @@ public class Symtab {
             codeToInsert.append(postCall);
           }
           codeToInsert.append("}"); // end if
+          CodeGenerator.carriageReturn(codeToInsert);
           codeToInsert.append("}"); // end finally
+          CodeGenerator.carriageReturn(codeToInsert);
           ifile.getFragments().add(new CodeFragment(insertFinallyAt, codeToInsert.toString(), CodeFragmentType.POSTCONDITION));
         }
       }//end if not abstract
@@ -735,20 +750,26 @@ public class Symtab {
   /**
      Code fragment to insert at the top of each file.
   **/
-  static final private CodeFragment _taglineFragment = new CodeFragment(new CodePoint(1, 0), "/*This file preprocessed with Jon's Assert Package*/", CodeFragmentType.PRECONDITION);
+  private static final CodeFragment TAGLINE_FRAGMENT = new CodeFragment(new CodePoint(1, 0), "/*This file preprocessed with Jon's Assert Package*/", CodeFragmentType.PRECONDITION);
 
 
   //------------- Inner classes below here -------------------
-  static private class FileState {
+  /**
+   * Keep track of the state in a file when we go into inner classes.
+   */
+  private static final class FileState {
     public FileState(final InstrumentedFile file, final HashMap imports, final Set starImports) {
       _imports = imports;
       _starImports = starImports;
       _file = file;
     }
 
-    /*package*/ HashMap _imports;
-    /*package*/ InstrumentedFile _file;
-    /*package*/ Set _starImports;
+    private final HashMap _imports;
+    public HashMap getImports() { return _imports; }
+    private final InstrumentedFile _file;
+    public InstrumentedFile getFile() { return _file; }
+    private final Set _starImports;
+    public Set getStarImports() { return _starImports; }
   }
   
 }

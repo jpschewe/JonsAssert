@@ -32,7 +32,7 @@ import antlr.Token;
 import net.mtu.eggplant.util.StringUtils;
 
 /**
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class AssertToken extends Token {
 
@@ -120,7 +120,7 @@ public class AssertToken extends Token {
   /**
      @return the message for this assertion, this may be null
   **/
-  final public String getMessage() {
+  public final String getMessage() {
     return _message;
   }
 
@@ -128,7 +128,7 @@ public class AssertToken extends Token {
   /**
      @return the condition for this assertion
   **/
-  final public String getCondition() {
+  public final String getCondition() {
     return _condition;
   }
   

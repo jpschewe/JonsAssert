@@ -30,21 +30,22 @@ package net.mtu.eggplant.dbc;
 import antlr.Token;
 
 /**
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class InvariantCondition {
-  public InvariantCondition(Token condition, Token message) {
+  public InvariantCondition(final Token condition,
+                            final Token message) {
     _condition = condition;
     _message = message;
   }
 
   private Token _condition;
-  final public Token getCondition() {
+  public final Token getCondition() {
     return _condition;
   }
 
   private Token _message;
-  final public Token getMessage() {
+  public final Token getMessage() {
     return _message;
   }
 

@@ -43,7 +43,7 @@ import junit.textui.TestRunner;
  * Must be called with ASSERT_BEHAVIOR_CONDITIONS set to EXCEPTION.
  *  
  * @invariant (_invariant), "This is an invariant";
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class TestAssert extends TestCase {
 
@@ -445,7 +445,7 @@ public class TestAssert extends TestCase {
    * Test methods with multiple exceptions in the throws clause.
    */
   public void multiException()
-    throws RuntimeException, NullPointerException {
+    throws NullPointerException, IllegalArgumentException {
 
   }
   

@@ -28,25 +28,26 @@
 package net.mtu.eggplant.dbc;
 
 /**
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-final public class CodePoint implements Comparable {
+public final class CodePoint implements Comparable {
 
   /**
      @pre (line > -1)
      @pre (column > 0)
   **/
-  public CodePoint(int line, int column) {
+  public CodePoint(final int line,
+                   final int column) {
     _line = line;
     _column = column;
   }
 
-  final public int getLine() {
+  public int getLine() {
     return _line;
   }
   private int _line;
 
-  final public int getColumn() {
+  public int getColumn() {
     return _column;
   }
   private int _column;
@@ -55,11 +56,10 @@ final public class CodePoint implements Comparable {
     return getLine() + ":" + getColumn();
   }
 
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     if(o instanceof CodePoint) {
       return (compareTo(o) == 0);
-    }
-    else {
+    } else {
       return false;
     }
   }
@@ -69,24 +69,20 @@ final public class CodePoint implements Comparable {
   }
   
   //Comparable
-  public int compareTo(Object o) {
+  public int compareTo(final Object o) {
     if(o instanceof CodePoint) {
       CodePoint other = (CodePoint)o;
       if(getLine() == other.getLine()) {
         if(getColumn() == other.getColumn()) {
           return 0;
-        }
-        else if(getColumn() < other.getColumn()) {
+        } else if(getColumn() < other.getColumn()) {
           return -1;
-        }
-        else {
+        } else {
           return 1;
         }
-      }
-      else if(getLine() < other.getLine()) {
+      } else if(getLine() < other.getLine()) {
         return -1;
-      }
-      else {
+      } else {
         return 1;
       }
     }

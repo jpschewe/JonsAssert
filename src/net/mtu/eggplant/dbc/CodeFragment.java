@@ -31,7 +31,7 @@ package net.mtu.eggplant.dbc;
  * Class that represents a fragment of code that needs to be inserted into a
  * file to instrument it for assertions.
  * 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class CodeFragment implements Comparable {
 
@@ -51,7 +51,7 @@ public class CodeFragment implements Comparable {
   /**
      where to insert the code
   **/
-  final public CodePoint getLocation() {
+  public final CodePoint getLocation() {
     return _location;
   }
   private CodePoint _location;
@@ -59,7 +59,7 @@ public class CodeFragment implements Comparable {
   /**
      what code to insert
   **/
-  final public String getCode() {
+  public final String getCode() {
     return _code;
   }
   private String _code;
@@ -67,7 +67,7 @@ public class CodeFragment implements Comparable {
   /**
      what type of assertion is this.
   **/
-  final public CodeFragmentType getType() {
+  public final CodeFragmentType getType() {
     return _type;
   }
   private CodeFragmentType _type;
@@ -75,8 +75,7 @@ public class CodeFragment implements Comparable {
   public boolean equals(final Object o) {
     if(o instanceof CodeFragment) {
       return (compareTo(o) == 0);
-    }
-    else {
+    } else {
       return false;
     }
   }
@@ -122,12 +121,10 @@ public class CodeFragment implements Comparable {
         int typeTest = getType().compareTo(other.getType());
         if(typeTest == 0) {
           return getCode().compareTo(other.getCode());
-        }
-        else {
+        } else {
           return typeTest;
         }
-      }
-      else {
+      } else {
         return test;
       }
     }
