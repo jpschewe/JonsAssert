@@ -101,3 +101,34 @@ public/protected method has the same signature as a package method in it's
 superclass the pre and post conditions on the package method will be checked,
 even though the public/protected method doesn't actually override the package
 method.
+
+- If a method in a class calls a constructor with the last argument being null
+and another constructor with the same signature, less the last argument,
+exists then the code will not compile due to a nondeterminism.  This can be
+worked around by casting null to the datatype of the last argument of the
+constructor.
+Example:
+This won't work:
+public class A {
+  public A(int i) {
+    this(i, null);
+  }
+
+  public A(int i, Component c) {
+    //do something
+  }
+}
+This will work:
+public class A {
+  public A(int i) {
+    this(i, (Component)null);
+  }
+
+  public A(int i, Component c) {
+    //do something
+  }
+}
+
+This is because I need to create an extra constructor to allow preconditions
+to be checked properly before the super class constructor is invoked.
+
