@@ -7,14 +7,14 @@
 */
 package org.tcfreenet.schewe.assert;
 
-public class AssertionViolation extends RuntimeException {
+/**
+   Exception thrown to break out of the parser if the destination file is
+   newer than the source file.
+**/
+public class FileAlreadyParsedException extends RuntimeException {
 
-  public AssertionViolation() {
+  public FileAlreadyParsedException() {
     super();
-  }
-
-  public AssertionViolation(String message) {
-    super(message);
   }
 
 }

@@ -5,7 +5,7 @@
 
   I'd appreciate comments/suggestions on the code schewe@tcfreenet.org
 */
-package org.tcfreenet.schewe.Assert;
+package org.tcfreenet.schewe.assert;
 
 import org.tcfreenet.schewe.utils.Named;
 
@@ -31,6 +31,7 @@ public class AssertClass implements Named {
     _anonymousClassCounter = 1;
     _constructorCounter = 0;
     _methods = new Vector();
+
   }
 
   private boolean _isInterface;
@@ -72,7 +73,6 @@ public class AssertClass implements Named {
       add their pre and post conditions to the current list of pre and post
       conditions.  */
     _methods.add(am);
-    //System.out.println("just added: " + am + " methods: " + _methods);
   }
 
   private List _methods;
@@ -123,5 +123,5 @@ public class AssertClass implements Named {
     String prefix = getPackage().replace('.', '_');
     return prefix + "_AssertDummy" + _constructorCounter++;
   }
-    
+
 }

@@ -5,7 +5,7 @@
 
   I'd appreciate comments/suggestions on the code schewe@tcfreenet.org
 */
-package org.tcfreenet.schewe.Assert;
+package org.tcfreenet.schewe.assert;
 
 import org.tcfreenet.schewe.utils.StringPair;
 import org.tcfreenet.schewe.utils.Pair;
@@ -164,7 +164,6 @@ public class Symtab {
      on the file stack, or null if no other files are being processed.
   **/
   public void finishFile() {
-    //[jpschewe:20000130.0958CST] at this point we should fill out any assertions that were found in other interfaces created in this file that weren't seen known the first time through. 
     if(!_fileStack.isEmpty()) {
       Pair p = (Pair)_fileStack.pop();
       _currentFile = (InstrumentedFile)p.getOne();
@@ -266,16 +265,9 @@ public class Symtab {
       //dump out the fragments and instrument the file
       try {
         LineNumberReader reader = new LineNumberReader(new FileReader(ifile.getFile()));
-        String filename = ifile.getFile().getAbsolutePath();
-        int indexOfSlash = filename.lastIndexOf(File.separatorChar);
-        String shortFilename = filename.substring(indexOfSlash);
-          
-        String path = AssertTools.createDirectoryForPackage(packageName);
+        String ifilename = AssertTools.getInstrumentedFilename(ifile.getFile(), packageName);
         
-        int indexOfDot = shortFilename.lastIndexOf('.');
-        String ifilename = shortFilename.substring(0, indexOfDot) + "." + AssertTools.getInstrumentedExtension();
-
-        FileWriter writer = new FileWriter(path + File.separatorChar + ifilename);
+        FileWriter writer = new FileWriter(ifilename);
 
         // instrument lines
         Iterator fragIter = ifile.getFragments().iterator();
@@ -646,6 +638,18 @@ public class Symtab {
     }
 
   }
+
+  /**
+     @return true if the destination for the current file is older than the
+     source file, or doesn't exist.  Which means that we should parse this
+     file.
+  **/
+  public boolean isDestinationOlderThanCurrentFile(final String packageName) {
+    File destFile = new File(AssertTools.getInstrumentedFilename(getCurrentFile().getFile(), packageName));
+    return !destFile.exists() || (destFile.lastModified() < getCurrentFile().getFile().lastModified());
+  }
+    
+  
   
   private AssertClass _currentClass;
   private Hashtable _allPackages;

@@ -9,7 +9,7 @@ header {
   Notes: Check invariants where ever pre and post conditions are checked
 
   */
-  package org.tcfreenet.schewe.Assert;
+  package org.tcfreenet.schewe.assert;
 
   import org.tcfreenet.schewe.utils.StringPair;
   
@@ -245,10 +245,22 @@ tokens {
 // Compilation Unit: In Java, this is a single file.  This is the start
 //   rule for this parser
 compilationUnit
+{
+  String packageName = null;
+}
   :	// A compilation unit starts with an optional package definition
-    (	packageDefinition
+    (	packageName=packageDefinition
     |	/* nothing */
     )
+    {
+      //Now we just need to check to make sure the destination file is older
+      if(!getSymtab().isDestinationOlderThanCurrentFile(packageName)) {
+	throw new FileAlreadyParsedException();
+      }
+      else {
+	System.out.println("source file is newer");
+      }
+    }
 
     // Next we have a series of zero or more import statements
     ( importDefinition )*
@@ -269,12 +281,16 @@ invariantConditions
   ;
 
 // Package statement: "package" followed by an identifier.
-packageDefinition
+packageDefinition returns [String packageName]
 options {defaultErrorHandler = true;} // let ANTLR handle errors
-{ Token id = null; }
+{
+  Token id = null;
+  packageName = null;
+}
   :	"package" id=identifier SEMI
     {
-      getSymtab().setCurrentPackageName(id.getText());
+      packageName = id.getText();
+      getSymtab().setCurrentPackageName(packageName);
     }
   ;
 
@@ -452,13 +468,24 @@ modifier returns [Token t]
 
 // Definition of a Java class
 classDefinition
+{
+  String name = null;
+}
   :	"class" id:IDENT
+    {
+      if(getSymtab().getCurrentClass() != null) {
+	name = getSymtab().getCurrentClass().getName() + "$" + id.getText();
+      }
+      else {
+	name = id.getText();
+      }
+    }
     // it _might_ have a superclass...
     superClassClause
     // it might implement some interfaces...
     implementsClause
     // now parse the body of the class
-    classBlock[id.getText(), false]
+    classBlock[name, false]
   ;
 
 
@@ -469,11 +496,23 @@ superClassClause
 
 // Definition of a Java Interface
 interfaceDefinition
+{
+  String name = null;
+}
   :	"interface" id:IDENT
+    {
+      if(getSymtab().getCurrentClass() != null) {
+	name = getSymtab().getCurrentClass().getName() + "$" + id.getText();
+      }
+      else {
+	name = id.getText();
+      }
+    }
+    
     // it might extend some other interfaces
     interfaceExtends
     // now parse the body of the interface (looks like a class...)
-    classBlock[id.getText(), true]
+    classBlock[name, true]
   ;
 
 

@@ -5,17 +5,17 @@
 
   I'd appreciate comments/suggestions on the code schewe@tcfreenet.org
 */
-package org.tcfreenet.schewe.Assert;
+package org.tcfreenet.schewe.assert;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.IOException;
 
 import antlr.TokenStreamSelector;
 
 public class Main {
 
-  static /* package */ boolean showTree = false;
   static /* package */ TokenStreamSelector selector = new TokenStreamSelector();
   static /* package */ JavaLexer javaLexer;
   static /* package */ AssertLexer assertLexer;
@@ -25,35 +25,18 @@ public class Main {
   public static void main(String[] args) {
     _symtab = new Symtab();
     
-    // Use a try/catch block for parser exceptions
-    try {
-      // if we have at least one command-line argument
-      if (args.length > 0 ) {
-        System.err.println("Parsing...");
-
-				// for each directory/file specified on the command line
-        for(int i=0; i< args.length;i++) {
-          if ( args[i].equals("-showtree") ) {
-            showTree = true;
-          }
-          else {
-            doFile(new File(args[i])); // parse it
-          }
-        }
-      }
-      else {
-        System.err.println("Parsing...");
-
-				// for each directory/file specified on the command line
-        doFile(new File("org/tcfreenet/schewe/Assert/testcases/")); // parse it
-        
-        //         System.err.println("Usage: java JavaRecogizer [-showtree] "+
-        //                            "<directory or file name>");
+    // if we have at least one command-line argument
+    if (args.length > 0 ) {
+      System.err.println("Parsing...");
+      // for each directory/file specified on the command line
+      for(int i=0; i< args.length;i++) {
+        doFile(new File(args[i])); // parse it
       }
     }
-    catch(Exception e) {
-      System.err.println("exception: "+e);
-      e.printStackTrace(System.err);   // so we can get stack trace
+    else {
+      System.err.println("Parsing...");
+      //Test case
+      doFile(new File("org/tcfreenet/schewe/assert/testcases/")); // parse it
     }
 
     //Let's see what we've found
@@ -64,7 +47,7 @@ public class Main {
 
   // This method decides what action to take based on the type of
   //   file we are looking at
-  public static void doFile(File f) throws Exception {
+  public static void doFile(File f) {
     // If this is a directory, walk each file/dir in that directory
     if (f.isDirectory()) {
       String files[] = f.list();
@@ -75,39 +58,31 @@ public class Main {
     // otherwise, if this is a java file, parse it!
     else if(f.getName().endsWith("." + AssertTools.getSourceExtension())) {
       System.err.println("   "+f.getAbsolutePath());
-
-
-      String filename = f.getName();
-      int indexOfDot = filename.lastIndexOf('.');
-      String ifilename = filename.substring(0, indexOfDot) + "." + AssertTools.getInstrumentedExtension();
-      String abPath = f.getAbsolutePath();
-      int indexOfSlash = abPath.lastIndexOf(File.separatorChar);
-      String path = abPath.substring(0, indexOfSlash);
-
-      // check to make sure the source file is newer than the other file.
-      //[jpschewe:20000219.0152CST] FIX leave this commented out for testing
-      //if(f.lastModified() > (new File(path + File.separatorChar + ifilename)).lastModified()) {
-        // let the symbol table know what's being parsed and parse the file if we haven't already
-        if(getSymtab().startFile(f)) {
+      if(getSymtab().startFile(f)) {
+        try {
           parseFile(new FileInputStream(f));
+        }
+        catch(IOException ioe) {
+          System.err.println("Caught exception getting file input stream: " + ioe);
+        }
+        catch(FileAlreadyParsedException fape) {
+          System.out.println("Source file is older than instrumented file, skipping: " + f.getName());
+        }
+        finally {
           getSymtab().finishFile();
         }
-      //}
-      //else {
-      //  System.err.println("source file is older than instrumented file, skipping: " + f.getName());
-      //}
+      }
     }
   }
 
   // Here's where we do the real work...
-  public static void parseFile(InputStream s)
-    throws Exception {
+  public static void parseFile(InputStream s) {
     try {
       // Create a scanner that reads from the input stream passed to us
       javaLexer = new JavaLexer(s);
-      javaLexer.setTokenObjectClass("org.tcfreenet.schewe.Assert.MyToken");
+      javaLexer.setTokenObjectClass("org.tcfreenet.schewe.assert.MyToken");
       assertLexer = new AssertLexer(javaLexer.getInputState());
-      assertLexer.setTokenObjectClass("org.tcfreenet.schewe.Assert.MyToken");
+      assertLexer.setTokenObjectClass("org.tcfreenet.schewe.assert.MyToken");
       
       selector.addInputStream(javaLexer, "java");
       selector.addInputStream(assertLexer, "assert");
@@ -126,6 +101,9 @@ public class Main {
       parser.setSymtab(getSymtab());
       // start parsing at the compilationUnit rule
       parser.compilationUnit();
+    }
+    catch(FileAlreadyParsedException fape) {
+      throw fape;
     }
     catch (Exception e) {
       System.err.println("parser exception: "+e);

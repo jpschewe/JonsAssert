@@ -5,7 +5,7 @@
 
   I'd appreciate comments/suggestions on the code schewe@tcfreenet.org
 */
-package org.tcfreenet.schewe.Assert.test;
+package org.tcfreenet.schewe.assert.test;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;

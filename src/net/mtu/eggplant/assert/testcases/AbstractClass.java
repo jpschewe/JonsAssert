@@ -5,7 +5,7 @@
 
   I'd appreciate comments/suggestions on the code schewe@tcfreenet.org
 */
-package org.tcfreenet.schewe.Assert.test;
+package org.tcfreenet.schewe.assert.test;
 
 /**
    Tests pre and post conditions on abstract methods, this is the abstract

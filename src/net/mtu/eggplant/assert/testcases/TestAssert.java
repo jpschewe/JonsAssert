@@ -5,9 +5,9 @@
 
   I'd appreciate comments/suggestions on the code schewe@tcfreenet.org
 */
-package org.tcfreenet.schewe.Assert.test;
+package org.tcfreenet.schewe.assert.test;
 
-import org.tcfreenet.schewe.Assert.AssertionViolation;
+import org.tcfreenet.schewe.assert.AssertionViolation;
 
 import java.util.Vector;
 import java.io.*;

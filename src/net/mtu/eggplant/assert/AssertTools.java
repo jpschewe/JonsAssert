@@ -5,7 +5,7 @@
 
   I'd appreciate comments/suggestions on the code schewe@tcfreenet.org
 */
-package org.tcfreenet.schewe.Assert;
+package org.tcfreenet.schewe.assert;
 
 import java.lang.reflect.Method;
 
@@ -253,7 +253,21 @@ final public class AssertTools {
   static public void setDestinationDirectory(final String dir) {
     _destination = dir;
   }
-  
+
+  /**
+     @return the instrumented filename to use, without the path
+  **/
+  static public String getInstrumentedFilename(final File sourceFile,
+                                               final String packageName) {
+    String filename = sourceFile.getAbsolutePath();
+    int indexOfSlash = filename.lastIndexOf(File.separatorChar);
+    String shortFilename = filename.substring(indexOfSlash);        
+    int indexOfDot = shortFilename.lastIndexOf('.');
+    String ifilename = shortFilename.substring(0, indexOfDot) + "." + getInstrumentedExtension();
+    String path = AssertTools.createDirectoryForPackage(packageName);    
+    return path + File.separatorChar + ifilename;
+  }
+                                        
   static private String _destination = "instrumented";
   static private String _sourceExtension = "java";
   static private String _instrumentedExtension = "java";

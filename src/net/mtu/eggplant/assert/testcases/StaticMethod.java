@@ -5,16 +5,16 @@
 
   I'd appreciate comments/suggestions on the code schewe@tcfreenet.org
 */
-package org.tcfreenet.schewe.Assert.test;
+package org.tcfreenet.schewe.assert.test;
 
 public class StaticMethod {
 
   static public void fail() {
-    foo(10);
+    foo(-10);
   }
 
   static public void pass() {
-    foo(-10);
+    foo(10);
   }
 
   /**

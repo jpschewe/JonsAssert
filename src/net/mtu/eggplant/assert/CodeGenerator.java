@@ -5,7 +5,7 @@
 
   I'd appreciate comments/suggestions on the code schewe@tcfreenet.org
 */
-package org.tcfreenet.schewe.Assert;
+package org.tcfreenet.schewe.assert;
 
 import org.tcfreenet.schewe.utils.StringPair;
 
@@ -37,7 +37,7 @@ public class CodeGenerator {
     code.append("if(! ");
     code.append(condition);
     code.append(") { ");
-    code.append("org.tcfreenet.schewe.Assert.AssertTools.assertFailed(new org.tcfreenet.schewe.Assert.AssertionViolation(");
+    code.append("org.tcfreenet.schewe.assert.AssertTools.assertFailed(new org.tcfreenet.schewe.assert.AssertionViolation(");
     code.append('"');
     code.append(errorMessage);
     code.append('"');
@@ -61,7 +61,7 @@ public class CodeGenerator {
     code.append("if(!__");
     code.append(mclassName);
     code.append("_checkInvariant()) {\n");
-    code.append("org.tcfreenet.schewe.Assert.AssertTools.invariantFailed(org.tcfreenet.schewe.Assert.AssertTools.getCurrentAssertionViolation());\n");
+    code.append("org.tcfreenet.schewe.assert.AssertTools.invariantFailed(org.tcfreenet.schewe.assert.AssertTools.getCurrentAssertionViolation());\n");
     code.append("}\n");
 
     return code.toString();
@@ -93,11 +93,11 @@ public class CodeGenerator {
     code.append("_JPS_thisClass = Class.forName(_JPS_className);\n");
     code.append("}\n");
     code.append("catch(ClassNotFoundException _JPS_cnfe) {\n");
-    code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"Got error getting the class object for class \" + _JPS_className + \" \" + _JPS_cnfe);\n");
+    code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"Got error getting the class object for class \" + _JPS_className + \" \" + _JPS_cnfe);\n");
     code.append("}\n");
   
     code.append("Class[] _JPS_methodArgs = new Class[0];\n");
-    code.append("java.lang.reflect.Method _JPS_superMethod = org.tcfreenet.schewe.Assert.AssertTools.findSuperMethod(_JPS_thisClass, \"checkInvariant\", _JPS_methodArgs);\n");
+    code.append("java.lang.reflect.Method _JPS_superMethod = org.tcfreenet.schewe.assert.AssertTools.findSuperMethod(_JPS_thisClass, \"checkInvariant\", _JPS_methodArgs);\n");
 
     code.append("if(_JPS_superMethod != null) {\n");
     //invoke it, pass on exceptions
@@ -107,21 +107,21 @@ public class CodeGenerator {
     code.append("}\n");
     code.append("catch(IllegalAccessException _JPS_iae) {\n");
     //[jpschewe:20000220.0936CST] just means that the super method is private and we really shouldn't be calling it in the first place          
-    //code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"Not enough access executing checkInvariant method on super class: \" + _JPS_iae.getMessage());\n");
+    //code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"Not enough access executing checkInvariant method on super class: \" + _JPS_iae.getMessage());\n");
     //Pretend it returned true :)
     code.append("_JPS_retVal = Boolean.TRUE;\n");
     code.append("}\n");
     code.append("catch(IllegalArgumentException _JPS_iae) {\n");
-    code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"IllegalArgument executing checkInvariant method on super class: \" + _JPS_iae.getMessage() + \" methodArgs \" + _JPS_methodArgs + \" args \" + _JPS_args);\n");
+    code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"IllegalArgument executing checkInvariant method on super class: \" + _JPS_iae.getMessage() + \" methodArgs \" + _JPS_methodArgs + \" args \" + _JPS_args);\n");
     code.append("}\n");
     code.append("catch(java.lang.reflect.InvocationTargetException _JPS_ite) {\n");
     code.append("_JPS_ite.getTargetException().printStackTrace();\n");
     code.append("}\n");
     code.append("if(_JPS_retVal == null) {\n");
-    code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"got null from checkInvariant\");\n");
+    code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"got null from checkInvariant\");\n");
     code.append("}\n");
     code.append("else if(! (_JPS_retVal instanceof Boolean) ) {\n");
-    code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"got something odd from checkInvariant: \" + _JPS_retVal.getClass());\n");
+    code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"got something odd from checkInvariant: \" + _JPS_retVal.getClass());\n");
     code.append("}\n");
 
     code.append("if(_JPS_retVal != null && !((Boolean)_JPS_retVal).booleanValue()) {\n");
@@ -258,7 +258,7 @@ public class CodeGenerator {
     }
     
     code.append(")) {\n");
-    code.append("org.tcfreenet.schewe.Assert.AssertTools.preConditionFailed(org.tcfreenet.schewe.Assert.AssertTools.getCurrentAssertionViolation());\n");
+    code.append("org.tcfreenet.schewe.assert.AssertTools.preConditionFailed(org.tcfreenet.schewe.assert.AssertTools.getCurrentAssertionViolation());\n");
     code.append("}\n");
 
     if(assertMethod.isConstructor()) {
@@ -369,7 +369,7 @@ public class CodeGenerator {
       code.append(paramName);
     }
     code.append(")) {\n");
-    code.append("org.tcfreenet.schewe.Assert.AssertTools.preConditionFailed(org.tcfreenet.schewe.Assert.AssertTools.getCurrentAssertionViolation());\n");
+    code.append("org.tcfreenet.schewe.assert.AssertTools.preConditionFailed(org.tcfreenet.schewe.assert.AssertTools.getCurrentAssertionViolation());\n");
     code.append("}\n");
 
     if(!assertMethod.isVoid()) {
@@ -426,7 +426,7 @@ public class CodeGenerator {
       code.append("_JPS_thisClass = Class.forName(_JPS_className);\n");
       code.append("}\n");
       code.append("catch(ClassNotFoundException _JPS_cnfe) {\n");
-      code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"Got error getting the class object for class \" + _JPS_className + \" \" + _JPS_cnfe);\n");
+      code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"Got error getting the class object for class \" + _JPS_className + \" \" + _JPS_cnfe);\n");
       code.append("}\n");
     
 
@@ -444,7 +444,7 @@ public class CodeGenerator {
       }
       code.append("};\n");
                 
-      code.append("java.lang.reflect.Method _JPS_superMethod = org.tcfreenet.schewe.Assert.AssertTools.findSuperMethod(_JPS_thisClass, \"check");
+      code.append("java.lang.reflect.Method _JPS_superMethod = org.tcfreenet.schewe.assert.AssertTools.findSuperMethod(_JPS_thisClass, \"check");
       code.append(assertMethod.getName());
       code.append("PreConditions\", _JPS_methodArgs);\n");
 
@@ -474,14 +474,14 @@ public class CodeGenerator {
       code.append("}\n");
       code.append("catch(IllegalAccessException _JPS_iae) {\n");
       //[jpschewe:20000220.0936CST] just means that the super method is private and we really shouldn't be calling it in the first place      
-      //code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"Not enough access executing superClass check");
+      //code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"Not enough access executing superClass check");
       //code.append(assertMethod.getName());
       //code.append("PreConditions: \" + _JPS_iae.getMessage());\n");
       //Pretend it returned true :)
       code.append("_JPS_retVal = Boolean.TRUE;\n");
       code.append("}\n");
       code.append("catch(IllegalArgumentException _JPS_iae) {\n");
-      code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"IllegalArgument executing superClass check");
+      code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"IllegalArgument executing superClass check");
       code.append(assertMethod.getName());
       code.append("PreConditions: \" + _JPS_iae.getMessage() + \" methodArgs \" + _JPS_methodArgs + \" args \" + _JPS_args);\n");
       code.append("}\n");
@@ -489,7 +489,7 @@ public class CodeGenerator {
       code.append("_JPS_ite.getTargetException().printStackTrace();\n");
       code.append("}\n");
       code.append("if(_JPS_retVal == null) {\n");
-      code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"got null from checkInvariant\");\n");
+      code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"got null from checkInvariant\");\n");
       code.append("}\n");
       code.append("else if(!((Boolean)_JPS_retVal).booleanValue()) {\n");
       code.append("return false;\n");
@@ -576,7 +576,7 @@ public class CodeGenerator {
       code.append("_JPS_thisClass = Class.forName(_JPS_className);\n");
       code.append("}\n");
       code.append("catch(ClassNotFoundException _JPS_cnfe) {\n");
-      code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"Got error getting the class object for class \" + _JPS_className + \" \" + _JPS_cnfe);\n");
+      code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"Got error getting the class object for class \" + _JPS_className + \" \" + _JPS_cnfe);\n");
       code.append("}\n");
     
 
@@ -604,7 +604,7 @@ public class CodeGenerator {
       }
       code.append("};\n");
                 
-      code.append("java.lang.reflect.Method _JPS_superMethod = org.tcfreenet.schewe.Assert.AssertTools.findSuperMethod(_JPS_thisClass, \"check");
+      code.append("java.lang.reflect.Method _JPS_superMethod = org.tcfreenet.schewe.assert.AssertTools.findSuperMethod(_JPS_thisClass, \"check");
       code.append(assertMethod.getName());
       code.append("PostConditions\", _JPS_methodArgs);\n");
 
@@ -641,14 +641,14 @@ public class CodeGenerator {
       code.append("}\n");
       code.append("catch(IllegalAccessException _JPS_iae) {\n");
       //[jpschewe:20000220.0936CST] just means that the super method is private and we really shouldn't be calling it in the first place
-      //code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"Not enough access executing superClass check");
+      //code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"Not enough access executing superClass check");
       //code.append(assertMethod.getName());
       //code.append("PostConditions: \" + _JPS_iae.getMessage());\n");
       //Pretend it returned true :)
       code.append("_JPS_retVal = Boolean.TRUE;\n");
       code.append("}\n");
       code.append("catch(IllegalArgumentException _JPS_iae) {\n");
-      code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"IllegalArgument executing superClass check");
+      code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"IllegalArgument executing superClass check");
       code.append(assertMethod.getName());
       code.append("PostConditions: \" + _JPS_iae.getMessage() + \" methodArgs \" + _JPS_methodArgs + \" args \" + _JPS_args);\n");
       code.append("}\n");
@@ -656,7 +656,7 @@ public class CodeGenerator {
       code.append("_JPS_ite.getTargetException().printStackTrace();\n");
       code.append("}\n");
       code.append("if(_JPS_retVal == null) {\n");
-      code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"got null from checkInvariant\");\n");
+      code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"got null from checkInvariant\");\n");
       code.append("}\n");
       code.append("else if(((Boolean)_JPS_retVal).booleanValue()) {\n");
       code.append("return true;\n");
@@ -702,10 +702,10 @@ public class CodeGenerator {
       }
       errorMessage += "\"" + condition + "\"";
     
-      code.append("org.tcfreenet.schewe.Assert.AssertionViolation _JPS_av = new org.tcfreenet.schewe.Assert.AssertionViolation(");
+      code.append("org.tcfreenet.schewe.assert.AssertionViolation _JPS_av = new org.tcfreenet.schewe.assert.AssertionViolation(");
       code.append(errorMessage);
       code.append(");\n");
-      code.append("org.tcfreenet.schewe.Assert.AssertTools.setCurrentAssertionViolation(_JPS_av);\n");
+      code.append("org.tcfreenet.schewe.assert.AssertTools.setCurrentAssertionViolation(_JPS_av);\n");
     
       code.append("return false;\n");
       code.append("}\n");

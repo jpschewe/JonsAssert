@@ -1,3 +1,9 @@
+2000-03-03  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* Main.java: Added code to correctly check destination file dates
+	so we can short circuit the parse.  Also now the unit tests all
+	pass, except for the interface test, which I haven't implemented yet.
+
 2000-02-27  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* java.g: Handle "[]"'s on data types correctly.  So that when I
