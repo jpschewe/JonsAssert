@@ -1,3 +1,8 @@
+2000-12-09  Jon Schewe  <jpschewe@mtu.net>
+
+	* CodeGenerator.java: Updated generated variable/method/class
+	names to follow standard naming conventions.
+
 2000-10-21  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* test/AssertToolsTest.java: Added some tests for AssertTools.setUniqueParams()
