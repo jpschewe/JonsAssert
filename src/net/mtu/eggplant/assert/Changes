@@ -1,0 +1,7 @@
+Bugs fixed since version 0.1:
+- Pre and postconditions for package methods are checked too often.  If a
+public/protected method has the same signature as a package method in it's
+superclass the pre and post conditions on the package method will be checked,
+even though the public/protected method doesn't actually override the package
+method.
+
