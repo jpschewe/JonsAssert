@@ -55,8 +55,8 @@ import gnu.getopt.LongOpt;
  *   <li>files all other arguments are taken to be files or directories to be parsed</li>
  * </ul>
  *
- * <p>Classes can also be instrumented by calling {@link
- * #instrument(Configuration, Collection) instrument} with a Configuration
+ * <p>Classes can also be instrumented by calling
+ * {@link #instrument(Configuration, Collection) instrument} with a Configuration
  * object and a Collection of files.
  *
  */
