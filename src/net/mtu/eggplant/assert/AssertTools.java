@@ -13,9 +13,6 @@ import org.tcfreenet.schewe.utils.algorithms.Filtering;
 
 import java.lang.reflect.Method;
 
-import java.io.File;
-
-import java.util.StringTokenizer;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.HashMap;
@@ -23,9 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
-import java.util.LinkedList;
 import java.util.Comparator;
-import java.util.Collections;
 import java.util.Iterator;
 
 /**
@@ -217,7 +212,7 @@ final public class AssertTools {
      not caused by the user.  Generate some useful message and then blow up.
   **/
   static public void internalError(final String message) {
-    throw new RuntimeException("You have found a bug!  Please see the README for instructions on reporting bugs.\n" + message);
+    throw new RuntimeException("You have found a bug!  Please see the README for instructions on reporting bugs." + System.getProperty("line.separator") + message);
   }
 
 
@@ -295,42 +290,42 @@ final public class AssertTools {
      <p>Here is an example:
      
      <pre>
-This won't work:
-public class A {
-  public A(int i) {
-    this(i, new AssertDummy(i));
-  }
-  private A(int i, AssertDummy ad) {
-    //generated to handle preconditions
-  }
-
-  public A(int i, int j) {
-   this(i, null);
-   //should call following constructor, but with generated constructor is ambiguous
-  }
-  
-  public A(int i, Component c) {
-    //do something
-  }
-}
-This will work:
-public class A {
-  public A(int i) {
-    this(i, true, new AssertDummy(i));
-  }
-  private A(int i, boolean dummy0, AssertDummy ad) {
-    //generated to handle preconditions
-  }
-
-  public A(int i, int j) {
-   this(i, null);
-   //should call following constructor, and now will since the code is no longer ambigous
-  }
-  
-  public A(int i, Component c) {
-    //do something
-  }
-}
+* This won't work:
+* public class A {
+*   public A(int i) {
+*     this(i, new AssertDummy(i));
+*   }
+*   private A(int i, AssertDummy ad) {
+*     //generated to handle preconditions
+*   }
+* 
+*   public A(int i, int j) {
+*    this(i, null);
+*    //should call following constructor, but with generated constructor is ambiguous
+*   }
+*   
+*   public A(int i, Component c) {
+*     //do something
+*   }
+* }
+* This will work:
+* public class A {
+*   public A(int i) {
+*     this(i, true, new AssertDummy(i));
+*   }
+*   private A(int i, boolean dummy0, AssertDummy ad) {
+*     //generated to handle preconditions
+*   }
+* 
+*   public A(int i, int j) {
+*    this(i, null);
+*    //should call following constructor, and now will since the code is no longer ambigous
+*   }
+*   
+*   public A(int i, Component c) {
+*     //do something
+*   }
+* }
      </pre>
      </p>
      
@@ -363,6 +358,7 @@ public class A {
     long dummyCount = 0;
     while(constructors.size() > 1) {
       final AssertMethod constructor = (AssertMethod)constructors.first();
+      
       constructors.remove(constructor); //maybe add it later
       final List constructorParams = constructor.getUniqueParams();
 
@@ -389,12 +385,16 @@ public class A {
           if(matches) {
             final String lastCompareParamType = ((StringPair)compareParamIter.next()).getStringOne();
             if(!isPrimative(lastCompareParamType)) {
-              constructorParams.add(new StringPair("boolean", "dummy" + dummyCount++));
+              constructorParams.add(new StringPair("boolean", "_JPS_dummy" + dummyCount++));
+              constructor.setUniqueParams(constructorParams);
               //We're done for now
               done = true;
               addedDummy = true;
-            }
-          }
+            } 
+          } 
+        } else if(compareParams.size() > constructorParams.size()+1) {
+          //No use checking any farther
+          done = true;
         }
       }
 
@@ -402,9 +402,7 @@ public class A {
       if(addedDummy) {
         //Keep working off the same iterator
         done = false;
-        while(constructorIter.hasNext() && addedDummy && !done) {
-          //Now watch for new dummy added
-          addedDummy = false;
+        while(constructorIter.hasNext() && !done) {
           final AssertMethod compare = (AssertMethod)constructorIter.next();
           final List compareParams = compare.getParams();
           if(compareParams.size() == constructorParams.size()) {
@@ -420,21 +418,20 @@ public class A {
               }
             }
             if(matches) {
-              constructorParams.add(new StringPair("boolean", "dummy" + dummyCount++));
+              constructorParams.add(new StringPair("boolean", "_JPS_dummy" + dummyCount++));
+              constructor.setUniqueParams(constructorParams);
               //Need to try again
-              addedDummy = true;
-            }
+              done = false;
+            } 
           } else if(compareParams.size() > constructorParams.size()) {
             //We're all done, no more possible conflicts
             done = true;
           }
         }
 
-        //Set new params
-        constructor.setUniqueParams(constructorParams);
-        //requeue
+        //requeue, can't requeue until parameter lists are unique! 
         constructors.add(constructor);
-      }
+      } 
     }
   }
   
@@ -478,7 +475,11 @@ public class A {
             }
           }
         }
-        throw new RuntimeException("This should never happen");
+        internalError("This should never happen: "
+                      + " m1Params: " + m1Params
+                      + " m2Params: " + m2Params
+                      );
+        return 0;
       }
     }
   };
@@ -500,6 +501,24 @@ public class A {
             || type.equals("float")
             || type.equals("double"));
   }
-  
 
+  /**
+     @return true if clazz extends Object and has no implemented interfaces.
+     This signals a case where optimizations can be done by not generated
+     assertion methods.
+  **/
+  static public boolean extendsObject(final AssertClass clazz) {
+    final String superclass = clazz.getSuperclass();
+    return (superclass == null || superclass.equals("java.lang.Object")) &&
+      clazz.getInterfaces().isEmpty();
+  }
+
+
+  /**
+     Used to represent no class.  This is used for caching.  If this class is
+     encountered it, then one can be assured that it's already been determined
+     that a class has been checked for and not found.
+  **/
+  final static public NONE NO_CLASS = new NONE();
+  static private class NONE { }
 }

@@ -24,6 +24,11 @@ public class NamedInnerClass {
   
   public class Bar {
 
+    /**
+       Check constructor preconditions in a named inner class too.
+
+       @pre (10 > 5)
+    **/
     public Bar() {
       System.out.println("In constructor for inner class Bar");
     }

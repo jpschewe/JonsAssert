@@ -16,13 +16,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.BufferedWriter;
 
-import java.net.URL;
 
 import java.util.Stack;
 import java.util.Iterator;
 import java.util.HashMap;
 import java.util.SortedSet;
-import java.util.Enumeration;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
@@ -255,7 +253,10 @@ public class Symtab {
      @pre (cp != null)
   **/
   public void finishClass(final CodePoint cp) {
-    final boolean extendsObject = extendsObject(_currentClass);
+    //Uniquify constructors
+    AssertTools.setUniqueParams(_currentClass);
+    
+    final boolean extendsObject = AssertTools.extendsObject(_currentClass);
     //add the invariant method, not on interfaces though
     if(!_currentClass.isInterface() && !(extendsObject && _currentClass.getInvariants().isEmpty())) {
       final String code = CodeGenerator.generateInvariantMethod(_currentClass);
@@ -294,8 +295,6 @@ public class Symtab {
       addClassInstrumentation(ifile, aClass);
       //System.out.println(aClass);
     }
-    //System.out.println(ifile.getFragments());
-    //sort the list
     //dump out the fragments and instrument the file
     try {
       final LineNumberReader reader = new LineNumberReader(new FileReader(ifile.getFile()));
@@ -445,19 +444,14 @@ public class Symtab {
     }
     
     if(!_currentMethod.isAbstract()) {
-      //[jpschewe:20000216.0742CST] add 1 so that we add the pre and post calls in the right place 
+      //add 1 so that we add the pre and post calls in the right place 
       _currentMethod.setMethodEntrance(new CodePoint(startEnd.getCodePointOne().getLine(),
                                                      startEnd.getCodePointOne().getColumn() + 1));
     }
-    //[jpschewe:20000216.0718CST] keep track of the closing brace, add 1 so we insert code after the '}'
+    //keep track of the closing brace, add 1 so we insert code after the '}'
     CodePoint close = new CodePoint(startEnd.getCodePointTwo().getLine(),
                                     startEnd.getCodePointTwo().getColumn() + 1);
     _currentMethod.setClose(close);
-    
-    //[jpschewe:20000216.0718CST] if it's a void method this is an exit
-    //if(_currentMethod.isVoid()) {
-    //  _currentMethod.addExit(new CodePointPair(startEnd.getCodePointTwo(), startEnd.getCodePointTwo()));
-    //}
     
     _currentClass.addMethod(_currentMethod);
     
@@ -478,20 +472,25 @@ public class Symtab {
   /**
      Add the pre and post condition calls for this class to ifile as well as
      calls to the checkInvariant method.
+
+     @pre (ifile != null)
+     @pre (aClass != null)
   **/
   private void addClassInstrumentation(final InstrumentedFile ifile,
                                        final AssertClass aClass) {
+    //If the superclass is null and the interfaces list is empty we know it
+    //extends java.lang.Object and we can skip assertion checks on the
+    //superclass.  Any class that explicitly extends Object will
+    //still have the calls until I figure out a better way to check.
+    final boolean extendsObject = AssertTools.extendsObject(aClass);
+
     if(aClass.isInterface()) {
       //Don't touch interfaces
       return;
     }
-    //If the superclass is null and the interfaces list is empty we know it
-    //extends java.lang.Object and we can skip assertion checks on the
-    //superclass.  Any class that explicitly extends java.lang.Object will
-    //still have the calls until I figure out a better way to check.  However
-    //this should fix the infinite recursion when compiling this package with
-    //itself.
-    final boolean extendsObject = extendsObject(aClass);
+    
+
+    //Cache for later
     final String invariantCall = CodeGenerator.generateInvariantCall(aClass);
     
     final Iterator methodIter = aClass.getMethods().iterator();
@@ -499,13 +498,16 @@ public class Symtab {
       final AssertMethod method = (AssertMethod)methodIter.next();
       String shortmclassName = method.getContainingClass().getName().replace('.', '_');
       shortmclassName = shortmclassName.replace('$', '_');
-      
-      //System.out.println("method: " + method);
 
       if(method.isConstructor()) {
         //[jpschewe:20000416.2142CST] FIX skip constructors for now, still needs some thought
-        //ifile.getFragments().add(new CodeFragment(method.getEntrance(), CodeGenerator.generateConstrauctorAssertions(method), CodeFragmentType.PRECONDITION));
+        //         //Check if we really need it
+        //         if(!aClass.getInvariants().isEmpty()
+        //            || !method.getPreConditions().isEmpty()
+        //            || !method.getPostConditions().isEmpty()) {
 
+        //           ifile.getFragments().add(new CodeFragment(method.getEntrance(), CodeGenerator.generateConstructorAssertions(method), CodeFragmentType.PRECONDITION));
+        //         }
       } else if(!method.isAbstract()) {
         //can't put calls inside abstract methods        
         final CodePoint entrance = method.getEntrance();      
@@ -516,7 +518,6 @@ public class Symtab {
           ifile.getFragments().add(new CodeFragment(entrance, preCall, CodeFragmentType.PRECONDITION));
         }
 
-//         String oldValues = CodeGenerator.generateOldValues(method);
         //Put a try-finally around void methods for post & invariant condition checks
         if(method.isVoid() && !(extendsObject && method.getContainingClass().getInvariants().isEmpty() && method.getPostConditions().isEmpty()) ) {
           ifile.getFragments().add(new CodeFragment(entrance, " boolean _JPS_foundException" + shortmclassName + " = false; try { ", CodeFragmentType.OLDVALUES));
@@ -530,10 +531,11 @@ public class Symtab {
         }
 
         //build the code fragments outside the loop for effiency
-        //[jpschewe:20000216.0704CST] need to keep track of retVal
-        final String postSetup = "final " + method.getReturnType() + " __retVal" + shortmclassName + " ="; 
+        //need to keep track of retVal
         final String postCall = CodeGenerator.generatePostConditionCall(method);
         if(!method.isVoid()) {
+          //non-void methods have to keep track of the return value
+          final String postSetup = "final " + method.getReturnType() + " __retVal" + shortmclassName + " =";           
           final Iterator exits = method.getExits().iterator();
           while(exits.hasNext()) {
             final CodePointPair exit = (CodePointPair)exits.next();
@@ -561,7 +563,7 @@ public class Symtab {
               String myPostCall = postCall + "}";
               ifile.getFragments().add(new CodeFragment(exit.getCodePointTwo(), myPostCall, CodeFragmentType.POSTCONDITION2));
             }
-          }
+          }//while exits.hasNext
           //end not void
         } else if( !(extendsObject && method.getContainingClass().getInvariants().isEmpty() && method.getPostConditions().isEmpty()) ) {
           //Add in a finally clause
@@ -650,19 +652,35 @@ public class Symtab {
       }//end if not abstract
 
       final CodePoint close = method.getClose();
-      //Add the pre and post check methods at the end of the method      
-      if(!(extendsObject && method.getPreConditions().isEmpty())) {
-        final String preMethod = CodeGenerator.generatePreConditionMethod(method);
-        ifile.getFragments().add(new CodeFragment(close, preMethod, CodeFragmentType.PRECONDITION));
-      }
-      if(!(extendsObject && method.getPostConditions().isEmpty())) {
-        final String postMethod = CodeGenerator.generatePostConditionMethod(method);
-        ifile.getFragments().add(new CodeFragment(close, postMethod, CodeFragmentType.POSTCONDITION));
+      //Add the pre and post check methods at the end of the method
+      if(!method.isConstructor()) {
+        //[jpschewe:20001024.2041CST] FIX constructors for inner classes are busted
+        if(!(extendsObject && method.getPreConditions().isEmpty())) {
+          final String preMethod = CodeGenerator.generatePreConditionMethod(method);
+          ifile.getFragments().add(new CodeFragment(close, preMethod, CodeFragmentType.PRECONDITION));
+        }
+        if(!(extendsObject && method.getPostConditions().isEmpty())) {
+          final String postMethod = CodeGenerator.generatePostConditionMethod(method);
+          ifile.getFragments().add(new CodeFragment(close, postMethod, CodeFragmentType.POSTCONDITION));
+        }
       }
     }
 
   }
 
+  /**
+     Build the instrumentation for interfaces
+     
+     @pre (ifile != null)
+     @pre (aClass != null && aClass.isInterface())
+  **/
+  private void addInterfaceInstrumentation(final InstrumentedFile ifile,
+                                           final AssertClass aClass) {
+
+
+
+  }
+  
   /**
      @return true if the destination for the current file is older than the
      source file, or doesn't exist.  Which means that we should parse this
@@ -674,17 +692,6 @@ public class Symtab {
   }
     
 
-  /**
-     @return true if clazz extends Object and has no implemented interfaces.
-     This signals a case where optimizations can be done by not generated
-     assertion methods.
-  **/
-  static public boolean extendsObject(final AssertClass clazz) {
-    final String superclass = clazz.getSuperclass();
-    return (superclass == null || superclass.equals("java.lang.Object")) &&
-      clazz.getInterfaces().isEmpty();
-  }
-  
   private AssertClass _currentClass;
   private HashMap _allPackages;
   /**

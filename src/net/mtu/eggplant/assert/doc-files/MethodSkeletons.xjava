@@ -13,7 +13,12 @@
   invariants are ANDed with super class
   preconditions are ORed with super class
   postconditions are ANDed with super class
-  This puts the burden on the person using the instrumented method rather than the person writing the method.  */
+  This puts the burden on the person using the instrumented method rather than the person writing the method.
+
+  Each time a method is called it is "locked".  When a method is called and it
+  is ready locked it returns true immediatly to avoid infinite recursion.
+
+*/
 
 //before
 public Object methodFoo(Object param1) {
@@ -41,19 +46,39 @@ public Object methodFoo(Object param1) {
 }
 
 
+/**
+   Logic:  if(!super preconditions) {
+              return false;
+           }
+           if( !AND(interface preconditions) ) {
+             return false;
+           }
+           return AND(pre condtitions for this class);
+              
+**/
 protected boolean __<packageName>_<methodName>_check<methodname>PostConditions(__retVal, param1, ...) {
 
   /* Just like check checkPreconditions, except that the superclass conditions
     as ANDed rather then ORed. */
 
-  // AND, as soon as a true is seen, return true
+  // AND, as soon as a false is seen, return false, looking up superclasses and interfaces
+  
   if(! ((Boolean)retVal).booleanValue()) {
     return false;
   }
 
 }
 
-
+/**
+   Logic:  if(super preconditions) {
+              return true;
+           }
+           if( OR(interface preconditions) ) {
+             return true;
+           }
+           return AND(pre condtitions for this class);
+              
+**/
 protected boolean __<packageName>_<methodName>_check<methodname>PreConditions(param1, param2, ...) {
   Class thisClass;
   try {
@@ -96,7 +121,7 @@ protected boolean __<packageName>_<methodName>_check<methodname>PreConditions(pa
   //[jpschewe:20000213.1603CST] FIX do interface pre conditions first and keep track of which interface they're from
 
   
-  // OR, as soon as a false is seen, return false;  
+  // OR, as soon as a true is seen, return true;  
   if(((Boolean)retVal).booleanValue()) {
     return true;
   }
@@ -113,7 +138,17 @@ protected boolean __<packageName>_<methodName>_check<methodname>PreConditions(pa
   return true;
 }
 
-  
+
+/**
+   Logic:  if(!super invariants) {
+              return false;
+           }
+           if( !AND(interface invariants) ) {
+             return false;
+           }
+           return AND(invariants for this class);
+              
+**/
 protected boolean __<packageName>_<methodName>_checkInvariant() {
   Class thisClass;
   try {
@@ -249,3 +284,66 @@ List getFullInterfaceName(final String interfaceName,
     //Whole other mess to figure out, need to figure out if it's already a full name or just an inner class
   }
 }
+
+
+//Before
+public interface Interface {
+  
+  /**
+     @pre (postCond(i) > 5)
+  **/
+  public boolean preCond(int i);
+
+}
+
+//After
+public interface Interface {
+  
+  /**
+     @pre (postCond(i) > 5)
+  **/
+  public boolean preCond(int i);
+
+  static final public class __<packageName>_<className>_AssertClass implements Interface {
+    private Class[] _interfaceCache;
+    private Interface _delegate;
+    public __<packageName>_<className>_AssertClass(final Interface delegate) {
+      _delegate = delegate;
+      //Do some caching
+      final Class[] interfaces = Interface.class.getInterfaces();
+      _interfaceCache = new Class[interfaces.length];
+      if() {
+        
+      } else {
+        _interfaceCache[i] = AssertTools.NO_CLASS;
+      }
+      
+    }
+
+    public boolean preCond(int i) {
+      return _delegate.preCond(i);
+    }
+
+    public boolean checkpreCondPreConditions(int i) {
+      if(! (postCond(i) > 5) ) {
+        return false;
+      }
+      //Need to check super interfaces
+      final Class interfaces = Interface.class.getInterfaces();
+      for(int i=0; i<interfaces.length; i++) {
+        if(AssertTools.classForname()) {
+          
+        } else {
+          _interfaceCache[i] = 
+        }
+      }
+      
+      return true;
+    }
+    public boolean checkpreCondPostConditions(boolean __retVal, int i) {
+      return true;
+    }
+
+  }
+}
+

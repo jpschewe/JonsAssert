@@ -207,7 +207,7 @@ public class AssertMethod implements Named {
   }
 
   public String toString() {
-    return "[AssertMethod] " + getName();
+    return "[AssertMethod " + getName() + " params: " + getParams() + "]";
   }
 
   

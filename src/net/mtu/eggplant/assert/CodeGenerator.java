@@ -209,10 +209,10 @@ public class CodeGenerator {
     final StringBuffer code = new StringBuffer();
     final String dummyClassName = assertMethod.getContainingClass().createDummyConstructorClassName();
     final List uniqueParams = assertMethod.getUniqueParams();
-    
+
     /*
       insert:
-      this(param0, param1, true, ..., new AssertDummy#(param0, param1));
+      this(param0, param1, true, ..., new AssertDummy#(param0, param1)); //getUniqueParams()
       checkInvariant(); //standard
       checkPostConditions(param0, param0, param1, param1); //standard
       }
@@ -221,13 +221,15 @@ public class CodeGenerator {
       checkPreConditions(param0, param1); //standard
       }
       }
-      private className(param0, param1, boolean, ..., AssertDummy#) {
+      private className(param0, param1, boolean, ..., AssertDummy#) { //getUniqueParams()
     */
+
+    //generate this call
     code.append("this(");
-    //put param names in here once
+    //put unique param names in here once
     {
       boolean first = true;
-      final Iterator paramIter = assertMethod.getParams().iterator();
+      final Iterator paramIter = assertMethod.getUniqueParams().iterator();
       while(paramIter.hasNext()) {
         if(!first) {
           code.append(", ");
@@ -240,10 +242,11 @@ public class CodeGenerator {
       }
     }
 
+    //call to dummy class
     if(!assertMethod.getParams().isEmpty()) {
       code.append(",");
     }
-    code.append("new ");
+    code.append(" new ");
     code.append(dummyClassName);
     code.append("(");
 
@@ -262,19 +265,24 @@ public class CodeGenerator {
         code.append(paramName);
       }
     }
-      
     code.append("));");
 
-    //call checkInvariant
-    code.append(generateInvariantCall(assertMethod.getContainingClass()));
-                
-    //call post conditions
-    code.append(generatePostConditionCall(assertMethod));
+    if(!assertMethod.getContainingClass().getInvariants().isEmpty()) {
+      //call checkInvariant
+      code.append(generateInvariantCall(assertMethod.getContainingClass()));
+    }
+
+    if(!assertMethod.getPostConditions().isEmpty()) {
+      //call post conditions
+      code.append(generatePostConditionCall(assertMethod));
+    }
     
-    code.append("}");
-    code.append("static private class ");
+    code.append("}"); //end regular constructor
+
+    //dummy class
+    code.append("final static private class ");
     code.append(dummyClassName);
-    code.append(" {");
+    code.append(" { ");
     code.append("public ");
     code.append(dummyClassName);
     code.append("(");
@@ -300,16 +308,20 @@ public class CodeGenerator {
     }
     code.append(") {");
 
-    //Just put in a call to the pre conditions
-    code.append(generatePreConditionCall(assertMethod));
-                
+    if(assertMethod.getPreConditions().isEmpty()) {
+      //Just put in a call to the pre conditions
+      code.append(generatePreConditionCall(assertMethod));
+    }
+    
     code.append("}");
     code.append("}");
+
+    //extra constructor
     code.append("private ");
     code.append(assertMethod.getName());
     code.append("(");
 
-    //put params with types in here with old values after each value
+    //put unique params with types in here
     {
       boolean first = true;
       final Iterator paramIter = assertMethod.getParams().iterator();
@@ -797,6 +809,18 @@ public class CodeGenerator {
 
   }
 
+  /**
+     Assertions on interfaces are checked by using a delegate class.  This
+     method generates that class.
+     
+     @pre (assertInterface != null && assertInterface.isInterface())
+  **/
+  static public String generateAssertClassForInterface(final AssertClass assertInterface) {
+    throw new RuntimeException("not implemented");
+  }
+  
+
+    
   /**
      Convert a class name to a class object call.  Normally this is just
      appending '.class', however primatives need to be converted to the
