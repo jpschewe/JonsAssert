@@ -11,8 +11,8 @@ import org.tcfreenet.schewe.utils.StringPair;
 import org.tcfreenet.schewe.utils.Named;
 import org.tcfreenet.schewe.utils.Pair;
 
-import java.util.Vector;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
    Object that contains the data needed to generate instrumented code for a
@@ -25,7 +25,7 @@ public class AssertMethod implements Named {
      @param name the name of this method, will match the name of the class if a constructor
      @param preConditions the preconditions for this method
      @param postConditions the postconditions for this method
-     @param params List of {@link StringPair StringPairs, (class, parameter name)}
+     @param params Set of {@link StringPair StringPairs, (class, parameter name)}
      @param retType the return type of this method, null signals this method is a constructor
      @param isStatic true if this method is static
      @param isPrivate true if this method is private
@@ -39,9 +39,9 @@ public class AssertMethod implements Named {
   **/
   public AssertMethod(final AssertClass theClass,
                       final String name,
-                      final List preConditions,
-                      final List postConditions,
-                      final List params,
+                      final Set preConditions,
+                      final Set postConditions,
+                      final Set params,
                       final String retType,
                       final boolean isStatic,
                       final boolean isPrivate,
@@ -55,8 +55,8 @@ public class AssertMethod implements Named {
     _static = isStatic;
     _private = isPrivate;
     _abstract = isAbstract;
-    _exits = new Vector();
-    _thrownExceptions = new Vector();
+    _exits = new HashSet(10);
+    _thrownExceptions = new HashSet(10);
   }
 
   //Named
@@ -77,22 +77,22 @@ public class AssertMethod implements Named {
   }
     
   /** contains the tokens that define the pre conditions **/  
-  private List /*AssertToken*/ _preConditions;
+  private Set /*AssertToken*/ _preConditions;
 
   /**
      @return the preConditions for this method, list of {@link AssertToken AssertTokens}
   **/
-  final public List getPreConditions() {
+  final public Set getPreConditions() {
     return _preConditions;
   }
 
   /** contains the tokens that define the post conditions **/
-  private List /*AssertToken*/ _postConditions;
+  private Set /*AssertToken*/ _postConditions;
 
   /**
      @return the postConditions for this method, list of {@link AssertToken AssertTokens}
   **/
-  final public List getPostConditions() {
+  final public Set getPostConditions() {
     return _postConditions;
   }
   
@@ -114,8 +114,8 @@ public class AssertMethod implements Named {
     return _entrance;
   }
   
-  /** List of Points **/
-  private List /*CodePointPair*/ _exits;
+  /** Set of Points **/
+  private Set /*CodePointPair*/ _exits;
 
   /**
      Add an exit to this method.
@@ -133,20 +133,20 @@ public class AssertMethod implements Named {
   
   /**
      @return list of the exits of this class, all return statements and the
-     closing brace if this is a void method.  Don't modify this List.
-     List of {@link CodePointPair CodePointPairs(start of return, semicolon)}
+     closing brace if this is a void method.  Don't modify this Set.
+     Set of {@link CodePointPair CodePointPairs(start of return, semicolon)}
   **/
-  final public List getExits() {
+  final public Set getExits() {
     return _exits;
   }
   
-  private List /*StringPair*/ _params;
+  private Set /*StringPair*/ _params;
 
   /**
-     @return List of {@link StringPair StringPairs, (class, parameter name)}, don't modify this
-     List
+     @return Set of {@link StringPair StringPairs, (class, parameter name)}, don't modify this
+     Set
   **/
-  final public List getParams() {
+  final public Set getParams() {
     return _params;
   }
 
@@ -221,15 +221,15 @@ public class AssertMethod implements Named {
     return _abstract;
   }
 
-  private List _thrownExceptions;
+  private Set _thrownExceptions;
   /**
      @pre (thrownExceptions != null)
   **/
-  final public void setThrownExceptions(final List thrownExceptions) {
+  final public void setThrownExceptions(final Set thrownExceptions) {
     _thrownExceptions = thrownExceptions;
   }
   
-  final public List getThrownExceptions() {
+  final public Set getThrownExceptions() {
     return _thrownExceptions;
   }
 }

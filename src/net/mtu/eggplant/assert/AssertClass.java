@@ -9,9 +9,8 @@ package org.tcfreenet.schewe.assert;
 
 import org.tcfreenet.schewe.utils.Named;
 
-import java.util.Vector;
-import java.util.List;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -34,7 +33,8 @@ public class AssertClass implements Named {
      These names may not be fully qualified.  They should be checked against the
      imports list.
      @param imports map of imports for this class key = package, value = class/null
-
+     @param starImports Set of star imports
+     
      @pre (interfaces != null)
      @pre (imports != null)
   **/
@@ -45,13 +45,14 @@ public class AssertClass implements Named {
                      final boolean isAnonymous,
                      final String superclass,
                      final Set interfaces,
-                     final Map imports) {
+                     final Map imports,
+                     final Set starImports) {
     _name = name;
     _packageName = packageName;
     _isInterface = isInterface;
     _anonymousClassCounter = 1;
     _constructorCounter = 0;
-    _methods = new Vector();
+    _methods = new HashSet(20);
     _isAnonymous = isAnonymous;
     _enclosingClass = enclosingClass;
     _superclass = superclass;
@@ -69,11 +70,19 @@ public class AssertClass implements Named {
 
   private Map _imports;
   /**
-    The list of imports from the file this class is defined in.  key =
-    package, value = class or null for a star import
+    The Map of imports from the file this class is defined in.  key =
+    package, value = class.
   **/
   final public Map getImports() {
     return _imports;
+  }
+
+  private Set _starImports;
+  /**
+     The Set of star imports from the file this class is defined in.
+  **/
+  final public Set getStarImports() {
+    return _starImports;
   }
   
   private String _superclass;
@@ -132,9 +141,9 @@ public class AssertClass implements Named {
     _methods.add(am);
   }
 
-  private List _methods;
+  private Set _methods;
   
-  final public List getMethods() {
+  final public Set getMethods() {
     return _methods;
   }
   
@@ -142,16 +151,16 @@ public class AssertClass implements Named {
     return "[AssertClass] " + getFullName();
   }
 
-  private List /*Token*/ _invariants;
+  private Set /*Token*/ _invariants;
   
   /**
      @pre (invariants != null)
   **/
-  final public void setInvariants(final List invariants) {
+  final public void setInvariants(final Set invariants) {
     _invariants = invariants;
   }
 
-  final public List getInvariants() {
+  final public Set getInvariants() {
     return _invariants;
   }
 

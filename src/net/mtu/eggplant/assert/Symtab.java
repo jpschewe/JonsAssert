@@ -7,7 +7,6 @@
 */
 package org.tcfreenet.schewe.assert;
 
-import org.tcfreenet.schewe.utils.Pair;
 import org.tcfreenet.schewe.utils.Debug;
 
 import java.io.File;
@@ -22,10 +21,8 @@ import java.net.URL;
 import java.util.Stack;
 import java.util.Iterator;
 import java.util.HashMap;
-import java.util.Vector;
 import java.util.SortedSet;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 
@@ -47,27 +44,27 @@ import java.util.HashSet;
 
 
   DataStructures to be maintained:
-    List of all classes parsed, so we don't parse one twice
+    Set of all classes parsed, so we don't parse one twice
     
-    List of files: HashMap (File, SortedSet)
+    Map of files: HashMap (File, SortedSet)
       classes associated with those files?
       CodeFragments associated with those files
-    List of classes:
+    Map of classes:
       Key = full classname
       Value = AssertClass (contains AssertMethods)
-    List of interfaces:
+    Map of interfaces:
       Key = full interface name
       Value = AssertClass (contains AssertMethods)
 
     AssertClass:
-      List of Methods in this class
-      List of invariants (List -> AssertToken)
+      Set of Methods in this class
+      Set of invariants (Set -> AssertToken)
       
     AssertMethod:
-      List of preconditions, in order that they appear in the code (List -> AssertToken)
+      Set of preconditions, in order that they appear in the code (Set -> AssertToken)
       Entrance point (line, column)
-      List of exit points (List->(line, column))
-      List of post conditions, order matters (List -> AssertToken)
+      Set of exit points (Set->(line, column))
+      Set of post conditions, order matters (Set -> AssertToken)
       Return type (String)
       Static or not (boolean)
       
@@ -102,13 +99,16 @@ public class Symtab {
     _fileStack = new Stack();
     _currentPackageName = "";
     _allPackages = new HashMap();
-    _allFiles = new Vector();
+    _allFiles = new HashSet();
     _methodStack = new Stack();
     _currentMethod = null;
     _config = config;
   }
 
   private Configuration _config;
+  /**
+     @return the configuration object used with this symbol table.
+  **/
   final public Configuration getConfiguration() {
     return _config;
   }
@@ -148,17 +148,21 @@ public class Symtab {
     if(_allFiles.contains(f)) {
       return false;
     }
+
+    //Keep track of the state
+    if(_currentFile != null) {
+      _fileStack.push(new FileState(_currentFile, _imports, _starImports));
+    }
+
+    
     final InstrumentedFile ifile = new InstrumentedFile(f);
     ifile.getFragments().add(_taglineFragment);
     
     _allFiles.add(f);
     _currentFile = ifile;
-    _imports = new HashMap();
+    _imports = new HashMap(50);
+    _starImports = new HashSet(50);
     
-    if(_currentFile != null) {
-      _fileStack.push(new Pair(_currentFile, _imports));
-    }
-
     return true;
   }
 
@@ -174,12 +178,14 @@ public class Symtab {
     }
 
     if(!_fileStack.isEmpty()) {
-      final Pair p = (Pair)_fileStack.pop();
-      _currentFile = (InstrumentedFile)p.getOne();
-      _imports = (HashMap)p.getTwo();
+      final FileState fs = (FileState)_fileStack.pop();
+      _currentFile = fs._file;
+      _imports = fs._imports;
+      _starImports = fs._starImports;
     } else {
       _currentFile = null;
       _imports = null;
+      _starImports= null;
     }
   }
   
@@ -195,7 +201,7 @@ public class Symtab {
      @pre (invariants != null)
   **/
   public void startClass(final String name,
-                         final List invariants,
+                         final Set invariants,
                          final boolean isInterface,
                          final boolean isAnonymous,
                          final String superclass) {
@@ -215,7 +221,7 @@ public class Symtab {
     if(isAnonymous) {
       className = enclosingClass.createAnonymousClassName();
     }
-    _currentClass = new AssertClass(className, getCurrentPackageName(), isInterface, enclosingClass, isAnonymous, superclass, interfaces, _imports);
+    _currentClass = new AssertClass(className, getCurrentPackageName(), isInterface, enclosingClass, isAnonymous, superclass, interfaces, _imports, _starImports);
     _currentClass.setInvariants(invariants);
     
     //System.out.println("in Symtab.startClass " + _currentClass);
@@ -229,7 +235,7 @@ public class Symtab {
     h.put(className, getCurrentClass());
 
     // associate it with a file too
-    //List v = (List)_allFiles.get(getCurrentFile());
+    //Set v = (Set)_allFiles.get(getCurrentFile());
     //v.addElement(getCurrentClass());    
   }
 
@@ -244,8 +250,9 @@ public class Symtab {
      @pre (cp != null)
   **/
   public void finishClass(final CodePoint cp) {
+    final boolean extendsObject = extendsObject(_currentClass);
     //add the invariant method, not on interfaces though
-    if(!_currentClass.isInterface()) {
+    if(!_currentClass.isInterface() && !(extendsObject && _currentClass.getInvariants().isEmpty())) {
       final String code = CodeGenerator.generateInvariantMethod(_currentClass);
       final CodeFragment cf = new CodeFragment(cp, code, CodeFragmentType.INVARIANT);
       _currentFile.getFragments().add(cf);
@@ -287,7 +294,7 @@ public class Symtab {
     //dump out the fragments and instrument the file
     try {
       final LineNumberReader reader = new LineNumberReader(new FileReader(ifile.getFile()));
-      final String ifilename = AssertTools.getInstrumentedFilename(ifile.getFile(), packageName);
+      final String ifilename = getConfiguration().getInstrumentedFilename(ifile.getFile(), packageName);
         
       final BufferedWriter writer = new BufferedWriter(new FileWriter(ifilename));
 
@@ -337,143 +344,6 @@ public class Symtab {
     }
   }
 
-//   /**
-//      Resolve a class or interface.  Given a name of a class/interface, find the package it
-//      belongs in.  We're assuming that if it isn't a fully qualified name it's
-//      in the list of imports or in the current package.  
-
-//      @return a StringPair where the first object is the package and the second
-//      is the class/interface name.  If we can't find the class file for the
-//      class/interface, return null.
-
-//      @pre (name != null)
-//   **/
-//   public StringPair resolveClass(final String name) {
-//     String packageName = null;
-//     String className = null;
-//     /*
-//       Should first check if it's already been parsed.  Maybe do this at a
-//       higher level?  */
-//     //[jpschewe:20000130.0009CST] what about inner classes?
-//     /*
-//       if the base name up to the first period can be found normally, then it's
-//       an innerclass.
-//     */
-//     if(name.indexOf('.') != -1) {
-//       className = name;
-//       if(findClassSource(getCurrentPackageName(), name) != null) {
-//         packageName = getCurrentPackageName();
-//       }
-//       else if(findClassSource("java.lang", name) != null) {
-//         packageName = "java.lang";
-//       }
-//       else {
-//         final Enumeration iter = _imports.keys();
-//         while(iter.hasMoreElements() && packageName == null) {
-//           final String pn = (String)iter.nextElement();
-//           final List possibles = (List)_imports.get(pn);
-//           if(possibles.size() > 0) {
-//             if(possibles.contains(name)) {
-//               packageName = pn;
-//             }
-//           }
-//           else {
-//             //star import, ewww              
-//             if(findClassSource(pn, name) != null) {
-//               packageName = pn;
-//             }
-//           }
-//         }
-//       }
-//     }
-//     else {
-//       //break name at last '.' and make the first piece packageName and the second className      
-//       int lastDot = name.lastIndexOf('.');
-//       packageName = name.substring(0, lastDot);
-//       className = name.substring(lastDot+1);
-//     }
-
-//     //now see if we actually found something
-//     if(packageName != null) {
-//       return new StringPair(packageName, className);
-//     }
-    
-//     return null;
-//   }
-
-//   /**
-//      Parse the given class.
-
-//      @param name the name of the interface.  If this is not a fully-qualified
-//      name, it will be resolved and then parsed.
-
-//      @return true on a successful parse
-     
-//      @pre (name != null)
-//   **/
-//   public boolean parseClass(final String name) {
-//     StringPair result = resolveClass(name);
-//     if(result == null) {
-//       return false;
-//     }
-
-//     String packageName = result.getStringOne();
-//     String className = result.getStringTwo();
-//     URL url = findClassSource(packageName, className);
-//     if(url == null) {
-//       return false;
-//     }
-//     // parse it
-//     try {
-//       InputStream is = url.openStream();
-//       //[jpschewe:20000129.0959CST] pass off to Main
-    
-//       return true;    
-//     }
-//     catch (IOException ioe) {
-//       System.err.println("Got error parsing file: " + ioe);
-//       return false;
-//     }
-//   }
-
-                                       
-  static public URL findClass(final String packageName, final String name) {
-    return findResource(packageName, name, "class");
-  }
-
-  static public URL findClassSource(final String packageName, final String name) {
-    return findResource(packageName, name, AssertTools.getSourceExtension());
-  }
-  
-  /**
-     <p>Find the URL that points to the source for this package.  If it can't be
-     found return null.</p>
-
-     @param packageName the package to look in
-     @param name the name of the file
-     @param extension the extension of the file
-     
-     [jpschewe:20000129.0914CST] doesn't yet handle inner interfaces, search for '.' in name and use that for the file to look for
-     [jpschewe:20000129.0918CST] should be modified to sort results, prefer a file reference
-     [jpschewe:20000129.0919CST] how does one do local interfaces?, jikes can't do it unless the class is already compiled.
-  **/
-  static private URL findResource(final String packageName, final String name, final String extension) {
-    String fileName = packageName.replace('.', '/') + "/" + name + '.' + extension;
-    try {
-      Enumeration enum = ClassLoader.getSystemClassLoader().getResources(fileName);
-      if(enum.hasMoreElements()) {
-        return (URL)enum.nextElement();
-      }
-      else {
-        return null;
-      }
-    }
-    catch(IOException ioe) {
-      System.err.println("Got error looking for interface source " + packageName + "." + name + " skipping");
-      return null;
-    }
-  }
-                                 
   /**
      Associate this CodeFragment with the current file begin parsed.
 
@@ -498,18 +368,16 @@ public class Symtab {
   **/
   public void addImport(final String className, final String packageName) {
     final String shortenedPackageName = packageName.substring(1);
-    //Debug.println("in addImport token className #" + className + "# packageName #" + packageName + "# shortedPackageName #" + shortenedPackageName + '#');
     if(className != null) {
-      List v = (List)_imports.get(shortenedPackageName);
+      Set v = (Set)_imports.get(shortenedPackageName);
       if(v == null) {
-	v = new Vector();
+	v = new HashSet(20);
       }
       //add the class to the list of classes for this package import
       v.add(className);
       _imports.put(shortenedPackageName, v);
     } else {
-      //empty vector means everything in this package
-      _imports.put(shortenedPackageName, new Vector());
+      _starImports.add(shortenedPackageName);
     }
   }
 
@@ -520,9 +388,9 @@ public class Symtab {
      @param name the name of this method, null for a constructor
      @param preConditions the preconditions for this method
      @param postConditions the postconditions for this method
-     @param params List of StringPairs, (class, parameter name)
+     @param params Set of StringPairs, (class, parameter name)
      @param retType the return type of this method, null signals this method is a constructor
-     @param mods the modifiers for the method, List of Strings
+     @param mods the modifiers for the method, Set of Strings
      
      @pre (preConditions != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(postConditions, AssertToken.class))
      @pre (postConditions != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(preConditions, AssertToken.class))
@@ -530,11 +398,11 @@ public class Symtab {
      @pre (mods != null && org.tcfreenet.schewe.utils.JPSCollections.elementsInstanceOf(String.class))
   **/
   public void startMethod(final String name,
-                          final List preConditions,
-                          final List postConditions,
-                          final List params,
+                          final Set preConditions,
+                          final Set postConditions,
+                          final Set params,
                           final String retType,
-                          final List mods) {
+                          final Set mods) {
     
     boolean isPrivate = mods.contains("private");
     boolean isStatic = mods.contains("static");
@@ -571,7 +439,7 @@ public class Symtab {
      @pre (startEnd != null)
   **/
   public void finishMethod(final CodePointPair startEnd,
-                           final List thrownExceptions) {
+                           final Set thrownExceptions) {
     //System.out.println("in finish method startEnd: " + startEnd + " _currentMethod: " + _currentMethod + " thrownExceptions: " + thrownExceptions);
 
     if(thrownExceptions != null) {
@@ -626,7 +494,7 @@ public class Symtab {
     //still have the calls until I figure out a better way to check.  However
     //this should fix the infinite recursion when compiling this package with
     //itself.
-    final boolean extendsObject = ((aClass.getSuperclass() == null) && aClass.getInterfaces().isEmpty());
+    final boolean extendsObject = extendsObject(aClass);
     final String invariantCall = CodeGenerator.generateInvariantCall(aClass);
     
     final Iterator methodIter = aClass.getMethods().iterator();
@@ -788,18 +656,18 @@ public class Symtab {
         }
       }//end if not abstract
 
+      final CodePoint close = method.getClose();
+      //Add the pre and post check methods at the end of the method      
       if(!method.isConstructor()) {
-        //Add the pre and post check methods at the end of the method
-        final CodePoint close = method.getClose();
+        //[jpschewe:20001008.2209CST] skip on constructor for now
         if(!(extendsObject && method.getPreConditions().isEmpty())) {
           final String preMethod = CodeGenerator.generatePreConditionMethod(method);
           ifile.getFragments().add(new CodeFragment(close, preMethod, CodeFragmentType.PRECONDITION));
         }
-
-        if(!(extendsObject && method.getPostConditions().isEmpty())) {
-          final String postMethod = CodeGenerator.generatePostConditionMethod(method);
-          ifile.getFragments().add(new CodeFragment(close, postMethod, CodeFragmentType.POSTCONDITION));
-        }
+      }
+      if(!(extendsObject && method.getPostConditions().isEmpty())) {
+        final String postMethod = CodeGenerator.generatePostConditionMethod(method);
+        ifile.getFragments().add(new CodeFragment(close, postMethod, CodeFragmentType.POSTCONDITION));
       }
     }
 
@@ -811,32 +679,61 @@ public class Symtab {
      file.
   **/
   public boolean isDestinationOlderThanCurrentFile(final String packageName) {
-    File destFile = new File(AssertTools.getInstrumentedFilename(getCurrentFile().getFile(), packageName));
+    File destFile = new File(getConfiguration().getInstrumentedFilename(getCurrentFile().getFile(), packageName));
     return !destFile.exists() || (destFile.lastModified() < getCurrentFile().getFile().lastModified());
   }
     
-  
+
+  /**
+     @return true if clazz extends Object and has no implemented interfaces.
+     This signals a case where optimizations can be done by not generated
+     assertion methods.
+  **/
+  static public boolean extendsObject(final AssertClass clazz) {
+    final String superclass = clazz.getSuperclass();
+    return (superclass == null || superclass.equals("java.lang.Object")) &&
+      clazz.getInterfaces().isEmpty();
+  }
   
   private AssertClass _currentClass;
   private HashMap _allPackages;
   /**
-     List of Files.
+     Set of Files.
   **/
-  private List _allFiles;
+  private Set _allFiles;
   private Stack _classStack;
   private Stack _fileStack;
   private Stack _methodStack;
   private AssertMethod _currentMethod;
   
   /**
-     HashMap of List, each key is a class name, each value is a package
-     name.
+     HashMap of imports, each key is a package name, each value is a Set of
+     class names.
   **/
   private HashMap _imports;
-
+  /**
+     Collection of packages that are imported via star imports.
+  **/
+  private Set _starImports;
+  
   /**
      Code fragment to insert at the top of each file.
   **/
-  static private CodeFragment _taglineFragment = new CodeFragment(new CodePoint(1, 0), "/*This file preprocessed with Jon's Assert Package*/", CodeFragmentType.PRECONDITION);
+  static final private CodeFragment _taglineFragment = new CodeFragment(new CodePoint(1, 0), "/*This file preprocessed with Jon's Assert Package*/", CodeFragmentType.PRECONDITION);
+
+
+  //------------- Innter classes below here -------------------
+  static private class FileState {
+    public FileState(final InstrumentedFile file, final HashMap imports, final Set starImports) {
+      _imports = imports;
+      _starImports = starImports;
+      _file = file;
+    }
+
+    /*package*/ HashMap _imports;
+    /*package*/ InstrumentedFile _file;
+    /*package*/ Set _starImports;
+  }
+  
 }
 

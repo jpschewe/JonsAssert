@@ -12,7 +12,7 @@ import org.tcfreenet.schewe.utils.StringPair;
 import gnu.regexp.RE;
 import gnu.regexp.REException;
 
-import java.util.List;
+import java.util.Set;
 import java.util.Iterator;
 
 public class CodeGenerator {
@@ -816,7 +816,7 @@ public class CodeGenerator {
      @param postCondition true if we're adding checks for a postcondition method. 
   **/
   static private void addConditionChecks(final StringBuffer code,
-                                         final List tokens,
+                                         final Set tokens,
                                          final boolean postCondition) {
     final Iterator iter = tokens.iterator();
     while(iter.hasNext()) {

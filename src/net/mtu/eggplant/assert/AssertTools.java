@@ -203,131 +203,18 @@ final public class AssertTools {
 
   /**
      called whenever an erorr occurs in the code that was generated that is
-     not caused by the user.  Generate some useful message and thwn blow up.
+     not caused by the user.  Generate some useful message and then blow up.
   **/
   static public void internalError(final String message) {
     throw new RuntimeException("You have found a bug!  Please see the README for instructions on reporting bugs.\n" + message);
   }
 
 
-  static private String _sourceExtension = "java";
-
-  /**
-     @see #setSourceExtension(String)
-     @see #setInstrumentedExtension(String)
-  **/
-  static public void setExtensions(final String sourceExtension,
-                                   final String instrumentedExtension) {
-    _sourceExtension = sourceExtension;
-    _instrumentedExtension = instrumentedExtension;
-  }
-
-  /**
-     @return the extension for the source files
-  **/
-  static public String getSourceExtension() {
-    return _sourceExtension;
-  }
-
-  static private String _instrumentedExtension = "java";  
-  /**
-     @return the extension for the instrumented files
-  **/
-  static public String getInstrumentedExtension() {
-    return _instrumentedExtension;
-  }
-
-  /**
-     @param sourceExtension the extension on the source files, defaults to 'java'
-  **/
-  static public void setSourceExtension(final String sourceExtension) {
-    _sourceExtension = sourceExtension;
-  }
-
-
-  /**
-     @param instrumentedExtension the extension on the instrumented files, defaults to 'java' 
-  **/    
-  static public void setInstrumentedExtension(final String instrumentedExtension) {
-    _instrumentedExtension = instrumentedExtension;
-  }
-  
-  /**
-     Take a package name that's passed in and turn it into a directory name
-     and create the directories relative to the instrumented directory path.
-
-     @return the directory to put the file in
-  **/
-  static public String createDirectoryForPackage(final String packageName) {
-    if(packageName == null) {
-      //default package
-      return getDestinationDirectory();
-    }
-    
-    StringBuffer dir = new StringBuffer(getDestinationDirectory());
-    File dirf = new File(dir.toString());
-    if(!dirf.exists()) {
-      boolean result = dirf.mkdir();
-      if(!result) {
-        throw new RuntimeException("Couldn't create directory: " + dir.toString());
-      }
-    }
-    else if(!dirf.isDirectory()) {
-      throw new RuntimeException("Error creating destination directories, file found where directory expected: " + dir.toString());
-    }
-      
-    StringTokenizer packageIter = new StringTokenizer(packageName, ".");
-    while(packageIter.hasMoreTokens()) {
-      String subPackage = packageIter.nextToken();
-      dir.append(File.separator);
-      dir.append(subPackage);
-      File f = new File(dir.toString());
-      if(!f.exists()) {
-        boolean result = f.mkdir();
-        if(!result) {
-          throw new RuntimeException("Couldn't create directory: " + dir.toString());
-        }
-      }
-      else if(!f.isDirectory()) {
-        throw new RuntimeException("Error creating destination directories, file found where directory expected: " + dir.toString());
-      }
-    }
-
-    return dir.toString();
-  }
-
-  static private String _destination = "instrumented";
-  static public String getDestinationDirectory() {
-    return _destination;
-  }
-
-  /**
-     Set the directory where the instrumented files should go.  Directories
-     will be created under this directory for the packages.
-  **/
-  static public void setDestinationDirectory(final String dir) {
-    _destination = dir;
-  }
-
-  /**
-     @return the instrumented filename to use, without the path
-  **/
-  static public String getInstrumentedFilename(final File sourceFile,
-                                               final String packageName) {
-    String filename = sourceFile.getAbsolutePath();
-    int indexOfSlash = filename.lastIndexOf(File.separatorChar);
-    String shortFilename = filename.substring(indexOfSlash);        
-    int indexOfDot = shortFilename.lastIndexOf('.');
-    String ifilename = shortFilename.substring(0, indexOfDot) + "." + getInstrumentedExtension();
-    String path = createDirectoryForPackage(packageName);    
-    return path + File.separatorChar + ifilename;
-  }
-                                        
 
   //   static private HashMap _classMap = new HashMap();
   /**
      Get the class object for this class name.  Just like {@link
-     Class#forName(String) Class.forName()}, but catches the exceptions
+     Class#forName(String) Class.forName()}, but returns null on an exception.
 
      @return null for no such class found
   **/
@@ -339,12 +226,12 @@ final public class AssertTools {
     //       return (Class)_classMap.get(className);
     //     }
     //     else {
-    Class thisClass = null;
+    Class thisClass;
     try {
       thisClass = Class.forName(className);
-    }
-    catch(ClassNotFoundException cnfe) {
+    } catch(ClassNotFoundException cnfe) {
       //ignore it, return null instead
+      thisClass = null;
     }
     //       _classMap.put(className, thisClass);
       
@@ -377,7 +264,7 @@ final public class AssertTools {
      @param signature the signature of the method to unlock
      @return true if the method was locked
      
-     @see #lockMethod()
+     @see #lockMethod(String)
   **/
   static synchronized public boolean unlockMethod(final String signature) {
     return _lockedMethods.remove(signature);

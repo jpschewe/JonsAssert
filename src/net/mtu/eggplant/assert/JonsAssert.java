@@ -26,13 +26,12 @@ public class JonsAssert {
   static /* package */ AssertLexer assertLexer;
   /** the symbol table */
   static private Symtab _symtab;
-  static /*pacakge*/ boolean _ignoreTimeStamp = false;
   static private boolean _debugLexer = false;
 
   /**
+     Parses the command line then fires everything off.
      Starts up the parser and instruments all of the files listed in args as
-     well as recursively looks in directories listed in args as well.  See
-     usage for more details.
+     well as recursively looks in directories listed in args as well.  
 
      @param args see usage for details
    **/
@@ -57,13 +56,13 @@ public class JonsAssert {
         config.setIgnoreTimeStamp(true);
         break;
       case 'd':
-        AssertTools.setDestinationDirectory(g.getOptarg());
+        config.setDestinationDirectory(g.getOptarg());
         break;
       case 's':
-        AssertTools.setSourceExtension(g.getOptarg());
+        config.setSourceExtension(g.getOptarg());
         break;
       case 'i':
-        AssertTools.setInstrumentedExtension(g.getOptarg());
+        config.setInstrumentedExtension(g.getOptarg());
         break;
       case 300:
         _debugLexer = true;
@@ -73,49 +72,60 @@ public class JonsAssert {
         break;
       default:
         //Print out usage and exit
-        System.err.println("Usage: JonsAssert [options] files ...");
-        System.err.println("-f, --force  force instrumentation");
-        System.err.println("-d, --destination <dir> the destination directory (default: instrumented)");
-        System.err.println("-s, --sourceExtension <ext> the extension on the source files (default: java)");
-        System.err.println("-i, --instrumentedExtension <ext> the extension on the source files (default: java)");
+        System.out.println("Usage: JonsAssert [options] files ...");
+        System.out.println("-f, --force  force instrumentation");
+        System.out.println("-d, --destination <dir> the destination directory (default: instrumented)");
+        System.out.println("-s, --sourceExtension <ext> the extension on the source files (default: java)");
+        System.out.println("-i, --instrumentedExtension <ext> the extension on the source files (default: java)");
         System.exit(1);
         break;
       }
     }
 
     _symtab = new Symtab(config);
-    
+
+    boolean success = true;
     // if we have at least one command-line argument
     if (args.length - g.getOptind() > 0 ) {
-      System.err.println("Parsing...");
+      System.out.println("Parsing...");
       // for each directory/file specified on the command line
       for(int i=g.getOptind(); i< args.length;i++) {
-        doFile(new File(args[i])); // parse it
+        success &= doFile(new File(args[i])); // parse it
       }
-    }
-    else {
-      System.err.println("Parsing testcases...");
+    } else {
+      System.out.println("Parsing testcases...");
       config.setIgnoreTimeStamp(true);
       //Test case
       doFile(new File("org/tcfreenet/schewe/assert/testcases/")); // parse it
     }
-    
+
+    //Set the exit status based on errors
+    System.exit((success ? 0 : 1));
   }
 
-  // This method decides what action to take based on the type of
-  //   file we are looking at
-  public static void doFile(final File f) {
+  /**
+     This method decides what action to take based on the type of file we are
+     looking at.
+
+     @param f the file/directory to parse, if a directory recursively look
+     through the directory for files that match the source extension and parse
+     them.
+     @return true for success
+  **/
+  static public boolean doFile(final File f) {
+    boolean success = true;
     if (f.isDirectory()) {
       // If this is a directory, walk each file/dir in that directory      
       final String files[] = f.list();
-      for(int i=0; i < files.length; i++)
-        doFile(new File(f, files[i]));
-    } else if(f.getName().endsWith("." + AssertTools.getSourceExtension())) {
+      for(int i=0; i < files.length; i++) {
+        success &= doFile(new File(f, files[i]));
+      }
+    } else if(f.getName().endsWith("." + getSymtab().getConfiguration().getSourceExtension())) {
       // otherwise, if this is a java file, parse it!      
       if(getSymtab().startFile(f)) {
-        boolean success = true;
         try {
           parseFile(new FileInputStream(f));
+          success = true;
         }
         catch(IOException ioe) {
           System.err.println("Caught exception getting file input stream: " + ioe);
@@ -125,7 +135,7 @@ public class JonsAssert {
           //System.out.println("Source file is older than instrumented file, skipping: " + f.getName());
           success = false;
         }
-        catch (Exception e) {
+        catch (final Exception e) {
           System.err.println("parser exception: "+e);
           e.printStackTrace();   // so we can get a stack trace
           success = false;
@@ -135,10 +145,15 @@ public class JonsAssert {
         }
       }
     }
+    return success;
   }
 
-  // Here's where we do the real work...
-  public static void parseFile(final InputStream s) throws Exception {
+  /**
+     Actually do the work of parsing the file here.
+
+     @param s a stream to parse  
+  ***/
+  static public void parseFile(final InputStream s) throws Exception {
       // Create a scanner that reads from the input stream passed to us
       javaLexer = new JavaLexer(s);
       javaLexer.setTokenObjectClass("org.tcfreenet.schewe.assert.MyToken");
@@ -163,7 +178,6 @@ public class JonsAssert {
           System.out.println(" name=" + parser.getTokenName(tok.getType()));
           tok = selector.nextToken();
         }
-        System.exit(0);
       } else {
         parser.setSymtab(getSymtab());
         // start parsing at the compilationUnit rule

@@ -49,7 +49,7 @@ protected boolean __<packageName>_<methodName>_check<methodname>PostConditions(_
 
 
     //[jpschewe:20000213.1603CST] FIX do interface post conditions first and keep track of which interface they're from
-    
+  
   // AND, as soon as a true is seen, return true
   if(! ((Boolean)retVal).booleanValue()) {
     return false;

@@ -32,6 +32,7 @@ options {
     testLiterals=false;    // don't automatically test for literals
     k=4;                   // four characters of lookahead
     filter=true; //ignore things we can't match
+	defaultErrorHandler = true;     // generate parser error handlers
 }
 
 {
