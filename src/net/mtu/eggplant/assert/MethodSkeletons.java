@@ -6,23 +6,22 @@
   
 */
 public Object methodFoo(Object param1) {
-  Object __oldParam1 = param1;
   if(!__checkInvariant()) {
-    throw AssertTools.getCurrentAssertionViolation().fillInStackTrace();
+    AssertTools.invariantFailed(AssertTools.getCurrentAssertionViolation());
   }
-  if(!__check<methodName>PreConditions(oldParam1, param1)) {
-    throw AssertTools.getCurrentAssertionViolation().fillInStackTrace();
+  if(!__check<methodName>PreConditions(param1, param2)) {
+    AssertTools.preConditionFailed(AssertTools.getCurrentAssertionViolation());
   }
-
+  Object __oldParam1 = param1;
 
 
   /* was return b; */
   Object __retVal = b;
   if(!__checkInvariant()) {
-    throw AssertTools.getCurrentAssertionViolation().fillInStackTrace();
+    AssertTools.invariantFailed(AssertTools.getCurrentAssertionViolation());
   }
   if(!__check<methodName>PostConditions(__retVal, oldParam1, param1)) {
-    throw AssertTools.getCurrentAssertionViolation().fillInStackTrace();
+    AssertTools.postConditionFailed(AssertTools.getCurrentAssertionViolation());
   }
   return __retVal;
 }
@@ -38,7 +37,7 @@ protected boolean __check<methodname>PostConditions(__retVal, oldParam1, param1,
 
 }
 
-protected boolean __check<methodname>PreConditions(oldParam1, param1, ...) {
+protected boolean __check<methodname>PreConditions(param1, ...) {
     // AND, as soon as a false is seen, return false;
 
     // do interface pre conditions first and keep track of which interface they're from
@@ -50,8 +49,15 @@ protected boolean __check<methodname>PreConditions(oldParam1, param1, ...) {
 
   
 protected boolean __checkInvariant() {
-  Class thisClass = this.getClass();
-  //Class superClass = thisClass.getSuperclass();
+  Class thisClass;
+  try {
+    String className = "<fill in class name>";
+    thisClass = Class.forName(className);
+  }
+  catch(ClassNotFoundException cnfe) {
+    AssertTools.internalError("Got error getting the class object for class " + className + " " + cnfe);
+  }
+  
   Class[] methodArgs = new Class[0];
   Method superMethod = AssertTools.findSuperMethod(thisClass, "__checkInvariant", methodArgs);
 
@@ -62,36 +68,36 @@ protected boolean __checkInvariant() {
       retVal = superMethod.invoke(this, args);
     }
     catch(IllegalAccessException iae) {
-      //bad, internal error, not enough access
+      AssertTools.internalError("Not enough access executing super.__checkInvariant: " + iae.getMessage());
     }
     catch(IllegalArgumentException iae) {
+      AssertTools.internalError("IllegalArgument executing super.__checkInvariant: " + iae.getMessage());
       //should never see, internal error
     }
     catch(InvocationTargetException ite) {
-      throw ite.getTargetException(); // should be the AssertionViolationException
+      throw ite.getTargetException();
     }
   }
 
   if(retVal == null) {
-    System.err.println("got null checkInvariant");
+    AssertTools.internalError("got null checkInvariant");
   }
   else if(! (retVal instanceof Boolean) ) {
-    System.err.println("got something odd from checkInvariant");
+    AssertTools.internalError("got something odd from checkInvariant: " + retVal.getClass());
   }
 
   if(!((Boolean)retVal).booleanValue()) {
-    return false; // just return
+    return false;
   }
   
-  //[jpschewe:20000103.1845CST] need to think about this one, should we return a value and store some state somewhere else or just throw the exception?
 
-  // do interface invariants first and keep track of which interface they're from
+  //[jpschewe:20000116.1749CST] still need to add to this do interface
+  //invariants first and keep track of which interface they're from
   
   //for <condition> (conditions)
   if(<condition>) {
-    AssertionViolation av = new AssertionViolation("Failed invariant\n" + (<message> != null ? <message> : "") + "\n" + <condition>);
+    AssertionViolation av = new AssertionViolation((<message> != null ? <message> : "") + "\n" + <condition>);
     AssertTools.setCurrentAssertionViolation(av);
-    //AssertTools.setCurrentAssertionViolation("Failed invariant\n" + (<message> != null ? <message> : "") + "\n" + <condition>);
     
     return false;
   }

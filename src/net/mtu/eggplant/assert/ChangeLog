@@ -1,5 +1,9 @@
 2000-01-16  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
+	* CodeGenerator.java: Added code to generate invariant checks.
+
+	* README (BUGS): Added section on reporting bugs.
+
 	* java.g: Still trying to get column numbers to work right.
 
 	* assert.g: now creates AssertTokens for the various conditions so

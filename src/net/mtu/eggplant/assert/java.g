@@ -87,23 +87,33 @@ tokens {
 
 // Define some helper methods
 {
-  public void print(String s) {
+  public void print(final String s) {
     System.out.println("Parser: " + s);
   }
-  
-  public void setSymtab(Symtab symtab) {
+
+  /**
+     set the symbol table object to use.
+  **/
+  public void setSymtab(final Symtab symtab) {
     _symtab = symtab;
   }
 
   private Symtab _symtab;
 
   /**
+     Get the symbol table object being used.
+  **/
+  public Symtab getSymtab() {
+    return _symtab;
+  }
+  
+  /**
      Given the id Token from the implements clause find the package the
      interface is defined in.  Parse the interface for assertions and add
      an AssertInterface object to the current class so we can check against
      it later.
   **/
-  private void parseImplementedInterface(Token t) {
+  private void parseImplementedInterface(final Token t) {
     String interfaceName = t.getText();
     String packageName = "";
     if(interfaceName.indexOf('.') > 0) {
@@ -120,34 +130,43 @@ tokens {
     //[jpschewe:20000103.0113CST] actually parse the file so we can check
     //against it later, if no file can be found then don't add it to the
     //class, otherwise add it to the current class with
-    //_symtab.getCurrentClass().addInterface(assertInterface)
+    //getSymtab().getCurrentClass().addInterface(assertInterface)
 
   }
   
   private Hashtable _imports = new Hashtable();
-  
-  private void addImport(Token t, String className, String packageName) {
-    packageName = packageName.substring(1);
+
+  /**
+       Add to the list of imports for this class.
+    **/
+  private void addImport(final Token t, final String className, final String packageName) {
+    String shortenedPackageName = packageName.substring(1);
     if(className != null) {
-      Vector v = (Vector)_imports.get(packageName);
+      Vector v = (Vector)_imports.get(shortenedPackageName);
       if(v == null) {
 	v = new Vector();
       }
       //add the class to the list of classes for this package import
       v.addElement(className);
-      _imports.put(packageName, v);
+      _imports.put(shortenedPackageName, v);
     }
     else {
       //empty vector means everything in this package
-      _imports.put(packageName, new Vector());
+      _imports.put(shortenedPackageName, new Vector());
     }
   }
 
+  /**
+       clear the list of imports.  Should be done at start of a file.
+    **/
   private void clearImports() {
     _imports = new Hashtable();
   }
 
-  private void addAsserts(Vector asserts, Token jdClose) {
+  /**
+     add an assert.  This should get cached with the file object?
+  **/
+  private void addAsserts(final Vector asserts, final Token jdClose) {
     if(asserts != null && asserts.size() > 0) {
       System.out.println("Parser: got asserts#");
       System.out.println("Insert code at line.column: " + jdClose.getLine() + "." + jdClose.getColumn() + " #" + jdClose.getText() + "#"  + jdClose.getClass());
@@ -161,44 +180,88 @@ tokens {
     }
   }
 
-  private static Vector _invariants = new Vector();
   
-  private void addInvariants(Vector invariants) {
-    if(invariants != null) {
-      System.out.println("Parser: got invariants#");
-      Enumeration iter = invariants.elements();
-      while(iter.hasMoreElements()) {
-	//Token ivc = (Token)iter.nextElement();
-	Object ivc = iter.nextElement();
-	System.out.println(":" + ivc + ":");
-	_invariants.addElement(ivc);
-      }
-      System.out.println("#");
+  private Vector _invariants = new Vector();
+
+  /**
+     add invariants to this class
+
+     @pre (invariant != null)
+  **/
+  private void addInvariant(final Token invariant) {
+    if(! (invariant instanceof AssertToken)) {
+      throw new RuntimeException("Expecting AssertToken! " + invariant.getClass());
     }
+    System.out.println("Added invariant " + ((AssertToken)invariant).getCondition() + " " + ((AssertToken)invariant).getMessage());
+    _invariants.addElement(invariant);
   }
 
+  /**
+     get the invariants for this class.
+  **/
+  private Vector getInvariants() {
+    return _invariants;
+  }
+
+  /**
+     Clear the list of invariants for this class.
+  **/
   private void clearInvariants() {
     _invariants = new Vector();
   }
 
-  private static Vector _prePosts = new Vector();
 
-  private void addPrePosts(Vector pps) {
-    if(pps != null) {
-      System.out.println("Parser: got pre/posts#");
-      Enumeration iter = pps.elements();
-      while(iter.hasMoreElements()) {
-	Token pp = (Token)iter.nextElement();
-	System.out.println(":" + pp + ":");
-	_prePosts.addElement(pp);
-      }
-      System.out.println("#");
+  private Vector _preConditions = new Vector();
+  /**
+     Get the list of preconditions that have been seen since the last clear.
+  **/
+  public Vector getPreConditions() {
+    return _preConditions;
+  }
+
+  /**
+     Add a precondition to the list of preconditions.
+  **/
+  public void addPreCondition(final Token pre) {
+    if(! (pre instanceof AssertToken)) {
+      throw new RuntimeException("Expecting AssertToken! " + pre.getClass());
     }
+    
+    _preConditions.addElement(pre);
   }
 
-  private void clearPrePosts() {
-    _prePosts = new Vector();
+  /**
+     clear out the list of preconditions.
+  **/
+  public void clearPreConditions() {
+    _preConditions = new Vector();
   }
+
+  private Vector _postConditions = new Vector();
+  /**
+     Get the list of postconditions that have been seen since the last clear.
+  **/
+  public Vector getPostConditions() {
+    return _postConditions;
+  }
+
+  /**
+     clear out the list of postconditions.
+  **/
+  public void addPostCondition(final Token post) {
+    if(! (post instanceof AssertToken)) {
+      throw new RuntimeException("Expecting AssertToken! " + post.getClass());
+    }
+    _postConditions.addElement(post);
+  }
+
+  /**
+     clear out the list of postconditions.
+  **/
+  public void clearPostConditions() {
+    _postConditions = new Vector();
+  }    
+
 }
 
 // Compilation Unit: In Java, this is a single file.  This is the start
@@ -220,14 +283,11 @@ compilationUnit
   ;
 
 assertTypeDefinition
-{ Vector invTokens = null; }
-  : (JAVADOC_OPEN invTokens=invariantConditions JAVADOC_CLOSE)? typeDefinition
-    { addInvariants(invTokens); }
+  : (JAVADOC_OPEN invariantConditions JAVADOC_CLOSE)? typeDefinition
   ;
 
-invariantConditions returns [Vector v]
-{ v=new Vector(); }
-  : ( iv:INVARIANT_CONDITION { v.addElement(iv); } )*
+invariantConditions
+  : ( iv:INVARIANT_CONDITION { addInvariant(iv); } )*
   ;
 
 // Package statement: "package" followed by an identifier.
@@ -237,7 +297,7 @@ options {defaultErrorHandler = true;} // let ANTLR handle errors
   :	"package" id=identifier SEMI
     {
 	    System.out.println("package id : " + id.getLine() + " " + id.getColumn());
-      _symtab.setCurrentPackageName(id.getText());
+      getSymtab().setCurrentPackageName(id.getText());
     }
   ;
 
@@ -382,7 +442,7 @@ modifier
 
 // Definition of a Java class
 classDefinition
-  :	"class" id:IDENT { _symtab.startClass(id.getText()); }
+  :	"class" id:IDENT { getSymtab().startClass(id.getText(), getInvariants()); }
     // it _might_ have a superclass...
     superClassClause
     // it might implement some interfaces...
@@ -420,16 +480,14 @@ classBlock
     RCURLY
   ;
 
-prePosts returns [Vector v]
-{ v=new Vector(); } :
-    ( post:POST_CONDITION { v.addElement(post); } |
-      pre:PRE_CONDITION { v.addElement(pre); } )* 
+prePosts 
+    :
+    ( post:POST_CONDITION { addPostCondition(post); } |
+      pre:PRE_CONDITION { addPreCondition(pre); } )* 
   ;
 
 prePostField 
-{ Vector prePostTokens = null; }
-  : (JAVADOC_OPEN prePostTokens=prePosts JAVADOC_CLOSE )? field
-    { addPrePosts(prePostTokens); }
+  : (JAVADOC_OPEN prePosts JAVADOC_CLOSE )? field
   ;
 
 

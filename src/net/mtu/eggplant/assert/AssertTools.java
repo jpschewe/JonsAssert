@@ -140,7 +140,7 @@ final public class AssertTools {
   }
 
   /**
-     Called to signal a failure.  This checks the system property
+     Called to signal an assertion failure.  This checks the system property
      ASSERT_BEHAVIOR to decide what to do.
      
      <ul>
@@ -162,5 +162,14 @@ final public class AssertTools {
       throw av;
     }
   }
+
+  /**
+     called whenever an erorr occurs in the code that was generated that is
+     not caused by the user.  Generate some useful message and thwn blow up.
+  **/
+  static public void internalError(final String message) {
+    throw new RuntimeException("You have found a bug!  Please see the README for instructions on reporting bugs.\n" + message);
+  }
+
   
 }

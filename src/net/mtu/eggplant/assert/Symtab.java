@@ -52,7 +52,7 @@ public class Symtab {
   /**
      set the package the the next class(es) belong to
   **/
-  public void setCurrentPackageName(String packageName) {
+  public void setCurrentPackageName(final String packageName) {
     if(_allPackages.get(packageName) == null) {
       _allPackages.put(packageName, new Hashtable());
     }
@@ -76,7 +76,7 @@ public class Symtab {
      Set the current file
      @return false if the file has already been seen.
   **/
-  public boolean setCurrentFile(File f) {
+  public boolean setCurrentFile(final File f) {
     _currentFile = f;
     _imports = new Hashtable();
     if(_allFiles.get(f) != null) {
@@ -90,17 +90,27 @@ public class Symtab {
   
   /**
      Push a class onto the stack of classes to handle inner classes.
+
+     @param name the name of the class, can be null in the case of anonomous
+     classes
+     @param invariants the invariants for this class
+     
+     @pre (invariants != null)
+     
   **/
-  public void startClass(String name) {
+  public void startClass(final String name, final Vector invariants) {
     if(_currentClass != null) {
       _classStack.push(_currentClass);
     }
     _currentClass = new AssertClass(name, getCurrentPackageName());
-
+    _currentClass.setInvariants(invariants);
+    
     System.out.println("in Symtab.startClass " + _currentClass);
     
     // add to the current package
     Hashtable h = (Hashtable)_allPackages.get(getCurrentPackageName());
+    //[jpschewe:20000116.0859CST] need to do something about anonomous classes
+    //here, name will be null
     h.put(name, getCurrentClass());
 
     // associate it with a file too
