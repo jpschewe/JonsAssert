@@ -120,8 +120,7 @@ public class AssertClass implements Named {
      conditions.
   **/
   public String createDummyConstructorClassName() {
-    String prefix = getPackage().replace('.', '_');
-    return prefix + "_AssertDummy" + _constructorCounter++;
+    return "_AssertDummy" + _constructorCounter++;
   }
 
 }
