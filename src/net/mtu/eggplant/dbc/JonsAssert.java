@@ -71,7 +71,7 @@ import org.apache.log4j.Logger;
  * {@link #instrument(Configuration, Collection) instrument} with a Configuration
  * object and a Collection of files.</p>
  *
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public final class JonsAssert {
 
@@ -99,6 +99,11 @@ public final class JonsAssert {
     options.addOption("prettyOutput", "prettyOutput", false, "put in carriage returns in the generated code.  This makes the output easier to read, but screws up line numbers");
     options.addOption("disableExit", "disableExit", false, "Disable System.exit during instrumentation");
     options.addOption("v", "verbose", false, "Should we be verbose?");
+
+    //need some options
+    if(args.length == 0) {
+      usage(options);
+    }
 
     //list to hold files/directories to instrument
     final Collection files = new LinkedList();
@@ -165,7 +170,7 @@ public final class JonsAssert {
       }
       
     } catch(final ParseException pe) {
-      System.err.println(pe.getMessage());
+      LOG.error(pe.getMessage());
       usage(options);
       _exitCode = 1;
       if(!_disableExit) {
