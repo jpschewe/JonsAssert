@@ -45,7 +45,7 @@ import net.mtu.eggplant.util.algorithms.Filtering;
 /**
  * class of static helper methods for assertions.
  * 
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public final class AssertTools {
 
@@ -92,7 +92,26 @@ public final class AssertTools {
   public static final String ASSERT_BEHAVIOR = System.getProperty("ASSERT_BEHAVIOR", "EXIT");
 
   private AssertTools() {} //no instances
-  
+
+  /**
+   * Do a depth first search of each interface heirarchy and return the class
+   * objects that implement the DBC conditions, if found.
+   *
+   * @param interfaces the interfaces to look in
+   * @return the DBC classes, may be an empty array if no DBC classes can be
+   * found
+   *
+   * @pre (null != interfaces)
+   * @post (null != $return)
+   */
+  public static Class[] findAssertClassInterfaces(final Class[] interfaces) {
+    final Set dbcInterfaces = new HashSet();
+    for(int i=0; i<interfaces.length; i++) {
+      
+    }
+    throw new RuntimeException("Not implemented");
+  }
+    
   /**
    * Find the superclasses method, this is my version of a superClass method,
    * this means that the method name is __<packageName>_<className>_methodName
