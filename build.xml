@@ -80,7 +80,7 @@
     </java>
   </target>
   
-  <target name="compile" depends="init,antlrTasks">
+  <target name="compile" depends="init,antlrTasks" description="Compile everything">
   <!-- broken
   <target name="compile" depends="init">
     <antlr target="${basedir}/src/net/mtu/eggplant/dbc/java.g" />
@@ -102,7 +102,7 @@
     </javac>
   </target>
 
-  <target name="test" depends="compile">
+  <target name="test" depends="compile" description="Run the unit tests">
     <echo message="Look at the output to determine if the tests passed, the build will always succeed" />
     <!-- first instrument the test files -->
     <java fork="yes"
@@ -161,7 +161,7 @@
     <java fork="yes" classname="junit.textui.TestRunner" 
 	  taskname="junit" failonerror="false">
       <sysproperty key="ASSERT_BEHAVIOR" value="EXCEPTION" />
-      <arg value="net.mtu.eggplant.dbc.test.TestAssert"/>
+      <arg value="net.mtu.eggplant.dbc.test.AllTests"/>
       <classpath>
         <pathelement location="${basedir}/${build.dir}"/>
         <path refid="base.classpath"/>
@@ -225,7 +225,7 @@
     </javac>
   </target>
 
-  <target name="clean">
+  <target name="clean" description="Clean up any temporary files created">
     <delete dir="${basedir}/${build.dir}" />
     <delete dir="${basedir}/${instrument.dir}" />
     <delete>

@@ -43,7 +43,7 @@ import junit.textui.TestRunner;
  * Must be called with ASSERT_BEHAVIOR_CONDITIONS set to EXCEPTION.
  *  
  * @invariant (_invariant), "This is an invariant";
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class TestAssert extends TestCase {
 
@@ -70,17 +70,8 @@ public class TestAssert extends TestCase {
     super("null");
   }
 
-  
   static public TestSuite suite() {
     return new TestSuite(TestAssert.class);
-  }
-  
-  /**
-     Just see if it runs.  This is in response to a bug from John Maloney.
-  */
-  public void testDefaultPackage() {
-    final DefaultPackage dp = new DefaultPackage();
-    dp.foo(new Object());
   }
   
   /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000
+ * Copyright (c) 2000-2002
  *      Jon Schewe.  All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,22 +23,35 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * I'd appreciate comments/suggestions on the code jpschewe@mtu.net
+ * Send appreciate comments/suggestions on the code to jpschewe@mtu.net
  */
+package net.mtu.eggplant.dbc.test;
 
 /**
- * This class is in the default package to test the generation of such
- * classes.
+ * Test handeling of an exception in a condition.  Pre and post conditions are
+ * allowed to throw exceptions, as long as they're declared by the method
+ * they're checking.
  * 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
-public class DefaultPackage {
-
+public class ExceptionInCondition {
+  
   /**
-   * @pre (i != null)
+   * @throws ClassNotFoundException on a database error
    */
-  public void foo(final Object i) {
-    
+  public boolean isExists()
+    throws ClassNotFoundException {
+    Class.forName("net.mtu.eggplant.dbc.test.ExceptionInCondition");
+    return false;
   }
 
+  /**
+   * @pre (!isExists())
+   * @post (!isExists())
+   */
+  public void create() 
+    throws ClassNotFoundException {
+    isExists();
+  }
+  
 }

@@ -71,6 +71,11 @@ though design by contract doesn't normally allow this.
 assertions that end up calling the methods themselves will not cause a
 recursive loop
 
+- support for classes in the default package is not very well tested.  If
+you have a problem with such classes, put them in a package!  It's just
+good programming practice.
+
+
 BUGS:
 - <CR>'s may exist inside assertions, however, if the first non-whitespace
 character, as determined by Character.isWhitespace, after the <CR> is an
@@ -121,6 +126,8 @@ a message, jpschewe@mtu.net.  At least include the message that was output
 and a description of what condition was being checked.  A stand alone test
 case that causes the error is REALLY helpful if you can do such a thing.
 
+- Methods called from pre and post conditions may throw exceptions if those
+exceptions are in the throws clause of the method to be checked.
 
 TODO:
 - fix bugs!

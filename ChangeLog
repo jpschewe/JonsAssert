@@ -1,3 +1,14 @@
+2003-08-10  Jon Schewe  <jpschewe@mtu.net>
+
+	* doc/README (FEATURES): Removed test for classes in the default
+	package.  The testcase just doesn't work with newer java compilers
+	well and it's just good practice to put all classes in a package.
+
+	* src/net/mtu/eggplant/dbc/CodeGenerator.java
+	(generatePostConditionMethod): Now methods called from pre and
+	post conditions may throw exceptions, as long as they're declared
+	in the throws clause of the method being checked.
+
 2003-07-02  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/net/mtu/eggplant/dbc/CodeGenerator.java (CodeGenerator):

@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Iterator;
 
 /**
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class CodeGenerator {
 
@@ -598,7 +598,16 @@ public class CodeGenerator {
       code.append(' ');
       code.append(sp.getStringTwo());
     }
-    code.append(") {");
+    code.append(")");
+    if(!assertMethod.getThrownExceptions().isEmpty()) {
+      carriageReturn(code);
+      code.append(" throws");
+      final Iterator exceptionIter = assertMethod.getThrownExceptions().iterator();
+      while(exceptionIter.hasNext()) {
+        code.append(" " + (String)exceptionIter.next());
+      }
+    }
+    code.append(" {");
     carriageReturn(code);
 
     code.append("if(!" + ASSERT_TOOLS_CLASSNAME + ".ENFORCE_PRE_CONDITION) { return true; }");
@@ -863,7 +872,16 @@ public class CodeGenerator {
       code.append(' ');
       code.append(paramName);
     }
-    code.append(") {");
+    code.append(")");
+    if(!assertMethod.getThrownExceptions().isEmpty()) {
+      carriageReturn(code);
+      code.append(" throws");
+      final Iterator exceptionIter = assertMethod.getThrownExceptions().iterator();
+      while(exceptionIter.hasNext()) {
+        code.append(" " + (String)exceptionIter.next());
+      }
+    }
+    code.append(" {");
     carriageReturn(code);
 
     code.append("if(!" + ASSERT_TOOLS_CLASSNAME + ".ENFORCE_POST_CONDITION) { return true; }");
