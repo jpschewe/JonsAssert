@@ -14,11 +14,32 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Iterator;
+
 import antlr.TokenStreamSelector;
 
 import gnu.getopt.Getopt;
 import gnu.getopt.LongOpt;
 
+/**
+ * <p>Class that starts everything off.</p>
+ *
+ * <a name="commandline_doc"><h2>Commandline options</h2></a>
+ * <ul>
+ *   <li>-f, --force  force instrumentation, reguardless of file modification time</li>
+ *   <li>-d, --destination <dir> the destination directory (default: instrumented)</li>
+ *   <li>-s, --sourceExtension <ext> the extension on the source files (default: java)</li>
+ *   <li>-i, --instrumentedExtension <ext> the extension on the source files (default: java)</li>
+ *   <li>files all other arguments are taken to be files or directories to be parsed</li>
+ * </ul>
+ *
+ * <p>Classes can also be instrumented by calling {@link
+ * #instrument(Configuration, Collection) instrument} with a Configuration
+ * object and a Collection of files.
+ *
+ */
 public class JonsAssert {
 
   static /* package */ TokenStreamSelector selector = new TokenStreamSelector();
@@ -29,12 +50,11 @@ public class JonsAssert {
   static private boolean _debugLexer = false;
 
   /**
-     Parses the command line then fires everything off.
-     Starts up the parser and instruments all of the files listed in args as
-     well as recursively looks in directories listed in args as well.  
-
-     @param args see usage for details
-   **/
+   * Parses the command line then calls {@link #instrument(Configuration, Collection)
+   * instrument}.
+   *
+   * @param args see {@link #commandline_doc commandline options}
+   */
   public static void main(final String[] args) {
     final Configuration config = new Configuration();
 
@@ -72,11 +92,11 @@ public class JonsAssert {
         break;
       default:
         //Print out usage and exit
-        System.out.println("Usage: JonsAssert [options] files ...");
-        System.out.println("-f, --force  force instrumentation");
-        System.out.println("-d, --destination <dir> the destination directory (default: instrumented)");
-        System.out.println("-s, --sourceExtension <ext> the extension on the source files (default: java)");
-        System.out.println("-i, --instrumentedExtension <ext> the extension on the source files (default: java)");
+        System.err.println("Usage: JonsAssert [options] files ...");
+        System.err.println("-f, --force  force instrumentation");
+        System.err.println("-d, --destination <dir> the destination directory (default: instrumented)");
+        System.err.println("-s, --sourceExtension <ext> the extension on the source files (default: java)");
+        System.err.println("-i, --instrumentedExtension <ext> the extension on the source files (default: java)");
         System.exit(1);
         break;
       }
@@ -84,25 +104,53 @@ public class JonsAssert {
 
     _symtab = new Symtab(config);
 
-    boolean success = true;
-    // if we have at least one command-line argument
+    final Collection files = new LinkedList();
     if (args.length - g.getOptind() > 0 ) {
+      for(int i=g.getOptind(); i< args.length; i++) {
+        files.add(new File(args[i]));
+      }
+    }
+    
+    //Set the exit status based on errors
+    System.exit(instrument(config, files) ? 0 : 1);
+  }
+
+  /**
+   * Entry point.  Starts up the parser and instruments all files.
+   *
+   * @param config the {@link Configuration configuration} object
+   * @param files Collection of {@link java.io.File files/directories} to
+   * parse.  Directories are parsed recursively.
+   * @return exit status
+   *
+   * @pre (config != null)
+   * @pre (files != null && org.tcfreenet.schewe.assert.CollectionUtils.checkInstanceOf(files, File.class))
+   *
+   */
+  static public boolean instrument(final Configuration config,
+                                   final Collection files) {
+    _symtab = new Symtab(config);
+
+    boolean success = true;
+    // if we have at least one file to parse
+    if(!files.isEmpty()) {
       System.out.println("Parsing...");
       // for each directory/file specified on the command line
-      for(int i=g.getOptind(); i< args.length;i++) {
-        success &= doFile(new File(args[i])); // parse it
+      final Iterator iter = files.iterator();
+      while(iter.hasNext()) {
+        final File file = (File)iter.next();
+        success &= doFile(file); // parse it
       }
     } else {
       System.out.println("Parsing testcases...");
       config.setIgnoreTimeStamp(true);
       //Test case
-      doFile(new File("org/tcfreenet/schewe/assert/testcases/")); // parse it
+      success &= doFile(new File("org/tcfreenet/schewe/assert/testcases/")); // parse it
     }
 
-    //Set the exit status based on errors
-    System.exit((success ? 0 : 1));
+    return success;
   }
-
+  
   /**
      This method decides what action to take based on the type of file we are
      looking at.
@@ -126,21 +174,21 @@ public class JonsAssert {
         try {
           parseFile(new FileInputStream(f));
           success = true;
-        }
-        catch(IOException ioe) {
-          System.err.println("Caught exception getting file input stream: " + ioe);
+        } catch(final IOException ioe) {
+          if(Debug.isDebugMode()) {
+            System.err.println("Caught exception getting file input stream: " + ioe);
+          }
           success = false;
-        }
-        catch(FileAlreadyParsedException fape) {
+        } catch(final FileAlreadyParsedException fape) {
           //System.out.println("Source file is older than instrumented file, skipping: " + f.getName());
-          success = false;
-        }
-        catch (final Exception e) {
+          success = true;
+        } catch (final Exception e) {
           System.err.println("parser exception: "+e);
-          e.printStackTrace();   // so we can get a stack trace
+          if(Debug.isDebugMode()) {
+            e.printStackTrace();   // so we can get a stack trace
+          }
           success = false;
-        }
-        finally {
+        } finally {
           getSymtab().finishFile(success);
         }
       }

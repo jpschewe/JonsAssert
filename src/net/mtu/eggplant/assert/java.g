@@ -13,6 +13,7 @@ header {
 
   import org.tcfreenet.schewe.utils.StringPair;
   import org.tcfreenet.schewe.utils.Pair;
+  import org.tcfreenet.schewe.utils.Debug;
   
   import java.util.Iterator;
   import java.util.Set;
@@ -78,7 +79,7 @@ options {
   exportVocab=Java;                // Call its vocabulary "Java"
   codeGenMakeSwitchThreshold = 2;  // Some optimizations
   codeGenBitsetTestThreshold = 3;
-  defaultErrorHandler = true;     // generate parser error handlers
+  defaultErrorHandler = false;     // generate parser error handlers
 }
 
 tokens {
@@ -135,7 +136,7 @@ tokens {
       //current package, _imports
     }
 
-    //[jpschewe:20000103.0113CST] actually parse the file so we can check
+    //actually parse the file so we can check
     //against it later, if no file can be found then don't add it to the
     //class, otherwise add it to the current class with
     //getSymtab().getCurrentClass().addInterface(assertInterface)
@@ -266,6 +267,7 @@ compilationUnit
     // possibly some javadoc comments
     ( {parseSection==0}? (javadocComment)* packageName=packageDefinition )?
     {
+	  Debug.println("just found the package");
       //Now we just need to check to make sure the destination file is older
       if(!getSymtab().getConfiguration().ignoreTimeStamp()) {
 		if(!getSymtab().isDestinationOlderThanCurrentFile(packageName)) {
@@ -286,7 +288,6 @@ compilationUnit
     // Wrapping things up with any number of class or interface definitions
     // with their corresponding invariants
 	( (invariantCondition)* typeDefinition )*
-
     EOF
   ;
 
@@ -622,7 +623,7 @@ field
 
     (
       // method, constructor, or variable declaration
-      //[jpschewe:20000215.2254CST] FIX need to do something special for abstract and native methods here
+      //need to do something special for abstract and native methods here
       mods=modifiers
       (	p=ctorHead
 	{
@@ -744,7 +745,7 @@ initializer
    the method.  This also watches for a list of exception classes in a
    "throws" clause.</p>
 
-   <p>[jpschewe:20000204.2127CST] this is only used for constructors so I'm
+   <p>this is only used for constructors so I'm
    just going to return the params, the method name is known</p>
 
    @return the parameters as StringPair(type, name)
@@ -942,9 +943,9 @@ statement
 	// Return an expression
     |	ret:"return" (expression)? semi:SEMI
       {
-	//[jpschewe:20000216.0717CST] keep track of these points for post conditions
+	//keep track of these points for post conditions
 	CodePoint retcp = new CodePoint(ret.getLine(), ret.getColumn());
-	//[jpschewe:20000216.2231CST] add 1 so that code is inserted after the semi colon
+	//add 1 so that code is inserted after the semi colon
 	CodePoint semicp = new CodePoint(semi.getLine(), semi.getColumn()+1);
 	getSymtab().getCurrentMethod().addExit(new CodePointPair(retcp, semicp));
       }
@@ -1475,7 +1476,7 @@ SL_COMMENT
 JAVADOC_OPEN
   : "/**"
     {
-      //System.out.println("java: got start of javadoc comment #" + text + "#");
+      //Debug.println("java: got start of javadoc comment #" + text + "#");
       JonsAssert.selector.push(JonsAssert.assertLexer);
     }
   ;

@@ -25,7 +25,8 @@ public class AllTests {
   **/
   public static Test suite() {
     TestSuite suite = new TestSuite();
-    suite.addTest(org.tcfreenet.schewe.assert.test.AssertToolsTest.suite());
+    suite.addTest(AssertToolsTest.suite());
+    suite.addTest(JonsAssertTest.suite());
     return suite;
   }
   

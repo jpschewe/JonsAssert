@@ -37,10 +37,10 @@ import java.util.LinkedList;
   This to keep track of from class to class:
   interfaces: pre/post, methods, invariant
 
-  I figure I can just write a method called __checkPre<methodName>(same
-  signature) and __checkPost<methodName>(same signature) to get pre and post
-  conditions and then just use introspection to call the super method if it
-  exists.  Need to explicitly code all interface pre/post/invariant methods
+  I figure I can just write a method called jps__checkPre<methodName>(same
+  signature) and jps__checkPost<methodName>(same signature) to get pre and
+  post conditions and then just use introspection to call the super method if
+  it exists.  Need to explicitly code all interface pre/post/invariant methods
   into all classes that implement an interface.
 
 
@@ -293,13 +293,11 @@ public class Symtab {
       final AssertClass aClass = (AssertClass)classIter.next();
       packageName = aClass.getPackage();
       addClassInstrumentation(ifile, aClass);
-      //System.out.println(aClass);
     }
     //dump out the fragments and instrument the file
     try {
       final LineNumberReader reader = new LineNumberReader(new FileReader(ifile.getFile()));
       final String ifilename = getConfiguration().getInstrumentedFilename(ifile.getFile(), packageName);
-        
       final BufferedWriter writer = new BufferedWriter(new FileWriter(ifilename));
 
       // instrument lines
@@ -489,16 +487,18 @@ public class Symtab {
       return;
     }
     
-
     //Cache for later
     final String invariantCall = CodeGenerator.generateInvariantCall(aClass);
+    final boolean skipInvariants = extendsObject && aClass.getInvariants().isEmpty();
     
     final Iterator methodIter = aClass.getMethods().iterator();
     while(methodIter.hasNext()) {
       final AssertMethod method = (AssertMethod)methodIter.next();
       String shortmclassName = method.getContainingClass().getName().replace('.', '_');
       shortmclassName = shortmclassName.replace('$', '_');
-
+      final boolean skipPreConditions = extendsObject && method.getPreConditions().isEmpty();
+      final boolean skipPostConditions = extendsObject && method.getPostConditions().isEmpty();
+      
       if(method.isConstructor()) {
         //[jpschewe:20000416.2142CST] FIX skip constructors for now, still needs some thought
         //         //Check if we really need it
@@ -512,21 +512,20 @@ public class Symtab {
         //can't put calls inside abstract methods        
         final CodePoint entrance = method.getEntrance();      
 
-        if(! (extendsObject && method.getPreConditions().isEmpty()) ) {
+        if(!skipPreConditions) {
           //Add a call to the precondition method at entrance
           final String preCall = CodeGenerator.generatePreConditionCall(method);      
           ifile.getFragments().add(new CodeFragment(entrance, preCall, CodeFragmentType.PRECONDITION));
         }
 
         //Put a try-finally around void methods for post & invariant condition checks
-        if(method.isVoid() && !(extendsObject && method.getContainingClass().getInvariants().isEmpty() && method.getPostConditions().isEmpty()) ) {
-          ifile.getFragments().add(new CodeFragment(entrance, " boolean _JPS_foundException" + shortmclassName + " = false; try { ", CodeFragmentType.OLDVALUES));
+        if(method.isVoid() && !skipInvariants && !skipPostConditions) {
+          ifile.getFragments().add(new CodeFragment(entrance, " boolean jps_foundException" + shortmclassName + " = false; try { ", CodeFragmentType.OLDVALUES));
         }
-
 
         //Add a call to the invariant method at entrance to methods that need it        
         if(!method.isStatic() && !method.isPrivate() && !method.isConstructor()
-           && !(extendsObject && method.getContainingClass().getInvariants().isEmpty()) ) {
+           && !skipInvariants) {
           ifile.getFragments().add(new CodeFragment(entrance, invariantCall, CodeFragmentType.INVARIANT));
         }
 
@@ -535,12 +534,12 @@ public class Symtab {
         final String postCall = CodeGenerator.generatePostConditionCall(method);
         if(!method.isVoid()) {
           //non-void methods have to keep track of the return value
-          final String postSetup = "final " + method.getReturnType() + " __retVal" + shortmclassName + " =";           
+          final String postSetup = "final " + method.getReturnType() + " jps__retVal" + shortmclassName + " =";           
           final Iterator exits = method.getExits().iterator();
           while(exits.hasNext()) {
             final CodePointPair exit = (CodePointPair)exits.next();
 
-            if(! (extendsObject && method.getContainingClass().getInvariants().isEmpty()) ) {
+            if(!skipInvariants) {
               //create a new scope around each exit
               if(!method.isStatic() && !method.isPrivate()) {
                 //Add a call to the invariant at each exit
@@ -549,23 +548,23 @@ public class Symtab {
               } else {
                 ifile.getFragments().add(new CodeFragment(exit.getCodePointOne(), "{", CodeFragmentType.INVARIANT));
               }
+            } else if( !(extendsObject && method.getPostConditions().isEmpty()) ) {
+              //Need to add the post opening scope
+              ifile.getFragments().add(new CodeFragment(exit.getCodePointOne(), "{", CodeFragmentType.INVARIANT));
             }
             
 
-            if(! (extendsObject && method.getPostConditions().isEmpty()) ) {
+            if(!skipPostConditions) {
               //Add a call to the postCondition at each exit
               //save the return value
               ifile.getFragments().add(new CodeModification(exit.getCodePointOne(), "return", postSetup, CodeFragmentType.POSTCONDITION));
-            }
-
-            if(! (extendsObject && method.getContainingClass().getInvariants().isEmpty()) ) {
               //finish the scope we just created and call the post condition method
               String myPostCall = postCall + "}";
               ifile.getFragments().add(new CodeFragment(exit.getCodePointTwo(), myPostCall, CodeFragmentType.POSTCONDITION2));
             }
           }//while exits.hasNext
           //end not void
-        } else if( !(extendsObject && method.getContainingClass().getInvariants().isEmpty() && method.getPostConditions().isEmpty()) ) {
+        } else if(!skipInvariants && !skipPostConditions) {
           //Add in a finally clause
           //finally {
           //checkInvariant
@@ -598,51 +597,51 @@ public class Symtab {
             }
             codeToInsert.append("catch(");
             codeToInsert.append(exception);
-            codeToInsert.append(" _JPS_exception");
+            codeToInsert.append(" jps_exception");
             codeToInsert.append(shortmclassName);
             codeToInsert.append(") {");
-            codeToInsert.append("_JPS_foundException");
+            codeToInsert.append("jps_foundException");
             codeToInsert.append(shortmclassName);
             codeToInsert.append(" = true;");
-            codeToInsert.append("throw _JPS_exception");
+            codeToInsert.append("throw jps_exception");
             codeToInsert.append(shortmclassName);
             codeToInsert.append(";");
             codeToInsert.append("}"); //end catch
           }
           if(catchError) {
             //catch java.lang.Error
-            codeToInsert.append("catch(Error _JPS_exception");
+            codeToInsert.append("catch(Error jps_exception");
             codeToInsert.append(shortmclassName);
             codeToInsert.append(") {");
-            codeToInsert.append("_JPS_foundException");
+            codeToInsert.append("jps_foundException");
             codeToInsert.append(shortmclassName);
             codeToInsert.append("= true;");
-            codeToInsert.append("throw _JPS_exception");
+            codeToInsert.append("throw jps_exception");
             codeToInsert.append(shortmclassName);
             codeToInsert.append(";");
             codeToInsert.append("}"); //end catch
           }
           if(catchRuntime) {
             //catch java.lang.RuntimeException
-            codeToInsert.append("catch(RuntimeException _JPS_exception");
+            codeToInsert.append("catch(RuntimeException jps_exception");
             codeToInsert.append(shortmclassName);
             codeToInsert.append(") {");
-            codeToInsert.append("_JPS_foundException");
+            codeToInsert.append("jps_foundException");
             codeToInsert.append(shortmclassName);
             codeToInsert.append(" = true;");
-            codeToInsert.append("throw _JPS_exception");
+            codeToInsert.append("throw jps_exception");
             codeToInsert.append(shortmclassName);
             codeToInsert.append(";");
             codeToInsert.append("}"); //end catch          
           }
           codeToInsert.append("finally { ");
-          codeToInsert.append("if(!_JPS_foundException");
+          codeToInsert.append("if(!jps_foundException");
           codeToInsert.append(shortmclassName);
           codeToInsert.append(") {");
-          if(!method.isStatic() && !method.isPrivate() && !(extendsObject && method.getContainingClass().getInvariants().isEmpty()) ) {
+          if(!method.isStatic() && !method.isPrivate() && !skipInvariants) {
             codeToInsert.append(invariantCall);
           }
-          if(!(extendsObject && method.getPostConditions().isEmpty())) {
+          if(!skipPostConditions) {
             codeToInsert.append(postCall);
           }
           codeToInsert.append("}"); // end if
@@ -655,17 +654,16 @@ public class Symtab {
       //Add the pre and post check methods at the end of the method
       if(!method.isConstructor()) {
         //[jpschewe:20001024.2041CST] FIX constructors for inner classes are busted
-        if(!(extendsObject && method.getPreConditions().isEmpty())) {
+        if(!skipPreConditions) {
           final String preMethod = CodeGenerator.generatePreConditionMethod(method);
           ifile.getFragments().add(new CodeFragment(close, preMethod, CodeFragmentType.PRECONDITION));
         }
-        if(!(extendsObject && method.getPostConditions().isEmpty())) {
+        if(!skipPostConditions) {
           final String postMethod = CodeGenerator.generatePostConditionMethod(method);
           ifile.getFragments().add(new CodeFragment(close, postMethod, CodeFragmentType.POSTCONDITION));
         }
       }
     }
-
   }
 
   /**
@@ -687,8 +685,9 @@ public class Symtab {
      file.
   **/
   public boolean isDestinationOlderThanCurrentFile(final String packageName) {
-    File destFile = new File(getConfiguration().getInstrumentedFilename(getCurrentFile().getFile(), packageName));
-    return !destFile.exists() || (destFile.lastModified() < getCurrentFile().getFile().lastModified());
+    final File sourceFile = getCurrentFile().getFile();
+    final File destFile = new File(getConfiguration().getInstrumentedFilename(sourceFile, packageName));
+    return !destFile.exists() || (destFile.lastModified() < sourceFile.lastModified());
   }
     
 
@@ -719,7 +718,7 @@ public class Symtab {
   static final private CodeFragment _taglineFragment = new CodeFragment(new CodePoint(1, 0), "/*This file preprocessed with Jon's Assert Package*/", CodeFragmentType.PRECONDITION);
 
 
-  //------------- Innter classes below here -------------------
+  //------------- Inner classes below here -------------------
   static private class FileState {
     public FileState(final InstrumentedFile file, final HashMap imports, final Set starImports) {
       _imports = imports;

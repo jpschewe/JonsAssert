@@ -23,11 +23,11 @@ import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 
 /**
-   Test cases for AssertTools.
-**/
+ * Test cases for AssertTools.
+ */
 public class AssertToolsTest extends TestCase {
 
-  public static void main(String args[]) {
+  public static void main(final String args[]) {
 //     TestSuite suite = new TestSuite();
 //     suite.addTest(new AssertToolsTest("testUniqueParams2"));
     TestRunner.run(suite());
@@ -35,7 +35,7 @@ public class AssertToolsTest extends TestCase {
     System.exit(0);
   }
   
-  public AssertToolsTest(String name) {
+  public AssertToolsTest(final String name) {
     super(name);
   }
 

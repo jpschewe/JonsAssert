@@ -59,5 +59,15 @@ public class Node {
       throw new IOException();
     }
   }
+
+  /**
+     Test for quotes in the condition, at one point this caused an infinite
+     loop when doing the search and replace to escape these quotes.
+     
+     @pre (!dateStr.equals(""))
+  **/
+  final public static long stringDateToLong(String dateStr) {
+    return 10L;
+  }
   
 }

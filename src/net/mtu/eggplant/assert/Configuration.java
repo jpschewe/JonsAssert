@@ -22,7 +22,7 @@ public class Configuration {
   final public boolean ignoreTimeStamp() {
     return _ignoreTimeStamp;
   }
-  final /*package*/ void setIgnoreTimeStamp(boolean b) {
+  final public void setIgnoreTimeStamp(boolean b) {
     _ignoreTimeStamp = b;
   }
   private boolean _ignoreTimeStamp = false;
@@ -82,28 +82,26 @@ public class Configuration {
       return getDestinationDirectory();
     }
     
-    StringBuffer dir = new StringBuffer(getDestinationDirectory());
-    File dirf = new File(dir.toString());
+    final StringBuffer dir = new StringBuffer(getDestinationDirectory());
+    final File dirf = new File(dir.toString());
     if(!dirf.exists()) {
-      boolean result = dirf.mkdir();
-      if(!result) {
-        throw new RuntimeException("Couldn't create directory: " + dir.toString());
+      if(!dirf.mkdir()) {
+        throw new RuntimeException("Couldn't create directory and it doesn't exist: " + dirf.toString());
       }
     }
     else if(!dirf.isDirectory()) {
       throw new RuntimeException("Error creating destination directories, file found where directory expected: " + dir.toString());
     }
       
-    StringTokenizer packageIter = new StringTokenizer(packageName, ".");
+    final StringTokenizer packageIter = new StringTokenizer(packageName, ".");
     while(packageIter.hasMoreTokens()) {
-      String subPackage = packageIter.nextToken();
+      final String subPackage = packageIter.nextToken();
       dir.append(File.separator);
       dir.append(subPackage);
-      File f = new File(dir.toString());
+      final File f = new File(dir.toString());
       if(!f.exists()) {
-        boolean result = f.mkdir();
-        if(!result) {
-          throw new RuntimeException("Couldn't create directory: " + dir.toString());
+        if(!f.mkdir()) {
+          throw new RuntimeException("Couldn't create directory and it doesn't exist: " + dir.toString());
         }
       }
       else if(!f.isDirectory()) {
@@ -124,7 +122,7 @@ public class Configuration {
      will be created under this directory for the packages.
   **/
   public void setDestinationDirectory(final String dir) {
-    _destination = dir;
+    _destination = dir.trim();
   }
 
   /**
@@ -134,12 +132,11 @@ public class Configuration {
                                         final String packageName) {
     final String filename = sourceFile.getAbsolutePath();
     final int indexOfSlash = filename.lastIndexOf(File.separatorChar);
-    final String shortFilename = filename.substring(indexOfSlash);        
+    final String shortFilename = filename.substring(indexOfSlash+1);
     int indexOfDot = shortFilename.lastIndexOf('.');
     final String ifilename = shortFilename.substring(0, indexOfDot) + "." + getInstrumentedExtension();
-    final String path = createDirectoryForPackage(packageName);    
+    final String path = createDirectoryForPackage(packageName);
     return path + File.separatorChar + ifilename;
   }
-                                        
   
 }

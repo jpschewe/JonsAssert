@@ -13,6 +13,7 @@
  '(jde-global-classpath (list
 			 (expand-file-name home-root)
 			 (expand-file-name "lib/antlr.jar" home-root)
+			 (expand-file-name "lib/parseview1.2.jar" home-root)
 			 (expand-file-name "lib/junit.jar" home-root)
 			 (expand-file-name "lib/java-getopt-1.0.7.jar" home-root)
 			 (expand-file-name "jre/lib/rt.jar" java-home)

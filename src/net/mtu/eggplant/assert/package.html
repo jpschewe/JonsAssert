@@ -1,0 +1,65 @@
+<html>
+  <body>
+
+      <h2>Generated names.</h2>
+      
+      <p>This table shows the names that are generated that might collide with
+      names in instrumented source code.  Do not use these names.  If there
+      are problems with the names choosen here, please emailme and I'll see
+      what I can do to keep them from colliding.  I've created these names to
+      follow standard naming conventions for java source code so that if the
+      code is run through a tool, like jtest, that checks these things the
+      instrumented code doesn't generate unneeded errors.  All generated
+      variables and methods will be prepended with jps_.  Some are listed in
+      the following table.</p>
+      
+      <table>
+	<tr>
+	  <th>name</th>
+	  <th>description</th>
+	</tr>
+
+	<tr>
+	  <td>jps__&lt;packageName&gt;_&lt;className&gt;_check&lt;methodName&gt;PreConditions</td>
+	  <td>Name of method used to check preconditions on a method</td>
+	</tr>
+
+	<tr>
+	  <td>jps__&lt;packageName&gt;_&lt;className&gt;_check&lt;methodName&gt;PostConditions</td>
+	  <td>Name of method used to check postconditions on a method</td>
+	</tr>
+
+	<tr>
+	  <td>jps__&lt;packageName&gt;_&lt;className&gt;_checkInvariant</td>
+	  <td>Name of method used to check invariants on a class</td>
+	</tr>
+
+	<tr>
+	  <td>jps__retval&lt;className&gt;</td>
+	  <td>Variable used to store the return value of a method so that it
+	    may be used when checking postconditions and still be returned
+	    from the method</td>
+	</tr>
+
+	<tr>
+	  <td>JPS_&lt;packageName&gt;_&lt;className&gt;_AssertDummy&lt;count&gt;</td>
+	  <td>Name of class generated to check preconditions on constructors.
+	    <tt>count</tt> is incremented for each constructor in a class</td>
+	</tr>
+
+	<tr>
+	  <td>jps_dummy&lt;count&gt;</td>
+	  <td>Name of extra parameters created to uniquify generated
+	    constructors.  <tt>count</tt> is incremented for each parameter
+	    added to a particular constructor</td>
+	</tr>
+
+	<tr>
+	  <td>JPS__&lt;packageName&gt;_&lt;className&gt;_AssertClass</td>
+	  <td>Name of class generated to check conditions on interfaces</td>
+	</tr>
+
+	
+      </table>
+  </body>
+</html>

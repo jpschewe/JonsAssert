@@ -8,7 +8,7 @@
 
   Replace all of the package names '.' with '_'
 
-  All variables created here will have _JPS_ in front of them except for __retVal
+  All variables created here will have jps__ in front of them except.
 
   invariants are ANDed with super class
   preconditions are ORed with super class
@@ -27,21 +27,21 @@ public Object methodFoo(Object param1) {
 
 //after
 public Object methodFoo(Object param1) {
-  if(!__<packageName>_<className>_checkInvariant()) {
+  if(!jps__<packageName>_<className>_checkInvariant()) {
     AssertTools.invariantFailed(AssertTools.getCurrentAssertionViolation());
   }
-  if(!__<packageName>_<className>_check<methodName>PreConditions(param1, param2, ...)) {
+  if(!jps__<packageName>_<className>_check<methodName>PreConditions(param1, param2, ...)) {
     AssertTools.preConditionFailed(AssertTools.getCurrentAssertionViolation());
   }
-  final Object __retVal<classname> = b;
+  final Object jps__retVal<classname> = b;
     
-  if(!__<packageName>_<className>_checkInvariant()) {
+  if(!jps__<packageName>_<className>_checkInvariant()) {
     AssertTools.invariantFailed(AssertTools.getCurrentAssertionViolation());
   }
-  if(!__<packageName>_<className>_check<methodName>PostConditions(__retVal<classname>, param1, ...)) {
+  if(!jps__<packageName>_<className>_check<methodName>PostConditions(jps__retVal<classname>, param1, ...)) {
     AssertTools.postConditionFailed(AssertTools.getCurrentAssertionViolation());
   }
-  return __retVal<classname>;
+  return jps__retVal<classname>;
 
 }
 
@@ -56,7 +56,7 @@ public Object methodFoo(Object param1) {
            return AND(pre condtitions for this class);
               
 **/
-protected boolean __<packageName>_<methodName>_check<methodname>PostConditions(__retVal, param1, ...) {
+protected boolean jps__<packageName>_<methodName>_check<methodname>PostConditions(jps__retVal, param1, ...) {
 
   /* Just like check checkPreconditions, except that the superclass conditions
     as ANDed rather then ORed. */
@@ -79,7 +79,7 @@ protected boolean __<packageName>_<methodName>_check<methodname>PostConditions(_
            return AND(pre condtitions for this class);
               
 **/
-protected boolean __<packageName>_<methodName>_check<methodname>PreConditions(param1, param2, ...) {
+protected boolean jps__<packageName>_<methodName>_check<methodname>PreConditions(param1, param2, ...) {
   Class thisClass;
   try {
     String className = "<fill in class name>";
@@ -149,7 +149,7 @@ protected boolean __<packageName>_<methodName>_check<methodname>PreConditions(pa
            return AND(invariants for this class);
               
 **/
-protected boolean __<packageName>_<methodName>_checkInvariant() {
+protected boolean jps__<packageName>_<methodName>_checkInvariant() {
   Class thisClass;
   try {
     String className = "<fill in class name>";
@@ -224,25 +224,25 @@ public Test(int i) {
 **/
 public Test (int i) {
 // -- start output from generatePreCondtitionCall 
-  this(i, new <packageName>_Test_AssertDummy0(i), true, ...);
+  this(i, new JPS_<packageName>_Test_AssertDummy0(i), true, ...);
   //standard check invariant call
-  if(!__<packageName>_Test_checkInvariant()) {
+  if(!jps__<packageName>_Test_checkInvariant()) {
     AssertTools.invariantFailed(AssertTools.getCurrentAssertionViolation());
   }
   //standard post condition call for void method
-  if(!__<packageName>_Test_checkTestPostConditions(i)) {
+  if(!jps__<packageName>_Test_checkTestPostConditions(i)) {
     AssertTools.postConditionFailed(AssertTools.getCurrentAssertionViolation());
   }
 }
-class <packageName>_Test_AssertDummy0 {
-  public <packageName>_Test_AssertDummy0(int i) {
+class JPS_<packageName>_Test_AssertDummy0 {
+  public JPS_<packageName>_Test_AssertDummy0(int i) {
     //Standard precondition call    
-    if(!__<packageName>_Test_checkTestPreConditions(i)) {
+    if(!jps__<packageName>_Test_checkTestPreConditions(i)) {
       AssertTools.preConditionFailed(AssertTools.getCurrentAssertionViolation());
     }
   }
 }
-private Test(int i, <packageName>_Test_AssertDummy0 ad, <some number of extra boolean parameters to uniquify signature>) {
+private Test(int i, JPS_<packageName>_Test_AssertDummy0 ad, <some number of extra boolean parameters to uniquify signature>) {
 // -- end output from generatePreConditionCall
   System.out.println("in constructor " + i);
 }
@@ -304,10 +304,10 @@ public interface Interface {
   **/
   public boolean preCond(int i);
 
-  static final public class __<packageName>_<className>_AssertClass implements Interface {
+  static final public class JPS__<packageName>_<className>_AssertClass implements Interface {
     private Class[] _interfaceCache;
     private Interface _delegate;
-    public __<packageName>_<className>_AssertClass(final Interface delegate) {
+    public jps__<packageName>_<className>_AssertClass(final Interface delegate) {
       _delegate = delegate;
       //Do some caching
       final Class[] interfaces = Interface.class.getInterfaces();
@@ -340,7 +340,7 @@ public interface Interface {
       
       return true;
     }
-    public boolean checkpreCondPostConditions(boolean __retVal, int i) {
+    public boolean checkpreCondPostConditions(boolean jps__retVal, int i) {
       return true;
     }
 
