@@ -156,7 +156,7 @@ public class TestAssert extends TestCase {
   }
 
   /**
-     @post (__retVal < 10), "Post condition";
+     @post ($return < 10), "Post condition";
   **/
   public int postCond(final int i) {
     return i+5;

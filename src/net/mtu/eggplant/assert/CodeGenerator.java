@@ -8,9 +8,7 @@
 package org.tcfreenet.schewe.assert;
 
 import org.tcfreenet.schewe.utils.StringPair;
-
-import gnu.regexp.RE;
-import gnu.regexp.REException;
+import org.tcfreenet.schewe.utils.StringUtils;
 
 import java.util.Set;
 import java.util.Iterator;
@@ -757,26 +755,6 @@ public class CodeGenerator {
   }
 
   /**
-     The RE used to rewrite post conditions.
-  **/
-  static private RE _postConditionRewrite;
-  /**
-     Used to escape quotes
-  **/
-  static private RE _escapeQuotes;
-  static {
-    try {
-      _postConditionRewrite = new RE("\\$return");
-      _escapeQuotes = new RE("(\"|\')");
-    } catch(final REException re) {
-      System.err.println("This is really bad!");
-      re.printStackTrace();
-      System.exit(1);
-    }
-  }
-  
-    
-  /**
      Append to code code to check for the assert conditions in tokens.
 
      @param postCondition true if we're adding checks for a postcondition method. 
@@ -791,10 +769,10 @@ public class CodeGenerator {
       final String message = token.getMessage();
       code.append("if(!");
       if(postCondition) {
-        code.append(_postConditionRewrite.substituteAll(condition, "__retVal"));
+        code.append(StringUtils.searchAndReplace(condition, "$return", "__retVal"));
       } else {
-        if(_postConditionRewrite.getMatch(condition) != null) {
-          System.err.println("$return found in precondition! " + token.getText());
+        if(condition.indexOf("$return") != -1) {
+          System.err.println("$return found in something other than postcondition! " + token.getText());
         }
         code.append(condition);
       }
@@ -803,7 +781,9 @@ public class CodeGenerator {
       if(message != null) {
         errorMessage = message + " + ";
       }
-      errorMessage += "\" " + _escapeQuotes.substituteAll(condition, "\\$1") + "\"";
+
+
+      errorMessage += "\" " + StringUtils.searchAndReplace(StringUtils.searchAndReplace(condition, "\"", "\\\""), "\'", "\\\'") + "\"";
     
       code.append("org.tcfreenet.schewe.assert.AssertionViolation _JPS_av = new org.tcfreenet.schewe.assert.AssertionViolation(");
       code.append(errorMessage);

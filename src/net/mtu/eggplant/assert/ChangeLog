@@ -1,3 +1,7 @@
+2000-10-15  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* CodeGenerator.java: Removed dependancy on gnu regexp package.
+
 2000-10-14  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* testcases/TestAssert.java: Added comments to unit tests.  Added
