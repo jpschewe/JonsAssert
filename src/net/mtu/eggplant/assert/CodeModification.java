@@ -29,50 +29,32 @@ public class CodeModification extends CodeFragment {
      @pre (code != null)
   **/
   public CodeModification(final CodePoint start,
-                          final CodePoint end,
                           final String searchText,
                           final String replaceText,
-                          final String code,
                           final CodeFragmentType type) {
-    super(start, code, type);
-    _end = end;
+    super(start, replaceText, type);
     _searchText = searchText;
-    _replaceText = replaceText;
-
   }
 
-  public CodePoint getEnd() {
-    return _end;
-  }
-  private CodePoint _end;
-
-  public CodePoint getStart() {
-    return getLocation();
-  }
-  
   public String getSearchText() {
     return _searchText;
   }
   private String _searchText;
   
   public String getReplaceText() {
-    return _replaceText;
+    return getCode();
   }
-  private String _replaceText;
 
   //[jpschewe:20000205.2234CST] FIX need to handle multiple line return statements..., can fix this with two code fragments for a post condition call, everything else is single line then
   public int instrumentLine(final int offset,
                             final StringBuffer line) {
-    int start = getStart().getColumn() + offset;
+    int start = getLocation().getColumn() + offset;
     String search = getSearchText();
     String replace = getReplaceText();
     int newOffset = offset + (replace.length() - search.length());
     int searchTextIndex = line.toString().indexOf(getSearchText(), start);
     line.replace(start, start+search.length(), replace);
 
-    int end = getEnd().getColumn() + newOffset;
-    line.insert(end, getCode());
-
-    return newOffset + getCode().length();
+    return newOffset;
   }
 }

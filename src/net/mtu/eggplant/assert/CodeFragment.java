@@ -77,6 +77,9 @@ public class CodeFragment implements Comparable {
   public int instrumentLine(final int offset,
                             final StringBuffer line) {
     int whereToInsert = offset + getLocation().getColumn();
+    while(line.length() <= whereToInsert) {
+      line.append(' ');
+    }
     line.insert(whereToInsert, getCode());
     return offset + getCode().length();
   }

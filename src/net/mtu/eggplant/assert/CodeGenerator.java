@@ -60,9 +60,9 @@ public class CodeGenerator {
     StringBuffer code = new StringBuffer();
     code.append("if(!__");
     code.append(mclassName);
-    code.append("_checkInvariant()) {");
-    code.append("org.tcfreenet.schewe.Assert.AssertTools.invariantFailed(org.tcfreenet.schewe.Assert.AssertTools.getCurrentAssertionViolation());");
-    code.append("}");
+    code.append("_checkInvariant()) {\n");
+    code.append("org.tcfreenet.schewe.Assert.AssertTools.invariantFailed(org.tcfreenet.schewe.Assert.AssertTools.getCurrentAssertionViolation());\n");
+    code.append("}\n");
 
     return code.toString();
   }
@@ -150,6 +150,7 @@ public class CodeGenerator {
   static public String generatePreConditionCall(final AssertMethod assertMethod) {
     StringBuffer code = new StringBuffer();
     StringBuffer params = new StringBuffer();
+    StringBuffer callparams = new StringBuffer();    
     String mclassName = assertMethod.getContainingClass().getFullName().replace('.', '_');
     String dummyClassName = assertMethod.getContainingClass().createDummyConstructorClassName();
     boolean first = true;
@@ -157,21 +158,26 @@ public class CodeGenerator {
     while(paramIter.hasNext()) {
       if(! first) {
         params.append(", ");
+        callparams.append(", ");
         first = false;
       }
       StringPair sp = (StringPair)paramIter.next();
       String paramName = sp.getStringTwo();
+      String paramType = sp.getStringOne();
+      callparams.append(paramName);
+      params.append(paramType);
+      params.append(" ");
       params.append(paramName);
     }
     
     if(assertMethod.isConstructor()) {
       // add extra class call
       code.append("this(");
-      code.append(params);
+      code.append(callparams);
       code.append(", new ");
       code.append(dummyClassName);
       code.append("(");
-      code.append(params);
+      code.append(callparams);
       code.append("));\n");
       code.append("}\n");
       code.append("static private class ");
@@ -190,7 +196,7 @@ public class CodeGenerator {
     code.append(assertMethod.getName());
     code.append("PreConditions(");
 
-    code.append(params);
+    code.append(callparams);
     code.append(")) {\n");
     code.append("org.tcfreenet.schewe.Assert.AssertTools.preConditionFailed(org.tcfreenet.schewe.Assert.AssertTools.getCurrentAssertionViolation());\n");
     code.append("}\n");
@@ -232,7 +238,7 @@ public class CodeGenerator {
       code.append(paramName);
       code.append(" = ");
       code.append(paramName);
-      code.append(";");
+      code.append(";\n");
     }
 
     return code.toString();
@@ -246,22 +252,11 @@ public class CodeGenerator {
 
      @pre (assertMethod != null)
   **/
-  static public String generatePostConditionCall(final AssertMethod assertMethod, final String retVal) {
-    //[jpschewe:20000206.2034CST] FIX to be two code fragments, one for before retVal and one for after retVal
-    //[jpschewe:20000118.0006CST] perhaps this should return a Vector of code fragments...
+  static public String generatePostConditionCall(final AssertMethod assertMethod) {
     StringBuffer code = new StringBuffer();
     String retType = assertMethod.getReturnType();
-    boolean voidMethod = retType.equals("void");
     String mclassName = assertMethod.getContainingClass().getFullName().replace('.', '_');
-    
-    if(!voidMethod) {
-      code.append("final ");
-      code.append(retType);
-      code.append(" __retVal = ");
-      code.append(retVal);
-      code.append(";");
-    }
-    
+
     code.append("if(!__");
     code.append(mclassName);
     code.append("_check");
@@ -269,7 +264,7 @@ public class CodeGenerator {
     code.append("PostConditions(");
 
     boolean first = true;
-    if(!voidMethod) {
+    if(!assertMethod.isVoid()) {
       code.append("__retVal");
       first = false;
     }
@@ -286,14 +281,13 @@ public class CodeGenerator {
       code.append(", ");
       code.append(paramName);
     }
-    code.append(")) {");
-    code.append("org.tcfreenet.schewe.Assert.AssertTools.preConditionFailed(org.tcfreenet.schewe.Assert.AssertTools.getCurrentAssertionViolation());");
-    code.append("}");
+    code.append(")) {\n");
+    code.append("org.tcfreenet.schewe.Assert.AssertTools.preConditionFailed(org.tcfreenet.schewe.Assert.AssertTools.getCurrentAssertionViolation());\n");
+    code.append("}\n");
 
-    //[jpschewe:20000205.1446CST] don't actually change the return, that way we can just insert code into the file rather than modifying it.
-    //if(!voidMethod) {
-    //  code.append("return __retVal;");
-    //}
+    if(!assertMethod.isVoid()) {
+      code.append("return __retVal;\n");
+    }
 
     return code.toString();
   }
@@ -327,11 +321,12 @@ public class CodeGenerator {
       code.append(sp.getStringTwo());
     }
     code.append(") {\n");
-    code.append("Class thisClass;\n");
-    code.append("try {\n");
+    code.append("Object retVal = null;\n");
+    code.append("Class thisClass = null;\n");
     code.append("String className = \"");
     code.append(className);
     code.append("\";\n");
+    code.append("try {\n");
     code.append("thisClass = Class.forName(className);\n");
     code.append("}\n");
     code.append("catch(ClassNotFoundException cnfe) {\n");
@@ -353,13 +348,14 @@ public class CodeGenerator {
     }
     code.append("};\n");
                 
-    code.append("Method superMethod = org.tcfreenet.schewe.Assert.AssertTools.findSuperMethod(thisClass, \"check");
+    code.append("java.lang.reflect.Method superMethod = org.tcfreenet.schewe.Assert.AssertTools.findSuperMethod(thisClass, \"check");
     code.append(assertMethod.getName());
     code.append("PreConditions\", methodArgs);\n");
 
     code.append("if(superMethod != null) {\n");
     code.append("Object[] args = {");
     //[jpschewe:20000213.1552CST] need parameters here, just the parameter names
+    //[jpschewe:20000216.2244CST] FIX need to wrap primative data types here!
     first = true;
     paramIter = assertMethod.getParams().iterator();
     while(paramIter.hasNext()) {
@@ -396,6 +392,10 @@ public class CodeGenerator {
     code.append("}\n");
     code.append("}\n");
 
+
+    code.append("if(!((Boolean)retVal).booleanValue()) {\n");
+    code.append("return false;\n");
+    code.append("}\n");
     
     //[jpschewe:20000116.1749CST] FIX still need to add to this to do interface
     //preconditions first and keep track of which interface they're from
@@ -425,23 +425,37 @@ public class CodeGenerator {
     code.append(assertMethod.getName());
     code.append("PostConditions(");
     boolean first = true;
+    if(!assertMethod.isVoid()) {
+      code.append(assertMethod.getReturnType());
+      code.append(" ");
+      code.append("__retVal");
+      first = false;
+    }
     Iterator paramIter = assertMethod.getParams().iterator();
     while(paramIter.hasNext()) {
+      StringPair sp = (StringPair)paramIter.next();
+      String paramType = sp.getStringOne();
+      String paramName = sp.getStringTwo();
       if(! first) {
         code.append(",");
         first = false;
       }
-      StringPair sp = (StringPair)paramIter.next();
-      code.append(sp.getStringOne());
+      code.append(paramType);
+      code.append(" ");
+      code.append("__old");
+      code.append(paramName);
+      code.append(", ");
+      code.append(paramType);
       code.append(' ');
-      code.append(sp.getStringTwo());
+      code.append(paramName);
     }
     code.append(") {\n");
-    code.append("Class thisClass;\n");
-    code.append("try {\n");
+    code.append("Object retVal = null;\n");
+    code.append("Class thisClass = null;\n");
     code.append("String className = \"");
     code.append(className);
     code.append("\";\n");
+    code.append("try {\n");
     code.append("thisClass = Class.forName(className);\n");
     code.append("}\n");
     code.append("catch(ClassNotFoundException cnfe) {\n");
@@ -463,13 +477,14 @@ public class CodeGenerator {
     }
     code.append("};\n");
                 
-    code.append("Method superMethod = org.tcfreenet.schewe.Assert.AssertTools.findSuperMethod(thisClass, \"check");
+    code.append("java.lang.reflect.Method superMethod = org.tcfreenet.schewe.Assert.AssertTools.findSuperMethod(thisClass, \"check");
     code.append(assertMethod.getName());
     code.append("PostConditions\", methodArgs);\n");
 
     code.append("if(superMethod != null) {\n");
     code.append("Object[] args = {");
     //[jpschewe:20000213.1552CST] need parameters here, just the parameter names
+    //[jpschewe:20000216.2244CST] FIX need to wrap primative data types here!    
     first = true;
     paramIter = assertMethod.getParams().iterator();
     while(paramIter.hasNext()) {
@@ -479,7 +494,7 @@ public class CodeGenerator {
       }
       StringPair sp = (StringPair)paramIter.next();
       code.append(sp.getStringTwo());
-    }    
+    }
     code.append("};\n");
     code.append("try {\n");
     code.append("retVal = superMethod.invoke(");
@@ -506,6 +521,10 @@ public class CodeGenerator {
     code.append("}\n");
     code.append("}\n");
 
+
+    code.append("if(((Boolean)retVal).booleanValue()) {\n");
+    code.append("return true;\n");
+    code.append("}\n");
     
     //[jpschewe:20000116.1749CST] FIX still need to add to this to do interface
     //postconditions first and keep track of which interface they're from
@@ -533,9 +552,9 @@ public class CodeGenerator {
       code.append(") {\n");
       String errorMessage = "";
       if(message != null) {
-        errorMessage = message + " ";
+        errorMessage = message + " + ";
       }
-      errorMessage += "+ \"" + condition + "\"";
+      errorMessage += "\"" + condition + "\"";
     
       code.append("org.tcfreenet.schewe.Assert.AssertionViolation av = new org.tcfreenet.schewe.Assert.AssertionViolation(");
       code.append(errorMessage);

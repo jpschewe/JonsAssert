@@ -117,7 +117,9 @@ public class AssertMethod implements Named {
      Add an exit to this method.
 
      @param points The first point is the start of the return token, the
-     second is the location of the semiColon at the end of the return.
+     second is the location of the semiColon at the end of the return.  If the
+     method is void or a constructor, these two locations are equal because
+     the first one will be ignored on instrumentation.
      
      @pre (exit != null)
   **/
@@ -184,6 +186,26 @@ public class AssertMethod implements Named {
   **/
   public boolean isVoid() {
     return (getReturnType() == null || getReturnType().equals("void"));
+  }
+
+  private CodePoint _close;
+
+  /**
+     @return the point at which should be added to be just outside the method, location of '}' + 1
+  **/
+  public CodePoint getClose() {
+    return _close;
+  }
+
+  /**
+     Set the point at which should be added to be just outside the method, location of '}' + 1
+  **/
+  public void setClose(final CodePoint close) {
+    _close = close;
+  }
+
+  public String toString() {
+    return "[AssertMethod] " + getName();
   }
   
 }

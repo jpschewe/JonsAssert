@@ -42,7 +42,7 @@ public class TestAssert implements Cloneable {
   }
 
   /**
-     @post ($ret < 10), "Post condition";
+     @post (__retVal < 10), "Post condition";
   **/
   public int postCond(int i) {
     return i+5;
@@ -70,5 +70,8 @@ public class TestAssert implements Cloneable {
     it.postCond(10); // should fail
 
   }
-  
+
+  private int foo(int i) {
+    return i;
+  }
 }

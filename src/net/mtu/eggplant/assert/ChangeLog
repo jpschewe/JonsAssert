@@ -1,3 +1,22 @@
+2000-02-16  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* java.g: Added clear calls for the pre and post conditions as
+	well as correct the column numbers that get passed to the addExit method.
+
+	* Symtab.java: Only add checks where we're supposed to, ie. no
+	invariant check on constructors.  Also modified the generation of
+	the entrance and exits so that the column numbers are such that
+	code is inserted on the correct side of the braces and semicolons.
+
+	* CodeGenerator.java: Lots of little fixes in the generated code.
+	Initialization of variables mainly.
+
+	* CodeFragment.java: Added fix for instrumenting a line if the
+	instrumentation is to be added after the last character of the line.
+
+	* test/TestAssert.java: Modified syntax a bit and made the class
+	compilable by adding the foo method.
+
 2000-02-15  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* java.g: Converted to CodeFragmentType from AssertType

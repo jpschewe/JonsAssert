@@ -144,24 +144,18 @@ tokens {
   **/
   private void addAsserts(final Vector asserts, final Token jdClose) {
     if(asserts != null && asserts.size() > 0) {
-      System.out.println("Parser: got asserts#");
       int line = jdClose.getLine();
       int column = jdClose.getColumn() + jdClose.getText().length();
       
-      System.out.println("Insert code at line.column: " + line + "." + column + " #" + jdClose.getText() + "#"  + jdClose.getClass());
       StringBuffer codeFrag = new StringBuffer();
       Enumeration iter = asserts.elements();
       while(iter.hasMoreElements()) {
 	AssertToken assertToken = (AssertToken)iter.nextElement();
-	//System.out.println(assertToken.getCondition() + " " + assertToken.getMessage());
 	String code = CodeGenerator.generateAssertion(assertToken);
-	System.out.println("code: " + code);
 	codeFrag.append(code);
       }
-      System.out.println("Parser: end asserts");
       CodeFragment codeFragment = new CodeFragment(new CodePoint(line, column), codeFrag.toString(), CodeFragmentType.ASSERT);
       getSymtab().addCodeFragment(codeFragment);
-      System.out.println(codeFragment);
     }
   }
 
@@ -177,7 +171,6 @@ tokens {
     if(! (invariant instanceof AssertToken)) {
       throw new RuntimeException("Expecting AssertToken! " + invariant.getClass());
     }
-    System.out.println("Added invariant " + ((AssertToken)invariant).getCondition() + " " + ((AssertToken)invariant).getMessage());
     _invariants.addElement(invariant);
   }
 
@@ -281,7 +274,6 @@ options {defaultErrorHandler = true;} // let ANTLR handle errors
 { Token id = null; }
   :	"package" id=identifier SEMI
     {
-	    System.out.println("package id : " + id.getLine() + " " + id.getColumn());
       getSymtab().setCurrentPackageName(id.getText());
     }
   ;
@@ -553,6 +545,7 @@ field
 }
   :
 
+    (
     // method, constructor, or variable declaration
     //[jpschewe:20000215.2254CST] FIX need to do something special for abstract and native methods here
     mods=modifiers
@@ -567,6 +560,9 @@ field
       {
 	// needs to be before compoundStatement so that I can have it set for the addExit calls
 	getSymtab().startMethod(null, getPreConditions(), getPostConditions(), params, null, isStatic, isPrivate);
+	clearPreConditions();
+	  clearPostConditions();
+	print("just called startMethod for constructor");
       }
       startEnd=compoundStatement // constructor
  
@@ -582,7 +578,10 @@ field
 	LPAREN params=parameterDeclarationList
 	{
 	  // needs to be before compoundStatement so that I can have it set for the addExit calls
-	  getSymtab().startMethod(null, getPreConditions(), getPostConditions(), params, null, isStatic, isPrivate);
+	  getSymtab().startMethod(methodName.getText(), getPreConditions(), getPostConditions(), params, retType.getText(), isStatic, isPrivate);
+	  print("just called startMethod: " + methodName.getText());
+	    clearPreConditions();
+	    clearPostConditions();
 	}
 	RPAREN
 
@@ -600,7 +599,8 @@ field
 
     // "{ ... }" instance initializer
   |	compoundStatement
-
+    )
+    
     {
       if(startEnd != null) {
 	//got a method or constructor
@@ -608,8 +608,11 @@ field
 	//if retType is null or is void, add an exit at startEnd.getCodePointTwo();
 	//generate code for pre/post/invariants
 	getSymtab().finishMethod(startEnd);
+	print("Found finish: " + methodName);
       }
-
+      else {
+	print("Couldn't find end!: " + methodName);
+      }
     }
   ;
 
@@ -844,15 +847,14 @@ statement
 	// do next iteration of a loop
     |	"continue" (IDENT)? SEMI
 
-	//[jpschewe:19991230.2259CST] put post call here
 	// Return an expression
     |	ret:"return" (expression)? semi:SEMI
       {
+	//[jpschewe:20000216.0717CST] keep track of these points for post conditions
 	CodePoint retcp = new CodePoint(ret.getLine(), ret.getColumn());
-	CodePoint semicp = new CodePoint(semi.getLine(), semi.getColumn());
-	//[jpschewe:20000205.1543CST] FIX need special bit here for doing search and replace in the code
-	//System.out.println("found return: " + exp);
-	//getSymtab().getCurrentMethod().addExit(retcp, semicp);
+	//[jpschewe:20000216.2231CST] add 1 so that code is inserted after the semi colon
+	CodePoint semicp = new CodePoint(semi.getLine(), semi.getColumn()+1);
+	getSymtab().getCurrentMethod().addExit(new CodePointPair(retcp, semicp));
       }
 
 	// switch/case statement
