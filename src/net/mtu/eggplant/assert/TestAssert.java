@@ -7,12 +7,15 @@
 */
 package org.tcfreenet.schewe.Assert;
 
+import java.util.Vector;
+import java.io.*;
+
 /**
    This is a test class for testing my assertions.
    
    @invariant (true), "This is an invariant";
 **/
-public class TestAssert {
+public class TestAssert implements foo.bar {
 
   public void testPrecondition() {
     preCond(-5); // should fail

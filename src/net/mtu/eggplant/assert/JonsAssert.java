@@ -7,23 +7,24 @@
 */
 package org.tcfreenet.schewe.Assert;
 
-import JavaRecognizer;
-import JavaLexer;
-import java.io.*;
-import antlr.collections.AST;
-import antlr.collections.impl.*;
-import antlr.debug.misc.*;
-import antlr.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+
+import antlr.TokenStreamSelector;
 
 public class Main {
 
-  static boolean showTree = false;
-  static TokenStreamSelector selector = new TokenStreamSelector();
-  static JavaLexer javaLexer;
-  static AssertLexer assertLexer;
-  //static AssertHelperLexer assertHelperLexer;
+  static /* package */ boolean showTree = false;
+  static /* package */ TokenStreamSelector selector = new TokenStreamSelector();
+  static /* package */ JavaLexer javaLexer;
+  static /* package */ AssertLexer assertLexer;
+  /** the symbol table */
+  static private Symtab _symtab;
   
   public static void main(String[] args) {
+    _symtab = new Symtab();
+    
     // Use a try/catch block for parser exceptions
     try {
       // if we have at least one command-line argument
@@ -46,8 +47,8 @@ public class Main {
 				// for each directory/file specified on the command line
         doFile(new File("org/tcfreenet/schewe/Assert/TestAssert.java")); // parse it
         
-//         System.err.println("Usage: java JavaRecogizer [-showtree] "+
-//                            "<directory or file name>");
+        //         System.err.println("Usage: java JavaRecogizer [-showtree] "+
+        //                            "<directory or file name>");
       }
     }
     catch(Exception e) {
@@ -59,8 +60,7 @@ public class Main {
 
   // This method decides what action to take based on the type of
   //   file we are looking at
-  public static void doFile(File f)
-    throws Exception {
+  public static void doFile(File f) throws Exception {
     // If this is a directory, walk each file/dir in that directory
     if (f.isDirectory()) {
       String files[] = f.list();
@@ -72,7 +72,11 @@ public class Main {
     else if ((f.getName().length()>5) &&
              f.getName().substring(f.getName().length()-5).equals(".java")) {
       System.err.println("   "+f.getAbsolutePath());
-      parseFile(f.getName(), new FileInputStream(f));
+
+      // let the symbol table know what's being parsed and parse the file if we haven't already
+      if(_symtab.setCurrentFile(f)) {
+        parseFile(f.getName(), new FileInputStream(f));
+      }
     }
   }
 
@@ -86,10 +90,10 @@ public class Main {
                   
       selector.addInputStream(javaLexer, "java");
       selector.addInputStream(assertLexer, "assert");
-      //selector.addInputStream(assertHelperLexer);
       selector.select(javaLexer);
                   
       // Create a parser that reads from the scanner
+      //for debugging the lexer
       //JavaRecognizer parser = new JavaRecognizer(lexer);
       //                   Token tok = selector.nextToken();
       //                   while(tok.getText() != null) {
@@ -98,39 +102,13 @@ public class Main {
       //                   }
       //                   System.exit(0);
       JavaRecognizer parser = new JavaRecognizer(selector);
+      parser.setSymtab(_symtab);
       // start parsing at the compilationUnit rule
       parser.compilationUnit();
-                  
-      // do something with the tree
-      doTreeAction(f, parser.getAST(), parser.getTokenNames());
     }
     catch (Exception e) {
       System.err.println("parser exception: "+e);
       e.printStackTrace();   // so we can get stack trace		
     }
   }
-	
-  public static void doTreeAction(String f, AST t, String[] tokenNames) {
-    if ( t==null ) return;
-    if ( showTree ) {
-      ((CommonAST)t).setVerboseStringConversion(true, tokenNames);
-      ASTFactory factory = new ASTFactory();
-      AST r = factory.create(0,"AST ROOT");
-      r.setFirstChild(t);
-      ASTFrame frame = new ASTFrame("Java AST", r);
-      frame.setVisible(true);
-      //		System.out.println(t.toStringList());
-    }
-    JavaTreeParser tparse = new JavaTreeParser();
-    try {
-      tparse.compilationUnit(t);
-      // System.out.println("successful walk of result AST for "+f);
-    }
-    catch (ParserException e) {
-      System.err.println(e.getMessage());
-      e.printStackTrace();
-    }
-
-  }
-
 }

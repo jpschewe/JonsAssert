@@ -5,13 +5,12 @@ JAVAC=jikes
 	$(JAVAC) $<
 
 all: AssertLexer.class \
-	JavaTreeParser.class \
-	JavaTreeParserTokenTypes.class \
-	JavaTreeParserTokenTypes.txt \
 	JavaLexer.class \
 	JavaRecognizer.class \
 	JavaTokenTypes.class \
 	JavaTokenTypes.txt \
+	Symtab.class \
+	AssertClass.class \
 	Main.class
 
 #assert2.g:	JavaTokenTypes.txt

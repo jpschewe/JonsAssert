@@ -1,3 +1,12 @@
+2000-01-03  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* java.g: list of mports should be correctly built, still need to
+	figure out how to resolve interfaces
+
+2000-01-02  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* README (BUGS): Added bug list.
+
 2000-01-01  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* java.g: removed stuff to build AST

@@ -7,8 +7,13 @@
 */
 package org.tcfreenet.schewe.Assert;
 
+import org.tcfreenet.schewe.utils.StringPair;
+
+import java.io.File;
+
 import java.util.Stack;
 import java.util.Hashtable;
+import java.util.Vector;
 
 /*
   Need to read the PDF again to make sure I've got these right.
@@ -29,27 +34,78 @@ import java.util.Hashtable;
 
 /**
    Class that keeps track of all classes and interfaces parsed in this run.
+   This is the place where most of the work for instrumentation gets done.
+   All lookups are done here.
 **/
 public class Symtab {
 
   public Symtab() {
     _classStack = new Stack();
-    _allClasses = new Hashtable();
     _currentClass = null;
+    _currentFile = null;
+    _currentPackageName = "";
+    _allPackages = new Hashtable();
+    _allFiles = new Hashtable();
   }
 
-  private Stack _classStack;
-  private Hashtable _allClasses;
-  private AssertClass _currentClass;
+  private String _currentPackageName;
+  /**
+     set the package the the next class(es) belong to
+  **/
+  public void setCurrentPackageName(String packageName) {
+    if(_allPackages.get(packageName) == null) {
+      _allPackages.put(packageName, new Hashtable());
+    }
+    _currentPackageName = packageName;
+  }
+
+  /**
+     @return the package that we're currently defining classes for
+  **/
+  public String getCurrentPackageName() {
+    return _currentPackageName;
+  }
+  
+  private File _currentFile;
+
+  public File getCurrentFile() {
+    return _currentFile;
+  }
+
+  /**
+     Set the current file
+     @return false if the file has already been seen.
+  **/
+  public boolean setCurrentFile(File f) {
+    _currentFile = f;
+    _imports = new Hashtable();
+    if(_allFiles.get(f) != null) {
+      return false;
+    }
+    else {
+      _allFiles.put(f, new Vector());
+      return true;
+    }
+  }
   
   /**
      Push a class onto the stack of classes to handle inner classes.
   **/
-  public void startClass() {
-    if(_classStack != null) {
+  public void startClass(String name) {
+    if(_currentClass != null) {
       _classStack.push(_currentClass);
     }
-    _currentClass = new AssertClass();
+    _currentClass = new AssertClass(name, getCurrentPackageName());
+
+    System.out.println("in Symtab.startClass " + _currentClass);
+    
+    // add to the current package
+    Hashtable h = (Hashtable)_allPackages.get(getCurrentPackageName());
+    h.put(name, getCurrentClass());
+
+    // associate it with a file too
+    Vector v = (Vector)_allFiles.get(getCurrentFile());
+    v.addElement(getCurrentClass());    
   }
 
   /**
@@ -58,16 +114,12 @@ public class Symtab {
      method defined as well as a checkInvariants method.
   **/
   public void finishClass() {
-    // note what methods need to be dumped at this line
-    _allClasses.put(_currentClass.getFullName(), _currentClass);
-    
     if(!_classStack.isEmpty()) {
       _currentClass = (AssertClass)_classStack.pop();
     }
     else {
       _currentClass = null;
     }
-    
   }
 
   /**
@@ -78,50 +130,37 @@ public class Symtab {
   public AssertClass getCurrentClass() {
     return _currentClass;
   }
-  
-}
 
-/*
-protected void __checkInvariant() throws AssertionViolationException {
-  Class thisClass = this.getClass();
-  Class superClass = thisClass.getSuperclass();
-  Method superMethod = null;
-  if(superClass != null) {
-    try {
-      Class[] classArgs = new Class[0];
-      superMethod = superClass.getDeclaredMethod("__checkInvariant", classArgs);
-    }
-    catch(NoSuchMethodException nsme) {
-      // no method, don't call it
-      superMethod = null;
-    }
-    catch(SecurityException se) {
-      //This is real bad, spit out internal error here
-    }
-  
-    if(superMethod != null) {
-      //invoke it, pass on exceptions
-      Object[] args = new Object[0];
-      try {
-        superMethod.invoke(this, args);
-      }
-      catch(IllegalAccessException iae) {
-        //bad, internal error, not enough access
-      }
-      catch(IllegalArgumentException iae) {
-        //should never see, internal error
-      }
-      catch(InvocationTargetException ite) {
-        throw ite.getTargetException(); // should be the AssertionViolationException
-      }
-    }
+  /**
+     instrument all of the files we've parsed so far.
+  **/
+  public void instrument() {
+    /*
+      walk over _allFiles and parse each class writing out to the instrument directory.
+    */
   }
 
-  // add users conditions here and throw an exception on the first failure
-  //for <condition> (conditions)
-  if(<condition>) {
-    throw new AssertionViolationException("Failed invariant\n" + (<message> != null ? <message> : "") + "\n" + <condition>);
+  /**
+     Resolve an interface.  Given a name of an interface, find the package it
+     belongs in.  We're assuming that if it isn't a fully qualified name it's
+     in the list of imports or in the current package.  Leave it up to the
+     real compiler to check for mistakes.
+
+     @return a StringPair where the first object is the package and the second
+     is the interface name.
+  **/
+  public StringPair resolveInterface(String name) {
+    return null;
   }
   
+  private AssertClass _currentClass;
+  private Hashtable _allPackages;
+  private Hashtable _allFiles;
+  private Stack _classStack;
+  /**
+     Hashtable of Vectors, each key is a class name, each value is a package
+     name.
+  **/
+  private Hashtable _imports;
 }
-*/
+

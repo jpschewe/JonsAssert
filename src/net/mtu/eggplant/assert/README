@@ -16,3 +16,6 @@ just copied to the instrumented directory.  Interfaces will get copied to
 the instrumented directory whenever a class that implements them is
 instrumented or if the one tries to instrument the interface itself.
 
+BUGS:
+Implementing an interface that is defined in the same file won't work right
+now.  This needs some seious thought.

@@ -13,7 +13,8 @@ header {
 
   import java.util.Enumeration;
   import java.util.Vector;
-
+  import java.util.Hashtable;
+  
 }
 /** Java 1.1 Recognizer Grammar
  *
@@ -86,28 +87,63 @@ tokens {
 
 // Define some helper methods
 {
-  private String _package;
-  private void setPackage(String p) {
-    _package = p;
+  public void print(String s) {
+    System.out.println("Parser: " + s);
+  }
+  
+  public void setSymtab(Symtab symtab) {
+    _symtab = symtab;
   }
 
-  private String getPackage() {
-    return _package;
+  private Symtab _symtab;
+
+  /**
+     Given the id Token from the implements clause find the package the
+     interface is defined in.  Parse the interface for assertions and add
+     an AssertInterface object to the current class so we can check against
+     it later.
+  **/
+  private void parseImplementedInterface(Token t) {
+    String interfaceName = t.getText();
+    String packageName = "";
+    if(interfaceName.indexOf('.') > 0) {
+      //already qualified interface, break up into package and name
+      int lastDot = interfaceName.lastIndexOf('.');
+      packageName = interfaceName.substring(0, lastDot);
+      interfaceName = interfaceName.substring(lastDot+1);
+    }
+    else {
+      //Need to figure out the right package here, search through the
+      //current package, _imports
+    }
+
+    //[jpschewe:20000103.0113CST] actually parse the file so we can check
+    //against it later
+    
   }
-
-  private Vector _imports = new Vector();
-
-  private void addImport(Token t, String className, String packagename) {
-    //[jpschewe:19991231.1859CST] need something here
-    //_imports.addElement(i);
-  }
-
-  private Vector getImports() {
-    return _imports;
+  
+  private Hashtable _imports = new Hashtable();
+  
+  private void addImport(Token t, String className, String packageName) {
+    packageName = packageName.substring(1);
+    print("in addImport " + t + ":" + className + ":" + packageName + ":");
+    if(className != null) {
+      Vector v = (Vector)_imports.get(packageName);
+      if(v == null) {
+	v = new Vector();
+      }
+      //add the class to the list of classes for this package import
+      v.addElement(className);
+      _imports.put(packageName, v);
+    }
+    else {
+      //empty vector means everything in this package
+      _imports.put(packageName, new Vector());
+    }
   }
 
   private void clearImports() {
-    _imports = new Vector();
+    _imports = new Hashtable();
   }
 
   private void addAsserts(Vector asserts, Token jdClose) {
@@ -194,7 +230,11 @@ invariantConditions returns [Vector v]
 // Package statement: "package" followed by an identifier.
 packageDefinition
 options {defaultErrorHandler = true;} // let ANTLR handle errors
-  :	"package" identifier SEMI
+{ Token id = null; }
+  :	"package" id=identifier SEMI
+    {
+      _symtab.setCurrentPackageName(id.getText());
+    }
   ;
 
 
@@ -240,77 +280,83 @@ typeSpec
 // A class type specification is a class type with possible brackets afterwards
 //   (which would make it an array type).
 classTypeSpec
+{ Token id; }
     :
-	identifier (LBRACK RBRACK)*
+	id=identifier (LBRACK RBRACK)*
   ;
 
 // A builtin type specification is a builtin type with possible brackets
 // afterwards (which would make it an array type).
 builtInTypeSpec
-  :	builtInType (LBRACK RBRACK)*
+{ Token id; }
+  :	id=builtInType (LBRACK RBRACK)*
   ;
 
 // A type name. which is either a (possibly qualified) class name or
 //   a primitive (builtin) type
-type
-  :	identifier
-  |	builtInType
+type returns [Token t]
+  :	t=identifier
+  |	t=builtInType
   ;
 
 // The primitive types.
-builtInType
-  :	"void"
-  |	"boolean"
-  |	"byte"
-  |	"char"
-  |	"short"
-  |	"int"
-  |	"float"
-  |	"long"
-  |	"double"
+builtInType returns [Token t]
+{ t = null; }
+  :	tvoid:"void" { t = tvoid; }
+  |	tboolean:"boolean" { t = tboolean; }
+  |	tbyte:"byte" { t = tbyte; }
+  |	tchar:"char" { t = tchar; }
+  |	tshort:"short" { t = tshort; }
+  |	tint:"int" { t = tint; }
+  |	tfloat:"float" { t = tfloat; }
+  |	tlong:"long" { t = tlong; }
+  |	tdouble:"double" { t = tdouble; }
   ;
 
 // A (possibly-qualified) java identifier.  We start with the first IDENT
 //   and expand its name by adding dots and following IDENTS
-identifier 
+identifier returns [Token t]
+{ t = null; }
   :
-    IDENT
-    ( DOT IDENT )*
+    id:IDENT { t = id; }
+    ( DOT id2:IDENT { t.setText(t.getText() + "." + id2.getText()); } )*
   ;
 
-identifierStar 
-  :
-    IDENT
-    ( DOT IDENT )*
-    ( DOT STAR )?
-  ;
-// identifierStar
-// {
-//   String className="";
-//   String packageName="";
-// }
+// identifierStar returns [Token t]
+// { t = null; }
 //   :
-//     id:IDENT        {className=id.getText();}
-//     ( DOT id2:IDENT
-// 	 {packageName += "."+className; className = id2.getText();} )*
-//     ( DOT STAR      {packageName += "."+className; className = null;} )?
-// 
-//     {
-// 	 // put the overall name in the token's text
-// 	 if (packageName.equals("")) {
-// 	   id.setText(className);
-// 	 }
-// 	 else if (className == null) {
-// 	   id.setText(packageName.substring(1));
-// 	 }
-// 	 else {
-// 	   id.setText(packageName.substring(1) + "." + className);
-// 	 }
-// 
-// 	 // tell the symbol table about the import
-// 	 addImport(id, className, packageName);
-//     }
+//     id:IDENT { t = id; }
+//     ( DOT id2:IDENT { t.setText(t.getText() + "." + id2.getText()); )*
+//     ( DOT STAR { t.setText(t.getText() + ".*"); )?
 //   ;
+
+identifierStar
+{
+  String className = "";
+  String packageName = "";
+}
+  :
+    id:IDENT        { className = id.getText(); }
+    ( DOT id2:IDENT
+	 { packageName += "." + className; className = id2.getText(); } )*
+    ( DOT STAR      { packageName += "." + className; className = null; } )?
+
+    {
+	 // put the overall name in the token's text
+	 if (packageName.equals("")) {
+	   id.setText(className);
+	 }
+	 else if (className == null) {
+	   id.setText(packageName.substring(1));
+	 }
+	 else {
+	   id.setText(packageName.substring(1) + "." + className);
+	 }
+
+	 // tell the symbol table about the import
+	 addImport(id, className, packageName);
+    }
+  ;
 
 
 // modifiers for Java classes, interfaces, class/instance vars and methods
@@ -332,7 +378,7 @@ modifier
 
 // Definition of a Java class
 classDefinition
-  :	"class" IDENT
+  :	"class" id:IDENT { _symtab.startClass(id.getText()); }
     // it _might_ have a superclass...
     superClassClause
     // it might implement some interfaces...
@@ -344,7 +390,8 @@ classDefinition
 
 
 superClassClause
-  :	( "extends" identifier )?
+{ Token id; }
+  :	( "extends" id=identifier )?
   ;
 
 // Definition of a Java Interface
@@ -383,17 +430,22 @@ prePostField
 
 
 // An interface can extend several other interfaces...
+//[jpschewe:20000102.1415CST] need stuff here too, this could get messy
 interfaceExtends
+{ Token id, id2; }
   :	(
       "extends"
-      identifier ( COMMA identifier )*
+      id=identifier ( COMMA id2=identifier )*
     )?
   ;
 
 // A class can implement several interfaces...
+//[jpschewe:20000102.1414CST] need stuff here
 implementsClause
+{ Token id, id2; }
   :	(
-      "implements" identifier ( COMMA identifier )*
+      "implements" id=identifier { parseImplementedInterface(id); }
+      ( COMMA id2=identifier { parseImplementedInterface(id2); } )*
     )?
   ;
 
@@ -506,7 +558,8 @@ ctorHead
 
 // This is a list of exception classes that the method is declared to throw
 throwsClause
-  :	"throws" identifier ( COMMA identifier )*
+{ Token id, id2; }
+  :	"throws" id=identifier ( COMMA id2=identifier )*
   ;
 
 
@@ -878,6 +931,7 @@ unaryExpressionNotPlusMinus
 
 // qualified names, array expressions, method invocation, post inc/dec
 postfixExpression
+{ Token id; }
   :	primaryExpression // start with a primary
 
     (	// qualified id (id.id.id.id...) -- build the name
@@ -915,7 +969,7 @@ postfixExpression
     )
 
     // look for int.class and int[].class
-  |	builtInType 
+  |	id=builtInType 
     ( LBRACK RBRACK )*
     DOT "class"
   ;
@@ -936,7 +990,8 @@ primaryExpression
 /** object instantiation.
  */
 newExpression
-  :	"new" type
+{ Token t; }
+  :	"new" t=type
     (	LPAREN argList RPAREN (classBlock)?
 
       //java 1.1
