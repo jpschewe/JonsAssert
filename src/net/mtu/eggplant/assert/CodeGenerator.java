@@ -135,7 +135,7 @@ public class CodeGenerator {
 
     addConditionChecks(code, assertClass.getInvariants());
 
-    code.append("return true;\n");
+    code.append("return _JPS_retVal == null || ((Boolean)_JPS_retVal).booleanValue();\n");
     code.append("}\n");
 
     return code.toString();
@@ -500,7 +500,12 @@ public class CodeGenerator {
     
     addConditionChecks(code, assertMethod.getPreConditions());
 
-    code.append("return true;\n");
+    if(assertMethod.isPrivate()) {
+      code.append("return true;");
+    }
+    else {
+      code.append("return _JPS_retVal == null || ((Boolean)_JPS_retVal).booleanValue();\n");
+    }
     code.append("}\n");
     
     return code.toString();
@@ -662,7 +667,12 @@ public class CodeGenerator {
     
     addConditionChecks(code, assertMethod.getPostConditions());
 
-    code.append("return true;\n");
+    if(assertMethod.isPrivate()) {
+      code.append("return true;");
+    }
+    else {
+      code.append("return _JPS_retVal == null || ((Boolean)_JPS_retVal).booleanValue();\n");
+    }
     code.append("}\n");
     
     return code.toString();
