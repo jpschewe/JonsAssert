@@ -390,6 +390,12 @@ public class CodeGenerator {
       code.append(shortmclassName);
       first = false;
     }
+    else {
+      //Need dummy slot
+      code.append("null");
+      first = false;
+    }
+    
     Iterator paramIter = assertMethod.getParams().iterator();
     while(paramIter.hasNext()) {
       StringPair sp = (StringPair)paramIter.next();
@@ -597,6 +603,11 @@ public class CodeGenerator {
         code.append("__retVal");
         first = false;
       }
+      else {
+        code.append("Object __dummyretVal");
+        first = false;
+      }
+      
       Iterator paramIter = assertMethod.getParams().iterator();
       while(paramIter.hasNext()) {
         StringPair sp = (StringPair)paramIter.next();
@@ -782,6 +793,7 @@ public class CodeGenerator {
         if(_postConditionRewrite.getMatch(condition) != null) {
           System.err.println("$return found in precondition! " + token.getText());
         }
+        code.append(condition);
       }
       code.append(") {");
       String errorMessage = "";

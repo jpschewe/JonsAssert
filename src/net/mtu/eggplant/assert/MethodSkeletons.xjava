@@ -3,13 +3,17 @@
   that they know what types of method names may cause problems and to ease in
   debugging the code that is generated.
   
-  still need to check order of pre vs. invariant, or does it matter?
 
-  remember only to check invariants on public instance methods, protected methods?, constructor exit
+  remember only to check invariants on public instance methods, protected methods, constructor exit
 
   Replace all of the package names '.' with '_'
 
   All variables created here will have _JPS_ in front of them except for __retVal and __old*
+
+  invariants are ANDed with super class
+  preconditions are ANDed with super class
+  postconditions are ORed with super class
+  This puts the burden on the person using the instrumented method rather than the person writing the method.
 */
 
 //before

@@ -13,9 +13,7 @@ they can recieve due credit.
 
 Implicit instrumentation is not yet supported, so each file needs to be
 instrumented explicitly.  Interfaces need no instrumentation, so they are just
-copied to the instrumented directory.  Also only files found on the filesystem
-are instrumented.  Those interfaces found through some URL, either on another
-machine or in a jar file, are only parsed, but not instrumented.
+copied to the instrumented directory.  
 
 @assert checks cannot be before one liners ex:
 if(i < 10) /** @assert (i < 10) **/ i = 11;
