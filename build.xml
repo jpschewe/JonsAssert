@@ -519,6 +519,7 @@
              access="${javadoc.access}"
              splitindex="true"
              additionalparam="-tag pre:cm:PreConditions -tag post:cm:PostConditions -tag invariant:tc:Invariants -breakiterator"
+      source="1.4"
              >
       <classpath refid="classpath.base" />
       <!-- core java -->
@@ -577,7 +578,7 @@
       <arg value="-d ${dir.inst}" />
       <!-- for deugging <arg value="-prettyOutput" /> -->
       <arg value="${dir.src}" />
-      <classpath refid="classpath.base" />
+      <classpath refid="classpath.run" />
     </java>
   </target>
 
