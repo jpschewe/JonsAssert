@@ -107,7 +107,13 @@ and another constructor with the same signature, less the last argument,
 exists then the code will not compile due to a nondeterminism.  This can be
 worked around by casting null to the datatype of the last argument of the
 constructor.
-Example:
+
+Example, notice that the second constructor has the same signature as the
+first, except for an extra argument tnat is an Object.  If the extra argument
+is a primative there is no problem.  It's also not a problem if the
+constructor is never called with null from inside the class, since the extra
+constructor created for checking preconditions is private.
+
 This won't work:
 public class A {
   public A(int i) {
@@ -128,7 +134,3 @@ public class A {
     //do something
   }
 }
-
-This is because I need to create an extra constructor to allow preconditions
-to be checked properly before the super class constructor is invoked.
-
