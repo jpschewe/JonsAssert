@@ -105,7 +105,7 @@ import org.apache.commons.logging.LogFactory;
  * This is the place where most of the work for instrumentation gets done.
  * All lookups are done here.
  * 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class Symtab {
 
@@ -328,12 +328,13 @@ public class Symtab {
         String line = reader.readLine();
         while(line != null) {
           final StringBuffer buf = new StringBuffer(line);        
+          //if(JonsAssert.getSymtab().getConfiguration().isPrettyOutput()) {
+          //  buf.append("//DBC Line: ");
+          //  buf.append(String.valueOf(reader.getLineNumber()));
+          //}
+            
           int offset = 0;
           while(curFrag != null && reader.getLineNumber() == curFrag.getLocation().getLine()) {
-            if(JonsAssert.getSymtab().getConfiguration().isPrettyOutput()) {
-              buf.append("//DBC Line: ");
-              buf.append(String.valueOf(reader.getLineNumber()));
-            }
             //instrument line
             offset = curFrag.instrumentLine(offset, buf);
             if(fragIter.hasNext()) {
