@@ -4,10 +4,11 @@
 <project name="assert" default="compile" basedir=".">
 
   <property file="${user.home}/.ant.properties" />
-
+  <property name="temp.dir"  value="${basedir}/tmp" />
+  
   <property name="app.name"   value="JonsAssert" />
   <property name="instrument.dir"  value="instrumented" />
-  
+
   <target name="init">
     <tstamp />
     <available property="assert.present" classname="net.mtu.eggplant.assert.JonsAssert" />
@@ -20,6 +21,7 @@
     <pathelement location="${basedir}/lib/java-getopt-1.0.7.jar"/>
     <pathelement location="${basedir}/lib/junit-3.4.jar"/>
   </path>
+
   
   <target name="compile" depends="init">
     <java classname="antlr.Tool"
@@ -134,5 +136,69 @@
       </fileset>
     </delete>
   </target>
+
+  <!-- Javadoc targets below here -->
+
+  <!-- tell javadoc where to find out doclet -->
+  <property name="doclet.name" value="com.honeywell.htc.schedinfra.javadoc.Standard" />
+  <property name="doclet.path" value="/home/jpschewe/projects/java/scripts/javadoc.jar" />
+  
+  <!-- used for releases -->
+  <property name="release.home.html.dir" value="http://disk.mn.mtu.net/~jpschewe/mtu.net" />
+  <!--<property name="home.html.dir" value="http://mtu.net/~jpschewe" />-->
+  <property name="release.html.dir" value="/net/home-jpschewe/public_html/mtu.net/" />
+
+
+  <!-- used for active_javadoc -->
+  <property name="active.home.html.dir" value="http://disk.mnt.mtu.net/~jpschewe" />
+  <property name="active.html.dir" value="/net/home-jpschewe/public_html/" />
+
+  <target name="init_javadoc">
+    <mkdir dir="${temp.dir}" />
+  </target>
+  
+  
+  <!-- 0.2 javadoc -->
+  <target name="0.2_javadoc" depends="init_javadoc">
+    <!-- get the source out of cvs -->
+    <cvs cvsRoot="/home/CVS-Repository"
+	 package="assert"
+	 dest="${temp.dir}"
+	 tag="JonsAssert-0_2" />
+    <!-- run javadoc on the source -->
+    <mkdir dir="${release.html.dir}/JonsAssert/0.2/api" />
+    <javadoc packagenames="net.mtu.eggplant.*"
+	     sourcepath="${temp.dir}/assert/src"
+	     use="true"
+	     splitindex="true"
+	     version="true"
+	     windowtitle="JonsAssert 0.2">
+      <doclet name="${doclet.name}"
+	      path="${doclet.path}">
+	<param name="-d" value="${release.html.dir}/JonsAssert/0.2/api" />
+      </doclet>
+      <classpath>
+	<pathelement location="${temp.dir}/assert/src/" />
+	<pathelement location="${temp.dir}/assert/lib/junit.jar" />
+	<pathelement location="${temp.dir}/assert/lib/JonsInfra-0.1.jar" />
+	<pathelement location="${temp.dir}/assert/lib/antlr.jar" />
+	<pathelement location="${temp.dir}/assert/lib/java-getopt-1.0.7.jar" />
+      </classpath>
+      <!-- core java -->
+      <link href="http://java.sun.com/j2se/1.3/docs/api/" />
+      <!-- infra -->
+      <link href="${release.home.html.dir}/JonsInfra/0.1/api" />
+      <!-- junit -->
+      <link href="${release.home.html.dir}/java/junit-3.2/" />
+      <!-- antlr -->
+      <link href="${release.home.html.dir}/java/antlr/javadoc/" />
+      <!-- gnu -->
+      <link href="${release.home.html.dir}/java/gnu/" />
+    </javadoc>
+    
+    <!-- delete the temp files -->
+    <delete dir="${temp.dir}" />
+  </target>
+  
   
 </project>
