@@ -647,7 +647,7 @@
   <!-- ============ Nightly Build/Check/Test/Build/Report/Etc ============ -->
   <target name="nightly.build"
           description="Tasks to run during nightly build"
-          depends="clean,javadoc,checkstyle.strict,test.dbc" />
+          depends="clean,javadoc,checkstyle.strict,test" />
 
   <!-- ==================== SECONDARY TARGETS ==================== -->
   <!-- build scripts to run the application -->
