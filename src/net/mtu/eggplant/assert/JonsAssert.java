@@ -15,6 +15,7 @@ import java.io.IOException;
 import antlr.TokenStreamSelector;
 
 import gnu.getopt.Getopt;
+import gnu.getopt.LongOpt;
 
 public class Main {
 
@@ -48,7 +49,10 @@ public class Main {
 
   static private Configuration parseCommandLine(String[] args) {
     Configuration config = new Configuration();
-    Getopt g = new Getopt("Main", args, "f");
+    LongOpt[] longopts = new LongOpt[1];
+
+    longopts[0] = new LongOpt("force", LongOpt.NO_ARGUMENT, null, 'f');    
+    Getopt g = new Getopt("JonsAssert", args, "f", longopts);
 
     int c;
     String arg;
@@ -58,7 +62,10 @@ public class Main {
         config.setIgnoreTimeStamp(true);
         break;
       default:
-        System.err.println("getopt() returned " + c);
+        //Print out usage and exit
+        System.err.println("Usage: JonsAssert [options] files ...");
+        System.err.println("-f, --force  force instrumentation");
+        System.exit(1);
         break;
       }
     }
