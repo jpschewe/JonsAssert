@@ -1,5 +1,7 @@
 2003-12-29  Jon Schewe  <jpschewe@mtu.net>
 
+	* Release 0.5.1
+	
 	* build.xml: Updated to JonsInfra 0.2
 
 2003-08-10  Jon Schewe  <jpschewe@mtu.net>
