@@ -359,4 +359,36 @@ public class TestAssert extends TestCase {
     assert("a2:This should throw an assertion violation", exception); 
   }
 
+  public void testPostConditionException() {
+    boolean exception = false;
+    boolean ioexception = false;
+    try {
+      Node n = new Node();
+      n.exceptionMethod(10);
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    catch(java.io.IOException ioe) {
+      ioexception = true;
+    }
+    assert("a1:This should not throw an assertion violation", !exception); 
+    assert("a3:This shuld throw an IOException", ioexception);
+
+    exception = false;
+    ioexception = false;
+    try {
+      Node n = new Node();
+      n.exceptionMethod(-10);
+    }
+    catch(AssertionViolation av) {
+      exception = true;
+    }
+    catch(IOException ioe) {
+      ioexception = true;
+    }
+    assert("a2:This should not throw an assertion violation", !exception);
+    assert("a4:This should not throw an IOException", !ioexception);
+  }
+  
 }

@@ -7,6 +7,9 @@
 */
 package org.tcfreenet.schewe.assert.test;
 
+import java.io.IOException;
+import java.io.File;
+
 /**
    This tests the instanceof rule in the parser as well as an empty compound
    statement and end of javadoc comment.
@@ -39,6 +42,22 @@ public class Node {
     }
     public int numrows;
     public int numcols;
+  }
+
+  private boolean _exception = false;
+  /**
+     Used to test exception postconditions.  Postconditions should not be
+     checked when exceptions are thrown.
+     *
+     * stuff
+     *
+     @post (!_exception)
+  **/
+  public void exceptionMethod(int i) throws IOException {
+    if(i > 0) {
+      _exception = true;
+      throw new IOException();
+    }
   }
   
 }
