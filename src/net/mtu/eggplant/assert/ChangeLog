@@ -1,3 +1,7 @@
+2000-01-11  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* Added some more test cases to the test directory.
+
 2000-01-08  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* java.g: Should parse everything correctly now!  Now we just need

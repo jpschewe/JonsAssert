@@ -11,11 +11,11 @@ import java.util.Vector;
 import java.io.*;
 
 /**
-   This is a test class for testing my assertions.
+   This is a test class for testing my assertions.  Tests all kinds of things.
    
    @invariant (true), "This is an invariant";
 **/
-public class TestAssert implements foo.bar {
+public class TestAssert implements Cloneable {
 
   public void testPrecondition() {
     preCond(-5); // should fail

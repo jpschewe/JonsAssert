@@ -8,19 +8,19 @@
 package org.tcfreenet.schewe.Assert.test;
 
 /**
-   tests conditions on a private instance method.
+   Tests pre and post conditions on abstract methods, this is the abstract
+   class.
 **/
-public class PrivateMethodTest {
+abstract public class AbstractClass {
 
-  public PrivateMethodTest() {
-    bar(10);
-  }
-  
   /**
-     @pre (i != 0)
+     @pre (i > 0)
   **/
-  private void bar(int i) {
-    System.out.println("bar: " + i);
-  }
+  abstract public boolean preCond(int i);
 
+  /**
+     @post ($ret < 12)
+  **/
+  abstract public int postCond(int i);
+  
 }
