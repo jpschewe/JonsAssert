@@ -1,5 +1,6 @@
-JAVA=java -green -classpath "/home/jpschewe/lib/java/antlr.jar:${JAVA_HOME}/jre/lib/rt.jar:/home/jpschewe/projects/java"
-JAVAC=jikes +E -deprecation -classpath "/home/jpschewe/lib/java/antlr.jar:${JAVA_HOME}/jre/lib/rt.jar:/home/jpschewe/projects/java"
+CLASSPATH=/home/jpschewe/lib/java/antlr.jar:${JAVA_HOME}/jre/lib/rt.jar:/home/jpschewe/projects/java:${HOME}/lib/java/gnu-regexp-1.0.8.jar:${HOME}/lib/java/java-getopt-1.0.7.jar
+JAVA=java -green -classpath "${CLASSPATH}"
+JAVAC=jikes +E -deprecation -classpath "${CLASSPATH}"
 
 #%.class : %.java
 #	$(JAVAC) $<
