@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--DOCTYPE project PUBLIC "-//Apache//DTD Ant 1.0//EN" "/usr/src/ant/project.dtd"-->
+<!DOCTYPE project PUBLIC "-//ANT//DTD project//EN" "file:/usr/src/ant/ant.dtd">
 
 <project name="assert" default="compile" basedir=".">
 
