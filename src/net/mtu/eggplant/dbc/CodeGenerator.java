@@ -34,7 +34,7 @@ import net.mtu.eggplant.util.StringPair;
 import net.mtu.eggplant.util.StringUtils;
 
 /**
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class CodeGenerator {
 
@@ -598,14 +598,7 @@ public class CodeGenerator {
       code.append(sp.getStringTwo());
     }
     code.append(")");
-    if(!assertMethod.getThrownExceptions().isEmpty()) {
-      carriageReturn(code);
-      code.append(" throws");
-      final Iterator exceptionIter = assertMethod.getThrownExceptions().iterator();
-      while(exceptionIter.hasNext()) {
-        code.append(" " + (String)exceptionIter.next());
-      }
-    }
+    insertThrowsClause(code, assertMethod);
     code.append(" {");
     carriageReturn(code);
 
@@ -654,7 +647,7 @@ public class CodeGenerator {
       carriageReturn(code);
         
       //need method parameters here, just the class objects, use getClassObjectForClass
-      code.append("final Class[] jps_methodArgs = {");
+      code.append("final Class[] jps_methodArgs = new Class[] {");
       first = true;
       paramIter = assertMethod.getParams().iterator();
       while(paramIter.hasNext()) {
@@ -872,14 +865,7 @@ public class CodeGenerator {
       code.append(paramName);
     }
     code.append(")");
-    if(!assertMethod.getThrownExceptions().isEmpty()) {
-      carriageReturn(code);
-      code.append(" throws");
-      final Iterator exceptionIter = assertMethod.getThrownExceptions().iterator();
-      while(exceptionIter.hasNext()) {
-        code.append(" " + (String)exceptionIter.next());
-      }
-    }
+    insertThrowsClause(code, assertMethod);
     code.append(" {");
     carriageReturn(code);
 
@@ -928,7 +914,7 @@ public class CodeGenerator {
       carriageReturn(code);
       
       //need method parameters here, just the class objects, use getClassObjectForClass
-      code.append("final Class[] jps_methodArgs = {");
+      code.append("final Class[] jps_methodArgs = new Class[] {");
       first = true;
       
       //Need return value here too
@@ -1187,6 +1173,27 @@ public class CodeGenerator {
     return paramName;
   }
 
+  /**
+   * Build the throws clause for assertMethod.
+   */
+  private static final void insertThrowsClause(final StringBuffer code,
+                                                  final AssertMethod assertMethod) {
+    if(!assertMethod.getThrownExceptions().isEmpty()) {
+      carriageReturn(code);
+      code.append(" throws");
+      boolean first = true;
+      final Iterator exceptionIter = assertMethod.getThrownExceptions().iterator();
+      while(exceptionIter.hasNext()) {
+        if(!first) {
+          code.append(", ");
+        } else {
+          first = false;
+        }
+        code.append(" " + (String)exceptionIter.next());
+      }
+    }
+  }
+    
   /**
    * Add a carriage return to code if pretty-output is turned on.
    */

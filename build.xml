@@ -4,10 +4,9 @@
 
   <!-- used for building releases -->
   <property name="app.name"   value="JonsAssert" />
-  <property name="app.version" value="0.5.4" />
+  <property name="app.version" value="0.6" />
   <property name="instrument.dir"  value="instrumented" />
   <property name="build.dir"  value="build" />
-  <property name="release.cvs.tag" value="JonsAssert-0_5_3" />
   <property name="release.html.dir" value="/home/jpschewe/public_html/mtu.net/public_html" />
 
   <!-- some CVS properties -->
