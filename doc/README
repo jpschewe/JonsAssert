@@ -49,6 +49,14 @@ update this readme as often as the javadoc.
 FEATURES:
 (some people might call these bugs, but I put them there on purpose :)
 
+- Need to watch out for serializable classes.  If you don't specify the
+serialversionUID in the file, then the jvm computes it off of the file.
+Included in this computation are the methods.  Since instrumenting with
+JonsAssert adds methods to the class, the classes won't come up with the same
+ID and deserializing files won't always work.  The easy fix is to just define
+serialversionUIDs in all of your serializable classes.  I've found it's just a
+good idea anyway.
+
 - Does design by contract correct, except where noted in the BUGS.
 
 -- Allows for checking of return value in post condition via the variable
