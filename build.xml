@@ -14,7 +14,7 @@
   <property name="cvs.module" value="assert" />
 
   <!-- used for *.javadoc -->
-  <property name="local.java.packages" value="http://netserver.mn.mtu.net/package-docs/java" />
+  <property name="local.java.packages" value="http://workstation.mn.mtu.net/package-docs/java" />
   <property name="local.java.projects" value="http://workstation.mn.mtu.net/package-docs/projects" />
   <property name="nightly.html.dir" value="/srv/www/htdocs/package-docs/projects" />
   <property name="mtu.net" value="http://mtu.net/~jpschewe" />
