@@ -90,17 +90,17 @@ public class CodeGenerator {
     code.append("protected boolean __");
     code.append(mclassName);
     code.append("_checkInvariant() {");
-    code.append("Class _JPS_thisClass = null;");
-    code.append("Object _JPS_retVal = null;");    
+    code.append("Object _JPS_retVal = null;");
+    
+    //Get the class object
     code.append("String _JPS_className = \"");
     code.append(className);
     code.append("\";");
-    code.append("try {");
-    code.append("_JPS_thisClass = Class.forName(_JPS_className);");
+    code.append("Class _JPS_thisClass = org.tcfreenet.schewe.assert.AssertTools.classForName(_JPS_className);");
+    code.append("if(_JPS_thisClass == null) {");
+    code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"Could not find class \" + _JPS_className);");
     code.append("}");
-    code.append("catch(ClassNotFoundException _JPS_cnfe) {");
-    code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"Got error getting the class object for class \" + _JPS_className + \" \" + _JPS_cnfe);");
-    code.append("}");
+      
   
     code.append("Class[] _JPS_methodArgs = new Class[0];");
     code.append("java.lang.reflect.Method _JPS_superMethod = org.tcfreenet.schewe.assert.AssertTools.findSuperMethod(_JPS_thisClass, \"checkInvariant\", _JPS_methodArgs);");
@@ -118,7 +118,7 @@ public class CodeGenerator {
     code.append("_JPS_retVal = Boolean.TRUE;");
     code.append("}");
     code.append("catch(IllegalArgumentException _JPS_iae) {");
-    code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"IllegalArgument executing checkInvariant method on super class: \" + _JPS_iae.getMessage() + \" methodArgs \" + _JPS_methodArgs + \" args \" + _JPS_args);");
+    code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"IllegalArgument executing checkInvariant method on super class: \" + _JPS_iae.getMessage() + \" methodArgs \" + org.tcfreenet.schewe.utils.Functions.printArray(_JPS_methodArgs) + \" args \" + org.tcfreenet.schewe.utils.Functions.printArray(_JPS_args));");
     code.append("}");
     code.append("catch(java.lang.reflect.InvocationTargetException _JPS_ite) {");
     code.append("_JPS_ite.getTargetException().printStackTrace();");
@@ -434,7 +434,7 @@ public class CodeGenerator {
   static public String generatePreConditionMethod(final AssertMethod assertMethod) {
     String className = assertMethod.getContainingClass().getFullName();
     String mclassName = className.replace('.', '_');
-    mclassName = mclassName.replace('$', '_');    
+    mclassName = mclassName.replace('$', '_');
     StringBuffer code = new StringBuffer();
 
     if(assertMethod.isStatic() || assertMethod.isConstructor()) {
@@ -470,17 +470,15 @@ public class CodeGenerator {
     if(!assertMethod.isPrivate() && !assertMethod.isConstructor()) {
       //[jpschewe:20000220.0933CST] don't check super class conditions if the method is private or a constructor
       code.append("Object _JPS_retVal = null;");
-      code.append("Class _JPS_thisClass = null;");
+
+      //Get the class object
       code.append("String _JPS_className = \"");
       code.append(className);
       code.append("\";");
-      code.append("try {");
-      code.append("_JPS_thisClass = Class.forName(_JPS_className);");
-      code.append("}");
-      code.append("catch(ClassNotFoundException _JPS_cnfe) {");
-      code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"Got error getting the class object for class \" + _JPS_className + \" \" + _JPS_cnfe);");
-      code.append("}");
-    
+      code.append("Class _JPS_thisClass = org.tcfreenet.schewe.assert.AssertTools.classForName(_JPS_className);");
+      code.append("if(_JPS_thisClass == null) {");
+      code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"Could not find class \" + _JPS_className);");
+      code.append("}");      
 
       //[jpschewe:20000213.1552CST] need method parameters here, just the class objects, use getClassObjectForClass
       code.append("Class[] _JPS_methodArgs = {");
@@ -504,8 +502,9 @@ public class CodeGenerator {
 
       code.append("if(_JPS_superMethod != null) {");
       code.append("Object[] _JPS_args = {");
-      //[jpschewe:20000213.1552CST] need parameters here, just the parameter names
-      first = true;
+      
+      first = true;      
+      //Need parameters here, just the parameter names
       paramIter = assertMethod.getParams().iterator();
       while(paramIter.hasNext()) {
         if(! first) {
@@ -539,7 +538,7 @@ public class CodeGenerator {
       code.append("catch(IllegalArgumentException _JPS_iae) {");
       code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"IllegalArgument executing superClass check");
       code.append(assertMethod.getName());
-      code.append("PreConditions: \" + _JPS_iae.getMessage() + \" methodArgs \" + _JPS_methodArgs + \" args \" + _JPS_args);");
+      code.append("PreConditions: \" + _JPS_iae.getMessage() + \" methodArgs \" + org.tcfreenet.schewe.utils.Functions.printArray(_JPS_methodArgs) + \" args \" + org.tcfreenet.schewe.utils.Functions.printArray(_JPS_args));");
       code.append("}");
       code.append("catch(java.lang.reflect.InvocationTargetException _JPS_ite) {");
       code.append("_JPS_ite.getTargetException().printStackTrace();");
@@ -631,27 +630,29 @@ public class CodeGenerator {
       }
       code.append(") {");
     if(!assertMethod.isPrivate() && !assertMethod.isConstructor()) {
-      //[jpschewe:20000220.0934CST] don't bother checking for super method if we're private or a constructor
+      //don't bother checking for super method if we're private or a constructor
       code.append("Object _JPS_retVal = null;");
-      code.append("Class _JPS_thisClass = null;");
+
+      //Get the class object
       code.append("String _JPS_className = \"");
       code.append(className);
       code.append("\";");
-      code.append("try {");
-      code.append("_JPS_thisClass = Class.forName(_JPS_className);");
-      code.append("}");
-      code.append("catch(ClassNotFoundException _JPS_cnfe) {");
-      code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"Got error getting the class object for class \" + _JPS_className + \" \" + _JPS_cnfe);");
+      code.append("Class _JPS_thisClass = org.tcfreenet.schewe.assert.AssertTools.classForName(_JPS_className);");
+      code.append("if(_JPS_thisClass == null) {");
+      code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"Could not find class \" + _JPS_className);");
       code.append("}");
     
-
-      //[jpschewe:20000213.1552CST] need method parameters here, just the class objects, use getClassObjectForClass
+      //need method parameters here, just the class objects, use getClassObjectForClass
       code.append("Class[] _JPS_methodArgs = {");
       first = true;
       
       //Need return value here too
       if(!assertMethod.isVoid()) {
         code.append(getClassObjectForClass(assertMethod.getReturnType()));
+        first = false;
+      }
+      else {
+        code.append("Object.class"); //For dummy return value
         first = false;
       }
       paramIter = assertMethod.getParams().iterator();
@@ -683,6 +684,11 @@ public class CodeGenerator {
         code.append(getObjectForParam(assertMethod.getReturnType(), "__retVal"));
         first = false;
       }
+      else {
+        code.append("null");
+        first = false;
+      }
+      
       paramIter = assertMethod.getParams().iterator();
       while(paramIter.hasNext()) {
         if(! first) {
@@ -719,13 +725,13 @@ public class CodeGenerator {
       code.append("catch(IllegalArgumentException _JPS_iae) {");
       code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"IllegalArgument executing superClass check");
       code.append(assertMethod.getName());
-      code.append("PostConditions: \" + _JPS_iae.getMessage() + \" methodArgs \" + _JPS_methodArgs + \" args \" + _JPS_args);");
+      code.append("PostConditions: \" + _JPS_iae.getMessage() + \" methodArgs \" + org.tcfreenet.schewe.utils.Functions.printArray(_JPS_methodArgs) + \" args: \" + org.tcfreenet.schewe.utils.Functions.printArray(_JPS_args));");
       code.append("}");
       code.append("catch(java.lang.reflect.InvocationTargetException _JPS_ite) {");
       code.append("_JPS_ite.getTargetException().printStackTrace();");
       code.append("}");
       code.append("if(_JPS_retVal == null) {");
-      code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"got null from checkInvariant\");");
+      code.append("org.tcfreenet.schewe.assert.AssertTools.internalError(\"got null from checkPostConditions\");");
       code.append("}");
       //PostConditions are ANDed
       code.append("else if(!((Boolean)_JPS_retVal).booleanValue()) {");

@@ -12,6 +12,9 @@ import java.lang.reflect.Method;
 import java.io.File;
 
 import java.util.StringTokenizer;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
    class of static helper methods for assertions.
@@ -19,6 +22,8 @@ import java.util.StringTokenizer;
 **/
 final public class AssertTools {
 
+  static private Map _superMethods = new WeakHashMap();
+  
   /**
      find the superclasses method, this is my version of a superClass method,
      this means that the method name is __<packageName>_<className>_methodName
@@ -32,12 +37,36 @@ final public class AssertTools {
      @pre (methodArgs != null)
   **/
   static public Method findSuperMethod(final Class thisClass, final String methodName, final Class[] methodArgs) {
+    //Get the method from this class
+    ScratchMethod sm = new ScratchMethod(thisClass, methodName, methodArgs);
+//     Method thisMethod;
+//     try {
+//       String fullClassName = thisClass.getName().replace('.', '_');
+//       fullClassName = fullClassName.replace('$', '_');
+//       String mname = "__" + fullClassName + "_" + methodName;
+//       thisMethod = thisClass.getDeclaredMethod(mname, methodArgs);
+//     }
+//     catch(NoSuchMethodException nsme) {
+//       internalError("Can't find method: " + methodName + " args: " + org.tcfreenet.schewe.utils.Functions.printArray(methodArgs) + " exception: " + nsme);
+//       return null;
+//     }
+//     catch(SecurityException se) {
+//       internalError("Security exception trying to find method " + methodName + ": " + se);
+//       return null;
+//     }
+
+     //Now see if it's cached
+     if(_superMethods.containsKey(sm)) {
+       return (Method)_superMethods.get(sm);
+     }
+
     Class superClass = thisClass.getSuperclass();
     Method superMethod = null;
     if(superClass != null) {
       while(superMethod == null && superClass != null) {
         try {
           String fullClassName = superClass.getName().replace('.', '_');
+          fullClassName = fullClassName.replace('$', '_');          
           String mname = "__" + fullClassName + "_" + methodName;
           superMethod = superClass.getDeclaredMethod(mname, methodArgs);
         }
@@ -49,11 +78,15 @@ final public class AssertTools {
         }
         catch(SecurityException se) {
           //This is real bad, spit out internal error here
-          System.err.println("Security exception trying to find method " + methodName + ": " + se);
+          internalError("Security exception trying to find method " + methodName + ": " + se);
           return null;
         }
       }
     }
+    
+    //put it in the cache
+    _superMethods.put(sm, superMethod);
+    
     return superMethod;
   }
 
@@ -185,9 +218,11 @@ final public class AssertTools {
   }
 
 
+  static private String _sourceExtension = "java";
+
   /**
      @see #setSourceExtension(String)
-     @see #setDestinationExtension(String)
+     @see #setInstrumentedExtension(String)
   **/
   static public void setExtensions(final String sourceExtension,
                                    final String instrumentedExtension) {
@@ -202,6 +237,7 @@ final public class AssertTools {
     return _sourceExtension;
   }
 
+  static private String _instrumentedExtension = "java";  
   /**
      @return the extension for the instrumented files
   **/
@@ -268,6 +304,7 @@ final public class AssertTools {
     return dir.toString();
   }
 
+  static private String _destination = "instrumented";
   static public String getDestinationDirectory() {
     return _destination;
   }
@@ -294,7 +331,33 @@ final public class AssertTools {
     return path + File.separatorChar + ifilename;
   }
                                         
-  static private String _destination = "instrumented";
-  static private String _sourceExtension = "java";
-  static private String _instrumentedExtension = "java";
+
+  static private HashMap _classMap = new HashMap();
+  /**
+     Get the class object for this class name.  Just like {@link
+     Class#forName(String) Class.forName()}, but uses an internal table for
+     caching classes.
+
+     @return null for no such class found
+
+     @pre (className != null)
+  **/
+  static public Class classForName(final String className) {
+    if(_classMap.containsKey(className)) {
+      return (Class)_classMap.get(className);
+    }
+    else {
+      Class thisClass = null;
+      try {
+        thisClass = Class.forName(className);
+      }
+      catch(ClassNotFoundException cnfe) {
+        //ignore it, return null instead
+      }
+      _classMap.put(className, thisClass);
+      
+      return thisClass;
+    }
+
+  }
 }
