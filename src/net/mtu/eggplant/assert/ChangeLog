@@ -1,5 +1,12 @@
 1999-12-30  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
+	* java.g (WS): Reindented with antlr-mode (should be more readable
+	now), added comments for where code should be generated to check
+	pre/post/invariant conditions.
+
+	* assert.g: Reindented with antlr-mode and commented out extra
+	print statements.
+
 	* java.g: initial entry, supports pre and post conditions and
 	invariants.  Doesn't generate any code yet though.
 
