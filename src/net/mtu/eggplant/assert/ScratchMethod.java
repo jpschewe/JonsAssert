@@ -10,7 +10,7 @@ package org.tcfreenet.schewe.assert;
 /**
    Scratch class with information to create a method.
 **/
-/*package*/ class ScratchMethod {
+final /*package*/ class ScratchMethod {
 
   /**
      @pre (theClass != null)
@@ -23,31 +23,43 @@ package org.tcfreenet.schewe.assert;
     _theClass = theClass;
     _methodName = methodName;
     _methodArgs = methodArgs;
+    _hashCode = _theClass.getName().hashCode() ^ _methodName.hashCode(); //cache it once
   }
 
-  private Class _theClass;
-  public Class getTheClass() {
-    return _theClass;
-  }
+  /*package*/ Class _theClass;
 
-  private String _methodName;
-  public String getMethodName() {
-    return _methodName;
-  }
+  /*package*/ String _methodName;
 
-  private Class[] _methodArgs;
-  public Class[] getMethodArgs() {
-    return _methodArgs;
-  }
+  /*package*/ Class[] _methodArgs;
+
+  private int _hashCode;
   
   public boolean equals(Object o) {
+    if(o == this) {
+      return true;
+    }
+                    
     if(o instanceof ScratchMethod) {
       ScratchMethod other = (ScratchMethod)o;
-      return _theClass.equals(other.getTheClass())
-        && _methodName.equals(other.getMethodName())
-        && _methodArgs.equals(other.getMethodArgs());
+      if(_theClass.equals(other._theClass)
+         && _methodName.equals(other._methodName)) {
+        Class[] params1 = _methodArgs;
+        Class[] params2 = other._methodArgs;
+        if(params1.length == params2.length) {
+          for(int i=0; i<params1.length; i++) {
+            if(!params1[i].equals(params2[i])) {
+              return false;
+            }
+          }
+          return true;          
+        }
+      }
     }
     return false;
   }
 
+  public int hashCode() {
+    return _hashCode;
+  }
+  
 }

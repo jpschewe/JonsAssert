@@ -1,3 +1,10 @@
+2000-05-06  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* ScratchMethod.java: Defined equals and hashCode for performance caching.
+
+	* AssertTools.java: Speed up instrumented code performance with
+	some caching.
+
 2000-04-30  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* AssertTools.java: Toyed around with caching super methods.

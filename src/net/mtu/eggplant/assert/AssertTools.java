@@ -22,7 +22,7 @@ import java.util.WeakHashMap;
 **/
 final public class AssertTools {
 
-  //static private Map _superMethods = new WeakHashMap();
+  static private Map _superMethods = new HashMap();
   
   /**
      find the superclasses method, this is my version of a superClass method,
@@ -37,43 +37,26 @@ final public class AssertTools {
      @pre (methodArgs != null)
   **/
   static public Method findSuperMethod(final Class thisClass, final String methodName, final Class[] methodArgs) {
-    //Get the method from this class
-    //ScratchMethod sm = new ScratchMethod(thisClass, methodName, methodArgs);
+    //Use a scratch class for the key
+    ScratchMethod sm = new ScratchMethod(thisClass, methodName, methodArgs);
+
+    //Now see if it's cached
+    if(_superMethods.containsKey(sm)) {
+        return (Method)_superMethods.get(sm);
+    }
     
-//     Method thisMethod;
-//     try {
-//       String fullClassName = thisClass.getName().replace('.', '_');
-//       fullClassName = fullClassName.replace('$', '_');
-//       String mname = "__" + fullClassName + "_" + methodName;
-//       thisMethod = thisClass.getDeclaredMethod(mname, methodArgs);
-//     }
-//     catch(NoSuchMethodException nsme) {
-//       internalError("Can't find method: " + methodName + " args: " + org.tcfreenet.schewe.utils.Functions.printArray(methodArgs) + " exception: " + nsme);
-//       return null;
-//     }
-//     catch(SecurityException se) {
-//       internalError("Security exception trying to find method " + methodName + ": " + se);
-//       return null;
-//     }
-
-     //Now see if it's cached
-//      if(_superMethods.containsKey(sm)) {
-//        return (Method)_superMethods.get(sm);
-//      }
-
     Class superClass = thisClass.getSuperclass();
     Method superMethod = null;
     if(superClass != null) {
       while(superMethod == null && superClass != null) {
         try {
-          String fullClassName = superClass.getName().replace('.', '_');
-          fullClassName = fullClassName.replace('$', '_');          
-          String mname = "__" + fullClassName + "_" + methodName;
-          superMethod = superClass.getDeclaredMethod(mname, methodArgs);
+          String fullSuperClassName = superClass.getName().replace('.', '_');
+          fullSuperClassName = fullSuperClassName.replace('$', '_');          
+          String supermname = "__" + fullSuperClassName + "_" + methodName;
+          superMethod = superClass.getDeclaredMethod(supermname, methodArgs);
         }
         catch(NoSuchMethodException nsme) {
           // no method, don't bother
-          //superMethod = null;
           //Try up another level
           superClass = superClass.getSuperclass();
         }
@@ -86,7 +69,7 @@ final public class AssertTools {
     }
     
     //put it in the cache
-    //_superMethods.put(sm, superMethod);
+    _superMethods.put(sm, superMethod);
     
     return superMethod;
   }
@@ -333,7 +316,7 @@ final public class AssertTools {
   }
                                         
 
-  //static private HashMap _classMap = new HashMap();
+//   static private HashMap _classMap = new HashMap();
   /**
      Get the class object for this class name.  Just like {@link
      Class#forName(String) Class.forName()}, but catches the exceptions
@@ -354,7 +337,7 @@ final public class AssertTools {
       catch(ClassNotFoundException cnfe) {
         //ignore it, return null instead
       }
-      //_classMap.put(className, thisClass);
+//       _classMap.put(className, thisClass);
       
       return thisClass;
 //     }
