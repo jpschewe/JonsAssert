@@ -105,7 +105,7 @@ import org.apache.commons.logging.LogFactory;
  * This is the place where most of the work for instrumentation gets done.
  * All lookups are done here.
  * 
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class Symtab {
 
@@ -527,13 +527,13 @@ public class Symtab {
       if(method.isConstructor()) {
         LOG.debug("Instrumentation in constructor isn't implemented yet");
         //[jpschewe:20000416.2142CST] FIX skip constructors for now, still needs some thought
-        //         //Check if we really need it
-        //         if(!aClass.getInvariants().isEmpty()
-        //            || !method.getPreConditions().isEmpty()
-        //            || !method.getPostConditions().isEmpty()) {
-
-        //           ifile.getFragments().add(new CodeFragment(method.getEntrance(), CodeGenerator.generateConstructorAssertions(method), CodeFragmentType.PRECONDITION));
-        //         }
+        //Check if we really need it
+//         if(!aClass.getInvariants().isEmpty()
+//            || !method.getPreConditions().isEmpty()
+//            || !method.getPostConditions().isEmpty()) {
+//           ifile.getFragments().add(new CodeFragment(method.getEntrance(), CodeGenerator.generateConstructorAssertions(method), CodeFragmentType.PRECONDITION));
+//          }
+        
       } else if(!method.isAbstract()) {
         //can't put calls inside abstract methods        
         final CodePoint entrance = method.getEntrance();      

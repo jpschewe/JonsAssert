@@ -34,7 +34,7 @@ import net.mtu.eggplant.util.StringPair;
 import net.mtu.eggplant.util.StringUtils;
 
 /**
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public final class CodeGenerator {
 
@@ -313,12 +313,12 @@ public final class CodeGenerator {
   }
 
   /**
-     Generate the calls to pre, post and invariant conditions for a
-     constructor.  Constructors are different enough to need they're own
-     generator.
-     
-     @pre (assertMethod.isConstructor())
-  **/
+   * Generate the calls to pre, post and invariant conditions for a
+   * constructor.  Constructors are different enough to need they're own
+   * generator.
+   * 
+   * @pre (null != assertMethod && assertMethod.isConstructor())
+   */
   public static String generateConstructorAssertions(final AssertMethod assertMethod) {
     final StringBuffer code = new StringBuffer();
     carriageReturn(code);

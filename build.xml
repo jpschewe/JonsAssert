@@ -1,5 +1,8 @@
 <project name="assert" default="compile">
 
+  <!-- load build specific properties first -->
+  <property file="build.properties" />
+
   <property name="temp.dir"  value="tmp" />
 
   <!-- used for building releases -->
@@ -123,7 +126,7 @@
   </target>
   
   <target name="compile"
-          depends="init,checkstyle,antlrTasks"
+          depends="init,jtags,checkstyle,antlrTasks"
           description="Compile everything">
   <!-- broken
   <target name="compile" depends="init">
@@ -246,7 +249,7 @@
   </target>
 
   <target name="compile.dbc"
-          depends="init,checkstyle,instrument"
+          depends="init,jtags,checkstyle,instrument"
           description="Instrument the code, then compile">
     <java classname="antlr.Tool"
 	  fork="yes"
@@ -496,4 +499,21 @@
     <mkdir dir="${basedir}/${temp.dir}" />
   </target>
 
+  <!-- ==================== Emacs Tags ==================== -->
+  <target name="jtags"
+          description="Build Emacs Tags file if jtags.executable property is set"
+          if="jtags.executable"
+          depends="init"
+          >
+    <exec dir="${basedir}/src"
+          executable="${jtags.executable}"
+          />
+  </target>
+
 </project>
+
+<!--
+Local Variables:
+eval: (auto-fill-mode -1)
+End:
+-->

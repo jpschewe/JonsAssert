@@ -1,6 +1,13 @@
 ;;This file assumes that the following variables and methods exist:
 (jde-set-project-name "JonsAssert")
 (let ((project-root (file-name-directory load-file-name)))
+  ;; Setup TAGS list
+  (let ((tag-cons (cons
+                   (expand-file-name "src" project-root)
+                   (expand-file-name "src" project-root))))
+    (if (boundp 'tag-table-alist)
+        (add-to-list 'tag-table-alist tag-cons)
+      (setq tag-table-alist (list tag-cons))))
   (jde-set-variables
    '(jde-run-working-directory (expand-file-name "build/" project-root))
    '(jde-compile-option-directory (expand-file-name "src/" project-root))

@@ -338,10 +338,13 @@ public class Test {
     // -- end output from generatePreConditionCall
     System.out.println("in constructor " + i + " " + t);
   }
+
+  //NOTE: Need to ensure that all AssertDummy classes are contained within the
+  //outermost class.  It's not allowed in inner classes.
   
   //Put all check pre/post methods at end of class along with any AssertDummy classes
   
-  //Standard preCondition and postCondition methods here, these will be static though
+  //Standard preCondition methods here, these will be static though
   static final class JPS_<packageName>_Test_AssertDummy {
     public JPS_<packageName>_Test_AssertDummy(int i) {
       //Standard precondition call    
