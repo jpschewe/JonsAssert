@@ -1,5 +1,5 @@
 JAVA=java -green -classpath "/home/jpschewe/lib/java/antlr.jar:/home/jpschewe/lib/java/rt.jar:/home/jpschewe/projects/java"
-JAVAC=jikes -classpath "/home/jpschewe/lib/java/antlr.jar:/home/jpschewe/lib/java/rt.jar:/home/jpschewe/projects/java"
+JAVAC=jikes +E -deprecation -classpath "/home/jpschewe/lib/java/antlr.jar:/home/jpschewe/lib/java/rt.jar:/home/jpschewe/projects/java"
 
 #%.class : %.java
 #	$(JAVAC) $<

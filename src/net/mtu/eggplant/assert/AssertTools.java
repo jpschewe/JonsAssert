@@ -29,7 +29,7 @@ final public class AssertTools {
     Method superMethod = null;
 
     return superMethod;
-    //[jpschewe:20000204.2006CST] this is busted, it won't work.
+    //[jpschewe:20000204.2006CST] FIX this is busted, it won't work. 
 //     if(superClass != null) {
 //       while(superMethod == null && !superClass.equals(Object.class)) {
 //         try {

@@ -17,6 +17,8 @@ import java.util.Enumeration;
 public class CodeGenerator {
 
   /**
+     This should be inserted right after the close of the javadoc comment.
+     
      @param tok the token that represents the assertion
      @return a String of code that checks this assert condition
 
@@ -49,6 +51,10 @@ public class CodeGenerator {
 
 
   /**
+     This should be added at the start and end of all instance methods, except
+     for private ones and should be at the end of constructors that aren't
+     private.
+     
      @return a string of code that will call the checkInvariant method
   **/
   static public String generateInvariantCall() {
@@ -61,6 +67,9 @@ public class CodeGenerator {
   }
 
   /**
+     This should be inserted right at the end of a class, just before the
+     closing curly.
+     
      @param assertClass the class to generate the invariant check for
      @return a string of code that actually checks the invariant conditions
 
@@ -114,7 +123,7 @@ public class CodeGenerator {
     code.append("}");
   
 
-    //[jpschewe:20000116.1749CST] still need to add to this do interface
+    //[jpschewe:20000116.1749CST] FIX still need to add to this to do interface
     //invariants first and keep track of which interface they're from
   
     Enumeration iter = assertClass.getInvariants().elements();
@@ -148,6 +157,8 @@ public class CodeGenerator {
   }
 
   /**
+     This code should be inserted right at the start of the method
+     
      @param assertMethod the method to generate the precondition call for
      @return the code for a call to check the pre conditions for the given method
 
@@ -180,6 +191,8 @@ public class CodeGenerator {
   }
 
   /**
+     This code should be inserted right after the precondition and invariant calls.
+     
      @param assertMethod the method to generate the old values for
      @return the code to generate all of the old values to be used when calling the post condition check
 
@@ -214,10 +227,11 @@ public class CodeGenerator {
      @pre (assertMethod != null)
   **/
   static public String generatePostConditionCall(final AssertMethod assertMethod, final String retVal) {
-    //[jpschewe:20000118.0006CST] perhaps this should return a Vector or code fragments...
+    //[jpschewe:20000206.2034CST] FIX to be two code fragments, one for before retVal and one for after retVal
+    //[jpschewe:20000118.0006CST] perhaps this should return a Vector of code fragments...
     StringBuffer code = new StringBuffer();
     String retType = assertMethod.getReturnType();
-    boolean voidMethod = retType.equalsIgnoreCase("void");
+    boolean voidMethod = retType.equals("void");
     
     if(!voidMethod) {
       code.append("final ");
@@ -253,9 +267,10 @@ public class CodeGenerator {
     code.append("AssertTools.preConditionFailed(AssertTools.getCurrentAssertionViolation());");
     code.append("}");
 
-    if(!voidMethod) {
-      code.append("return __retVal;");
-    }
+    //[jpschewe:20000205.1446CST] don't actually change the return, that way we can just insert code into the file rather than modifying it.
+    //if(!voidMethod) {
+    //  code.append("return __retVal;");
+    //}
 
     return code.toString();
   }
@@ -263,7 +278,30 @@ public class CodeGenerator {
   /*
     idea for preconditions on constructor
     stuff to add after open { for constructor:
-
+    
+    //start example
+  /**
+     @pre (i > 0)
+     @pre (checkValue(i))
+  **/
+  public Test (int i) {
+    this(i, new AssertDummy0(i));
+  }
+  static private class AssertDummy0 {
+    public AssertDummy0(int i) {
+      __checkConstructorPreConditions(i);
+    }
+  }
+    static /*package*/ void __checkConstructorPreConditions(int i) {
+      System.out.println("i > 0 " + (i > 0));
+      System.out.println("checkValue(i) " + checkValue(i));
+    }
+    
+  private Test(int i, AssertDummy0 ad) {
+    System.out.println("in constructor " + i);
+  }
+  //end example
+  
     String params; // grabbed from parser tokens
     long # = 0;
     foreach constructor (constructors) {
@@ -277,12 +315,28 @@ public class CodeGenerator {
         }
       }
       private constructorName(params, AssertDummy#) {
-
+      
       CodeFragment codeFrag = new CodeFragment(constructor.getEntrance().line, constructor.getEntrance().column, code, AssertType.PRECONDITION);
       symtab.associateCodeWithCurrentFile(codeFrag);
       #++;
-    }    
+    }
 
   */
+
+  /**
+     @return the code neccessary to implement the pre conditions on this method
+  **/
+  static public String generatePreConditionMethod(final AssertMethod assertMethod) {
+    //[jpschewe:20000206.2033CST] FIX
+    return null;
+  }
+
+  /**
+     @return the code neccessary to implement the post conditions on this method
+  **/
+  static public String generatePostConditionMethod(final AssertMethod assertMethod) {
+    //[jpschewe:20000206.2034CST] FIX
+    return null;
+  }
   
 }

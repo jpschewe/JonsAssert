@@ -12,11 +12,11 @@ import org.tcfreenet.schewe.utils.Named;
 /**
    Represents a type of assertion.
 **/
-public class AssertType implements Named {
+public class AssertType implements Named, Comparable {
 
   final static public AssertType ASSERT = new AssertType("ASSERT", 3);
-  final static public AssertType PRECONDITION = new AssertType("PRECONDITION", 1);
-  final static public AssertType INVARIANT = new AssertType("INVARIANT", 0);
+  final static public AssertType PRECONDITION = new AssertType("PRECONDITION", 0);
+  final static public AssertType INVARIANT = new AssertType("INVARIANT", 1);
   final static public AssertType POSTCONDITION = new AssertType("POSTCONDITION", 2);
 
   /**
@@ -28,7 +28,7 @@ public class AssertType implements Named {
     _rank = rank;
   }
 
-  public long getRank() {
+  private long getRank() {
     return _rank;
   }
   private long _rank;
@@ -53,4 +53,27 @@ public class AssertType implements Named {
     return (new Long(getRank())).hashCode();
   }
 
+
+  //Comparable
+  /**
+     @throws ClassCastException if other is not an AssertType
+  **/
+  public int compareTo(final Object o) {
+    if(o instanceof AssertType) {
+      AssertType other = (AssertType)o;
+      if(other.equals(this)) {
+        return 0;
+      }
+      else if(getRank() < other.getRank()) {
+        return -1;
+      }
+      else {
+        return 1;
+      }
+    }
+    else {
+      throw new ClassCastException(o.getClass() + " is not a AssertType");
+    }
+  }
+  //end Comparable
 }

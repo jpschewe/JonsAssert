@@ -13,20 +13,20 @@ final public class CodePoint implements Comparable {
      @pre (line > -1)
      @pre (line > -1)
   **/
-  public CodePoint(long line, long column) {
+  public CodePoint(int line, int column) {
     _line = line;
     _column = column;
   }
 
-  public long getLine() {
+  public int getLine() {
     return _line;
   }
-  private long _line;
+  private int _line;
 
-  public long getColumn() {
+  public int getColumn() {
     return _column;
   }
-  private long _column;
+  private int _column;
 
   public String toString() {
     return getLine() + "." + getColumn();
@@ -42,7 +42,7 @@ final public class CodePoint implements Comparable {
   }
 
   public int hashCode() {
-    return new Long(getLine()).hashCode();
+    return getLine();
   }
   
   //Comparable

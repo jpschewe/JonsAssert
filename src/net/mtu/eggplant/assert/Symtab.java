@@ -94,6 +94,8 @@ public class Symtab {
     _currentPackageName = "";
     _allPackages = new Hashtable();
     _allFiles = new Hashtable();
+    _methodStack = new Stack();
+    _currentMethod = null;
   }
 
   private String _currentPackageName;
@@ -320,10 +322,10 @@ public class Symtab {
     }
     // parse it
     try {
-    InputStream is = url.openStream();
-    //[jpschewe:20000129.0959CST] pass off to Main
+      InputStream is = url.openStream();
+      //[jpschewe:20000129.0959CST] pass off to Main
     
-    return true;    
+      return true;    
     }
     catch (IOException ioe) {
       System.err.println("Got error parsing file: " + ioe);
@@ -427,15 +429,49 @@ public class Symtab {
                           final String retType,
                           final boolean isStatic,
                           final boolean isPrivate) {
-    //do something with this
+    if(_currentMethod != null) {
+      _methodStack.push(_currentMethod);
+    }
+    String theName;
+    if(name == null) {
+      theName = _currentClass.getName();
+    } else {
+      theName = name;
+    }
+    
+    _currentMethod = new AssertMethod(_currentClass, theName, preConditions, postConditions, params, retType, isStatic, isPrivate);
+
   }
 
   /**
      Finishes the method that is currently being parsed.  This will pop a
-     method off the method stack, if one exists.
-  **/
-  public void finishMethod() {
+     method off the method stack, if one exists.  This will also set the
+     method entrance and add a method exit if the method is void.
 
+     @param startEnd two code points representing the opening and closing braces of the method
+  **/
+  public void finishMethod(final CodePointPair startEnd) {
+    //[jpschewe:20000206.1000CST] FIX change this to actuall create a CodeModification for changing the return statement, if it's not void, and one for inserting the text after the SEMI.
+    _currentMethod.setMethodEntrance(startEnd.getCodePointOne());
+    String retType = _currentMethod.getReturnType();
+    if(_currentMethod.isVoid()) {
+      _currentMethod.addExit(startEnd.getCodePointTwo(), null);
+    }
+    
+    _currentClass.addMethod(_currentMethod);
+    if(!_methodStack.isEmpty()) {
+      _currentMethod = (AssertMethod)_methodStack.pop();
+    }
+    else {
+      _currentMethod = null;
+    }
+  }
+
+  /**
+     Get at the method that's currently being parsed.
+  **/
+  public AssertMethod getCurrentMethod() {
+    return _currentMethod;
   }
   
   private AssertClass _currentClass;
@@ -443,6 +479,8 @@ public class Symtab {
   private Hashtable _allFiles;
   private Stack _classStack;
   private Stack _fileStack;
+  private Stack _methodStack;
+  private AssertMethod _currentMethod;
   
   /**
      Hashtable of Vectors, each key is a class name, each value is a package

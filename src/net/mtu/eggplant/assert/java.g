@@ -315,7 +315,7 @@ declaration
 //   this rule separate so they can easily be collected in a Vector if
 //   someone so desires
 /**
-   @returns the list of modifiers as Strings
+   @return the list of modifiers as Strings
 **/
 modifiers returns [Vector mods]
 {
@@ -329,7 +329,7 @@ modifiers returns [Vector mods]
 // A type specification is a type name with possible brackets afterwards
 //   (which would make it an array type).
 /**
-   @returns the Token that represents this type spec
+   @return the Token that represents this type spec
 **/
 typeSpec returns [Token t]
   : t=classTypeSpec
@@ -339,7 +339,7 @@ typeSpec returns [Token t]
 // A class type specification is a class type with possible brackets afterwards
 //   (which would make it an array type).
 /**
-   @returns the Token that represents this class type spec
+   @return the Token that represents this class type spec
 **/
 classTypeSpec returns [Token id]
     :
@@ -349,7 +349,7 @@ classTypeSpec returns [Token id]
 // A builtin type specification is a builtin type with possible brackets
 // afterwards (which would make it an array type).
 /**
-   @returns the Token that represents this builtin type spec
+   @return the Token that represents this builtin type spec
 **/
 builtInTypeSpec returns [Token id]
   :	id=builtInType (LBRACK RBRACK)*
@@ -358,7 +358,7 @@ builtInTypeSpec returns [Token id]
 // A type name. which is either a (possibly qualified) class name or
 //   a primitive (builtin) type
 /**
-   @returns the Token that represents this type
+   @return the Token that represents this type
 **/
 type returns [Token t]
   :	t=identifier
@@ -367,7 +367,7 @@ type returns [Token t]
 
 // The primitive types.
 /**
-   @returns the Token that represents this builtin type
+   @return the Token that represents this builtin type
 **/
 builtInType returns [Token t]
 { t = null; }
@@ -386,7 +386,7 @@ builtInType returns [Token t]
  A (possibly-qualified) java identifier.  We start with the first IDENT
    and expand its name by adding dots and following IDENTS
 
-   @returns a Token that represents this identifier, the text of the Token is
+   @return a Token that represents this identifier, the text of the Token is
    equal to the whole identifier, including possible dots for a fully
    qualified java class name.
 **/
@@ -466,8 +466,8 @@ classDefinition
     // it might implement some interfaces...
     implementsClause
     // now parse the body of the class
-    classBlock[id.getText()]
-    //[jpschewe:19991230.2312CST] generate code to check invariants here    
+    classBlock[id.getText(), false]
+    //[jpschewe:19991230.2312CST] FIX generate code to check invariants here    
   ;
 
 
@@ -482,16 +482,17 @@ interfaceDefinition
     // it might extend some other interfaces
     interfaceExtends
     // now parse the body of the interface (looks like a class...)
-    classBlock[id.getText()]
+    classBlock[id.getText(), true]
   ;
 
 
-// This is the body of a class.  You can have fields and extra semicolons,
-// That's about it (until you see what a field is...)
-classBlock [ String name ]
+/**
+   This is the body of a class or interface.  You can have fields and extra semicolons,
+   That's about it (until you see what a field is...)
+**/
+classBlock [ String name, boolean isInterface ]
   :
     lc:LCURLY
-    //[jpschewe:20000129.0025CST] insert pre & invariant checks here
     {
       getSymtab().startClass(name, getInvariants());
       clearInvariants();
@@ -514,7 +515,7 @@ prePostField
 
 
 // An interface can extend several other interfaces...
-//[jpschewe:20000102.1415CST] need stuff here too, this could get messy
+//[jpschewe:20000102.1415CST] FIX need stuff here too, this could get messy
 interfaceExtends
 { Token id, id2; }
   :	(
@@ -524,7 +525,7 @@ interfaceExtends
   ;
 
 // A class can implement several interfaces...
-//[jpschewe:20000102.1414CST] need stuff here
+//[jpschewe:20000102.1414CST] FIX need stuff here
 implementsClause
 { Token id, id2; }
   :	(
@@ -558,7 +559,7 @@ field
       isStatic = mods.contains("static");
     }
     
-    //[jpschewe:19991230.2309CST] check pre and post conditions here
+    //[jpschewe:19991230.2309CST] FIX check pre and post conditions here
     (	params=ctorHead
       {
 	// needs to be before compoundStatement so that I can have it set for the addExit calls
@@ -599,12 +600,13 @@ field
 
     {
       if(startEnd != null) {
-	//got a method
+	//got a method or constructor
 	//set the methods entrace to startEnd.getCodePointOne();
 	//if retType is null or is void, add an exit at startEnd.getCodePointTwo();
-
+	//generate code for pre/post/invariants
+	getSymtab().finishMethod(startEnd);
       }
-      getSymtab().finishMethod();
+
     }
   ;
 
@@ -660,10 +662,16 @@ initializer
   |	arrayInitializer
   ;
 
-// This is the header of a method.  It includes the name and parameters
-//   for the method.
-//   This also watches for a list of exception classes in a "throws" clause.
-//[jpschewe:20000204.2127CST] this is only used for constructors so I'm just going to return the params, the method name is known
+/**
+ <p>This is the header of a method.  It includes the name and parameters for
+   the method.  This also watches for a list of exception classes in a
+   "throws" clause.</p>
+
+   <p>[jpschewe:20000204.2127CST] this is only used for constructors so I'm
+   just going to return the params, the method name is known</p>
+
+   @return the parameters as StringPair(type, name)
+**/
 ctorHead returns [Vector params]
 {
   params = null;
@@ -748,7 +756,7 @@ assertCondition
 //      it starts a new scope for variable definitions
 
 /**
-@return a CodePointPair that represent the open and close curly braces
+   @return a CodePointPair that represent the open and close curly braces
 **/
 compoundStatement returns [CodePointPair startEnd]
 {
@@ -789,19 +797,18 @@ statement
 	// statements.  Must backtrack to be sure.  Could use a semantic
 	// predicate to test symbol table to see what the type was coming
 	// up, but that's pretty hard without a symbol table ;)
-	//#5
-    |	/*(assertCondition)?*/ (declaration)=> declaration SEMI
+    |	(declaration)=> declaration SEMI
 
 	// An expression statement.  This could be a method call,
 	// assignment statement, or any other expression evaluated for
 	// side-effects.
-    |	/*(assertCondition)?*/ expression SEMI
+    |	expression SEMI
 
 	// Attach a label to the front of a statement
     |	IDENT COLON statement
 
 	// If-else statement
-    |	/*(assertCondition)?*/"if" LPAREN expression RPAREN statement
+    |	"if" LPAREN expression RPAREN statement
 	(
 	    // CONFLICT: the old "dangling-else" problem...
 	    //           ANTLR generates proper code matching
@@ -814,7 +821,7 @@ statement
 	)?
 
 	// For statement
-    |	/*(assertCondition)?*/ "for"
+    |	"for"
 	LPAREN
 	forInit SEMI   // initializer
 	forCond	SEMI   // condition test
@@ -823,36 +830,40 @@ statement
 	statement                     // statement to loop over
 
 	// While statement
-	//#10
-    |	/*(assertCondition)?*/ "while" LPAREN expression RPAREN statement
+    |	"while" LPAREN expression RPAREN statement
 
 	// do-while statement
-    |	/*(assertCondition)?*/ "do" statement "while" LPAREN expression RPAREN SEMI
+    |	"do" statement "while" LPAREN expression RPAREN SEMI
 
 	// get out of a loop (or switch)
-    |	/*(assertCondition)?*/ "break" (IDENT)? SEMI
+    |	"break" (IDENT)? SEMI
 
 	// do next iteration of a loop
-    |	/*(assertCondition)?*/ "continue" (IDENT)? SEMI
+    |	"continue" (IDENT)? SEMI
 
 	//[jpschewe:19991230.2259CST] put post call here
 	// Return an expression
-    |	/*(assertCondition)?*/ "return" (expression)? SEMI
+    |	ret:"return" (expression)? SEMI
+      {
+	CodePoint cp = new CodePoint(ret.getLine(), ret.getColumn());
+	//[jpschewe:20000205.1543CST] FIX need special bit here for doing search and replace in the code
+	//System.out.println("found return: " + exp);
+	//getSymtab().getCurrentMethod().addExit(cp, statement);
+      }
 
 	// switch/case statement
-    |	/*(assertCondition)?*/ "switch" LPAREN expression RPAREN LCURLY
+    |	"switch" LPAREN expression RPAREN LCURLY
 	( casesGroup )*
 	RCURLY
 
 	// exception try-catch block
-	//#16
-    |	/*(assertCondition)?*/ tryBlock
+    |	tryBlock
 
 	// throw an exception
-    |	/*(assertCondition)?*/ "throw" expression SEMI
+    |	"throw" expression SEMI
 
 	// synchronize a statement
-    |	/*(assertCondition)?*/ "synchronized" LPAREN expression RPAREN compoundStatement
+    |	"synchronized" LPAREN expression RPAREN compoundStatement
 
 	// empty statement
     |	SEMI
@@ -913,6 +924,10 @@ handler
   ;
 
 
+/**
+   the mother of all expressions
+
+<pre>
 // expressions
 // Note that most of these expressions follow the pattern
 //   thisLevelExpression :
@@ -944,16 +959,19 @@ handler
 // Note that the above precedence levels map to the rules below...
 // Once you have a precedence chart, writing the appropriate rules as below
 //   is usually very straightfoward
+</pre>
 
 
 
-// the mother of all expressions
+**/
 expression
   :	assignmentExpression
   ;
 
 
-// This is a list of expressions.
+/**
+   This is a list of expressions.
+**/
 expressionList
   :	expression (COMMA expression)*
   ;
@@ -987,43 +1005,64 @@ conditionalExpression
   ;
 
 
-// logical or (||)  (level 11)
+/**
+   logical or (||)  (level 11)
+
+**/
 logicalOrExpression
   :	logicalAndExpression (LOR logicalAndExpression)*
   ;
 
 
-// logical and (&&)  (level 10)
+/**
+   logical and (&&)  (level 10)
+
+**/
 logicalAndExpression
   :	inclusiveOrExpression (LAND inclusiveOrExpression)*
   ;
 
 
-// bitwise or non-short-circuiting or (|)  (level 9)
+/**
+   bitwise or non-short-circuiting or (|)  (level 9)
+
+**/
 inclusiveOrExpression
   :	exclusiveOrExpression (BOR exclusiveOrExpression)*
   ;
 
 
-// exclusive or (^)  (level 8)
+/**
+   exclusive or (^)  (level 8)
+
+**/
 exclusiveOrExpression
   :	andExpression (BXOR andExpression)*
   ;
 
 
-// bitwise or non-short-circuiting and (&)  (level 7)
+/**
+   bitwise or non-short-circuiting and (&)  (level 7)
+
+**/
 andExpression
   :	equalityExpression (BAND equalityExpression)*
   ;
 
 
-// equality/inequality (==/!=) (level 6)
+/**
+   equality/inequality (==/!=) (level 6)
+
+**/
 equalityExpression
   :	relationalExpression ((NOT_EQUAL | EQUAL) relationalExpression)*
   ;
 
 
-// boolean relational expressions (level 5)
+/**
+   boolean relational expressions (level 5)
+
+**/
 relationalExpression
   :	shiftExpression
     (	(	LT
@@ -1037,19 +1076,28 @@ relationalExpression
   ;
 
 
-// bit shift expressions (level 4)
+/**
+   bit shift expressions (level 4)
+
+**/
 shiftExpression
   :	additiveExpression ((SL | SR | BSR) additiveExpression)*
   ;
 
 
-// binary addition/subtraction (level 3)
+/**
+   binary addition/subtraction (level 3)
+
+**/
 additiveExpression
   :	multiplicativeExpression ((PLUS | MINUS) multiplicativeExpression)*
   ;
 
 
-// multiplication/division/modulo (level 2)
+/**
+   multiplication/division/modulo (level 2)
+
+**/
 multiplicativeExpression
   :	unaryExpression ((STAR | DIV | MOD ) unaryExpression)*
   ;
@@ -1088,7 +1136,10 @@ unaryExpressionNotPlusMinus
     )
   ;
 
-// qualified names, array expressions, method invocation, post inc/dec
+/**
+   qualified names, array expressions, method invocation, post inc/dec
+
+**/
 postfixExpression
 { Token id; }
   :	primaryExpression // start with a primary
@@ -1133,7 +1184,9 @@ postfixExpression
     DOT "class"
   ;
 
-// the basic element of an expression
+/**
+   the basic element of an expression
+**/
 primaryExpression
   :	IDENT
   |	newExpression
@@ -1146,14 +1199,15 @@ primaryExpression
   |	LPAREN assignmentExpression RPAREN
   ;
 
-/** object instantiation.
- */
+/**
+   object instantiation.
+**/
 newExpression
 { Token t; }
   :	"new" t=type
-    (	LPAREN argList RPAREN ( classBlock[getSymtab().getCurrentClass().createAnonymousClassName()] )?
+    (	LPAREN argList RPAREN ( classBlock[getSymtab().getCurrentClass().createAnonymousClassName(), false] )?
 
-      //[jpschewe:20000128.0740CST] need to start an anonymous class
+      //[jpschewe:20000128.0740CST] FIX need to start an anonymous class
       //here, use t to determine what interfaces we need to check for
       //conditions
 	    

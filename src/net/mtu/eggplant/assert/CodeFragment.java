@@ -66,6 +66,20 @@ public class CodeFragment implements Comparable {
   public String toString() {
     return "Insert " + getType() + " at " + getLocation() + ": " + getCode();
   }
+
+  /**
+     Instrument the given line.
+     
+     @param offset how many characters have been added to this line since it was pulled from the file
+     @param line the line to modify
+     @return the new offset
+  **/
+  public int instrumentLine(final int offset,
+                            final StringBuffer line) {
+    int whereToInsert = offset + getLocation().getColumn();
+    line.insert(whereToInsert, getCode());
+    return offset + getCode().length();
+  }
   
   //Comparable
   /**
@@ -80,15 +94,7 @@ public class CodeFragment implements Comparable {
       CodeFragment other = (CodeFragment)o;
       int test = getLocation().compareTo(other.getLocation());
       if(test == 0) {
-        if(getType().equals(other.getType())) {
-          return 0;
-        }
-        else if(getType().getRank() < other.getType().getRank()) {
-          return -1;
-        }
-        else {
-          return 1;
-        }
+        return getType().compareTo(other.getType());
       }
       else {
         return test;

@@ -112,18 +112,19 @@ public class AssertMethod implements Named {
   /**
      Add an exit to this method.
 
-     @param exit the line and column in the file where this exit occurs
-     @param statement the statement of the return statement, null if the method is void
-
+     @param points The first point is the start of the return token, the
+     second is the location of the semiColon at the end of the return.
+     
      @pre (exit != null)
   **/
-  public void addExit(final CodePoint exit, final String statement) {
-    _exits.addElement(new Pair(exit, statement));
+  public void addExit(final CodePointPair points) {
+    _exits.addElement(points);
   }
-
+  
   /**
      @return list of the exits of this class, all return statements and the
      closing brace if this is a void method.  Don't modify this Vector.
+     Vector of CodePoints(start of return, semicolon)
   **/
   public Vector getExits() {
     return _exits;
@@ -172,6 +173,13 @@ public class AssertMethod implements Named {
   **/
   public boolean isConstructor() {
     return (getReturnType() == null);
+  }
+
+  /**
+     @return true if this method is a void method, this includes constructors.
+  **/
+  public boolean isVoid() {
+    return (getReturnType() == null || getReturnType().equals("void"));
   }
   
 }
