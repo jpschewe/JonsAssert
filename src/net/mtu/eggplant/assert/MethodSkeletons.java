@@ -9,18 +9,18 @@ public Object methodFoo(Object param1) {
   if(!__checkInvariant()) {
     AssertTools.invariantFailed(AssertTools.getCurrentAssertionViolation());
   }
-  if(!__check<methodName>PreConditions(param1, param2)) {
+  if(!__check<methodName>PreConditions(param1, param2, ...)) {
     AssertTools.preConditionFailed(AssertTools.getCurrentAssertionViolation());
   }
-  Object __oldParam1 = param1;
+  final Object __oldParam1 = param1;
 
 
   /* was return b; */
-  Object __retVal = b;
+  final Object __retVal = b;
   if(!__checkInvariant()) {
     AssertTools.invariantFailed(AssertTools.getCurrentAssertionViolation());
   }
-  if(!__check<methodName>PostConditions(__retVal, oldParam1, param1)) {
+  if(!__check<methodName>PostConditions(__retVal, __oldParam1, param1, ...)) {
     AssertTools.postConditionFailed(AssertTools.getCurrentAssertionViolation());
   }
   return __retVal;
@@ -37,7 +37,7 @@ protected boolean __check<methodname>PostConditions(__retVal, oldParam1, param1,
 
 }
 
-protected boolean __check<methodname>PreConditions(param1, ...) {
+protected boolean __check<methodname>PreConditions(param1, param2, ...) {
     // AND, as soon as a false is seen, return false;
 
     // do interface pre conditions first and keep track of which interface they're from

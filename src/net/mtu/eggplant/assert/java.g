@@ -169,7 +169,7 @@ tokens {
   private void addAsserts(final Vector asserts, final Token jdClose) {
     if(asserts != null && asserts.size() > 0) {
       System.out.println("Parser: got asserts#");
-      System.out.println("Insert code at line.column: " + jdClose.getLine() + "." + jdClose.getColumn() + " #" + jdClose.getText() + "#"  + jdClose.getClass());
+      System.out.println("Insert code at line.column: " + jdClose.getLine() + "." + (jdClose.getColumn() + jdClose.getText().length()) + " #" + jdClose.getText() + "#"  + jdClose.getClass());
       Enumeration iter = asserts.elements();
       while(iter.hasMoreElements()) {
 	AssertToken assertToken = (AssertToken)iter.nextElement();
@@ -472,6 +472,7 @@ interfaceDefinition
 // That's about it (until you see what a field is...)
 classBlock
   :
+    //[jpschewe:20000120.2217CST] need special case for anonymous classes here
     // [jpschewe:19991230.2300CST] insert the call to __JPSCheckPre<methodname>(<params>)
     LCURLY
     //this should just be methods and constructors,
@@ -1119,30 +1120,43 @@ options {
 
 {
     // for column tracking
-    protected int tokColumn = -3;
-    protected int column = -2;
-    public void consume() throws IOException {
-	if(inputState.guessing > 0) {
-	    if(text.length() == 0) {
-		// remember token start column
-		tokColumn = column;
-	    }
-	    if (LA(1) == '\n') {
-		column = -1;
-	    }
-	    else {
-		column++;
-	    }
-	}
-	super.consume();
+  protected int tokColumn = 0;
+  protected int column = 0;
+  public void consume() throws IOException {
+    if(text.length()==0) {
+      // remember the token start column
+      tokColumn = column;
     }
-    
-    protected Token makeToken(int t) {
-	Token tok = super.makeToken(t);
-	tok.setColumn(tokColumn);
-	return tok;
-    }
+//    if(LA(1) == '\n' || LA(1) == '\r') {
+//	column = 0;
+//    }
+    column++;
+//	  if(inputState.guessing > 0) {
+//	      if(text.length() == 0) {
+//		  // remember token start column
+//		  tokColumn = column;
+//	      }
+//	      if (LA(1) == '\n') {
+//		  column = -1;
+//	      }
+//	      else {
+//		  column++;
+//	      }
+//	  }
+    super.consume();
+  }
 
+  public void newline() {
+    column = 0;
+    super.newline();
+  }
+  
+  protected Token makeToken(int t) {
+    Token tok = super.makeToken(t);
+    tok.setColumn(tokColumn);
+    return tok;
+  }
+  
 }
 
 

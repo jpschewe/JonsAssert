@@ -1,3 +1,9 @@
+2000-01-20  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* assert.g: Added column tracking code
+
+	* java.g: Added code for keeping track of columns
+
 2000-01-16  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* CodeGenerator.java: Added code to generate invariant checks.

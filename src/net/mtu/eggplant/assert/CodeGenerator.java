@@ -7,6 +7,8 @@
 */
 package org.tcfreenet.schewe.Assert;
 
+import org.tcfreenet.schewe.utils.StringPair;
+
 import antlr.Token;
 
 import java.util.Vector;
@@ -145,4 +147,118 @@ public class CodeGenerator {
     
   }
 
+  /**
+     @param assertMethod the method to generate the precondition call for
+     @return the code for a call to check the pre conditions for the given method
+
+     @pre (assertMethod != null)
+  **/
+  static public String generatePreConditionCall(final AssertMethod assertMethod) {
+    StringBuffer code = new StringBuffer();
+    
+    code.append("if(!__check");
+    code.append(assertMethod.getName());
+    code.append("PreConditions(");
+
+    boolean first = true;
+    Enumeration paramIter = assertMethod.getParams().elements();
+    while(paramIter.hasMoreElements()) {
+      StringPair sp = (StringPair)paramIter.nextElement();
+      String paramName = sp.getStringTwo();
+      if(! first) {
+        code.append(",");
+        first = false;
+      }
+      code.append(paramName);
+    }
+    code.append(")) {");
+    code.append("AssertTools.preConditionFailed(AssertTools.getCurrentAssertionViolation());");
+    code.append("}");
+
+
+    return code.toString();
+  }
+
+  /**
+     @param assertMethod the method to generate the old values for
+     @return the code to generate all of the old values to be used when calling the post condition check
+
+     @pre (assertMethod != null)
+  **/
+  static public String generateOldValues(final AssertMethod assertMethod) {
+    StringBuffer code = new StringBuffer();
+
+    Enumeration paramIter = assertMethod.getParams().elements();
+    while(paramIter.hasMoreElements()) {
+      StringPair sp = (StringPair)paramIter.nextElement();
+      String paramType = sp.getStringOne();
+      String paramName = sp.getStringTwo();
+      code.append("final ");
+      code.append(paramType);
+      code.append(" __old");
+      code.append(paramName);
+      code.append(" = ");
+      code.append(paramName);
+      code.append(";");
+    }
+
+    return code.toString();
+  }
+
+  /**
+     @param assertMethod the method to generate the post condition check call for
+     @param retVal the actual return statement that is in the code before it
+     is instrumented, ignored if the method has no return value
+     @return code to call the post condition check for a method
+
+     @pre (assertMethod != null)
+  **/
+  static public String generatePostConditionCall(final AssertMethod assertMethod, final String retVal) {
+    //[jpschewe:20000118.0006CST] perhaps this should return a Vector or code fragments...
+    StringBuffer code = new StringBuffer();
+    String retType = assertMethod.getReturnType();
+    boolean voidMethod = retType.equalsIgnoreCase("void");
+    
+    if(!voidMethod) {
+      code.append("final ");
+      code.append(retType);
+      code.append(" __retVal = ");
+      code.append(retVal);
+      code.append(";");
+    }
+    
+    code.append("if(!__check");
+    code.append(assertMethod.getName());
+    code.append("PostConditions(");
+
+    boolean first = true;
+    if(!voidMethod) {
+      code.append("__retVal");
+      first = false;
+    }
+    Enumeration paramIter = assertMethod.getParams().elements();
+    while(paramIter.hasMoreElements()) {
+      StringPair sp = (StringPair)paramIter.nextElement();
+      String paramName = sp.getStringTwo();
+      if(! first) {
+        code.append(",");
+        first = false;
+      }
+      code.append("__old");
+      code.append(paramName);
+      code.append(", ");
+      code.append(paramName);
+    }
+    code.append(")) {");
+    code.append("AssertTools.preConditionFailed(AssertTools.getCurrentAssertionViolation());");
+    code.append("}");
+
+    if(!voidMethod) {
+      code.append("return __retVal;");
+    }
+
+    return code.toString();
+  }
+
+  
 }

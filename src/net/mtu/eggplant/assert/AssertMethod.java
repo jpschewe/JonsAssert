@@ -9,6 +9,7 @@ package org.tcfreenet.schewe.Assert;
 
 import org.tcfreenet.schewe.utils.StringPair;
 import org.tcfreenet.schewe.utils.Named;
+import org.tcfreenet.schewe.utils.Pair;
 
 import java.util.Vector;
 
@@ -107,9 +108,14 @@ public class AssertMethod implements Named {
 
   /**
      Add an exit to this method.
+
+     @param exit the line and column in the file where this exit occurs
+     @param statement the statement of the return statement, null if the method is void
+
+     @pre (exit != null)
   **/
-  public void addExit(final Point exit) {
-    _exits.addElement(exit);
+  public void addExit(final Point exit, final String statement) {
+    _exits.addElement(new Pair(exit, statement));
   }
 
   /**
