@@ -9,7 +9,7 @@
    '(jde-compile-option-deprecation t)
    '(jde-global-classpath (list
 			   (expand-file-name "src/" project-root)
-			   (expand-file-name "lib/JonsInfra-0.1.jar" project-root)
+			   (expand-file-name "lib/JonsInfra-0.2.jar" project-root)
 			   (expand-file-name "lib/antlr.jar" project-root)
 			   (expand-file-name "lib/junit-3.7.jar" project-root)
 			   (expand-file-name "lib/werken.opt.jar" project-root)

@@ -1,3 +1,7 @@
+2003-12-29  Jon Schewe  <jpschewe@mtu.net>
+
+	* build.xml: Updated to JonsInfra 0.2
+
 2003-08-10  Jon Schewe  <jpschewe@mtu.net>
 
 	* doc/README (FEATURES): Removed test for classes in the default
