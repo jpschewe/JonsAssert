@@ -14,6 +14,8 @@ import java.io.IOException;
 
 import antlr.TokenStreamSelector;
 
+import gnu.getopt.Getopt;
+
 public class Main {
 
   static /* package */ TokenStreamSelector selector = new TokenStreamSelector();
@@ -21,9 +23,12 @@ public class Main {
   static /* package */ AssertLexer assertLexer;
   /** the symbol table */
   static private Symtab _symtab;
+  static /*pacakge*/ boolean _ignoreTimeStamp = false;
   
   public static void main(String[] args) {
-    _symtab = new Symtab();
+
+
+    _symtab = new Symtab(parseCommandLine(args));
     
     // if we have at least one command-line argument
     if (args.length > 0 ) {
@@ -41,6 +46,26 @@ public class Main {
     
   }
 
+  static private Configuration parseCommandLine(String[] args) {
+    Configuration config = new Configuration();
+    Getopt g = new Getopt("Main", args, "f");
+
+    int c;
+    String arg;
+    while((c = g.getopt()) != -1) {
+      switch(c) {
+      case 'f':
+        config.setIgnoreTimeStamp(true);
+        break;
+      default:
+        System.err.println("getopt() returned " + c);
+        break;
+      }
+    }
+
+    return config;
+  }
+  
 
   // This method decides what action to take based on the type of
   //   file we are looking at
@@ -63,7 +88,7 @@ public class Main {
           System.err.println("Caught exception getting file input stream: " + ioe);
         }
         catch(FileAlreadyParsedException fape) {
-          System.out.println("Source file is older than instrumented file, skipping: " + f.getName());
+          //System.out.println("Source file is older than instrumented file, skipping: " + f.getName());
         }
         catch (Exception e) {
           System.err.println("parser exception: "+e);

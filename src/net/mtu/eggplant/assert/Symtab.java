@@ -90,7 +90,10 @@ import java.util.List;
 **/
 public class Symtab {
 
-  public Symtab() {
+  /**
+     @pre (config != null)
+  **/
+  public Symtab(final Configuration config) {
     _classStack = new Stack();
     _currentClass = null;
     _currentFile = null;
@@ -100,8 +103,14 @@ public class Symtab {
     _allFiles = new Vector();
     _methodStack = new Stack();
     _currentMethod = null;
+    _config = config;
   }
 
+  private Configuration _config;
+  public Configuration getConfiguration() {
+    return _config;
+  }
+  
   private String _currentPackageName;
   /**
      set the package the the next class(es) belong to
@@ -193,11 +202,23 @@ public class Symtab {
      @pre (invariants != null)
      
   **/
-  public void startClass(final String name, final List invariants, final boolean isInterface) {
+  public void startClass(final String name, final List invariants, final boolean isInterface,
+                         final boolean isAnonymous) {
+    AssertClass enclosingClass = _currentClass;
     if(_currentClass != null) {
       _classStack.push(_currentClass);
     }
-    _currentClass = new AssertClass(name, getCurrentPackageName(), isInterface);
+
+    if(enclosingClass != null) {
+      while(enclosingClass != null && enclosingClass.isAnonymous()) {
+        enclosingClass = enclosingClass.getEnclosingClass();
+      }
+    }
+    String className = name;
+    if(isAnonymous) {
+      className = enclosingClass.createAnonymousClassName();
+    }
+    _currentClass = new AssertClass(className, getCurrentPackageName(), isInterface, enclosingClass, isAnonymous);
     _currentClass.setInvariants(invariants);
     
     //System.out.println("in Symtab.startClass " + _currentClass);
@@ -208,7 +229,7 @@ public class Symtab {
       _allPackages.put(getCurrentPackageName(), new Hashtable());
       h = (Hashtable)_allPackages.get(getCurrentPackageName());
     }
-    h.put(name, getCurrentClass());
+    h.put(className, getCurrentClass());
 
     // associate it with a file too
     //List v = (List)_allFiles.get(getCurrentFile());

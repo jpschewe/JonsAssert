@@ -20,20 +20,38 @@ public class AssertClass implements Named {
   /**
      If packageName is null, then it's in the default package.  If name is
      null, it's an anonomous class.
-     
+
+     @param name the simple name of this class
+     @param packageName the name of hte package this class is in
+     @param isInterface true if this class represents an interface
+     @param enclosingClass the enclosing class, this can not be another anonymous class
+     @param isAnonymous true if this class represents an anonymous class
   **/
   public AssertClass(final String name,
                      final String packageName,
-                     final boolean isInterface) {
+                     final boolean isInterface,
+                     final AssertClass enclosingClass,
+                     final boolean isAnonymous) {
     _name = name;
     _packageName = packageName;
     _isInterface = isInterface;
     _anonymousClassCounter = 1;
     _constructorCounter = 0;
     _methods = new Vector();
-
+    _isAnonymous = isAnonymous;
+    _enclosingClass = enclosingClass;
   }
 
+  private AssertClass _enclosingClass;
+  public AssertClass getEnclosingClass() {
+    return _enclosingClass;
+  }
+
+  private boolean _isAnonymous;
+  public boolean isAnonymous() {
+    return _isAnonymous;
+  }
+  
   private boolean _isInterface;
   public boolean isInterface() {
     return _isInterface;

@@ -264,11 +264,13 @@ compilationUnit
     ( {_parseSection==0}? (invariantCondition)* packageName=packageDefinition )?
     {
       //Now we just need to check to make sure the destination file is older
-      if(!getSymtab().isDestinationOlderThanCurrentFile(packageName)) {
-	throw new FileAlreadyParsedException();
+      if(!getSymtab().getConfiguration().ignoreTimeStamp()) {
+	if(!getSymtab().isDestinationOlderThanCurrentFile(packageName)) {
+	  throw new FileAlreadyParsedException();
+	}
+	_parseSection = 1;
+	clearInvariants();
       }
-      _parseSection = 1;
-      clearInvariants();
     }
 
     // Next we have a series of zero or more import statements with
@@ -497,7 +499,7 @@ classDefinition
     // it might implement some interfaces...
     implementsClause
     // now parse the body of the class
-    classBlock[name, false]
+    classBlock[name, false, false]
   ;
 
 
@@ -524,7 +526,7 @@ interfaceDefinition
     // it might extend some other interfaces
     interfaceExtends
     // now parse the body of the interface (looks like a class...)
-    classBlock[name, true]
+    classBlock[name, true, false]
   ;
 
 
@@ -532,11 +534,11 @@ interfaceDefinition
    This is the body of a class or interface.  You can have fields and extra semicolons,
    That's about it (until you see what a field is...)
 **/
-classBlock [ String name, boolean isInterface ]
+classBlock [ String name, boolean isInterface, boolean isAnonymous ]
   :
     lc:LCURLY
     {
-      getSymtab().startClass(name, getInvariants(), isInterface);
+      getSymtab().startClass(name, getInvariants(), isInterface, isAnonymous);
       clearInvariants();
     }
     //this should just be methods and constructors,
@@ -1270,7 +1272,7 @@ primaryExpression
 newExpression
 { Token t; }
   :	"new" t=type
-    (	LPAREN argList RPAREN ( classBlock[getSymtab().getCurrentClass().createAnonymousClassName(), false] )?
+    (	LPAREN argList RPAREN ( classBlock[null, false, true] )?
 
       //[jpschewe:20000128.0740CST] FIX need to use t to figure out what
       //interfaces we need to check conditions on.

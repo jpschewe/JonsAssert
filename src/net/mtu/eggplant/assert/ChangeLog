@@ -1,8 +1,19 @@
 2000-04-19  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
+	* Main.java: Started adding command line parameters.  Added the
+	important -f for forcing instrumentation even if the file already exists.
+
+	* AssertClass.java: I think I've got anonymous class names finally
+	correct.
+
+	* MethodSkeletons.xjava: Updated documentation.
+
 	* CodeGenerator.java: Added check to make sure $return only
 	shows up in postconditions.  Still need to make this a better
 	message though.
+	Added dummy parameter to checkPost methods for void methods so
+	that they are distinct from checkPost methods for methods with
+	return values and the same name.
 
 	* assert.g: Line count now gets updated when a <CR> is found in an
 	assertion condition.
