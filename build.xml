@@ -4,7 +4,7 @@
 
   <!-- used for building releases -->
   <property name="app.name"   value="JonsAssert" />
-  <property name="app.version" value="0.5.3" />
+  <property name="app.version" value="0.5.4" />
   <property name="instrument.dir"  value="instrumented" />
   <property name="build.dir"  value="build" />
   <property name="release.cvs.tag" value="JonsAssert-0_5_3" />
@@ -252,58 +252,82 @@
     </delete>
   </target>
 
-  <target name="release"
-          description="Make a release, CVS tag is created manually">
+  <target name="dist"
+          description="Make a release based on the working directory"
+          >
+
+    <!-- clean out first to get clean source and good compile -->
+    <antcall target="clean" />
+
+    <delete dir="${release.html.dir}/${app.name}/${app.version}" />
     <mkdir dir="${release.html.dir}/${app.name}/${app.version}" />
-           
-    <!-- checkout to a temp directory -->
-    <cvs cvsRoot="${cvs.root}"
-         package="${cvs.module}"
-         dest="${temp.dir}"
-         tag="${release.cvs.tag}" />
 
     <!-- copy index.html, ChangeLog to web directory -->
     <copy todir="${release.html.dir}/${app.name}/${app.version}"
           flatten="true">
-      <fileset dir="${temp.dir}/assert">
+      <fileset dir="${basedir}">
         <include name="ChangeLog" />
         <include name="doc/*" />
       </fileset>
+      <filterset>
+        <filter token="APP-VERSION" value="${app.version}" />
+      </filterset>
     </copy>
 
     <!-- zip source to web directory -->
-    <zip basedir="${temp.dir}"
+    <zip basedir="${basedir}"
          destfile="${release.html.dir}/${app.name}/${app.version}/${app.name}-${app.version}-src.zip"
-         />
+         >
+      <include name="src/**" />
+      <include name="doc/**" />
+      <include name="lib/**" />
+      <include name="prj.el" />
+      <include name="build.xml" />
+      <include name="ChangeLog" />
+    </zip>
 
-    <!-- compile -->
-    <javac srcdir="${temp.dir}/assert/src"
-           destdir="${temp.dir}/assert/src"
-           source="1.4"
-           >
-      <classpath>
-        <pathelement location="${temp.dir}/assert/src/" />
-        <pathelement location="${temp.dir}/assert/lib/JonsInfra-0.2.jar"/>
-        <pathelement location="${temp.dir}/assert/lib/antlr.jar"/>
-        <pathelement location="${temp.dir}/assert/lib/werken.opt.jar"/>
-        <pathelement location="${temp.dir}/assert/lib/junit-3.8.jar"/>
-      </classpath>
-      <include name="net/**/*.java"/>
-    </javac>
-    
+    <!-- now compile everything -->
+    <antcall target="compile" />
+
     <!-- build the jar -->
     <jar jarfile="${release.html.dir}/${app.name}/${app.version}/${app.name}-${app.version}.jar"
-         basedir="${temp.dir}/assert/src"
-         excludes="**/*.java"
-          />
-
+         basedir="${basedir}/build"
+         />
     
     <!-- generate javadoc -->
-    <antcall target="release.javadoc" />
+    <!-- run javadoc on the source -->
+    <mkdir dir="${release.html.dir}/${app.name}/${app.version}/api" />
+    <javadoc packagenames="net.mtu.eggplant.*"
+             sourcepath="${basedir}/src"
+             use="true"
+             splitindex="true"
+             version="true"
+             source="1.4"
+             windowtitle="${app.name}-${app.version}"
+             destdir="${release.html.dir}/${app.name}/${app.version}/api"
+             additionalparam="-tag beaninfo:a:BeanInfo -tag test:a:Tests -tag pre:cm:PreConditions -tag post:cm:PostConditions -tag invariant:tc:Invariants -breakiterator"
+             >
+        <classpath>
+          <pathelement location="${basedir}/src/" />
+          <path refid="base.classpath" />
+        </classpath>
+        <!-- core java -->
+        <link href="http://java.sun.com/j2se/1.4/docs/api/" />
 
-    <!-- delete the temp files -->
-    <delete dir="${temp.dir}" />
-    
+        <!-- JonsInfra -->
+        <link href="${mtu.net}/JonsInfra/0.2/api" />
+
+        <!-- junit -->
+        <link href="http://www.junit.org/junit/javadoc/3.8" />
+
+        <!-- antlr -->
+        <link href="http://www.antlr.org/javadoc/" />
+
+        <!-- werken.opt -->
+        <link href="http://code.werken.com/werken.opt/build/apidocs/" />
+      </javadoc>
+
+
     <echo message="Remember to sync out to mtu.net" />
   </target>
 
@@ -416,57 +440,4 @@
     <delete dir="${basedir}/${temp.dir}" />
   </target>
 
-  <target name="release.javadoc">
-    <mkdir dir="${temp.dir}" />
-    <!-- get the source out of cvs -->
-    <cvs cvsRoot="${cvs.root}"
-         package="${cvs.module}"
-         dest="${temp.dir}"
-         tag="${release.cvs.tag}" />
-    <!-- run javadoc on the source -->
-    <mkdir dir="${release.html.dir}/${app.name}/${app.version}/api" />
-    <javadoc packagenames="net.mtu.eggplant.*"
-             sourcepath="${temp.dir}/assert/src"
-             use="true"
-             splitindex="true"
-             version="true"
-             windowtitle="${app.name}-${app.version}"
-             destdir="${release.html.dir}/${app.name}/${app.version}/api"
-             additionalparam="-tag beaninfo:a:BeanInfo -tag test:a:Tests -tag pre:cm:PreConditions -tag post:cm:PostConditions -tag invariant:tc:Invariants -breakiterator"
-             >
-        <classpath>
-          <pathelement location="${temp.dir}/assert/src/" />
-          <pathelement location="${temp.dir}/assert/lib/junit-3.8.jar" />
-          <pathelement location="${temp.dir}/assert/lib/JonsInfra-0.2.jar" />
-          <pathelement location="${temp.dir}/assert/lib/antlr.jar" />
-          <pathelement location="${temp.dir}/assert/lib/werken.opt.jar" />
-            </classpath>
-        <!-- core java -->
-        <link offline="true"
-              href="http://java.sun.com/j2se/1.4/docs/api/"
-              packagelistLoc="${local.java.packages}/jdk-1.4.0/api/" />
-
-        <!-- JonsInfra -->
-        <link offline="true"
-              href="${mtu.net}/JonsInfra/0.2/api"
-              packagelistLoc="${mtu.net.offline}/JonsInfra/0.2/api" />
-
-        <!-- junit -->
-        <link offline="true"
-              href="http://www.junit.org/junit/javadoc/3.8"
-              packagelistLoc="${local.java.packages}/junit-3.8/" />
-
-        <!-- antlr -->
-        <link offline="true"
-              href="http://www.antlr.org/javadoc/"
-              packagelistLoc="${local.java.packages}/antlr/javadoc/" />
-
-        <!-- werken.opt -->
-        <link href="http://code.werken.com/werken.opt/build/apidocs/" />
-      </javadoc>
-    
-    <!-- delete the temp files -->
-    <delete dir="${temp.dir}" />
-  </target>
-  
 </project>

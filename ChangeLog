@@ -1,9 +1,11 @@
 2003-12-29  Jon Schewe  <jpschewe@mtu.net>
 
-	* Release 0.5.3
+	* Release 0.5.4
 	
 	* build.xml: Updated to JonsInfra 0.2
 
+	* build.xml: Updated to junit 3.8
+	
 2003-08-10  Jon Schewe  <jpschewe@mtu.net>
 
 	* doc/README (FEATURES): Removed test for classes in the default
