@@ -84,6 +84,9 @@ public class Main {
       javaLexer.setTokenObjectClass("org.tcfreenet.schewe.assert.MyToken");
       assertLexer = new AssertLexer(javaLexer.getInputState());
       assertLexer.setTokenObjectClass("org.tcfreenet.schewe.assert.MyToken");
+      ColumnTracker ct = new ColumnTracker();
+      assertLexer.setColumnTracker(ct);
+      javaLexer.setColumnTracker(ct);
       
       selector.addInputStream(javaLexer, "java");
       selector.addInputStream(assertLexer, "assert");

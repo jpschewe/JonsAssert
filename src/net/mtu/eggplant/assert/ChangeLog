@@ -1,5 +1,9 @@
 2000-04-18  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
+	* Main.java: Added code to track column information across
+	multiple lexers.  This makes sure that the instrumentation gets
+	inserted at the right column.
+
 	* CodeGenerator.java: Added regexp rewrites for $return and
 	escaping quotes.
 

@@ -146,7 +146,6 @@ tokens {
     if(asserts != null && asserts.size() > 0) {
       int line = jdClose.getLine();
       int column = jdClose.getColumn() + jdClose.getText().length();
-      
       StringBuffer codeFrag = new StringBuffer();
       Enumeration iter = asserts.elements();
       while(iter.hasMoreElements()) {
@@ -1327,42 +1326,33 @@ options {
 
 {
     // for column tracking
-  protected int tokColumn = 0;
-  protected int column = 0;
-  public void consume() throws IOException {
-    if(text.length()==0) {
-      // remember the token start column
-      tokColumn = column;
+    public void setColumnTracker(final ColumnTracker ct) {
+	_ct = ct;
+	_ct._tokenColumn = 0;
+	_ct._column = 0;
     }
-//    if(LA(1) == '\n' || LA(1) == '\r') {
-//	column = 0;
-//    }
-    column++;
-//	  if(inputState.guessing > 0) {
-//	      if(text.length() == 0) {
-//		  // remember token start column
-//		  tokColumn = column;
-//	      }
-//	      if (LA(1) == '\n') {
-//		  column = -1;
-//	      }
-//	      else {
-//		  column++;
-//	      }
-//	  }
-    super.consume();
-  }
 
-  public void newline() {
-    column = 0;
-    super.newline();
-  }
-  
-  protected Token makeToken(int t) {
-    Token tok = super.makeToken(t);
-    tok.setColumn(tokColumn);
-    return tok;
-  }
+    private ColumnTracker _ct;
+    
+    public void consume() throws IOException {
+	if(text.length()==0) {
+	    // remember the token start column
+	    _ct._tokenColumn = _ct._column;
+	}
+	_ct._column++;
+	super.consume();
+    }
+
+    public void newline() {
+	_ct._column = 0;
+	super.newline();
+    }
+    
+    protected Token makeToken(int t) {
+	Token tok = super.makeToken(t);
+	tok.setColumn(_ct._tokenColumn);
+	return tok;
+    }
   
 }
 

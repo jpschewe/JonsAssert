@@ -37,40 +37,33 @@ options {
 
 {
     // for column tracking
-    protected int tokColumn = 0;
-    protected int column = 0;
+    public void setColumnTracker(final ColumnTracker ct) {
+	_ct = ct;
+	_ct._tokenColumn = 0;
+	_ct._column = 0;
+    }
+
+    private ColumnTracker _ct;
+    
     public void consume() throws IOException {
 	if(text.length()==0) {
 	    // remember the token start column
-	    tokColumn = column;
+	    _ct._tokenColumn = _ct._column;
 	}
-	column++;
-//    if(inputState.guessing > 0) {
-//	if(text.length() == 0) {
-//	  // remember token start column
-//	  tokColumn = column;
-//	}
-//	if (LA(1) == '\n') {
-//	  column = -6;
-//	}
-//	else {
-//	  column++;
-//	}
-//    }
-    super.consume();
-  }
+	_ct._column++;
+	super.consume();
+    }
 
-  public void newline() {
-    column = 0;
-    super.newline();
-  }
+    public void newline() {
+	_ct._column = 0;
+	super.newline();
+    }
     
     protected Token makeToken(int t) {
 	Token tok = super.makeToken(t);
-	tok.setColumn(tokColumn);
+	tok.setColumn(_ct._tokenColumn);
 	return tok;
     }
-
 }
 
 NEWLINE
