@@ -787,15 +787,18 @@ parameterModifier
   :	("final")?
   ;
 
-// should be before all statements and most compoundStatements, but not all
-// so this needs to be added to the places that call compoundStatement
+/**
+   Handle assert or invariant conditions, if an invariant token is seen, clear
+   the asserts, if an assert is seen, clear the invariants.  This should keep
+   us out of trouble.
+**/
 assertOrInvariantCondition
 { Vector assertTokens = new Vector(); }
   : (JAVADOC_OPEN
-    ( assert:ASSERT_CONDITION { assertTokens.addElement(assert); }
+    ( assert:ASSERT_CONDITION { assertTokens.addElement(assert); clearInvariants(); }
       | PRE_CONDITION
       | POST_CONDITION
-      | iv:INVARIANT_CONDITION { addInvariant(iv); }
+      | iv:INVARIANT_CONDITION { addInvariant(iv); assertTokens = new Vector(); }
     )*
     jdc:JAVADOC_CLOSE 
     { addAsserts(assertTokens, jdc); }
