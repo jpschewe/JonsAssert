@@ -25,7 +25,7 @@
  *
  * I'd appreciate comments/suggestions on the code jpschewe@mtu.net
  */
-package net.mtu.eggplant.assert.testcases;
+package net.mtu.eggplant.assert.test;
 
 /**
    Comment over imports.

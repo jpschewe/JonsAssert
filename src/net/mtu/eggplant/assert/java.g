@@ -167,7 +167,7 @@ tokens {
   private void addAsserts(final List asserts, final Token jdClose) {
     if(asserts != null && asserts.size() > 0) {
       int line = jdClose.getLine();
-      int column = jdClose.getColumn() + jdClose.getText().length();
+      int column = jdClose.getColumn()-1 + jdClose.getText().length();
       //System.out.println("adding assert"
       //  + " line: " + line
       //  + " column: " + column
@@ -280,11 +280,24 @@ compilationUnit
   :
 
 
+    //FIX This parseSection bit is strange.  There's got to be a better way to
+    //do this
+
     // A compilation unit starts with an optional package definition and
     // possibly some javadoc comments
-    ( {parseSection==0}? (javadocComment)* packageName=packageDefinition )?
+
+    //( {parseSection==0}? (javadocComment)*
+    //( {parseSection==0}? ( (javadocComment)* packageName=packageDefinition )
+    //| /* nothing */
+    //)
+    //)
+
+    ( packageName=packageDefinition
+    | 
+    )
     {
-	  Debug.println("just found the package");
+      getSymtab().setCurrentPackageName(packageName);
+      Debug.println("just found the package");
       //Now we just need to check to make sure the destination file is older
       if(!getSymtab().getConfiguration().ignoreTimeStamp()) {
 		if(!getSymtab().isDestinationOlderThanCurrentFile(packageName)) {
@@ -292,7 +305,7 @@ compilationUnit
 		}
       }
       //If we get here, either we're in force mode or the source file is newer
-      parseSection = 1;
+      //parseSection = 1;
       clearInvariants();
       //Put the print here so you don't see it unless we're really parsing the files
       System.out.println("  " + getSymtab().getCurrentFile().getFile().getAbsolutePath());
@@ -337,7 +350,6 @@ options {
     "package" id=identifier SEMI
     {
       packageName = id.getText();
-      getSymtab().setCurrentPackageName(packageName);
     }
   ;
 
@@ -582,7 +594,7 @@ classBlock [ String name, boolean isInterface, boolean isAnonymous, Token superc
     rc:RCURLY
     {
       clearInvariants();
-      getSymtab().finishClass(new CodePoint(rc.getLine(), rc.getColumn()));
+      getSymtab().finishClass(new CodePoint(rc.getLine(), rc.getColumn()-1));
     }
   ;
 
@@ -688,7 +700,7 @@ field
 	    }
 	    else {
 	      //abstract, native or interface method
-	      CodePoint close = new CodePoint(semi.getLine(), semi.getColumn());
+	      CodePoint close = new CodePoint(semi.getLine(), semi.getColumn()-1);
 	      getSymtab().finishMethod(new CodePointPair(close, close), null);
 	    }
 	    //print("Found finish: " + methodName);
@@ -886,8 +898,8 @@ compoundStatement returns [CodePointPair startEnd]
       rc:RCURLY
     )
     {
-      CodePoint start = new CodePoint(lc.getLine(), lc.getColumn());
-      CodePoint end = new CodePoint(rc.getLine(), rc.getColumn());
+      CodePoint start = new CodePoint(lc.getLine(), lc.getColumn()-1);
+      CodePoint end = new CodePoint(rc.getLine(), rc.getColumn()-1);
       startEnd = new CodePointPair(start, end);
     }
   ;
@@ -961,9 +973,9 @@ statement
     |	ret:"return" (expression)? semi:SEMI
       {
 	//keep track of these points for post conditions
-	CodePoint retcp = new CodePoint(ret.getLine(), ret.getColumn());
+	CodePoint retcp = new CodePoint(ret.getLine(), ret.getColumn()-1);
 	//add 1 so that code is inserted after the semi colon
-	CodePoint semicp = new CodePoint(semi.getLine(), semi.getColumn()+1);
+	CodePoint semicp = new CodePoint(semi.getLine(), semi.getColumn());
 	getSymtab().getCurrentMethod().addExit(new CodePointPair(retcp, semicp));
       }
 

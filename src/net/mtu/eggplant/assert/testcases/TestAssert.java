@@ -25,7 +25,9 @@
  *
  * I'd appreciate comments/suggestions on the code jpschewe@mtu.net
  */
-package net.mtu.eggplant.assert.testcases;
+package net.mtu.eggplant.assert.test;
+
+import DefaultPackage;
 
 import net.mtu.eggplant.assert.AssertionViolation;
 
@@ -74,7 +76,15 @@ public class TestAssert extends TestCase {
   static public TestSuite suite() {
     return new TestSuite(TestAssert.class);
   }
-
+  
+  /**
+     Just see if it runs.  This is in response to a bug from John Maloney.
+  */
+  public void testDefaultPackage() {
+    final DefaultPackage dp = new DefaultPackage();
+    dp.foo(new Object());
+  }
+  
   /**
      Check to see if an invariant fails when it should.
   **/

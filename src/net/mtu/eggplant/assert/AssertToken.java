@@ -29,7 +29,7 @@ package net.mtu.eggplant.assert;
 
 import antlr.Token;
 
-public class AssertToken extends MyToken {
+public class AssertToken extends Token {
 
   /**
      @pre (condition != null)

@@ -25,27 +25,18 @@
  *
  * I'd appreciate comments/suggestions on the code jpschewe@mtu.net
  */
-package net.mtu.eggplant.assert.test.sub;
 
 /**
-   This class will get instrumented into test/sub so that the package method
-   test is valid.
-**/
-public class CheckWrongPreconditionsSubClass extends net.mtu.eggplant.assert.test.CheckWrongPreconditionsSuperClass {
+ * This class is in the default package to test the generation of such
+ * classes.
+ */
+public class DefaultPackage {
 
-  public void testPrivateMethod(final int i) {
-    privateMethod(i);
-  }
-
-  public void testPackageMethod(final int i) {
-    packageMethod(i);
-  }
-  
-  private void privateMethod(final int i) {
+  /**
+   * @pre (i != null)
+   */
+  public void foo(final Object i) {
     
   }
 
-  /*package*/ void packageMethod(final int i) {
-    
-  }
 }

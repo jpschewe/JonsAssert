@@ -329,7 +329,7 @@ public class Symtab {
         String line = reader.readLine();
         while(line != null) {
           final StringBuffer buf = new StringBuffer(line);        
-          int offset = 0;        
+          int offset = 0;
           while(curFrag != null && reader.getLineNumber() == curFrag.getLocation().getLine()) {
             //instrument line
             offset = curFrag.instrumentLine(offset, buf);
@@ -594,7 +594,6 @@ public class Symtab {
           //Subtract 1 so that we add just before the '}'
           final CodePoint insertFinallyAt = new CodePoint(method.getClose().getLine(), method.getClose().getColumn() - 1);
           final StringBuffer codeToInsert = new StringBuffer();
-          codeToInsert.append("}");
           //catch programmers exceptions first so my catches are reachable
           boolean catchRuntime = true;
           boolean catchError = true;
@@ -615,7 +614,7 @@ public class Symtab {
               catchError = false;
               catchRuntime = false;
             }
-            codeToInsert.append("catch(");
+            codeToInsert.append("} catch(");
             codeToInsert.append(exception);
             codeToInsert.append(" jps_exception");
             codeToInsert.append(shortmclassName);
@@ -626,11 +625,11 @@ public class Symtab {
             codeToInsert.append("throw jps_exception");
             codeToInsert.append(shortmclassName);
             codeToInsert.append(";");
-            codeToInsert.append("}"); //end catch
-          }
+          } //end while
+          
           if(catchError) {
             //catch java.lang.Error
-            codeToInsert.append("catch(Error jps_exception");
+            codeToInsert.append("} catch(Error jps_exception");
             codeToInsert.append(shortmclassName);
             codeToInsert.append(") {");
             codeToInsert.append("jps_foundException");
@@ -639,11 +638,10 @@ public class Symtab {
             codeToInsert.append("throw jps_exception");
             codeToInsert.append(shortmclassName);
             codeToInsert.append(";");
-            codeToInsert.append("}"); //end catch
           }
           if(catchRuntime) {
             //catch java.lang.RuntimeException
-            codeToInsert.append("catch(RuntimeException jps_exception");
+            codeToInsert.append("} catch(RuntimeException jps_exception");
             codeToInsert.append(shortmclassName);
             codeToInsert.append(") {");
             codeToInsert.append("jps_foundException");
@@ -652,9 +650,8 @@ public class Symtab {
             codeToInsert.append("throw jps_exception");
             codeToInsert.append(shortmclassName);
             codeToInsert.append(";");
-            codeToInsert.append("}"); //end catch          
           }
-          codeToInsert.append("finally { ");
+          codeToInsert.append("} finally { ");
           codeToInsert.append("if(!jps_foundException");
           codeToInsert.append(shortmclassName);
           codeToInsert.append(") {");

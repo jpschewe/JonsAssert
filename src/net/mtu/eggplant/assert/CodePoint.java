@@ -31,7 +31,7 @@ final public class CodePoint implements Comparable {
 
   /**
      @pre (line > -1)
-     @pre (line > -1)
+     @pre (column > 0)
   **/
   public CodePoint(int line, int column) {
     _line = line;
