@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Iterator;
 
 /**
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class CodeGenerator {
 
@@ -62,17 +62,22 @@ public class CodeGenerator {
     errorMessage.append("\" ").append(condition).append("\"");
 
     final StringBuffer code = new StringBuffer();
+    carriageReturn(code);
     code.append("{");
+    carriageReturn(code);
     code.append("if(" + ASSERT_TOOLS_CLASSNAME + ".ENFORCE_ASSERT_CONDITION && ! ");
     code.append(condition);
     code.append(") { ");
+    carriageReturn(code);
     code.append(ASSERT_TOOLS_CLASSNAME + ".assertFailed(new " + ASSERTION_VIOLATION_CLASSNAME + "(");
-    //code.append("\"");
     code.append(errorMessage.toString());
-    //code.append("\"");
+    carriageReturn(code);
     code.append("));");
+    carriageReturn(code);
     code.append(" }");
+    carriageReturn(code);
     code.append("}");
+    carriageReturn(code);
     
     return code.toString();
   }
@@ -129,9 +134,8 @@ public class CodeGenerator {
     code.append("if(!" + ASSERT_TOOLS_CLASSNAME + ".ENFORCE_INVARIANT_CONDITION) { return true; }");
     
     //check for recursive calls
-    code.append("if(!" + ASSERT_TOOLS_CLASSNAME + ".lockMethod(\"");
-    code.append(methodKey);
-    code.append("\")) { return true; }");
+    code.append("final " + ASSERT_TOOLS_CLASSNAME + ".MethodLock jps__methodLock = " + ASSERT_TOOLS_CLASSNAME + ".lockMethod(\"" + methodKey + "\", this);");
+    code.append("if(null == jps__methodLock) { return true; }");
 
     code.append("Object jps__retval = null;");
     code.append("if(" + ASSERT_TOOLS_CLASSNAME + ".ENFORCE_INHERITED_CONDITIONS) {");
@@ -197,9 +201,7 @@ public class CodeGenerator {
     code.append("}");
 
     code.append("if(!((Boolean)jps__retval).booleanValue()) {");
-    code.append(ASSERT_TOOLS_CLASSNAME + ".unlockMethod(\"");
-    code.append(methodKey);
-    code.append("\");");
+    code.append(ASSERT_TOOLS_CLASSNAME + ".unlockMethod(jps__methodLock);");
     code.append("return false;");
     code.append("}");
     code.append("}"); //end if(superMethod != AssertTools.NO_METHOD)
@@ -212,9 +214,7 @@ public class CodeGenerator {
                 
     addConditionChecks(code, assertClass.getInvariants(), false);
 
-    code.append(ASSERT_TOOLS_CLASSNAME + ".unlockMethod(\"");
-    code.append(methodKey);
-    code.append("\");");
+    code.append(ASSERT_TOOLS_CLASSNAME + ".unlockMethod(jps__methodLock);");
 
     code.append("return true;"); //nothing failed, so just return
     code.append("}");
@@ -543,9 +543,14 @@ public class CodeGenerator {
     code.append("if(!" + ASSERT_TOOLS_CLASSNAME + ".ENFORCE_PRE_CONDITION) { return true; }");
     
     //check for recursive calls
-    code.append("if(!" + ASSERT_TOOLS_CLASSNAME + ".lockMethod(\"");
-    code.append(methodKey);
-    code.append("\")) { return true; }");
+    code.append("final " + ASSERT_TOOLS_CLASSNAME + ".MethodLock jps__methodLock = " + ASSERT_TOOLS_CLASSNAME + ".lockMethod(\"" + methodKey + "\", ");
+    if(assertMethod.isStatic()) {
+      code.append("null");
+    } else {
+      code.append("this");
+    }
+    code.append(");");
+    code.append("if(null == jps__methodLock) { return true; }");
     
     code.append("Object jps__retval = null;");
     
@@ -646,9 +651,7 @@ public class CodeGenerator {
       code.append("}");
       //PreConditions are ORed
       code.append("else if(((Boolean)jps__retval).booleanValue()) {");
-      code.append(ASSERT_TOOLS_CLASSNAME + ".unlockMethod(\"");
-      code.append(methodKey);
-      code.append("\");");
+      code.append(ASSERT_TOOLS_CLASSNAME + ".unlockMethod(jps__methodLock);");
       code.append("return true;");
       code.append("}");
       
@@ -664,9 +667,7 @@ public class CodeGenerator {
 
     addConditionChecks(code, assertMethod.getPreConditions(), false);
     
-    code.append(ASSERT_TOOLS_CLASSNAME + ".unlockMethod(\"");
-    code.append(methodKey);
-    code.append("\");");
+    code.append(ASSERT_TOOLS_CLASSNAME + ".unlockMethod(jps__methodLock);");
     
     //nothing failed locally
     code.append("if(null == jps__retval) {"); //didn't call superclass checks, so return true
@@ -765,9 +766,14 @@ public class CodeGenerator {
     code.append("if(!" + ASSERT_TOOLS_CLASSNAME + ".ENFORCE_POST_CONDITION) { return true; }");
     
     //check for recursive calls
-    code.append("if(!" + ASSERT_TOOLS_CLASSNAME + ".lockMethod(\"");
-    code.append(methodKey);
-    code.append("\")) { return true; }");
+    code.append("final " + ASSERT_TOOLS_CLASSNAME + ".MethodLock jps__methodLock = " + ASSERT_TOOLS_CLASSNAME + ".lockMethod(\"" + methodKey + "\", ");
+    if(assertMethod.isStatic()) {
+      code.append("null");
+    } else {
+      code.append("this");
+    }
+    code.append(");");
+    code.append("if(null == jps__methodLock) { return true; }");
     
     if(!assertMethod.isPrivate() && !assertMethod.isConstructor()) {
       //don't bother checking for super method if we're private or a constructor
@@ -892,9 +898,7 @@ public class CodeGenerator {
       code.append("}");
       //PostConditions are ANDed
       code.append("else if(!((Boolean)jps__retval).booleanValue()) {");
-      code.append(ASSERT_TOOLS_CLASSNAME + ".unlockMethod(\"");
-      code.append(methodKey);
-      code.append("\");");
+      code.append(ASSERT_TOOLS_CLASSNAME + ".unlockMethod(jps__methodLock);");
       code.append("return false;");
       code.append("}");
       
@@ -907,9 +911,7 @@ public class CodeGenerator {
     }
     
     addConditionChecks(code, assertMethod.getPostConditions(), true);
-    code.append(ASSERT_TOOLS_CLASSNAME + ".unlockMethod(\"");
-    code.append(methodKey);
-    code.append("\");");
+    code.append(ASSERT_TOOLS_CLASSNAME + ".unlockMethod(jps__methodLock);");
     code.append("return true;"); //nothing failed, just return true
     code.append("}");
     
@@ -1025,5 +1027,14 @@ public class CodeGenerator {
     }
 
     return paramName;
+  }
+
+  /**
+   * Add a carriage return to code if pretty-output is turned on.
+   */
+  private static final void carriageReturn(final StringBuffer code) {
+    if(JonsAssert.getSymtab().getConfiguration().isPrettyOutput()) {
+      code.append(System.getProperty("line.separator"));
+    }
   }
 }

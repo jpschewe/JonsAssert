@@ -44,7 +44,7 @@ import java.util.Iterator;
 /**
  * class of static helper methods for assertions.
  * 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 final public class AssertTools {
 
@@ -93,12 +93,12 @@ final public class AssertTools {
   private AssertTools() {} //no instances
   
   /**
-   * find the superclasses method, this is my version of a superClass method,
+   * Find the superclasses method, this is my version of a superClass method,
    * this means that the method name is __<packageName>_<className>_methodName
-   * where packageName is the package the class is in with the '.'s replaced
-   * with '_' and className is the name of the class.
+   * where packageName is the package the class is in with the characters '.'
+   * and '$' replaced with '_' and className is the name of the class.
    * 
-   * @return the method found, null for no such method.
+   * @return the method found, if no such method can be found
    * 
    * @pre (thisClass != null)
    * @pre (methodName != null)
@@ -120,12 +120,12 @@ final public class AssertTools {
           final String supermname = "jps__" + fullSuperClassName + "_" + methodName;
           superMethod = superClass.getDeclaredMethod(supermname, methodArgs);
         }
-        catch(NoSuchMethodException nsme) {
+        catch(final NoSuchMethodException nsme) {
           // no method, don't bother
           //Try up another level
           superClass = superClass.getSuperclass();
         }
-        catch(SecurityException se) {
+        catch(final SecurityException se) {
           //This is real bad, spit out internal error here
           internalError("Security exception trying to find method " + methodName + ": " + se);
           return null;
@@ -256,33 +256,36 @@ final public class AssertTools {
 
   private static final Set _lockedMethods = new HashSet(20);
   /**
-   * Lock a method.  This is ued at the top of the pre, post and invariant
-   * check methods so that the methods don't get called recursively.  Method
-   * signatures are just stored in a Set, if the signature is in the Set, the
-   * method is locked.
+   * Lock a method.  This is used at the top of the pre, post and invariant
+   * check methods so that the methods don't get called recursively.  
    *
    * @param signature the signature of the method to lock
-   * @return true if the lock succeeded, false if the method is already locked.
+   * @param instance the instance that should be locked.  this or null (for
+   * static methods)
+   * @return the lock if it succeeded, null if it failed
    **/
-  static synchronized public boolean lockMethod(final String signature) {
-    if(_lockedMethods.contains(signature)) {
-      return false;
+  static synchronized public MethodLock lockMethod(final String signature,
+                                                final Object instance) {
+    final Thread thread = Thread.currentThread();
+    final MethodLock lock = new MethodLock(signature, instance, thread);
+    if(_lockedMethods.contains(lock)) {
+      return null;
     } else {
-      _lockedMethods.add(signature);
-      return true;
+      _lockedMethods.add(lock);
+      return lock;
     }
   }
 
   /**
-     Unlock a method.
-
-     @param signature the signature of the method to unlock
-     @return true if the method was locked
-     
-     @see #lockMethod(String)
-  **/
-  static synchronized public boolean unlockMethod(final String signature) {
-    return _lockedMethods.remove(signature);
+   * Unlock a method.
+   * 
+   * @param lock the lock that was recieved from lockMethod()
+   * @return true if the method was locked
+   * 
+   * @see #lockMethod(String, Object)
+   */
+  static synchronized public boolean unlockMethod(final MethodLock lock) {
+    return _lockedMethods.remove(lock);
   }
 
   /**
@@ -547,5 +550,42 @@ final public class AssertTools {
     }
     NO_METHOD = noMethod;
   }
-  
+
+  /**
+   * Used for locking methods.
+   *
+   * @see #lockMethod(String, Object)
+   */
+  public static final class MethodLock {
+    /**
+     * @pre (null != signature)
+     * @pre (null != thread)
+     */
+    public MethodLock(final String signature,
+                      final Object instance,
+                      final Thread thread) {
+      _signature = signature;
+      _instance = instance;
+      _thread = thread;
+    }
+
+    public int hashCode() {
+      return _signature.hashCode();
+    }
+
+    public boolean equals(final Object o) {
+      if(o instanceof MethodLock) {
+        final MethodLock other = (MethodLock)o;
+        return _signature.equals(other._signature)
+          && _thread.equals(other._thread)
+          && (_instance != null ? _instance.equals(other._instance) : _instance == other._instance);
+      } else {
+        return false;
+      }
+    }
+    
+    private final String _signature;
+    private final Object _instance;
+    private final Thread _thread;
+  }
 }

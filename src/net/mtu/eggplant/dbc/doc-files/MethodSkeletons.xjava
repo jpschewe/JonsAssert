@@ -59,8 +59,9 @@ public Object methodFoo(Object param1) {
 transient private java.lang.reflect.Method _jps__<packageName>_<methodName>_check<methodname>PreConditions;
 protected boolean jps__<packageName>_<methodName>_check<methodname>PreConditions(param1, param2, ...) {
   if(!AssertTools.ENFORCE_PRE_CONDITION) { return true; }
-  
-  if(!AssertTools.lockMethod("jps__<packageName>_<methodName>_check<methodname>PreConditions_paramType1_paramType2_...")) { return true; }
+
+  final MethodLock jps__methodLock = AssertTools.lockMethod("jps__<packageName>_<methodName>_check<methodname>PreConditions_paramType1_paramType2_...", this/*null*/);
+  if(null == jps__methodLock) { return true; }
 
   if(AssertTools.ENFORCE_INHERITED_CONDITIONS) {
     Class thisClass;
@@ -108,11 +109,28 @@ protected boolean jps__<packageName>_<methodName>_check<methodname>PreConditions
 
 
     //[jpschewe:20000213.1603CST] FIX do interface pre conditions first and keep track of which interface they're from
+    final Class[] interfaces = thisClass.getInterfaces();
+    for(int i=0; i<interfaces.length; i++) {
+      //find method son super interfaces to call.  This return value needs to
+      //be cached.  Perhaps we should also have a flag that allows us to skip
+      //checking on interfaces all together that is separate from
+      //CHECK_INHERITED_CONDITIONS
 
+      //actually should probably create an instance of ..._AssertClass with
+      //this and then cache those instances.  We should then be able to call
+      //the check_... methods directly without reflection.
+      
+      //This method should look first for the dbc class, then for the
+      //appropriate method on the given interface, if not found continue to
+      //search up each super interface until a method is found and return the
+      //union of all methods.
+      final Method[] methods = AssertTools.findInterfaceMethod(interfaces[i], "check<methodname>PreConditions", methodArgs);
+      //invoke on each method ORing the result
+    }
   
     // OR, as soon as a true is seen, return true;  
     if(((Boolean)retVal).booleanValue()) {
-      AssertTools.unlockMethod("jps__<packageName>_<methodName>_check<methodname>PreConditions_paramType1_paramType2_...");
+      AssertTools.unlockMethod(jps__methodLOck);
       return true;
     }
   }
@@ -122,12 +140,12 @@ protected boolean jps__<packageName>_<methodName>_check<methodname>PreConditions
     AssertionViolation av = new AssertionViolation((<message> != null ? <message> : "") + "\n" + <condition>);
     AssertTools.setCurrentAssertionViolation(av);
 
-    AssertTools.unlockMethod("jps__<packageName>_<methodName>_check<methodname>PreConditions_paramType1_paramType2_...");    
+    AssertTools.unlockMethod(jps__methodLock);
     return false;
   }
   //end for
 
-  AssertTools.unlockMethod("jps__<packageName>_<methodName>_check<methodname>PreConditions_paramType1_paramType2_...");
+  AssertTools.unlockMethod(jps__methodLock);
   return true;
 }
 
@@ -172,7 +190,8 @@ transient private java.lang.reflect.Method _jps__<packageName>_<methodName>_chec
 protected boolean jps__<packageName>_<methodName>_checkInvariant() {
   if(!AssertTools.ENFORCE_INVARIANT_CONDITION) { return true; }
 
-  if(!AssertTools.lockMethod("jps__<packageName>_<methodName>_checkInvariant")) { return true; }
+  final MethodLock jps__methodLock = AssertTools.lockMethod("jps__<packageName>_<methodName>_checkInvariant", this/*null*/);
+  if(null == jps__methodLock) { return true; }
 
   if(AssertTools.ENFORCE_INHERITED_CONDITIONS) {
     Class thisClass;
@@ -219,7 +238,7 @@ protected boolean jps__<packageName>_<methodName>_checkInvariant() {
     }
 
     if(!((Boolean)retVal).booleanValue()) {
-      AssertTools.unlockMethod("jps__<packageName>_<methodName>_checkInvariant");
+      AssertTools.unlockMethod(jps__methodLock);
       return false;
     }
   }
@@ -232,11 +251,11 @@ protected boolean jps__<packageName>_<methodName>_checkInvariant() {
     AssertionViolation av = new AssertionViolation((<message> != null ? <message> : "") + "\n" + <condition>);
     AssertTools.setCurrentAssertionViolation(av);
 
-    AssertTools.unlockMethod("jps__<packageName>_<methodName>_checkInvariant");    
+    AssertTools.unlockMethod(jps__methodLock);
     return false;
   }
 
-  AssertTools.unlockMethod("jps__<packageName>_<methodName>_checkInvariant");
+  AssertTools.unlockMethod(jps__methodLock);
   return true;
 }
 
@@ -317,12 +336,19 @@ public interface Interface {
   static final public class JPS__<packageName>_<className>_AssertClass implements Interface {
     private Class[] _interfaceCache;
     private Interface _delegate;
-    public jps__<packageName>_<className>_AssertClass(final Interface delegate) {
+    public JPS__<packageName>_<className>_AssertClass(final Interface delegate) {
       _delegate = delegate;
       //Do some caching
       final Class[] interfaces = Interface.class.getInterfaces();
       _interfaceCache = new Class[interfaces.length];
       for(int i=0; i<interfaces.length; i++) {
+        //FIX do a depth first search of each interface heirarchy and cache
+        //the class object, if found.  This may return multiple interfaces in
+        //the case where the direct superinterface doesn't have DBC, but its
+        //superinterface does.
+        final Class[] dbcInterfaces = AssertTools.findAssertClassInterfaces(interfaces[i]);
+        //FIX add each interface to the cache
+          
         final String interfaceName = "JPS_" +
           StringUtils.searchAndReplace(interfaces[i].getName(), ".", "_") + "_AssertClass";
         
@@ -343,45 +369,36 @@ public interface Interface {
     }
 
     public boolean preCond(int i) {
-      //cna be standard calls
-      if(!jps__checkInvariant()) {
-        AssertTools.invariantFailed(AssertTools.getCurrentAssertionViolation());
-      }
-      if(!jps__checkpreCondPreConditions(param1, param2, ...)) {
-        AssertTools.preConditionFailed(AssertTools.getCurrentAssertionViolation());
-      }
-      
-      final boolean jps__retVal = _delegate.preCond(i);
-
-      //can be standard calls 
-      if(!jps__checkInvariant()) {
-        AssertTools.invariantFailed(AssertTools.getCurrentAssertionViolation());
-      }
-      if(!jps__checkpreCondPostConditions(jps__retVal, i)) {
-        AssertTools.postConditionFailed(AssertTools.getCurrentAssertionViolation());
-      }
-      return jps__retVal;
-      
+      //just delegate, condition checking will be done by class that really
+      //implements the interface
+      return _delegate.preCond(i);
     }
 
     //this can't be standard because of interface checking
     public boolean jps__checkpreCondPreConditions(int i) {
+      if(!AssertTools.ENFORCE_PRE_CONDITION) { return true; }
+
+      final MethodLock methodLock = AssertTools.lockMethod("jps__<packageName>_<methodName>_check<methodname>PreConditions_paramType1_paramType2_...", this/*null*/);
+      if(null == methodLock) { return true; }
+
+      if(AssertTools.ENFORCE_INHERITED_CONDITIONS) {
+      
+        //FIX Look in interface cache to find which interfaces to search in and
+        //then cache the methods found.
+
+        //FIX invoke cached methods and do appropriate boolean logic on return
+        //values
+      }
+      
       if(! (foo(i) > 5) ) {
         return false;
       }
-      //Need to check super interfaces
-      final Class interfaces = Interface.class.getInterfaces();
-      for(int i=0; i<interfaces.length; i++) {
-        if(AssertTools.classForName()) {
-          
-        } else {
-          _interfaceCache[i] = ;
-        }
-      }
+    
       return true;
     }
     
     public boolean jps__checkpreCondPostConditions(boolean jps__retVal, int i) {
+      //do same looking up the interface heirarchy
       return true;
     }
 
@@ -390,14 +407,17 @@ public interface Interface {
     }
 
     public boolean jps__checkfooPreConditions(int i) {
+      //just like preCond without first check statement
       return true;
     }
 
     public boolean jps_checkfooPostConditions(int i) {
+      //just like preCond without first check statement
       return true;
     }
 
     public boolean jps__checkInvariant() {
+      //need to look up interface heirarchy
       return true;
     }
   }

@@ -4,10 +4,11 @@
 <project name="assert" default="compile" basedir=".">
 
   <property file="${user.home}/.ant.properties" />
-  <property name="temp.dir"  value="${basedir}/tmp" />
+  <property name="temp.dir"  value="tmp" />
   
   <property name="app.name"   value="JonsAssert-0.5" />
   <property name="instrument.dir"  value="instrumented" />
+  <property name="build.dir"  value="build" />
 
   <property name="cvs.root" value="disk:/export/CVS-Repository" />
   <property name="cvs.module" value="assert" />
@@ -89,9 +90,10 @@
     <antlr target="${basedir}/src/net/mtu/eggplant/dbc/java14.g" />
     <antlr target="${basedir}/src/net/mtu/eggplant/dbc/assert.g" />
     -->
-    
+
+    <mkdir dir="${basedir}/${build.dir}" />
     <javac srcdir="${basedir}/src"
-	   destdir="${basedir}/src"
+	   destdir="${build.dir}"
 	   debug="true"
 	   deprecation="true">
       <classpath>
@@ -103,23 +105,19 @@
     </javac>
   </target>
 
-  <target name="jar" depends="compile">
-    <jar jarfile="${app.name}.jar"
-	 basedir="${basedir}/src" includes="**" />
-  </target>
-
   <target name="test" depends="compile">
     <echo message="Look at the output to determine if the tests passed, the build will always succeed" />
     <!-- first instrument the test files -->
-    <java fork="no"
+    <java fork="yes"
 	  classname="net.mtu.eggplant.dbc.JonsAssert"
 	  taskname="DBC"
 	  failonerror="false"> <!-- so we can see what all needs fixing -->
       <arg value="-d ${basedir}/${instrument.dir}" />
       <arg value="-f" />
+      <arg value="--pretty-output" />
       <arg value="${basedir}/src/net/mtu/eggplant/dbc/testcases" />
       <classpath>
-        <pathelement location="${basedir}/src"/>
+        <pathelement location="${basedir}/${build.dir}"/>
         <path refid="base.classpath"/>
       </classpath>
     </java>
@@ -132,24 +130,32 @@
       <arg value="-source 1.4" />
       <arg value="-d ${basedir}/${instrument.dir}" />
       <arg value="-f" />
+      <arg value="--pretty-output" />
       <arg value="${basedir}/src/net/mtu/eggplant/dbc/test14" />
       <classpath>
-        <pathelement location="${basedir}/src"/>
+        <pathelement location="${basedir}/${build.dir}"/>
         <path refid="base.classpath"/>
       </classpath>
     </java>
 
     <!-- compile newly instrumented files -->
     <javac srcdir="${basedir}/${instrument.dir}"
-	   destdir="${basedir}/src"
+	   destdir="${basedir}/${build.dir}"
 	   debug="true"
-	   deprecation="true">
+	   deprecation="true"
+           source="1.4"
+           >
       <classpath>
+        <pathelement location="${basedir}/${build.dir}"/>
         <path refid="base.classpath"/>
       </classpath>
       <include name="**/*.java" />
       <!-- don't try and compile the 1.4 stuff -->
-      <exclude name="net/mtu/eggplant/dbc/test/Test14Compatibility.java" />
+      <!--<exclude name="net/mtu/eggplant/dbc/test/Test14Compatibility.java" />-->
+
+      <!-- JPS:debug -->
+      <exclude name="net/mtu/eggplant/dbc/test/TestAssert.java" />
+
       <!--<include name="DefaultPackage.java" />
       <include name="net/mtu/eggplant/dbc/test/**/*.java" />-->
     </javac>
@@ -160,7 +166,7 @@
       <sysproperty key="ASSERT_BEHAVIOR" value="EXCEPTION" />
       <arg value="net.mtu.eggplant.dbc.test.TestAssert"/>
       <classpath>
-        <pathelement location="${basedir}/src"/>
+        <pathelement location="${basedir}/${build.dir}"/>
         <path refid="base.classpath"/>
       </classpath>
     </java>
@@ -171,7 +177,7 @@
       <sysproperty key="ENFORCE_INHERITED_CONDITIONS" value="FALSE" />
       <arg value="net.mtu.eggplant.dbc.test.TestEnforceInherited"/>
       <classpath>
-        <pathelement location="${basedir}/src"/>
+        <pathelement location="${basedir}/${build.dir}"/>
         <path refid="base.classpath"/>
       </classpath>
     </java>
@@ -211,7 +217,7 @@
     </java>
 
     <javac srcdir="${instrument.dir}"
-	   destdir="${basedir}/src"
+	   destdir="${basedir}/${build.dir}"
 	   debug="true"
 	   deprecation="true">
       <classpath>
@@ -223,9 +229,10 @@
   </target>
 
   <target name="clean">
+    <delete dir="${basedir}/${build.dir}" />
+    <delete dir="${basedir}/${instrument.dir}" />
     <delete>
-      <fileset dir="${basedir}/src">
-  	  <include name="**/*.class" />
+      <fileset dir="${basedir}/src" >
   	  <include name="net/mtu/eggplant/dbc/AssertLexer.*" />
   	  <include name="net/mtu/eggplant/dbc/AssertLexerTokenTypes.*" />
   	  <include name="net/mtu/eggplant/dbc/JavaLexer.*" />
@@ -255,7 +262,7 @@
   <property name="active.html.dir" value="/home/public_html/" />
 
   <target name="init_javadoc">
-    <mkdir dir="${temp.dir}" />
+    <mkdir dir="${basedir}/${temp.dir}" />
   </target>
   
   
@@ -264,12 +271,12 @@
     <!-- get the source out of cvs -->
     <cvs cvsRoot="/home/CVS-Repository"
 	 package="assert"
-	 dest="${temp.dir}"
+	 dest="${basedir}/${temp.dir}"
 	 tag="JonsAssert-0_2" />
     <!-- run javadoc on the source -->
     <mkdir dir="${mtu.net.offline}/JonsAssert/0.2/api" />
     <javadoc packagenames="net.mtu.eggplant.*"
-	     sourcepath="${temp.dir}/assert/src"
+	     sourcepath="${basedir}/${temp.dir}/assert/src"
 	     use="true"
 	     splitindex="true"
 	     version="true"
@@ -279,11 +286,11 @@
 	      path="${doclet.path}">
       </doclet>
       <classpath>
-	<pathelement location="${temp.dir}/assert/src/" />
-	<pathelement location="${temp.dir}/assert/lib/junit.jar" />
-	<pathelement location="${temp.dir}/assert/lib/JonsInfra-0.1.jar" />
-	<pathelement location="${temp.dir}/assert/lib/antlr.jar" />
-	<pathelement location="${temp.dir}/assert/lib/java-getopt-1.0.7.jar" />
+	<pathelement location="${basedir}/${temp.dir}/assert/src/" />
+	<pathelement location="${basedir}/${temp.dir}/assert/lib/junit.jar" />
+	<pathelement location="${basedir}/${temp.dir}/assert/lib/JonsInfra-0.1.jar" />
+	<pathelement location="${basedir}/${temp.dir}/assert/lib/antlr.jar" />
+	<pathelement location="${basedir}/${temp.dir}/assert/lib/java-getopt-1.0.7.jar" />
       </classpath>
       <!-- core java -->
       <link href="http://java.sun.com/j2se/1.3/docs/api/" />
@@ -298,7 +305,7 @@
     </javadoc>
     
     <!-- delete the temp files -->
-    <delete dir="${temp.dir}" />
+    <delete dir="${basedir}/${temp.dir}" />
   </target>
   
   <!-- 0.3 javadoc -->
@@ -306,12 +313,12 @@
     <!-- get the source out of cvs -->
     <cvs cvsRoot="/home/CVS-Repository"
 	 package="assert"
-	 dest="${temp.dir}"
+	 dest="${basedir}/${temp.dir}"
 	 tag="JonsAssert-0_3" />
     <!-- run javadoc on the source -->
     <mkdir dir="${mtu.net.offline}/JonsAssert/0.3/api" />
     <javadoc packagenames="net.mtu.eggplant.*"
-	     sourcepath="${temp.dir}/assert/src"
+	     sourcepath="$${basedir}/{temp.dir}/assert/src"
 	     use="true"
 	     splitindex="true"
 	     version="true"
@@ -321,11 +328,11 @@
 	      path="${doclet.path}">
       </doclet>
       <classpath>
-	<pathelement location="${temp.dir}/assert/src/" />
-	<pathelement location="${temp.dir}/assert/lib/junit-3.6.jar" />
-	<pathelement location="${temp.dir}/assert/lib/JonsInfra-0.1.jar" />
-	<pathelement location="${temp.dir}/assert/lib/antlr.jar" />
-	<pathelement location="${temp.dir}/assert/lib/werken.opt.jar" />
+	<pathelement location="${basedir}/${temp.dir}/assert/src/" />
+	<pathelement location="${basedir}/${temp.dir}/assert/lib/junit-3.6.jar" />
+	<pathelement location="${basedir}/${temp.dir}/assert/lib/JonsInfra-0.1.jar" />
+	<pathelement location="${basedir}/${temp.dir}/assert/lib/antlr.jar" />
+	<pathelement location="${basedir}/${temp.dir}/assert/lib/werken.opt.jar" />
       </classpath>
       <!-- core java -->
       <link href="http://java.sun.com/j2se/1.3/docs/api/" />
@@ -340,7 +347,7 @@
     </javadoc>
     
     <!-- delete the temp files -->
-    <delete dir="${temp.dir}" />
+    <delete dir="${basedir}/${temp.dir}" />
   </target>
 
   <!-- 0.5 javadoc -->
@@ -348,12 +355,12 @@
     <!-- get the source out of cvs -->
     <cvs cvsRoot="/home/CVS-Repository"
 	 package="assert"
-	 dest="${temp.dir}"
+	 dest="${basedir}/${temp.dir}"
 	 tag="JonsAssert-0_5" />
     <!-- run javadoc on the source -->
     <mkdir dir="${mtu.net.offline}/JonsAssert/api" />
     <javadoc packagenames="net.mtu.eggplant.dbc"
-	     sourcepath="${temp.dir}/assert/src"
+	     sourcepath="${basedir}/${temp.dir}/assert/src"
 	     use="true"
 	     splitindex="true"
 	     version="true"
@@ -363,11 +370,11 @@
 	      path="${doclet.path}">
       </doclet>
       <classpath>
-	<pathelement location="${temp.dir}/assert/src/" />
-	<pathelement location="${temp.dir}/assert/lib/junit-3.7.jar" />
-	<pathelement location="${temp.dir}/assert/lib/JonsInfra-0.1.jar" />
-	<pathelement location="${temp.dir}/assert/lib/antlr.jar" />
-	<pathelement location="${temp.dir}/assert/lib/werken.opt.jar" />
+	<pathelement location="${basedir}/${temp.dir}/assert/src/" />
+	<pathelement location="${basedir}/${temp.dir}/assert/lib/junit-3.7.jar" />
+	<pathelement location="${basedir}/${temp.dir}/assert/lib/JonsInfra-0.1.jar" />
+	<pathelement location="${basedir}/${temp.dir}/assert/lib/antlr.jar" />
+	<pathelement location="${basedir}/${temp.dir}/assert/lib/werken.opt.jar" />
       </classpath>
       <!-- core java -->
       <link href="http://java.sun.com/j2se/1.3/docs/api/" />
@@ -382,27 +389,27 @@
     </javadoc>
     
     <!-- delete the temp files -->
-    <delete dir="${temp.dir}" />
+    <delete dir="${basedir}/${temp.dir}" />
   </target>
 
   <!-- do a nightly build to my fileserver -->
   <target name="nightly.javadoc">
-    <mkdir dir="${temp.dir}" />    
+    <mkdir dir="${basedir}/${temp.dir}" />    
     <!-- get the source out of cvs -->
     <cvs cvsRoot="${cvs.root}"
          package="${cvs.module}"
-         dest="${temp.dir}"
+         dest="${basedir}/${temp.dir}"
          quiet="true" />
 
     <!-- build the lexers -->
     <antcall target="antlrTasks">
-      <param name="basedir" value="${temp.dir}/assert" />
+      <param name="basedir" value="${basedir}/${temp.dir}/assert" />
     </antcall>
       
     <!-- run javadoc on the source -->
     <mkdir dir="${nightly.html.dir}/JonsAssert" />
     <javadoc packagenames="net.mtu.eggplant.*"
-             sourcepath="${temp.dir}/assert/src"
+             sourcepath="${basedir}/${temp.dir}/assert/src"
              use="true"
              splitindex="true"
              version="true"
@@ -423,7 +430,7 @@
     </javadoc>
     
     <!-- delete the temp files -->
-    <delete dir="${temp.dir}" />
+    <delete dir="${basedir}/${temp.dir}" />
   </target>
   
 </project>

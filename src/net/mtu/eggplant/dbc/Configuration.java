@@ -34,7 +34,7 @@ import java.util.StringTokenizer;
 /**
  * Holds all the option values.
  * 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class Configuration {
 
@@ -211,5 +211,17 @@ public class Configuration {
     public String getName() { return _name; }
     private final String _name;
   }
+
+  private boolean _prettyOutput = false;
+  /**
+   * If carriage returns should be output in generated code.  Defaults to
+   * false.
+   */
+  public final boolean isPrettyOutput() { return _prettyOutput; }
+
+  /**
+   * @see #isPrettyOutput()
+   */
+  public final void setPrettyOutput(final boolean b) { _prettyOutput = b; }
   
 }

@@ -62,6 +62,7 @@ import net.mtu.eggplant.util.algorithms.Applying;
  *   <li>-s, --sourceExtension &lt;ext&gt; the extension on the source files (default: java)</li>
  *   <li>-i, --instrumentedExtension &lt;ext&gt; the extension on the source files (default: java)</li>
  *   <li>--source &lt;release&gt; Provide source compatibility with specified release (just like javac</li>
+ *   <li>--pretty-output put in carriage returns in the generated code.  This makes the output easier to read, but screws up line numbers</li>
  *   <li>files all other arguments are taken to be files or directories to be parsed</li>
  * </ul></p>
  *
@@ -69,7 +70,7 @@ import net.mtu.eggplant.util.algorithms.Applying;
  * {@link #instrument(Configuration, Collection) instrument} with a Configuration
  * object and a Collection of files.</p>
  *
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class JonsAssert {
 
@@ -77,7 +78,6 @@ public class JonsAssert {
   static /* package */ JavaLexer javaLexer;
   static /* package */ AssertLexer assertLexer;
   /** the symbol table */
-  static private Symtab _symtab;
   static private boolean _debugLexer = false;
 
   /**
@@ -98,6 +98,7 @@ public class JonsAssert {
       options.addOption('@', "source", true, "<release> Provide source compatibility with specified release (just like javac");
       options.addOption('~', "debugLexer", false, "");
       options.addOption('!', "debug", false, "");
+      options.addOption('#', "pretty-output", false, "put in carriage returns in the generated code.  This makes the output easier to read, but screws up line numbers");
     } catch(final DuplicateOptionException doe) {
       System.err.println("Someone specified duplicate options in the code!");
       //System.exit(1);
@@ -140,6 +141,9 @@ public class JonsAssert {
           usage(options);
           return;
         }
+      }
+      if(cl.optIsSet('#')) {
+        config.setPrettyOutput(true);
       }
 
       final Iterator iter = cl.getArgs().iterator();
@@ -347,7 +351,11 @@ public class JonsAssert {
     }
   }
 
-  final static public Symtab getSymtab() {
+  private static Symtab _symtab;
+  /**
+   * Get the symbol table.
+   */
+  public static final Symtab getSymtab() {
     return _symtab;
   }
 

@@ -1,3 +1,20 @@
+2003-05-08  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/net/mtu/eggplant/dbc/doc-files/MethodSkeletons.xjava:
+	Working on how to instrument interfaces.
+
+	* src/net/mtu/eggplant/dbc/JonsAssert.java (main): Implemented
+	pretty-output option.
+
+	* src/net/mtu/eggplant/dbc/AssertTools.java (lockMethod): Made
+	method locking also pay attention to the instance of the object
+	and the current thread, so that recursive calls are only avoided
+	within the same instance and thread. 
+
+	* src/net/mtu/eggplant/dbc/CodeGenerator.java (generateAssertion):
+	Started adding pretty output option where carriage returns are
+	output in the instrumented code. 
+
 2002-06-02  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/net/mtu/eggplant/dbc/JonsAssert.java (main): Now check to
