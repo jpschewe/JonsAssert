@@ -467,7 +467,7 @@ classDefinition
     implementsClause
     // now parse the body of the class
     classBlock[id.getText(), false]
-    //[jpschewe:19991230.2312CST] FIX generate code to check invariants here    
+    //[jpschewe:19991230.2312CST] FIX generate method to check invariants here    
   ;
 
 

@@ -180,5 +180,33 @@ final public class AssertTools {
     throw new RuntimeException("You have found a bug!  Please see the README for instructions on reporting bugs.\n" + message);
   }
 
-  
+
+  /**
+     Set the extensions to be used for files.
+
+     @param sourceExtension the extension on the source files, defaults to 'java'
+     @param instrumentedExtension the extension on the instrumented files, defalts to 'ijava'
+  **/
+  static public void setExtensions(final String sourceExtension,
+                                   final String instrumentedExtension) {
+    _sourceExtension = sourceExtension;
+    _instrumentedExtension = instrumentedExtension;
+  }
+
+  /**
+     @return the extension for the source files
+  **/
+  static public String getSourceExtension() {
+    return _sourceExtension;
+  }
+
+  /**
+     @return the extension for the instrumented files
+  **/
+  static public String getInstrumentedExtension() {
+    return _instrumentedExtension;
+  }
+
+  static private String _sourceExtension = "java";
+  static private String _instrumentedExtension = "ijava";
 }

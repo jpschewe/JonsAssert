@@ -13,6 +13,8 @@ import antlr.Token;
 
 import java.util.Vector;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.Iterator;
 
 public class CodeGenerator {
 
@@ -129,33 +131,11 @@ public class CodeGenerator {
     code.append("return false;\n");
     code.append("}\n");
   
-
     //[jpschewe:20000116.1749CST] FIX still need to add to this to do interface
     //invariants first and keep track of which interface they're from
-  
-    Enumeration iter = assertClass.getInvariants().elements();
-    while(iter.hasMoreElements()) {
-      AssertToken token = (AssertToken)iter.nextElement();
-      String condition = token.getCondition();
-      String message = token.getMessage();
-      code.append("if(!");
-      code.append(condition);
-      code.append(") {\n");
-      String errorMessage = "";
-      if(message != null) {
-        errorMessage = message + " ";
-      }
-      errorMessage += "+ \"" + condition + "\"";
-    
-      code.append("org.tcfreenet.schewe.Assert.AssertionViolation av = new org.tcfreenet.schewe.Assert.AssertionViolation(");
-      code.append(errorMessage);
-      code.append(");\n");
-      code.append("org.tcfreenet.schewe.Assert.AssertTools.setCurrentAssertionViolation(av);\n");
-    
-      code.append("return false;\n");
-      code.append("}\n");
-    }
-    
+
+    addConditionChecks(code, assertClass.getInvariants());
+
     code.append("return true;\n");
     code.append("}\n");
 
@@ -173,7 +153,40 @@ public class CodeGenerator {
   **/
   static public String generatePreConditionCall(final AssertMethod assertMethod) {
     StringBuffer code = new StringBuffer();
+    StringBuffer params = new StringBuffer();
     String mclassName = assertMethod.getContainingClass().getFullName().replace('.', '_');
+    String dummyClassName = assertMethod.getContainingClass().createDummyConstructorClassName();
+    boolean first = true;
+    Enumeration paramIter = assertMethod.getParams().elements();
+    while(paramIter.hasMoreElements()) {
+      if(! first) {
+        params.append(", ");
+        first = false;
+      }
+      StringPair sp = (StringPair)paramIter.nextElement();
+      String paramName = sp.getStringTwo();
+      params.append(paramName);
+    }
+    
+    if(assertMethod.isConstructor()) {
+      // add extra class call
+      code.append("this(");
+      code.append(params);
+      code.append(", new ");
+      code.append(dummyClassName);
+      code.append("(");
+      code.append(params);
+      code.append("));\n");
+      code.append("}\n");
+      code.append("static private class ");
+      code.append(dummyClassName);
+      code.append(" {\n");
+      code.append("public ");
+      code.append(dummyClassName);
+      code.append("(");
+      code.append(params);
+      code.append(") {\n");
+    }
     
     code.append("if(!__");
     code.append(mclassName);
@@ -181,21 +194,22 @@ public class CodeGenerator {
     code.append(assertMethod.getName());
     code.append("PreConditions(");
 
-    boolean first = true;
-    Enumeration paramIter = assertMethod.getParams().elements();
-    while(paramIter.hasMoreElements()) {
-      StringPair sp = (StringPair)paramIter.nextElement();
-      String paramName = sp.getStringTwo();
-      if(! first) {
-        code.append(",");
-        first = false;
-      }
-      code.append(paramName);
-    }
-    code.append(")) {");
-    code.append("org.tcfreenet.schewe.Assert.AssertTools.preConditionFailed(org.tcfreenet.schewe.Assert.AssertTools.getCurrentAssertionViolation());");
-    code.append("}");
+    code.append(params);
+    code.append(")) {\n");
+    code.append("org.tcfreenet.schewe.Assert.AssertTools.preConditionFailed(org.tcfreenet.schewe.Assert.AssertTools.getCurrentAssertionViolation());\n");
+    code.append("}\n");
 
+    if(assertMethod.isConstructor()) {
+      code.append("}\n");
+      code.append("}\n");
+      code.append("private ");
+      code.append(assertMethod.getName());
+      code.append("(");
+      code.append(params);
+      code.append(", ");
+      code.append(dummyClassName);
+      code.append(" ad) {\n");
+    }
 
     return code.toString();
   }
@@ -268,7 +282,7 @@ public class CodeGenerator {
       StringPair sp = (StringPair)paramIter.nextElement();
       String paramName = sp.getStringTwo();
       if(! first) {
-        code.append(",");
+        code.append(", ");
         first = false;
       }
       code.append("__old");
@@ -288,66 +302,197 @@ public class CodeGenerator {
     return code.toString();
   }
 
-//
-//    idea for preconditions on constructor
-//    stuff to add after open { for constructor:
-
-    //start example
-//   /**
-//      @pre (i > 0)
-//      @pre (checkValue(i))
-//   **/
-//   public Test (int i) {
-//     this(i, new AssertDummy0(i));
-//   }
-//   static private class AssertDummy0 {
-//     public AssertDummy0(int i) {
-//       __checkConstructorPreConditions(i);
-//     }
-//   }
-//     static /*package*/ void __checkConstructorPreConditions(int i) {
-//       System.out.println("i > 0 " + (i > 0));
-//       System.out.println("checkValue(i) " + checkValue(i));
-//     }
-    
-//   private Test(int i, AssertDummy0 ad) {
-//     System.out.println("in constructor " + i);
-//   }
-//   //end example
-  
-//     String params; // grabbed from parser tokens
-//     long # = 0;
-//     foreach constructor (constructors) {
-//        Vector preconditions = constructor.getPreConditions();
-       
-//         this(params, new AssertDummy#( (cond0), "mesg0", (cond1), "mesg1", ...));
-//       }
-//       static private class AssertDummy# {
-//         public AssertDummy#(boolean cond0, String mesg0, boolean cond1, String mesg1, ...) {
-//           // check against params here and do regular fail stuff
-//         }
-//       }
-//       private constructorName(params, AssertDummy#) {
-      
-//       CodeFragment codeFrag = new CodeFragment(constructor.getEntrance().line, constructor.getEntrance().column, code, AssertType.PRECONDITION);
-//       symtab.associateCodeWithCurrentFile(codeFrag);
-//       #++;
-//     }
-
   /**
      @return the code neccessary to implement the pre conditions on this method
   **/
   static public String generatePreConditionMethod(final AssertMethod assertMethod) {
-    //[jpschewe:20000206.2033CST] FIX
-    return null;
+    String className = assertMethod.getContainingClass().getFullName();
+    String mclassName = className.replace('.', '_');
+    StringBuffer code = new StringBuffer();
+
+    if(assertMethod.isStatic() || assertMethod.isConstructor()) {
+      code.append("static ");
+    }
+    code.append("protected boolean __");
+    code.append(mclassName);
+    code.append("_check");
+    code.append(assertMethod.getName());
+    code.append("PreConditions(");
+    boolean first = true;
+    Iterator paramIter = assertMethod.getParams().iterator();
+    while(paramIter.hasNext()) {
+      if(! first) {
+        code.append(",");
+        first = false;
+      }
+      StringPair sp = (StringPair)paramIter.next();
+      code.append(sp.getStringOne());
+      code.append(' ');
+      code.append(sp.getStringTwo());
+    }
+    code.append(") {\n");
+    code.append("Class thisClass;\n");
+    code.append("try {\n");
+    code.append("String className = \"");
+    code.append(className);
+    code.append("\";\n");
+    code.append("thisClass = Class.forName(className);\n");
+    code.append("}\n");
+    code.append("catch(ClassNotFoundException cnfe) {\n");
+    code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"Got error getting the class object for class \" + className + \" \" + cnfe);\n");
+    code.append("}\n");
+    
+
+    //[jpschewe:20000213.1552CST] need method parameters here, just the class objects, use getClassObjectForClass
+    code.append("Class[] methodArgs = {");
+    first = true;
+    paramIter = assertMethod.getParams().iterator();
+    while(paramIter.hasNext()) {
+      if(! first) {
+        code.append(", ");
+        first = false;
+      }
+      StringPair sp = (StringPair)paramIter.next();
+      code.append(getClassObjectForClass(sp.getStringOne()));
+    }
+    code.append("};\n");
+                
+    code.append("Method superMethod = org.tcfreenet.schewe.Assert.AssertTools.findSuperMethod(thisClass, \"check");
+    code.append(assertMethod.getName());
+    code.append("PreConditions\", methodArgs);\n");
+
+    code.append("if(superMethod != null) {\n");
+    code.append("Object[] args = {");
+    //[jpschewe:20000213.1552CST] need parameters here, just the parameter names
+    first = true;
+    paramIter = assertMethod.getParams().iterator();
+    while(paramIter.hasNext()) {
+      if(! first) {
+        code.append(", ");
+        first = false;
+      }
+      StringPair sp = (StringPair)paramIter.next();
+      code.append(sp.getStringTwo());
+    }    
+    code.append("};\n");
+    code.append("try {\n");
+    code.append("retVal = superMethod.invoke(");
+    if(assertMethod.isStatic() || assertMethod.isConstructor()) {
+      code.append("null");
+    }
+    else {
+      code.append("this");
+    }
+    code.append(", args);\n");
+    code.append("}\n");
+    code.append("catch(IllegalAccessException iae) {\n");
+    code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"Not enough access executing superClass check");
+    code.append(assertMethod.getName());
+    code.append("PreConditions: \" + iae.getMessage());\n");
+    code.append("}\n");
+    code.append("catch(IllegalArgumentException iae) {\n");
+    code.append("org.tcfreenet.schewe.Assert.AssertTools.internalError(\"IllegalArgument executing superClass check");
+    code.append(assertMethod.getName());
+    code.append("PreConditions: \" + iae.getMessage());\n");
+    code.append("}\n");
+    code.append("catch(java.lang.reflect.InvocationTargetException ite) {\n");
+    code.append("ite.getTargetException().printStackTrace();\n");
+    code.append("}\n");
+    code.append("}\n");
+
+    
+    //[jpschewe:20000116.1749CST] FIX still need to add to this to do interface
+    //preconditions first and keep track of which interface they're from
+
+    addConditionChecks(code, assertMethod.getPreConditions());
+
+    code.append("return true;\n");
+    code.append("}\n");
+    
+    return code.toString();
   }
 
   /**
      @return the code neccessary to implement the post conditions on this method
   **/
   static public String generatePostConditionMethod(final AssertMethod assertMethod) {
-    //[jpschewe:20000206.2034CST] FIX
-    return null;
+    StringBuffer code = new StringBuffer();
+    //[jpschewe:20000206.2034CST] FIX add code
+
+    //[jpschewe:20000116.1749CST] FIX still need to add to this to do interface
+    //post conditions first and keep track of which interface they're from
+
+    addConditionChecks(code, assertMethod.getPostConditions());
+
+    code.append("return true;\n");
+    code.append("}\n");
+    
+    return code.toString();
   }
-  
+
+  /**
+     Append to code code to check for the assert conditions in tokens.
+  **/
+  static private void addConditionChecks(final StringBuffer code,
+                                         final List tokens) {
+    Iterator iter = tokens.iterator();
+    while(iter.hasNext()) {
+      AssertToken token = (AssertToken)iter.next();
+      String condition = token.getCondition();
+      String message = token.getMessage();
+      code.append("if(!");
+      code.append(condition);
+      code.append(") {\n");
+      String errorMessage = "";
+      if(message != null) {
+        errorMessage = message + " ";
+      }
+      errorMessage += "+ \"" + condition + "\"";
+    
+      code.append("org.tcfreenet.schewe.Assert.AssertionViolation av = new org.tcfreenet.schewe.Assert.AssertionViolation(");
+      code.append(errorMessage);
+      code.append(");\n");
+      code.append("org.tcfreenet.schewe.Assert.AssertTools.setCurrentAssertionViolation(av);\n");
+    
+      code.append("return false;\n");
+      code.append("}\n");
+    }
+
+  }
+
+  /**
+     Convert a class name to a class object call.  Normally this is just
+     appending '.class', however primatives need to be converted to the
+     appropriate wrapper class and then append '.TYPE'.
+
+     @pre (cl != null)
+   **/
+  static public String getClassObjectForClass(final String cl) {
+    if(cl.equals("int")) {
+      return "Integer.TYPE";
+    }
+    else if(cl.equals("long")) {
+      return "Long.TYPE";
+    }
+    else if(cl.equals("float")) {
+      return "Float.TYPE";
+    }
+    else if(cl.equals("double")) {
+      return "Double.TYPE";
+    }
+    else if(cl.equals("boolean")) {
+      return "Boolean.TYPE";
+    }
+    else if(cl.equals("byte")) {
+      return "Byte.TYPE";
+    }
+    else if(cl.equals("char")) {
+      return "Character.TYPE";
+    }
+    else if(cl.equals("short")) {
+      return "Short.TYPE";
+    }
+
+    return cl + ".class";
+  }
 }

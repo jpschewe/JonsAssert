@@ -17,9 +17,8 @@ here correctly.
 Preconditions on constructors are limited by the fact that they may not
 reference reference instance methods or non-static inner classes.
 
-- Methods called by assertions cannot throw exceptions.  It's rather difficult
+Methods called by assertions cannot throw exceptions.  It's rather difficult
 to find what's actually being called and what exceptions it can throw.
-
 
 BUGS:
 - Implementing an interface that is defined in the same file won't work right
@@ -59,5 +58,4 @@ variables, even though design by contract doesn't allow this.
 
 
 TODO:
-- Correctly call super class assertions.
 - Get assertions off of implemented interfaces.

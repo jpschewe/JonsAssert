@@ -24,7 +24,7 @@ public class AssertMethod implements Named {
      @param name the name of this method, will match the name of the class if a constructor
      @param preConditions the preconditions for this method
      @param postConditions the postconditions for this method
-     @param params Vector of StringPairs, (class, parameter name)
+     @param params Vector of {@link StringPair StringPairs, (class, parameter name)}
      @param retType the return type of this method, null signals this method is a constructor
      @param isStatic true if this method is static
      @param isPrivate true if this method is private
@@ -127,7 +127,7 @@ public class AssertMethod implements Named {
   /**
      @return list of the exits of this class, all return statements and the
      closing brace if this is a void method.  Don't modify this Vector.
-     Vector of CodePoints(start of return, semicolon)
+     Vector of {@link CodePointPair CodePointPairs(start of return, semicolon)}
   **/
   public Vector getExits() {
     return _exits;
@@ -136,7 +136,7 @@ public class AssertMethod implements Named {
   private Vector /*StringPair*/ _params;
 
   /**
-     @return Vector of StringPairs, (class, parameter name), don't modify this
+     @return Vector of {@link StringPair StringPairs, (class, parameter name)}, don't modify this
      Vector
   **/
   public Vector getParams() {

@@ -262,7 +262,7 @@ public class Symtab {
         LineNumberReader reader = new LineNumberReader(new FileReader(ifile.getFile()));
         String filename = ifile.getFile().getName();
         int indexOfDot = filename.lastIndexOf('.');
-        String ifilename = filename.substring(0, indexOfDot) + ".ijava";
+        String ifilename = filename.substring(0, indexOfDot) + "." + AssertTools.getInstrumentedExtension();
         String abPath = ifile.getFile().getAbsolutePath();
         int indexOfSlash = abPath.lastIndexOf(File.separatorChar);
         String path = abPath.substring(0, indexOfSlash);
@@ -364,10 +364,11 @@ public class Symtab {
       className = name.substring(lastDot+1);
     }
 
-    //now see if the java file exists and return based on that
+    //now see if we actually found something
     if(packageName != null) {
       return new StringPair(packageName, className);
     }
+    
     return null;
   }
 
@@ -412,7 +413,7 @@ public class Symtab {
   }
 
   static public URL findClassSource(final String packageName, final String name) {
-    return findResource(packageName, name, "java");
+    return findResource(packageName, name, AssertTools.getSourceExtension());
   }
   
   /**

@@ -30,25 +30,79 @@ public Object methodFoo(Object param1) {
   return __retVal;
 }
 
-protected boolean __<packageName>_<methodName>_check<methodname>PostConditions(__retVal, oldParam1, param1, ...) {
-    // OR, as soon as a true is seen, return true
 
-    // do interface post conditions first and keep track of which interface they're from
+//[jpschewe:20000213.1555CST] FIX still need code
+protected boolean __<packageName>_<methodName>_check<methodname>PostConditions(__retVal, oldParam1, param1, ...) {
+
+
+    //[jpschewe:20000213.1603CST] FIX do interface post conditions first and keep track of which interface they're from
     
-    if(((Boolean)retVal).booleanValue()) {
-        return true;
-    }
+  // OR, as soon as a true is seen, return true
+  if(((Boolean)retVal).booleanValue()) {
+    return true;
+  }
 
 }
 
-protected boolean __<packageName>_<methodName>_check<methodname>PreConditions(param1, param2, ...) {
-    // AND, as soon as a false is seen, return false;
 
-    // do interface pre conditions first and keep track of which interface they're from
-    
-    if(!((Boolean)retVal).booleanValue()) {
-        return false;
+protected boolean __<packageName>_<methodName>_check<methodname>PreConditions(param1, param2, ...) {
+  Class thisClass;
+  try {
+    String className = "<fill in class name>";
+    thisClass = Class.forName(className);
+  }
+  catch(ClassNotFoundException cnfe) {
+    org.tcfreenet.schewe.Assert.AssertTools.internalError("Got error getting the class object for class " + className + " " + cnfe);
+  }
+
+  //[jpschewe:20000213.1552CST] FIX need method parameters here, just the class objects
+  Class[] methodArgs = new Class[0];
+  Method superMethod = org.tcfreenet.schewe.Assert.AssertTools.findSuperMethod(thisClass, "check<methodname>PreConditions", methodArgs);
+
+  if(superMethod != null) {
+    //invoke it, bail on exceptions
+    //[jpschewe:20000213.1552CST] FIX need parameters here, just the parameter names
+    Object[] args = new Object[0];
+    try {
+      retVal = superMethod.invoke(this, args);
     }
+    catch(IllegalAccessException iae) {
+      org.tcfreenet.schewe.Assert.AssertTools.internalError("Not enough access executing superClass check<methodName>PreConditions: " + iae.getMessage());
+    }
+    catch(IllegalArgumentException iae) {
+      org.tcfreenet.schewe.Assert.AssertTools.internalError("IllegalArgument executing superClass check<methodName>PreConditions: " + iae.getMessage());
+      //should never see, internal error
+    }
+    catch(java.lang.reflect.InvocationTargetException ite) {
+      ite.getTargetException().printStackTrace();
+    }
+  }
+
+  if(retVal == null) {
+    org.tcfreenet.schewe.Assert.AssertTools.internalError("got null check<methodName>PreConditions");
+  }
+  else if(! (retVal instanceof Boolean) ) {
+    org.tcfreenet.schewe.Assert.AssertTools.internalError("got something odd from check<methodName>Preconditions: " + retVal.getClass());
+  }
+
+
+  //[jpschewe:20000213.1603CST] FIX do interface pre conditions first and keep track of which interface they're from
+
+  // AND, as soon as a false is seen, return false;  
+  if(!((Boolean)retVal).booleanValue()) {
+    return false;
+  }
+
+  //for <condition> (conditions)
+  if(! <condition> ) {
+    org.tcfreenet.schewe.Assert.AssertionViolation av = new org.tcfreenet.schewe.Assert.AssertionViolation((<message> != null ? <message> : "") + "\n" + <condition>);
+    org.tcfreenet.schewe.Assert.AssertTools.setCurrentAssertionViolation(av);
+    
+    return false;
+  }
+  //end for
+  
+  return true;
 }
 
   
@@ -59,35 +113,35 @@ protected boolean __<packageName>_<methodName>_checkInvariant() {
     thisClass = Class.forName(className);
   }
   catch(ClassNotFoundException cnfe) {
-    AssertTools.internalError("Got error getting the class object for class " + className + " " + cnfe);
+    org.tcfreenet.schewe.Assert.AssertTools.internalError("Got error getting the class object for class " + className + " " + cnfe);
   }
   
   Class[] methodArgs = new Class[0];
-  Method superMethod = AssertTools.findSuperMethod(thisClass, "__checkInvariant", methodArgs);
+  Method superMethod = org.tcfreenet.schewe.Assert.AssertTools.findSuperMethod(thisClass, "checkInvariant", methodArgs);
 
   if(superMethod != null) {
-    //invoke it, pass on exceptions
+    //invoke it, bail on exceptions
     Object[] args = new Object[0];
     try {
       retVal = superMethod.invoke(this, args);
     }
     catch(IllegalAccessException iae) {
-      AssertTools.internalError("Not enough access executing super.__checkInvariant: " + iae.getMessage());
+      org.tcfreenet.schewe.Assert.AssertTools.internalError("Not enough access executing superClass checkInvariant: " + iae.getMessage());
     }
     catch(IllegalArgumentException iae) {
-      AssertTools.internalError("IllegalArgument executing super.__checkInvariant: " + iae.getMessage());
+      org.tcfreenet.schewe.Assert.AssertTools.internalError("IllegalArgument executing superClass checkInvariant: " + iae.getMessage());
       //should never see, internal error
     }
     catch(java.lang.reflect.InvocationTargetException ite) {
-      throw ite.getTargetException();
+      ite.getTargetException().printStackTrace();
     }
   }
 
   if(retVal == null) {
-    AssertTools.internalError("got null checkInvariant");
+    org.tcfreenet.schewe.Assert.AssertTools.internalError("got null checkInvariant");
   }
   else if(! (retVal instanceof Boolean) ) {
-    AssertTools.internalError("got something odd from checkInvariant: " + retVal.getClass());
+    org.tcfreenet.schewe.Assert.AssertTools.internalError("got something odd from checkInvariant: " + retVal.getClass());
   }
 
   if(!((Boolean)retVal).booleanValue()) {
@@ -95,17 +149,72 @@ protected boolean __<packageName>_<methodName>_checkInvariant() {
   }
   
 
-  //[jpschewe:20000116.1749CST] still need to add to this do interface
+  //[jpschewe:20000116.1749CST] FIX still need to add to this do interface
   //invariants first and keep track of which interface they're from
   
   //for <condition> (conditions)
-  if(<condition>) {
-    AssertionViolation av = new AssertionViolation((<message> != null ? <message> : "") + "\n" + <condition>);
-    AssertTools.setCurrentAssertionViolation(av);
+  if(! <condition> ) {
+    org.tcfreenet.schewe.Assert.AssertionViolation av = new org.tcfreenet.schewe.Assert.AssertionViolation((<message> != null ? <message> : "") + "\n" + <condition>);
+    org.tcfreenet.schewe.Assert.AssertTools.setCurrentAssertionViolation(av);
     
     return false;
   }
 
   return true;
 }
+
+//preconditions on constructor
+//Before
+/**
+   @pre (i > 0)
+   @pre (checkValue(i))
+**/
+public Test(int i) {
+  System.out.println("in constructor " + i);
+}
+
+//After
+/**
+   @pre (i > 0)
+   @pre (checkValue(i))
+**/
+public Test (int i) {
+// -- start output from generatePreCondtitionCall 
+  this(i, new AssertDummy0(i));
+}
+static private class AssertDummy0 {
+  public AssertDummy0(int i) {
+    if(!__<packageName>_<className>_checkConstructorPreConditions(i)) {
+      throw AssertTools.getCurrentAssertionViolation();
+    }
+  }
+}
+private Test(int i, AssertDummy0 ad) {
+// -- end output from generatePreConditionCall
+  System.out.println("in constructor " + i);
+}
+
+// -- start output from generatePreConditionMethod
+static /*package*/ boolean __<packageName>_<className>_checkConstructorPreConditions(int i) {
+  // AND, as soon as a false is seen, return false;
+
+  Object retVal = superMethod.invoke(i);
+  
+  if(!((Boolean)retVal).booleanValue()) {
+    return false;
+  }
+
+  if(! (i > 0) ) {
+    //AssertionViolation
+    return false;
+  }
+  if(! checkValue(i) ) {
+    //AssertionViolation
+    return false;
+  }
+
+  return true;
+}
+// -- end output from generatePreConditionMethod 
+
 
