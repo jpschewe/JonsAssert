@@ -1,0 +1,4401 @@
+%!PS-Adobe-3.0
+%%Title: java.g
+%%Creator: Jon Schewe
+%%CreationDate: 20:54:55 Dec 15 1999
+%%Pages: (atend)
+%%EndComments
+
+%%BeginProlog
+/LandscapeMode false def
+/NumberOfColumns 1 def
+/LandscapePageHeight 792.0 def
+/PrintWidth   498.6141732283465 def
+/PrintHeight  643.7029732283465 def
+/LeftMargin   56.69291338582677 def
+/RightMargin  56.69291338582677 def
+/InterColumn  56.69291338582677 def
+/BottomMargin 42.51968503937008 def
+/TopMargin    42.51968503937008 def
+/HeaderOffset 28.34645669291339 def
+/HeaderPad    2.4276 def
+/PrintHeader true def
+/PrintHeaderFrame false def
+/ShowNofN true def
+/Duplex false def
+/LineHeight   8.967500000000001 def
+% ISOLatin1Encoding stolen from ps_init.ps in GhostScript 2.6.1.4:
+/ISOLatin1Encoding where { pop } {
+% -- The ISO Latin-1 encoding vector isn't known, so define it.
+% -- The first half is the same as the standard encoding,
+% -- except for minus instead of hyphen at code 055.
+/ISOLatin1Encoding
+StandardEncoding 0 45 getinterval aload pop
+    /minus
+StandardEncoding 46 82 getinterval aload pop
+%*** NOTE: the following are missing in the Adobe documentation,
+%*** but appear in the displayed table:
+%*** macron at 0225, dieresis at 0230, cedilla at 0233, space at 0240.
+% 0200 (128)
+    /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+    /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+    /dotlessi /grave /acute /circumflex /tilde /macron /breve /dotaccent
+    /dieresis /.notdef /ring /cedilla /.notdef /hungarumlaut /ogonek /caron
+% 0240 (160)
+    /space /exclamdown /cent /sterling
+	/currency /yen /brokenbar /section
+    /dieresis /copyright /ordfeminine /guillemotleft
+	/logicalnot /hyphen /registered /macron
+    /degree /plusminus /twosuperior /threesuperior
+	/acute /mu /paragraph /periodcentered
+    /cedilla /onesuperior /ordmasculine /guillemotright
+	/onequarter /onehalf /threequarters /questiondown
+% 0300 (192)
+    /Agrave /Aacute /Acircumflex /Atilde
+	/Adieresis /Aring /AE /Ccedilla
+    /Egrave /Eacute /Ecircumflex /Edieresis
+	/Igrave /Iacute /Icircumflex /Idieresis
+    /Eth /Ntilde /Ograve /Oacute
+	/Ocircumflex /Otilde /Odieresis /multiply
+    /Oslash /Ugrave /Uacute /Ucircumflex
+	/Udieresis /Yacute /Thorn /germandbls
+% 0340 (224)
+    /agrave /aacute /acircumflex /atilde
+	/adieresis /aring /ae /ccedilla
+    /egrave /eacute /ecircumflex /edieresis
+	/igrave /iacute /icircumflex /idieresis
+    /eth /ntilde /ograve /oacute
+	/ocircumflex /otilde /odieresis /divide
+    /oslash /ugrave /uacute /ucircumflex
+	/udieresis /yacute /thorn /ydieresis
+256 packedarray def
+} ifelse
+
+/reencodeFontISO { %def
+  dup
+  length 5 add dict	% Make a new font (a new dict the same size
+			% as the old one) with room for our new symbols.
+
+  begin			% Make the new font the current dictionary.
+
+
+    { 1 index /FID ne
+      { def } { pop pop } ifelse
+    } forall		% Copy each of the symbols from the old dictionary
+			% to the new one except for the font ID.
+
+    /Encoding ISOLatin1Encoding def	% Override the encoding with
+					% the ISOLatin1 encoding.
+
+    % Use the font's bounding box to determine the ascent, descent,
+    % and overall height; don't forget that these values have to be
+    % transformed using the font's matrix.
+
+%          ^    (x2 y2)
+%          |       |
+%          |       v
+%          |  +----+ - -
+%          |  |    |   ^
+%          |  |    |   | Ascent (usually > 0)
+%          |  |    |   |
+% (0 0) -> +--+----+-------->
+%             |    |   |
+%             |    |   v Descent (usually < 0)
+% (x1 y1) --> +----+ - -
+
+    FontBBox				% -- x1 y1 x2 y2
+    FontMatrix transform /Ascent  exch def pop
+    FontMatrix transform /Descent exch def pop
+    /FontHeight Ascent Descent sub def	% use `sub' because descent < 0
+
+    % Define these in case they're not in the FontInfo
+    % (also, here they're easier to get to.
+    /UnderlinePosition  1 def
+    /UnderlineThickness 1 def
+
+    % Get the underline position and thickness if they're defined.
+    currentdict /FontInfo known {
+      FontInfo
+
+      dup /UnderlinePosition known {
+	dup /UnderlinePosition get
+	0 exch FontMatrix transform exch pop
+	/UnderlinePosition exch def
+      } if
+
+      dup /UnderlineThickness known {
+	/UnderlineThickness get
+	0 exch FontMatrix transform exch pop
+	/UnderlineThickness exch def
+      } if
+
+    } if
+
+    currentdict		% Leave the new font on the stack
+    end			% Stop using the font as the current dictionary.
+    definefont		% Put the font into the font dictionary
+    pop			% Discard the returned font.
+} bind def
+
+/DefFont {				% Font definition
+  findfont exch scalefont reencodeFontISO
+} def
+
+/F {					% Font selection
+  findfont
+  dup /Ascent             get /Ascent             exch def
+  dup /Descent            get /Descent            exch def
+  dup /FontHeight         get /FontHeight         exch def
+  dup /UnderlinePosition  get /UnderlinePosition  exch def
+  dup /UnderlineThickness get /UnderlineThickness exch def
+  setfont
+} def
+
+/FG /setrgbcolor load def
+
+/bg false def
+/BG {
+  dup /bg exch def
+  { mark 4 1 roll ] /bgcolor exch def } if
+} def
+
+%  B    width    C
+%   +-----------+
+%               | Ascent  (usually > 0)
+% A +           +
+%               | Descent (usually < 0)
+%   +-----------+
+%  E    width    D
+
+/dobackground {				% width --
+  currentpoint				% -- width x y
+  gsave
+    newpath
+    moveto				% A (x y)
+    0 Ascent rmoveto			% B
+    dup 0 rlineto			% C
+    0 Descent Ascent sub rlineto	% D
+    neg 0 rlineto			% E
+    closepath
+    bgcolor aload pop setrgbcolor
+    fill
+  grestore
+} def
+
+/dobackgroundstring {			% string --
+  stringwidth pop
+  dobackground
+} def
+
+/dounderline {				% fromx fromy --
+  currentpoint
+  gsave
+    UnderlineThickness setlinewidth
+    4 2 roll
+    UnderlinePosition add moveto
+    UnderlinePosition add lineto
+    stroke
+  grestore
+} def
+
+/eolbg {				% dobackground until right margin
+  PrintWidth				% -- x-eol
+  currentpoint pop			% -- cur-x
+  sub					% -- width until eol
+  dobackground
+} def
+
+/eolul {				% idem for underline
+  PrintWidth				% -- x-eol
+  currentpoint exch pop			% -- x-eol cur-y
+  dounderline
+} def
+
+/SL {					% Soft Linefeed
+  bg { eolbg } if
+  ul { eolul } if
+  0  currentpoint exch pop LineHeight sub  moveto
+} def
+
+/HL /SL load def			% Hard Linefeed
+
+/sp1 { currentpoint 3 -1 roll } def
+
+% Some debug
+/dcp { currentpoint exch 40 string cvs print (, ) print = } def
+/dp { print 2 copy
+   exch 40 string cvs print (, ) print = } def
+
+/S {
+  bg { dup dobackgroundstring } if
+  ul { sp1 } if
+  show
+  ul { dounderline } if
+} def
+
+/W {
+  ul { sp1 } if
+  ( ) stringwidth	% Get the width of a space in the current font.
+  pop			% Discard the Y component.
+  mul			% Multiply the width of a space
+			% by the number of spaces to plot
+  bg { dup dobackground } if
+  0 rmoveto
+  ul { dounderline } if
+} def
+
+/BeginDoc {
+  % ---- save the state of the document (useful for ghostscript!)
+  /docState save def
+  % ---- [jack] Kludge: my ghostscript window is 21x27.7 instead of 21x29.7
+  /JackGhostscript where {
+    pop 1 27.7 29.7 div scale
+  } if
+  LandscapeMode {
+    % ---- translate to bottom-right corner of Portrait page
+    LandscapePageHeight 0 translate
+    90 rotate
+    } if
+  /ColumnWidth PrintWidth InterColumn add def
+  % ---- translate to lower left corner of TEXT
+  LeftMargin BottomMargin translate
+  % ---- define where  printing will start
+  /f0 F					% this installs Ascent
+  /PrintStartY PrintHeight Ascent sub def
+  /ColumnIndex 1 def
+} def
+
+/EndDoc {
+  % ---- on last page but not last column, spit out the page
+  ColumnIndex 1 eq not { showpage } if
+  % ---- restore the state of the document (useful for ghostscript!)
+  docState restore
+} def
+
+/BeginDSCPage {
+  % ---- when 1st column, save the state of the page
+  ColumnIndex 1 eq { /pageState save def } if
+  % ---- save the state of the column
+  /columnState save def
+} def
+
+/BeginPage {
+  PrintHeader {
+    PrintHeaderFrame { HeaderFrame } if
+    HeaderText
+  } if
+  0 PrintStartY moveto			% move to where printing will start
+} def
+
+/EndPage {
+  bg { eolbg } if
+  ul { eolul } if
+} def
+
+/EndDSCPage {
+  ColumnIndex NumberOfColumns eq {
+    % ---- on last column, spit out the page
+    showpage
+    % ---- restore the state of the page
+    pageState restore
+    /ColumnIndex 1 def
+  } { % else
+    % ---- restore the state of the current column
+    columnState restore
+    % ---- and translate to the next column
+    ColumnWidth 0 translate
+    /ColumnIndex ColumnIndex 1 add def
+  } ifelse
+} def
+
+/ul false def
+
+/UL { /ul exch def } def
+
+/SetHeaderLines {			% nb-lines --
+  /HeaderLines exch def
+  % ---- bottom up
+  HeaderPad
+  HeaderLines 1 sub HeaderLineHeight mul add
+  HeaderTitleLineHeight add
+  HeaderPad add
+  /HeaderHeight exch def
+} def
+
+% |---------|
+% |  tm     |
+% |---------|
+% |  header |
+% |-+-------| <-- (x y)
+% |  ho     |
+% |---------|
+% |  text   |
+% |-+-------| <-- (0 0)
+% |  bm     |
+% |---------|
+
+/HeaderFrameStart {			% -- x y
+  0  PrintHeight HeaderOffset add
+} def
+
+/HeaderFramePath {
+  PrintWidth	 0			rlineto
+  0		 HeaderHeight		rlineto
+  PrintWidth neg 0			rlineto
+  0		 HeaderHeight neg	rlineto
+} def
+
+/HeaderFrame {
+  gsave
+    0.4 setlinewidth
+    % ---- fill a black rectangle (the shadow of the next one)
+    HeaderFrameStart moveto
+    1 -1 rmoveto
+    HeaderFramePath
+    0 setgray fill
+    % ---- do the next rectangle ...
+    HeaderFrameStart moveto
+    HeaderFramePath
+    gsave 0.9 setgray fill grestore	% filled with grey
+    gsave 0 setgray stroke grestore	% drawn  with black
+  grestore
+} def
+
+/HeaderStart {
+  HeaderFrameStart
+  exch HeaderPad add exch	% horizontal pad
+  % ---- bottom up
+  HeaderPad add			% vertical   pad
+  HeaderDescent sub
+  HeaderLineHeight HeaderLines 1 sub mul add
+} def
+
+/strcat {
+  dup length 3 -1 roll dup length dup 4 -1 roll add string dup
+  0 5 -1 roll putinterval
+  dup 4 2 roll exch putinterval
+} def
+
+/pagenumberstring {
+  PageNumber 32 string cvs
+  ShowNofN {
+    (/) strcat
+    PageCount 32 string cvs strcat
+  } if
+} def
+
+/HeaderText {
+  HeaderStart moveto
+
+  HeaderLinesRight HeaderLinesLeft	% -- rightLines leftLines
+
+  % ---- hack: `PN 1 and'  ==  `PN 2 modulo'
+
+  % ---- if duplex and even page number, then exchange left and right
+  Duplex PageNumber 1 and 0 eq and { exch } if
+
+  { % ---- process the left lines
+    aload pop
+    exch F
+    gsave
+      dup xcheck { exec } if
+      show
+    grestore
+    0 HeaderLineHeight neg rmoveto
+  } forall
+
+  HeaderStart moveto
+
+  { % ---- process the right lines
+    aload pop
+    exch F
+    gsave
+      dup xcheck { exec } if
+      dup stringwidth pop
+      PrintWidth exch sub HeaderPad 2 mul sub 0 rmoveto
+      show
+    grestore
+    0 HeaderLineHeight neg rmoveto
+  } forall
+} def
+
+/ReportFontInfo {
+  2 copy
+  /t0 3 1 roll DefFont
+  /t0 F
+  /lh FontHeight def
+  /sw ( ) stringwidth pop def
+  /aw (01234567890abcdefghijklmnopqrstuvwxyz) dup length exch
+  stringwidth pop exch div def
+  /t1 12 /Helvetica-Oblique DefFont
+  /t1 F
+  gsave
+    (For ) show
+    128 string cvs show
+    ( ) show
+    32 string cvs show
+    ( point, the line height is ) show
+    lh 32 string cvs show
+    (, the space width is ) show
+    sw 32 string cvs show
+    (,) show
+  grestore
+  0 FontHeight neg rmoveto
+  gsave
+    (and a crude estimate of average character width is ) show
+    aw 32 string cvs show
+    (.) show
+  grestore
+  0 FontHeight neg rmoveto
+} def
+
+/cm { % cm to point
+  72 mul 2.54 div
+} def
+
+/ReportAllFontInfo {
+  FontDirectory
+  { % key = font name  value = font dictionary
+    pop 10 exch ReportFontInfo
+  } forall
+} def
+
+% 3 cm 20 cm moveto  10 /Courier ReportFontInfo  showpage
+% 3 cm 20 cm moveto  ReportAllFontInfo           showpage
+
+%%EndProlog
+
+%%BeginSetup
+/h0 14 /Helvetica-Bold DefFont
+/h1 12 /Helvetica DefFont
+
+% ---- These lines must be kept together because...
+
+/h0 F
+/HeaderTitleLineHeight FontHeight def
+
+/h1 F
+/HeaderLineHeight FontHeight def
+/HeaderDescent    Descent def
+
+% ---- ...because `F' has a side-effect on `FontHeight' and `Descent'
+
+/f0 8.5 /Courier DefFont
+/f1 8.5 /Courier-Bold DefFont
+/f2 8.5 /Courier-Oblique DefFont
+/f3 8.5 /Courier-BoldOblique DefFont
+
+BeginDoc
+
+%%EndSetup
+
+%%Page: 1 1
+BeginDSCPage
+/PageNumber 1 def
+/PageCount 17 def
+/HeaderLinesLeft [
+  [ /h0 (java.g) ]
+  [ /h1 (/home/jpschewe/projects/java/org/tcfreenet/schewe/Assert/) ]
+] def
+/HeaderLinesRight [
+  [ /h0 /pagenumberstring load ]
+  [ /h1 (Dec 15 1999) ]
+] def
+2 SetHeaderLines
+BeginPage
+/f0 F
+false BG
+0.0 0.0 0.0 FG
+false UL
+0.0 0.0 0.0 FG
+(header {) S
+HL
+(/*) S
+HL
+(  This file is licensed through the GNU public License.  Please read it.) S
+HL
+(  Basically you can modify this code as you wish, but you need to distribute) S
+HL
+(  the source code for all applications that use this code.) S
+HL
+HL
+(  I'd appreciate comments/suggestions on the code schewe@tcfreenet.org) S
+HL
+(*/) S
+HL
+(package org.tcfreenet.schewe.Assert;) S
+HL
+HL
+(import antlr.*;) S
+HL
+(}) S
+HL
+(/** Java 1.1 Recognizer Grammar) S
+HL
+( *) S
+HL
+( * Run 'java JavaRecognizer <directory full of java files>') S
+HL
+( *) S
+HL
+( * Authors:) S
+HL
+( *) S
+14 W
+(John Mitchell) S
+11 W
+(johnm@non.net) S
+HL
+( *) S
+14 W
+(Terence Parr) S
+12 W
+(parrt@magelang.com) S
+HL
+( *) S
+14 W
+(John Lilley) S
+21 W
+(jlilley@empathy.com) S
+HL
+( *) S
+14 W
+(Scott Stanchfield) S
+7 W
+(thetick@magelang.com) S
+HL
+( *) S
+HL
+( * Version 1.00 December 9, 1997 -- initial release) S
+HL
+( * Version 1.01 December 10, 1997) S
+HL
+( *) S
+14 W
+(fixed bug in octal def \(0..7 not 0..8\)) S
+HL
+( * Version 1.10 August 1998 \(parrt\)) S
+HL
+( *) S
+14 W
+(added tree construction) S
+HL
+( *) S
+14 W
+(fixed definition of WS,comments for mac,pc,unix newlines) S
+HL
+( *) S
+14 W
+(added unary plus) S
+HL
+( * Version 1.11 \(Nov 20, 1998\)) S
+HL
+( *) S
+14 W
+(Added "shutup" option to turn off last ambig warning.) S
+HL
+( *) S
+14 W
+(Fixed inner class def to allow named class defs as statements) S
+HL
+( *) S
+14 W
+(synchronized requires compound not simple statement) S
+HL
+( *) S
+14 W
+(add [] after builtInType DOT class in primaryExpression) S
+HL
+( *) S
+14 W
+("const" is reserved but not valid..removed from modifiers) S
+HL
+( *) S
+HL
+( * Version 1.12 \(Feb 2, 1999\)) S
+HL
+( *) S
+14 W
+(Changed LITERAL_xxx to xxx in tree grammar.) S
+HL
+( *) S
+14 W
+(Updated java.g to use tokens {...} now for 2.6.0 \(new feature\).) S
+HL
+( *) S
+HL
+( * Version 1.13 \(Apr 23, 1999\)) S
+HL
+( *) S
+14 W
+(Didn't have \(stat\)? for else clause in tree parser.) S
+HL
+( *) S
+14 W
+(Didn't gen ASTs for interface extends.  Updated tree parser too.) S
+HL
+( *) S
+14 W
+(Updated to 2.6.0.) S
+HL
+( *) S
+HL
+( * This grammar is in the PUBLIC DOMAIN) S
+HL
+( *) S
+HL
+( * BUGS) S
+HL
+( *) S
+14 W
+(\(expression\) + "string" is parsed incorrectly \(+ as unary plus\).) S
+HL
+( *) S
+14 W
+(Doesn't like Object[].class \(does like int[].class\)) S
+HL
+( *) S
+HL
+( */) S
+HL
+(class JavaRecognizer extends Parser;) S
+HL
+(options {) S
+HL
+8 W
+(k = 2;                           // two token lookahead) S
+HL
+8 W
+(exportVocab=Java;                // Call its vocabulary "Java") S
+HL
+8 W
+(codeGenMakeSwitchThreshold = 2;  // Some optimizations) S
+HL
+8 W
+(codeGenBitsetTestThreshold = 3;) S
+HL
+8 W
+(defaultErrorHandler = false;     // Don't generate parser error handlers) S
+HL
+8 W
+(buildAST = true;) S
+HL
+(}) S
+HL
+HL
+(tokens {) S
+HL
+8 W
+(BLOCK; MODIFIERS; OBJBLOCK; SLIST; CTOR_DEF; METHOD_DEF; VARIABLE_DEF; ) S
+HL
+8 W
+(INSTANCE_INIT; STATIC_INIT; TYPE; CLASS_DEF; INTERFACE_DEF; ) S
+HL
+8 W
+(PACKAGE_DEF; ARRAY_DECLARATOR; EXTENDS_CLAUSE; IMPLEMENTS_CLAUSE;) S
+HL
+8 W
+(PARAMETERS; PARAMETER_DEF; LABELED_STAT; TYPECAST; INDEX_OP; ) S
+HL
+8 W
+(POST_INC; POST_DEC; METHOD_CALL; EXPR; ARRAY_INIT; ) S
+HL
+8 W
+(IMPORT; UNARY_MINUS; UNARY_PLUS; CASE_GROUP; ELIST; FOR_INIT; FOR_CONDITION; ) S
+HL
+8 W
+(FOR_ITERATOR; EMPTY_STAT; JAVADOC_OPEN; JAVADOC_CLOSE; POST_CONDITION; PRE_CONDITION;) S
+HL
+8 W
+(ASSERT_CONDITION; INVARIANT_CONDITION; ) S
+HL
+(}) S
+EndPage
+EndDSCPage
+
+%%Page: 2 2
+BeginDSCPage
+/PageNumber 2 def
+/PageCount 17 def
+/HeaderLinesLeft [
+  [ /h0 (java.g) ]
+  [ /h1 (/home/jpschewe/projects/java/org/tcfreenet/schewe/Assert/) ]
+] def
+/HeaderLinesRight [
+  [ /h0 /pagenumberstring load ]
+  [ /h1 (Dec 15 1999) ]
+] def
+2 SetHeaderLines
+BeginPage
+/f0 F
+false BG
+0.0 0.0 0.0 FG
+false UL
+8 W
+HL
+(// Compilation Unit: In Java, this is a single file.  This is the start) S
+HL
+(//   rule for this parser) S
+HL
+(compilationUnit) S
+HL
+8 W
+(:) S
+7 W
+(// A compilation unit starts with an optional package definition) S
+HL
+16 W
+(\() S
+7 W
+(packageDefinition) S
+HL
+16 W
+(|) S
+7 W
+(/* nothing */) S
+HL
+16 W
+(\)) S
+HL
+HL
+16 W
+(// Next we have a series of zero or more import statements) S
+HL
+16 W
+(\( importDefinition \)*) S
+HL
+HL
+16 W
+(// Wrapping things up with any number of class or interface) S
+HL
+16 W
+(//    definitions) S
+HL
+16 W
+(\( assertTypeDefinition \)*) S
+HL
+HL
+16 W
+(EOF!) S
+HL
+8 W
+(;) S
+HL
+HL
+(assertTypeDefinition) S
+HL
+8 W
+(: \(JAVADOC_OPEN \(INVARIANT_CONDITION\)* JAVADOC_CLOSE\)? typeDefinition) S
+HL
+8 W
+({ System.out.println\("Parser: got invariant"\); }) S
+HL
+8 W
+(;) S
+HL
+HL
+(// Package statement: "package" followed by an identifier.) S
+HL
+(packageDefinition) S
+HL
+8 W
+(options {defaultErrorHandler = true;} // let ANTLR handle errors) S
+HL
+8 W
+(:) S
+7 W
+(p:"package"^ {#p.setType\(PACKAGE_DEF\);} identifier SEMI!) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// Import statement: import followed by a package or class name) S
+HL
+(importDefinition) S
+HL
+8 W
+(options {defaultErrorHandler = true;}) S
+HL
+8 W
+(:) S
+7 W
+(i:"import"^ {#i.setType\(IMPORT\);} identifierStar SEMI!) S
+HL
+8 W
+(;) S
+HL
+HL
+(// A type definition in a file is either a class or interface definition.) S
+HL
+(typeDefinition) S
+HL
+8 W
+(options {defaultErrorHandler = true;}) S
+HL
+8 W
+(:) S
+7 W
+(m:modifiers!) S
+HL
+16 W
+(\( classDefinition[#m]) S
+HL
+16 W
+(| interfaceDefinition[#m]) S
+HL
+16 W
+(\)) S
+HL
+8 W
+(|) S
+7 W
+(SEMI!) S
+HL
+8 W
+(;) S
+HL
+HL
+(/** A declaration is the creation of a reference or primitive-type variable) S
+HL
+( *  Create a separate Type/Var tree for each var in the var list.) S
+HL
+( */) S
+HL
+(declaration!) S
+HL
+8 W
+(:) S
+7 W
+(m:modifiers t:typeSpec[false] v:variableDefinitions[#m,#t]) S
+HL
+16 W
+({#declaration = #v;}) S
+HL
+8 W
+(;) S
+HL
+HL
+(/* A declaration with no modifiers) S
+HL
+(localVariableDeclaration) S
+HL
+8 W
+(:) S
+7 W
+(t:typeSpec[false] v:variableDefinitions[#[MODIFIERS, "MODIFIERS"],#t]) S
+HL
+16 W
+({#localVariableDeclaration = #v;}) S
+HL
+8 W
+(;) S
+HL
+( */) S
+HL
+HL
+(// A list of zero or more modifiers.  We could have used \(modifier\)* in) S
+HL
+(//   place of a call to modifiers, but I thought it was a good idea to keep) S
+HL
+(//   this rule separate so they can easily be collected in a Vector if) S
+HL
+(//   someone so desires) S
+HL
+(modifiers) S
+HL
+8 W
+(:) S
+7 W
+(\( modifier \)*) S
+HL
+16 W
+({#modifiers = #\([MODIFIERS, "MODIFIERS"], #modifiers\);}) S
+HL
+8 W
+(;) S
+HL
+HL
+EndPage
+EndDSCPage
+
+%%Page: 3 3
+BeginDSCPage
+/PageNumber 3 def
+/PageCount 17 def
+/HeaderLinesLeft [
+  [ /h0 (java.g) ]
+  [ /h1 (/home/jpschewe/projects/java/org/tcfreenet/schewe/Assert/) ]
+] def
+/HeaderLinesRight [
+  [ /h0 /pagenumberstring load ]
+  [ /h1 (Dec 15 1999) ]
+] def
+2 SetHeaderLines
+BeginPage
+/f0 F
+false BG
+0.0 0.0 0.0 FG
+false UL
+(// A type specification is a type name with possible brackets afterwards) S
+HL
+(//   \(which would make it an array type\).) S
+HL
+(typeSpec[boolean addImagNode]) S
+HL
+8 W
+(:) S
+7 W
+(type \(lb:LBRACK^ {#lb.setType\(ARRAY_DECLARATOR\);} RBRACK!\)*) S
+HL
+16 W
+({) S
+HL
+24 W
+(if \( addImagNode \) {) S
+HL
+32 W
+(#typeSpec = #\(#[TYPE,"TYPE"], #typeSpec\);) S
+HL
+24 W
+(}) S
+HL
+16 W
+(}) S
+HL
+8 W
+(;) S
+HL
+HL
+(// A type name. which is either a \(possibly qualified\) class name or) S
+HL
+(//   a primitive \(builtin\) type) S
+HL
+(type) S
+HL
+8 W
+(:) S
+7 W
+(identifier) S
+HL
+8 W
+(|) S
+7 W
+(builtInType) S
+HL
+8 W
+(;) S
+HL
+HL
+(// The primitive types.) S
+HL
+(builtInType) S
+HL
+8 W
+(:) S
+7 W
+("void") S
+HL
+8 W
+(|) S
+7 W
+("boolean") S
+HL
+8 W
+(|) S
+7 W
+("byte") S
+HL
+8 W
+(|) S
+7 W
+("char") S
+HL
+8 W
+(|) S
+7 W
+("short") S
+HL
+8 W
+(|) S
+7 W
+("int") S
+HL
+8 W
+(|) S
+7 W
+("float") S
+HL
+8 W
+(|) S
+7 W
+("long") S
+HL
+8 W
+(|) S
+7 W
+("double") S
+HL
+8 W
+(;) S
+HL
+HL
+(// A \(possibly-qualified\) java identifier.  We start with the first IDENT) S
+HL
+(//   and expand its name by adding dots and following IDENTS) S
+HL
+(identifier) S
+HL
+8 W
+(:) S
+7 W
+(IDENT  \( DOT^ IDENT \)*) S
+HL
+8 W
+(;) S
+HL
+HL
+(identifierStar) S
+HL
+8 W
+(:) S
+7 W
+(IDENT) S
+HL
+16 W
+(\( DOT^ IDENT \)*) S
+HL
+16 W
+(\( DOT^ STAR  \)?) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// modifiers for Java classes, interfaces, class/instance vars and methods) S
+HL
+(modifier) S
+HL
+8 W
+(:) S
+7 W
+("private") S
+HL
+8 W
+(|) S
+7 W
+("public") S
+HL
+8 W
+(|) S
+7 W
+("protected") S
+HL
+8 W
+(|) S
+7 W
+("static") S
+HL
+8 W
+(|) S
+7 W
+("transient") S
+HL
+8 W
+(|) S
+7 W
+("final") S
+HL
+8 W
+(|) S
+7 W
+("abstract") S
+HL
+8 W
+(|) S
+7 W
+("native") S
+HL
+8 W
+(|) S
+7 W
+("threadsafe") S
+HL
+8 W
+(|) S
+7 W
+("synchronized") S
+HL
+(//) S
+6 W
+(|) S
+7 W
+("const") S
+17 W
+(// reserved word; leave out) S
+HL
+8 W
+(|) S
+7 W
+("volatile") S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// Definition of a Java class) S
+HL
+(classDefinition![AST modifiers]) S
+HL
+8 W
+(:) S
+7 W
+("class" IDENT) S
+HL
+16 W
+(// it _might_ have a superclass...) S
+HL
+16 W
+(sc:superClassClause) S
+HL
+16 W
+(// it might implement some interfaces...) S
+HL
+16 W
+(ic:implementsClause) S
+HL
+16 W
+(// now parse the body of the class) S
+HL
+16 W
+(cb:classBlock) S
+HL
+16 W
+({#classDefinition = #\(#[CLASS_DEF,"CLASS_DEF"],) S
+HL
+59 W
+(modifiers,IDENT,sc,ic,cb\);}) S
+EndPage
+EndDSCPage
+
+%%Page: 4 4
+BeginDSCPage
+/PageNumber 4 def
+/PageCount 17 def
+/HeaderLinesLeft [
+  [ /h0 (java.g) ]
+  [ /h1 (/home/jpschewe/projects/java/org/tcfreenet/schewe/Assert/) ]
+] def
+/HeaderLinesRight [
+  [ /h0 /pagenumberstring load ]
+  [ /h1 (Dec 15 1999) ]
+] def
+2 SetHeaderLines
+BeginPage
+/f0 F
+false BG
+0.0 0.0 0.0 FG
+false UL
+8 W
+(;) S
+HL
+HL
+(superClassClause!) S
+HL
+8 W
+(:) S
+7 W
+(\( "extends" id:identifier \)?) S
+HL
+16 W
+({#superClassClause = #\(#[EXTENDS_CLAUSE,"EXTENDS_CLAUSE"],id\);}) S
+HL
+8 W
+(;) S
+HL
+HL
+(// Definition of a Java Interface) S
+HL
+(interfaceDefinition![AST modifiers]) S
+HL
+8 W
+(:) S
+7 W
+("interface" IDENT) S
+HL
+16 W
+(// it might extend some other interfaces) S
+HL
+16 W
+(ie:interfaceExtends) S
+HL
+16 W
+(// now parse the body of the interface \(looks like a class...\)) S
+HL
+16 W
+(cb:classBlock) S
+HL
+16 W
+({#interfaceDefinition = #\(#[INTERFACE_DEF,"INTERFACE_DEF"],) S
+HL
+72 W
+(modifiers,IDENT,ie,cb\);}) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// This is the body of a class.  You can have fields and extra semicolons,) S
+HL
+(// That's about it \(until you see what a field is...\)) S
+HL
+(classBlock) S
+HL
+8 W
+(:) S
+7 W
+(LCURLY!) S
+HL
+24 W
+(\( assertfield | SEMI \)*) S
+HL
+16 W
+(RCURLY!) S
+HL
+16 W
+({#classBlock = #\([OBJBLOCK, "OBJBLOCK"], #classBlock\);}) S
+HL
+8 W
+(;) S
+HL
+HL
+(assertfield :) S
+HL
+12 W
+(\(JAVADOC_OPEN \(ASSERT_CONDITION\)* JAVADOC_CLOSE\)? field) S
+HL
+12 W
+({ System.out.println\("Parser: Got assert condition"\); }) S
+HL
+12 W
+(;) S
+HL
+HL
+(prePost : \(POST_CONDITION | PRE_CONDITION\)) S
+HL
+8 W
+({ System.out.println\("Parser: Got a pre or post condition"\); }) S
+HL
+8 W
+(;) S
+HL
+HL
+(// An interface can extend several other interfaces...) S
+HL
+(interfaceExtends) S
+HL
+8 W
+(:) S
+7 W
+(\() S
+HL
+16 W
+(e:"extends" {#e.setType\(EXTENDS_CLAUSE\);}) S
+HL
+16 W
+(identifier \( COMMA! identifier \)*) S
+HL
+16 W
+(\)?) S
+HL
+16 W
+({#interfaceExtends = #\(#[EXTENDS_CLAUSE,"EXTENDS_CLAUSE"],) S
+HL
+56 W
+(#interfaceExtends\);}) S
+HL
+8 W
+(;) S
+HL
+HL
+(// A class can implement several interfaces...) S
+HL
+(implementsClause) S
+HL
+8 W
+(:) S
+7 W
+(\() S
+HL
+24 W
+(i:"implements"! identifier \( COMMA! identifier \)*) S
+HL
+16 W
+(\)?) S
+HL
+16 W
+({#implementsClause = #\(#[IMPLEMENTS_CLAUSE,"IMPLEMENTS_CLAUSE"],) S
+HL
+65 W
+(#implementsClause\);}) S
+HL
+8 W
+(;) S
+HL
+HL
+(// Now the various things that can be defined inside a class or interface...) S
+HL
+(// Note that not all of these are really valid in an interface \(constructors,) S
+HL
+(//   for example\), and if this grammar were used for a compiler there would) S
+HL
+(//   need to be some semantic checks to make sure we're doing the right thing...) S
+HL
+(field!) S
+HL
+8 W
+(:) S
+7 W
+(// method, constructor, or variable declaration) S
+HL
+16 W
+(mods:modifiers) S
+HL
+16 W
+(\() S
+7 W
+(h:ctorHead s:compoundStatement // constructor) S
+HL
+24 W
+({#field = #\(#[CTOR_DEF,"CTOR_DEF"], mods, h, s\);}) S
+HL
+HL
+16 W
+(|) S
+7 W
+(cd:classDefinition[#mods]       // inner class) S
+HL
+24 W
+({#field = #cd;}) S
+HL
+24 W
+HL
+16 W
+(|) S
+7 W
+(id:interfaceDefinition[#mods]   // inner interface) S
+HL
+24 W
+({#field = #id;}) S
+HL
+EndPage
+EndDSCPage
+
+%%Page: 5 5
+BeginDSCPage
+/PageNumber 5 def
+/PageCount 17 def
+/HeaderLinesLeft [
+  [ /h0 (java.g) ]
+  [ /h1 (/home/jpschewe/projects/java/org/tcfreenet/schewe/Assert/) ]
+] def
+/HeaderLinesRight [
+  [ /h0 /pagenumberstring load ]
+  [ /h1 (Dec 15 1999) ]
+] def
+2 SetHeaderLines
+BeginPage
+/f0 F
+false BG
+0.0 0.0 0.0 FG
+false UL
+16 W
+(|) S
+7 W
+(t:typeSpec[false]  // method or variable declaration\(s\)) S
+HL
+24 W
+(\() S
+7 W
+(IDENT  // the name of the method) S
+HL
+HL
+32 W
+(// parse the formal parameter declarations.) S
+HL
+32 W
+(LPAREN! param:parameterDeclarationList RPAREN!) S
+HL
+HL
+32 W
+(rt:returnTypeBrackersOnEndOfMethodHead[#t]) S
+HL
+HL
+32 W
+(// get the list of exceptions that this method is declared to thr) S
+SL
+(ow) S
+HL
+32 W
+(\(tc:throwsClause\)?) S
+HL
+HL
+32 W
+(\( s2:compoundStatement | SEMI \)) S
+HL
+32 W
+({#field = #\(#[METHOD_DEF,"METHOD_DEF"],) S
+HL
+53 W
+(mods,) S
+HL
+57 W
+(#\(#[TYPE,"TYPE"],rt\),) S
+HL
+57 W
+(IDENT,) S
+HL
+57 W
+(param,) S
+HL
+57 W
+(tc,) S
+HL
+57 W
+(s2\);}) S
+HL
+24 W
+(|) S
+7 W
+(v:variableDefinitions[#mods,#t] SEMI) S
+HL
+(//) S
+30 W
+({#field = #\(#[VARIABLE_DEF,"VARIABLE_DEF"], v\);}) S
+HL
+32 W
+({#field = #v;}) S
+HL
+24 W
+(\)) S
+HL
+16 W
+(\)) S
+HL
+HL
+(    // "static { ... }" class initializer) S
+HL
+8 W
+(|) S
+7 W
+("static" s3:compoundStatement) S
+HL
+16 W
+({#field = #\(#[STATIC_INIT,"STATIC_INIT"], s3\);}) S
+HL
+HL
+(    // "{ ... }" instance initializer) S
+HL
+8 W
+(|) S
+7 W
+(compoundStatement) S
+HL
+16 W
+({#field = #\(#[INSTANCE_INIT,"INSTANCE_INIT"], s3\);}) S
+HL
+8 W
+(;) S
+HL
+HL
+(variableDefinitions[AST mods, AST t]) S
+HL
+8 W
+(:) S
+7 W
+(variableDeclarator[getASTFactory\(\).dupTree\(mods\),) S
+HL
+51 W
+(getASTFactory\(\).dupTree\(t\)]) S
+HL
+16 W
+(\() S
+7 W
+(COMMA!) S
+HL
+24 W
+(variableDeclarator[getASTFactory\(\).dupTree\(mods\),) S
+HL
+59 W
+(getASTFactory\(\).dupTree\(t\)]) S
+HL
+16 W
+(\)*) S
+HL
+8 W
+(;) S
+HL
+HL
+(/** Declaration of a variable.  This can be a class/instance variable,) S
+HL
+( *   or a local variable in a method) S
+HL
+( * It can also include possible initialization.) S
+HL
+( */) S
+HL
+(variableDeclarator![AST mods, AST t]) S
+HL
+8 W
+(:) S
+7 W
+(id:IDENT d:declaratorBrackets[t] v:varInitializer) S
+HL
+16 W
+({#variableDeclarator = #\(#[VARIABLE_DEF,"VARIABLE_DEF"], mods, #\(#[TYPE,"TYPE"],d) S
+SL
+(\), id, v\);}) S
+HL
+8 W
+(;) S
+HL
+HL
+(declaratorBrackets[AST typ]) S
+HL
+8 W
+(:) S
+7 W
+({#declaratorBrackets=typ;}) S
+HL
+16 W
+(\(lb:LBRACK^ {#lb.setType\(ARRAY_DECLARATOR\);} RBRACK!\)*) S
+HL
+8 W
+(;) S
+HL
+HL
+(varInitializer) S
+HL
+8 W
+(:) S
+7 W
+(\( ASSIGN^ initializer \)?) S
+HL
+8 W
+(;) S
+HL
+HL
+(// This is an initializer used to set up an array.) S
+HL
+(arrayInitializer) S
+HL
+8 W
+(:) S
+7 W
+(lc:LCURLY^ {#lc.setType\(ARRAY_INIT\);}) S
+HL
+24 W
+(\() S
+7 W
+(initializer) S
+HL
+32 W
+(\() S
+HL
+40 W
+(// CONFLICT: does a COMMA after an initializer start a ne) S
+SL
+(w) S
+HL
+40 W
+(//           initializer or start the option ',' at end?) S
+HL
+40 W
+(//           ANTLR generates proper code by matching) S
+EndPage
+EndDSCPage
+
+%%Page: 6 6
+BeginDSCPage
+/PageNumber 6 def
+/PageCount 17 def
+/HeaderLinesLeft [
+  [ /h0 (java.g) ]
+  [ /h1 (/home/jpschewe/projects/java/org/tcfreenet/schewe/Assert/) ]
+] def
+/HeaderLinesRight [
+  [ /h0 /pagenumberstring load ]
+  [ /h1 (Dec 15 1999) ]
+] def
+2 SetHeaderLines
+BeginPage
+/f0 F
+false BG
+0.0 0.0 0.0 FG
+false UL
+40 W
+(//) S
+23 W
+(the comma as soon as possible.) S
+HL
+40 W
+(options {) S
+HL
+48 W
+(warnWhenFollowAmbig = false;) S
+HL
+40 W
+(}) S
+HL
+32 W
+(:) S
+HL
+40 W
+(COMMA! initializer) S
+HL
+32 W
+(\)*) S
+HL
+32 W
+(\(COMMA!\)?) S
+HL
+24 W
+(\)?) S
+HL
+16 W
+(RCURLY!) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// The two "things" that can initialize an array element are an expression) S
+HL
+(//   and another \(nested\) array initializer.) S
+HL
+(initializer) S
+HL
+8 W
+(:) S
+7 W
+(expression) S
+HL
+8 W
+(|) S
+7 W
+(arrayInitializer) S
+HL
+8 W
+(;) S
+HL
+HL
+(// This is the header of a method.  It includes the name and parameters) S
+HL
+(//   for the method.) S
+HL
+(//   This also watches for a list of exception classes in a "throws" clause.) S
+HL
+(ctorHead) S
+HL
+8 W
+(:) S
+7 W
+(IDENT  // the name of the method) S
+HL
+HL
+16 W
+(// parse the formal parameter declarations.) S
+HL
+16 W
+(LPAREN! parameterDeclarationList RPAREN!) S
+HL
+HL
+16 W
+(// get the list of exceptions that this method is declared to throw) S
+HL
+16 W
+(\(throwsClause\)?) S
+HL
+8 W
+(;) S
+HL
+HL
+(// This is a list of exception classes that the method is declared to throw) S
+HL
+(throwsClause) S
+HL
+8 W
+(:) S
+7 W
+("throws"^ identifier \( COMMA! identifier \)*) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(returnTypeBrackersOnEndOfMethodHead[AST typ]) S
+HL
+8 W
+(:) S
+7 W
+({#returnTypeBrackersOnEndOfMethodHead = typ;}) S
+HL
+16 W
+(\(lb:LBRACK^ {#lb.setType\(ARRAY_DECLARATOR\);} RBRACK!\)*) S
+HL
+8 W
+(;) S
+HL
+HL
+(// A list of formal parameters) S
+HL
+(parameterDeclarationList) S
+HL
+8 W
+(:) S
+7 W
+(\( parameterDeclaration \( COMMA! parameterDeclaration \)* \)?) S
+HL
+16 W
+({#parameterDeclarationList = #\(#[PARAMETERS,"PARAMETERS"],) S
+HL
+72 W
+(#parameterDeclarationList) S
+SL
+(\);}) S
+HL
+8 W
+(;) S
+HL
+HL
+(// A formal parameter.) S
+HL
+(parameterDeclaration!) S
+HL
+8 W
+(:) S
+7 W
+(pm:parameterModifier t:typeSpec[false] id:IDENT) S
+HL
+16 W
+(pd:parameterDeclaratorBrackets[#t]) S
+HL
+16 W
+({#parameterDeclaration = #\(#[PARAMETER_DEF,"PARAMETER_DEF"],) S
+HL
+72 W
+(pm, #\([TYPE,"TYPE"],pd\), ) S
+SL
+(id\);}) S
+HL
+8 W
+(;) S
+HL
+HL
+(parameterDeclaratorBrackets[AST t]) S
+HL
+8 W
+(:) S
+7 W
+({#parameterDeclaratorBrackets = t;}) S
+HL
+16 W
+(\(lb:LBRACK^ {#lb.setType\(ARRAY_DECLARATOR\);} RBRACK!\)*) S
+HL
+8 W
+(;) S
+HL
+HL
+(parameterModifier) S
+HL
+8 W
+(:) S
+7 W
+(\(f:"final"\)?) S
+HL
+16 W
+({#parameterModifier = #\(#[MODIFIERS,"MODIFIERS"], f\);}) S
+HL
+8 W
+(;) S
+HL
+HL
+(// Compound statement.  This is used in many contexts:) S
+EndPage
+EndDSCPage
+
+%%Page: 7 7
+BeginDSCPage
+/PageNumber 7 def
+/PageCount 17 def
+/HeaderLinesLeft [
+  [ /h0 (java.g) ]
+  [ /h1 (/home/jpschewe/projects/java/org/tcfreenet/schewe/Assert/) ]
+] def
+/HeaderLinesRight [
+  [ /h0 /pagenumberstring load ]
+  [ /h1 (Dec 15 1999) ]
+] def
+2 SetHeaderLines
+BeginPage
+/f0 F
+false BG
+0.0 0.0 0.0 FG
+false UL
+(//   Inside a class definition prefixed with "static":) S
+HL
+(//      it is a class initializer) S
+HL
+(//   Inside a class definition without "static":) S
+HL
+(//      it is an instance initializer) S
+HL
+(//   As the body of a method) S
+HL
+(//   As a completely indepdent braced block of code inside a method) S
+HL
+(//      it starts a new scope for variable definitions) S
+HL
+HL
+(compoundStatement) S
+HL
+8 W
+(:) S
+7 W
+(lc:LCURLY^ {#lc.setType\(SLIST\);}) S
+HL
+24 W
+(// include the \(possibly-empty\) list of statements) S
+HL
+24 W
+(\(statement\)*) S
+HL
+16 W
+(RCURLY!) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(statement) S
+HL
+8 W
+(// A list of statements in curly braces -- start a new scope!) S
+HL
+8 W
+(:) S
+7 W
+(compoundStatement) S
+HL
+HL
+8 W
+(// class definition \(no modifiers allowed; pass empty list\)) S
+HL
+8 W
+(|) S
+7 W
+(classDefinition[#[MODIFIERS, "MODIFIERS"]]) S
+HL
+HL
+8 W
+(// interface definition \(no modifiers allowed; pass empty list\)) S
+HL
+8 W
+(|) S
+7 W
+(interfaceDefinition[#[MODIFIERS, "MODIFIERS"]]) S
+HL
+HL
+16 W
+(// declarations are ambiguous with "ID DOT" relative to expression) S
+HL
+16 W
+(// statements.  Must backtrack to be sure.  Could use a semantic) S
+HL
+16 W
+(// predicate to test symbol table to see what the type was coming) S
+HL
+16 W
+(// up, but that's pretty hard without a symbol table ;\)) S
+HL
+(//) S
+6 W
+(|) S
+7 W
+(\(localVariableDeclaration\)=> localVariableDeclaration SEMI!) S
+HL
+8 W
+(|) S
+7 W
+(\(declaration\)=> declaration SEMI!) S
+HL
+HL
+16 W
+(// An expression statement.  This could be a method call,) S
+HL
+16 W
+(// assignment statement, or any other expression evaluated for) S
+HL
+16 W
+(// side-effects.) S
+HL
+8 W
+(|) S
+7 W
+(expression SEMI!) S
+HL
+HL
+8 W
+(// Attach a label to the front of a statement) S
+HL
+8 W
+(|) S
+7 W
+(IDENT c:COLON^ {#c.setType\(LABELED_STAT\);} statement) S
+HL
+HL
+8 W
+(// If-else statement) S
+HL
+8 W
+(|) S
+7 W
+("if"^ LPAREN! expression RPAREN! statement) S
+HL
+16 W
+(\() S
+HL
+24 W
+(// CONFLICT: the old "dangling-else" problem...) S
+HL
+24 W
+(//           ANTLR generates proper code matching) S
+HL
+24 W
+(//) S
+23 W
+(as soon as possible.  Hush warning.) S
+HL
+24 W
+(options {) S
+HL
+32 W
+(warnWhenFollowAmbig = false;) S
+HL
+24 W
+(}) S
+HL
+16 W
+(:) S
+HL
+24 W
+("else"! statement) S
+HL
+16 W
+(\)?) S
+HL
+HL
+8 W
+(// For statement) S
+HL
+8 W
+(|) S
+7 W
+("for"^) S
+HL
+24 W
+(LPAREN!) S
+HL
+32 W
+(forInit SEMI!   // initializer) S
+HL
+32 W
+(forCond) S
+1 W
+(SEMI!   // condition test) S
+HL
+32 W
+(forIter         // updater) S
+HL
+24 W
+(RPAREN!) S
+HL
+24 W
+(statement                     // statement to loop over) S
+HL
+HL
+8 W
+(// While statement) S
+HL
+8 W
+(|) S
+7 W
+("while"^ LPAREN! expression RPAREN! statement) S
+HL
+HL
+8 W
+(// do-while statement) S
+HL
+8 W
+(|) S
+7 W
+("do"^ statement "while"! LPAREN! expression RPAREN! SEMI!) S
+HL
+HL
+8 W
+(// get out of a loop \(or switch\)) S
+HL
+8 W
+(|) S
+7 W
+("break"^ \(IDENT\)? SEMI!) S
+HL
+EndPage
+EndDSCPage
+
+%%Page: 8 8
+BeginDSCPage
+/PageNumber 8 def
+/PageCount 17 def
+/HeaderLinesLeft [
+  [ /h0 (java.g) ]
+  [ /h1 (/home/jpschewe/projects/java/org/tcfreenet/schewe/Assert/) ]
+] def
+/HeaderLinesRight [
+  [ /h0 /pagenumberstring load ]
+  [ /h1 (Dec 15 1999) ]
+] def
+2 SetHeaderLines
+BeginPage
+/f0 F
+false BG
+0.0 0.0 0.0 FG
+false UL
+8 W
+(// do next iteration of a loop) S
+HL
+8 W
+(|) S
+7 W
+("continue"^ \(IDENT\)? SEMI!) S
+HL
+HL
+8 W
+(// Return an expression) S
+HL
+8 W
+(|) S
+7 W
+("return"^ \(expression\)? SEMI!) S
+HL
+HL
+8 W
+(// switch/case statement) S
+HL
+8 W
+(|) S
+7 W
+("switch"^ LPAREN! expression RPAREN! LCURLY!) S
+HL
+24 W
+(\( casesGroup \)*) S
+HL
+16 W
+(RCURLY!) S
+HL
+HL
+8 W
+(// exception try-catch block) S
+HL
+8 W
+(|) S
+7 W
+(tryBlock) S
+HL
+HL
+8 W
+(// throw an exception) S
+HL
+8 W
+(|) S
+7 W
+("throw"^ expression SEMI!) S
+HL
+HL
+8 W
+(// synchronize a statement) S
+HL
+8 W
+(|) S
+7 W
+("synchronized"^ LPAREN! expression RPAREN! compoundStatement) S
+HL
+HL
+8 W
+(// empty statement) S
+HL
+8 W
+(|) S
+7 W
+(s:SEMI {#s.setType\(EMPTY_STAT\);}) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(casesGroup) S
+HL
+8 W
+(:) S
+7 W
+(\() S
+7 W
+(// CONFLICT: to which case group do the statements bind?) S
+HL
+24 W
+(//           ANTLR generates proper code: it groups the) S
+HL
+24 W
+(//           many "case"/"default" labels together then) S
+HL
+24 W
+(//           follows them with the statements) S
+HL
+24 W
+(options {) S
+HL
+32 W
+(warnWhenFollowAmbig = false;) S
+HL
+24 W
+(}) S
+HL
+24 W
+(:) S
+HL
+24 W
+(aCase) S
+HL
+16 W
+(\)+) S
+HL
+16 W
+(caseSList) S
+HL
+16 W
+({#casesGroup = #\([CASE_GROUP, "CASE_GROUP"], #casesGroup\);}) S
+HL
+8 W
+(;) S
+HL
+HL
+(aCase) S
+HL
+8 W
+(:) S
+7 W
+(\("case"^ expression | "default"\) COLON!) S
+HL
+8 W
+(;) S
+HL
+HL
+(caseSList) S
+HL
+8 W
+(:) S
+7 W
+(\(statement\)*) S
+HL
+16 W
+({#caseSList = #\(#[SLIST,"SLIST"],#caseSList\);}) S
+HL
+8 W
+(;) S
+HL
+HL
+(// The initializer for a for loop) S
+HL
+(forInit) S
+HL
+16 W
+(// if it looks like a declaration, it is) S
+HL
+8 W
+(:) S
+7 W
+(\() S
+7 W
+(\(declaration\)=> declaration) S
+HL
+16 W
+(// otherwise it could be an expression list...) S
+HL
+16 W
+(|) S
+7 W
+(expressionList) S
+HL
+16 W
+(\)?) S
+HL
+16 W
+({#forInit = #\(#[FOR_INIT,"FOR_INIT"],#forInit\);}) S
+HL
+8 W
+(;) S
+HL
+HL
+(forCond) S
+HL
+8 W
+(:) S
+7 W
+(\(expression\)?) S
+HL
+16 W
+({#forCond = #\(#[FOR_CONDITION,"FOR_CONDITION"],#forCond\);}) S
+HL
+8 W
+(;) S
+HL
+HL
+(forIter) S
+HL
+8 W
+(:) S
+7 W
+(\(expressionList\)?) S
+HL
+16 W
+({#forIter = #\(#[FOR_ITERATOR,"FOR_ITERATOR"],#forIter\);}) S
+HL
+8 W
+(;) S
+HL
+HL
+(// an exception handler try/catch block) S
+HL
+(tryBlock) S
+HL
+8 W
+(:) S
+7 W
+("try"^ compoundStatement) S
+EndPage
+EndDSCPage
+
+%%Page: 9 9
+BeginDSCPage
+/PageNumber 9 def
+/PageCount 17 def
+/HeaderLinesLeft [
+  [ /h0 (java.g) ]
+  [ /h1 (/home/jpschewe/projects/java/org/tcfreenet/schewe/Assert/) ]
+] def
+/HeaderLinesRight [
+  [ /h0 /pagenumberstring load ]
+  [ /h1 (Dec 15 1999) ]
+] def
+2 SetHeaderLines
+BeginPage
+/f0 F
+false BG
+0.0 0.0 0.0 FG
+false UL
+16 W
+(\(handler\)*) S
+HL
+16 W
+(\( "finally"^ compoundStatement \)?) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// an exception handler) S
+HL
+(handler) S
+HL
+8 W
+(:) S
+7 W
+("catch"^ LPAREN! parameterDeclaration RPAREN! compoundStatement) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// expressions) S
+HL
+(// Note that most of these expressions follow the pattern) S
+HL
+(//   thisLevelExpression :) S
+HL
+(//       nextHigherPrecedenceExpression) S
+HL
+(//           \(OPERATOR nextHigherPrecedenceExpression\)*) S
+HL
+(// which is a standard recursive definition for a parsing an expression.) S
+HL
+(// The operators in java have the following precedences:) S
+HL
+(//    lowest  \(13\)  = *= /= %= += -= <<= >>= >>>= &= ^= |=) S
+HL
+(//            \(12\)  ?:) S
+HL
+(//            \(11\)  ||) S
+HL
+(//            \(10\)  &&) S
+HL
+(//            \( 9\)  |) S
+HL
+(//            \( 8\)  ^) S
+HL
+(//            \( 7\)  &) S
+HL
+(//            \( 6\)  == !=) S
+HL
+(//            \( 5\)  < <= > >=) S
+HL
+(//            \( 4\)  << >>) S
+HL
+(//            \( 3\)  +\(binary\) -\(binary\)) S
+HL
+(//            \( 2\)  * / %) S
+HL
+(//            \( 1\)  ++ -- +\(unary\) -\(unary\)  ~  !  \(type\)) S
+HL
+(//                  []   \(\) \(method call\)  . \(dot -- identifier qualification\)) S
+HL
+(//                  new   \(\)  \(explicit parenthesis\)) S
+HL
+(//) S
+HL
+(// the last two are not usually on a precedence chart; I put them in) S
+HL
+(// to point out that new has a higher precedence than '.', so you) S
+HL
+(// can validy use) S
+HL
+(//     new Frame\(\).show\(\)) S
+HL
+(// ) S
+HL
+(// Note that the above precedence levels map to the rules below...) S
+HL
+(// Once you have a precedence chart, writing the appropriate rules as below) S
+HL
+(//   is usually very straightfoward) S
+HL
+HL
+HL
+HL
+(// the mother of all expressions) S
+HL
+(expression) S
+HL
+8 W
+(:) S
+7 W
+(assignmentExpression) S
+HL
+16 W
+({#expression = #\(#[EXPR,"EXPR"],#expression\);}) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// This is a list of expressions.) S
+HL
+(expressionList) S
+HL
+8 W
+(:) S
+7 W
+(expression \(COMMA! expression\)*) S
+HL
+16 W
+({#expressionList = #\(#[ELIST,"ELIST"], expressionList\);}) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// assignment expression \(level 13\)) S
+HL
+(assignmentExpression) S
+HL
+8 W
+(:) S
+7 W
+(conditionalExpression) S
+HL
+16 W
+(\() S
+7 W
+(\() S
+7 W
+(ASSIGN^) S
+HL
+(            |   PLUS_ASSIGN^) S
+HL
+(            |   MINUS_ASSIGN^) S
+HL
+(            |   STAR_ASSIGN^) S
+HL
+(            |   DIV_ASSIGN^) S
+HL
+(            |   MOD_ASSIGN^) S
+HL
+(            |   SR_ASSIGN^) S
+HL
+(            |   BSR_ASSIGN^) S
+HL
+(            |   SL_ASSIGN^) S
+HL
+(            |   BAND_ASSIGN^) S
+EndPage
+EndDSCPage
+
+%%Page: 10 10
+BeginDSCPage
+/PageNumber 10 def
+/PageCount 17 def
+/HeaderLinesLeft [
+  [ /h0 (java.g) ]
+  [ /h1 (/home/jpschewe/projects/java/org/tcfreenet/schewe/Assert/) ]
+] def
+/HeaderLinesRight [
+  [ /h0 /pagenumberstring load ]
+  [ /h1 (Dec 15 1999) ]
+] def
+2 SetHeaderLines
+BeginPage
+/f0 F
+false BG
+0.0 0.0 0.0 FG
+false UL
+(            |   BXOR_ASSIGN^) S
+HL
+(            |   BOR_ASSIGN^) S
+HL
+(            \)) S
+HL
+24 W
+(assignmentExpression) S
+HL
+16 W
+(\)?) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// conditional test \(level 12\)) S
+HL
+(conditionalExpression) S
+HL
+8 W
+(:) S
+7 W
+(logicalOrExpression) S
+HL
+16 W
+(\( QUESTION^ conditionalExpression COLON! conditionalExpression \)?) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// logical or \(||\)  \(level 11\)) S
+HL
+(logicalOrExpression) S
+HL
+8 W
+(:) S
+7 W
+(logicalAndExpression \(LOR^ logicalAndExpression\)*) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// logical and \(&&\)  \(level 10\)) S
+HL
+(logicalAndExpression) S
+HL
+8 W
+(:) S
+7 W
+(inclusiveOrExpression \(LAND^ inclusiveOrExpression\)*) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// bitwise or non-short-circuiting or \(|\)  \(level 9\)) S
+HL
+(inclusiveOrExpression) S
+HL
+8 W
+(:) S
+7 W
+(exclusiveOrExpression \(BOR^ exclusiveOrExpression\)*) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// exclusive or \(^\)  \(level 8\)) S
+HL
+(exclusiveOrExpression) S
+HL
+8 W
+(:) S
+7 W
+(andExpression \(BXOR^ andExpression\)*) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// bitwise or non-short-circuiting and \(&\)  \(level 7\)) S
+HL
+(andExpression) S
+HL
+8 W
+(:) S
+7 W
+(equalityExpression \(BAND^ equalityExpression\)*) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// equality/inequality \(==/!=\) \(level 6\)) S
+HL
+(equalityExpression) S
+HL
+8 W
+(:) S
+7 W
+(relationalExpression \(\(NOT_EQUAL^ | EQUAL^\) relationalExpression\)*) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// boolean relational expressions \(level 5\)) S
+HL
+(relationalExpression) S
+HL
+8 W
+(:) S
+7 W
+(shiftExpression) S
+HL
+16 W
+(\() S
+7 W
+(\() S
+7 W
+(LT^) S
+HL
+24 W
+(|) S
+7 W
+(GT^) S
+HL
+24 W
+(|) S
+7 W
+(LE^) S
+HL
+24 W
+(|) S
+7 W
+(GE^) S
+HL
+24 W
+(\)) S
+HL
+24 W
+(shiftExpression) S
+HL
+16 W
+(\)*) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// bit shift expressions \(level 4\)) S
+HL
+(shiftExpression) S
+HL
+8 W
+(:) S
+7 W
+(additiveExpression \(\(SL^ | SR^ | BSR^\) additiveExpression\)*) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// binary addition/subtraction \(level 3\)) S
+HL
+(additiveExpression) S
+EndPage
+EndDSCPage
+
+%%Page: 11 11
+BeginDSCPage
+/PageNumber 11 def
+/PageCount 17 def
+/HeaderLinesLeft [
+  [ /h0 (java.g) ]
+  [ /h1 (/home/jpschewe/projects/java/org/tcfreenet/schewe/Assert/) ]
+] def
+/HeaderLinesRight [
+  [ /h0 /pagenumberstring load ]
+  [ /h1 (Dec 15 1999) ]
+] def
+2 SetHeaderLines
+BeginPage
+/f0 F
+false BG
+0.0 0.0 0.0 FG
+false UL
+8 W
+(:) S
+7 W
+(multiplicativeExpression \(\(PLUS^ | MINUS^\) multiplicativeExpression\)*) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// multiplication/division/modulo \(level 2\)) S
+HL
+(multiplicativeExpression) S
+HL
+8 W
+(:) S
+7 W
+(castExpression \(\(STAR^ | DIV^ | MOD^ \) castExpression\)*) S
+HL
+8 W
+(;) S
+HL
+HL
+(// cast/unary \(level 1\)) S
+HL
+(castExpression) S
+HL
+8 W
+(// if it _looks_ like a cast, it _is_ a cast) S
+HL
+8 W
+(:) S
+7 W
+(\( LPAREN typeSpec[true] RPAREN castExpression \)=>) S
+HL
+24 W
+(lp:LPAREN^ {#lp.setType\(TYPECAST\);} typeSpec[true] RPAREN!) S
+HL
+24 W
+(c:castExpression) S
+HL
+HL
+8 W
+(// otherwise it's a unary expression) S
+HL
+8 W
+(|) S
+7 W
+(INC^ castExpression) S
+HL
+8 W
+(|) S
+7 W
+(DEC^ castExpression) S
+HL
+8 W
+(|) S
+7 W
+(MINUS^ {#MINUS.setType\(UNARY_MINUS\);} castExpression) S
+HL
+8 W
+(|) S
+7 W
+(PLUS^  {#PLUS.setType\(UNARY_PLUS\);} castExpression) S
+HL
+8 W
+(|) S
+7 W
+(BNOT^ castExpression) S
+HL
+8 W
+(|) S
+7 W
+(LNOT^ castExpression) S
+HL
+8 W
+(|) S
+7 W
+(postfixExpression \( "instanceof"^ typeSpec[true] \)?) S
+HL
+16 W
+(// instanceof should not allow just primitives \(x instanceof int\)) S
+HL
+16 W
+(// need a semantic check if we're compiling...) S
+HL
+8 W
+(;) S
+HL
+HL
+(// qualified names, array expressions, method invocation, post inc/dec) S
+HL
+(postfixExpression) S
+HL
+8 W
+(:) S
+7 W
+(primaryExpression // start with a primary) S
+HL
+HL
+16 W
+HL
+16 W
+(\() S
+7 W
+(// qualified id \(id.id.id.id...\) -- build the name) S
+HL
+24 W
+(DOT^ \( IDENT) S
+HL
+32 W
+(| "this") S
+HL
+32 W
+(| "class") S
+HL
+32 W
+(| newExpression) S
+HL
+32 W
+(| "super" LPAREN \( expressionList \)? RPAREN) S
+HL
+32 W
+(\)) S
+HL
+24 W
+(// the above line needs a semantic check to make sure "class") S
+HL
+24 W
+(//   is the _last_ qualifier.) S
+HL
+HL
+24 W
+(// an array indexing operation) S
+HL
+16 W
+(|) S
+7 W
+(lb:LBRACK^ {#lb.setType\(INDEX_OP\);} expression RBRACK!) S
+HL
+HL
+24 W
+(// method invocation) S
+HL
+24 W
+(// The next line is not strictly proper; it allows x\(3\)\(4\) or) S
+HL
+24 W
+(//   x[2]\(4\) which are not valid in Java.  If this grammar were used) S
+HL
+24 W
+(//   to validate a Java program a semantic check would be needed, or) S
+HL
+24 W
+(//   this rule would get really ugly...) S
+HL
+16 W
+(|) S
+7 W
+(lp:LPAREN^ {#lp.setType\(METHOD_CALL\);}) S
+HL
+32 W
+(argList) S
+HL
+24 W
+(RPAREN!) S
+HL
+16 W
+(\)*) S
+HL
+HL
+24 W
+(// possibly add on a post-increment or post-decrement) S
+HL
+16 W
+(\() S
+7 W
+(in:INC^ {#in.setType\(POST_INC\);}) S
+HL
+16 W
+(|) S
+7 W
+(de:DEC^ {#de.setType\(POST_DEC\);}) S
+HL
+16 W
+(|) S
+7 W
+(// nothing) S
+HL
+16 W
+(\)) S
+HL
+8 W
+(;) S
+HL
+HL
+(// the basic element of an expression) S
+HL
+(primaryExpression) S
+HL
+8 W
+(:) S
+7 W
+(IDENT) S
+HL
+8 W
+(|) S
+7 W
+(builtInType ) S
+HL
+16 W
+(\( lb:LBRACK^ {#lb.setType\(ARRAY_DECLARATOR\);} RBRACK! \)*) S
+HL
+16 W
+(DOT^ "class") S
+HL
+8 W
+(|) S
+7 W
+(newExpression) S
+HL
+8 W
+(|) S
+7 W
+(constant) S
+HL
+8 W
+(|) S
+7 W
+("super") S
+EndPage
+EndDSCPage
+
+%%Page: 12 12
+BeginDSCPage
+/PageNumber 12 def
+/PageCount 17 def
+/HeaderLinesLeft [
+  [ /h0 (java.g) ]
+  [ /h1 (/home/jpschewe/projects/java/org/tcfreenet/schewe/Assert/) ]
+] def
+/HeaderLinesRight [
+  [ /h0 /pagenumberstring load ]
+  [ /h1 (Dec 15 1999) ]
+] def
+2 SetHeaderLines
+BeginPage
+/f0 F
+false BG
+0.0 0.0 0.0 FG
+false UL
+8 W
+(|) S
+7 W
+("true") S
+HL
+8 W
+(|) S
+7 W
+("false") S
+HL
+8 W
+(|) S
+7 W
+("this") S
+HL
+8 W
+(|) S
+7 W
+("null") S
+HL
+8 W
+(|) S
+7 W
+(LPAREN! assignmentExpression RPAREN!) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(/** object instantiation.) S
+HL
+( *  Trees are built as illustrated by the following input/tree pairs:) S
+HL
+( *  ) S
+HL
+( *  new T\(\)) S
+HL
+( *  ) S
+HL
+( *  new) S
+HL
+( *   |) S
+HL
+( *   T --  ELIST) S
+HL
+( *           |) S
+HL
+( *          arg1 -- arg2 -- .. -- argn) S
+HL
+( *  ) S
+HL
+( *  new int[]) S
+HL
+( *) S
+HL
+( *  new) S
+HL
+( *   |) S
+HL
+( *  int -- ARRAY_DECLARATOR) S
+HL
+( *  ) S
+HL
+( *  new int[] {1,2}) S
+HL
+( *) S
+HL
+( *  new) S
+HL
+( *   |) S
+HL
+( *  int -- ARRAY_DECLARATOR -- ARRAY_INIT) S
+HL
+( *                                  |) S
+HL
+( *                                EXPR -- EXPR) S
+HL
+( *                                  |      |) S
+HL
+( *                                  1      2) S
+HL
+( *  ) S
+HL
+( *  new int[3]) S
+HL
+( *  new) S
+HL
+( *   |) S
+HL
+( *  int -- ARRAY_DECLARATOR) S
+HL
+( *                |) S
+HL
+( *              EXPR) S
+HL
+( *                |) S
+HL
+( *                3) S
+HL
+( *  ) S
+HL
+( *  new int[1][2]) S
+HL
+( *  ) S
+HL
+( *  new) S
+HL
+( *   |) S
+HL
+( *  int -- ARRAY_DECLARATOR) S
+HL
+( *               |) S
+HL
+( *         ARRAY_DECLARATOR -- EXPR) S
+HL
+( *               |              |) S
+HL
+( *             EXPR             1) S
+HL
+( *               |) S
+HL
+( *               2) S
+HL
+( *  ) S
+HL
+( */) S
+HL
+(newExpression) S
+HL
+8 W
+(:) S
+7 W
+("new"^ type) S
+HL
+16 W
+(\() S
+7 W
+(LPAREN! argList RPAREN! \(classBlock\)?) S
+HL
+HL
+24 W
+(//java 1.1) S
+HL
+24 W
+(// Note: This will allow bad constructs like) S
+HL
+24 W
+(//    new int[4][][3] {exp,exp}.) S
+HL
+24 W
+(//    There needs to be a semantic check here...) S
+HL
+24 W
+(// to make sure:) S
+HL
+24 W
+(//   a\) [ expr ] and [ ] are not mixed) S
+HL
+24 W
+(//   b\) [ expr ] and an init are not used together) S
+HL
+HL
+16 W
+(|) S
+7 W
+(newArrayDeclarator \(arrayInitializer\)?) S
+HL
+16 W
+(\)) S
+HL
+8 W
+(;) S
+EndPage
+EndDSCPage
+
+%%Page: 13 13
+BeginDSCPage
+/PageNumber 13 def
+/PageCount 17 def
+/HeaderLinesLeft [
+  [ /h0 (java.g) ]
+  [ /h1 (/home/jpschewe/projects/java/org/tcfreenet/schewe/Assert/) ]
+] def
+/HeaderLinesRight [
+  [ /h0 /pagenumberstring load ]
+  [ /h1 (Dec 15 1999) ]
+] def
+2 SetHeaderLines
+BeginPage
+/f0 F
+false BG
+0.0 0.0 0.0 FG
+false UL
+HL
+(argList) S
+HL
+8 W
+(:) S
+7 W
+(\() S
+7 W
+(expressionList) S
+HL
+16 W
+(|) S
+7 W
+(/*nothing*/) S
+HL
+24 W
+({#argList = #[ELIST,"ELIST"];}) S
+HL
+16 W
+(\)) S
+HL
+8 W
+(;) S
+HL
+HL
+(newArrayDeclarator) S
+HL
+8 W
+(:) S
+7 W
+(\() S
+HL
+24 W
+(// CONFLICT:) S
+HL
+24 W
+(// newExpression is a primaryExpression which can be) S
+HL
+24 W
+(// followed by an array index reference.  This is ok,) S
+HL
+24 W
+(// as the generated code will stay in this loop as) S
+HL
+24 W
+(// long as it sees an LBRACK \(proper behavior\)) S
+HL
+24 W
+(options {) S
+HL
+32 W
+(warnWhenFollowAmbig = false;) S
+HL
+24 W
+(}) S
+HL
+16 W
+(:) S
+HL
+24 W
+(lb:LBRACK^ {#lb.setType\(ARRAY_DECLARATOR\);}) S
+HL
+32 W
+(\(expression\)?) S
+HL
+24 W
+(RBRACK!) S
+HL
+16 W
+(\)+) S
+HL
+8 W
+(;) S
+HL
+HL
+(constant) S
+HL
+8 W
+(:) S
+7 W
+(NUM_INT) S
+HL
+8 W
+(|) S
+7 W
+(CHAR_LITERAL) S
+HL
+8 W
+(|) S
+7 W
+(STRING_LITERAL) S
+HL
+8 W
+(|) S
+7 W
+(NUM_FLOAT) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(//----------------------------------------------------------------------------) S
+HL
+(// The Java scanner) S
+HL
+(//----------------------------------------------------------------------------) S
+HL
+(class JavaLexer extends Lexer;) S
+HL
+HL
+(options {) S
+HL
+8 W
+(exportVocab=Java;      // call the vocabulary "Java") S
+HL
+8 W
+(testLiterals=false;    // don't automatically test for literals) S
+HL
+8 W
+(k=4;                   // four characters of lookahead) S
+HL
+(}) S
+HL
+HL
+HL
+HL
+(// OPERATORS) S
+HL
+(QUESTION) S
+16 W
+(:) S
+7 W
+('?') S
+13 W
+(;) S
+HL
+(LPAREN) S
+18 W
+(:) S
+7 W
+('\(') S
+13 W
+(;) S
+HL
+(RPAREN) S
+18 W
+(:) S
+7 W
+('\)') S
+13 W
+(;) S
+HL
+(LBRACK) S
+18 W
+(:) S
+7 W
+('[') S
+13 W
+(;) S
+HL
+(RBRACK) S
+18 W
+(:) S
+7 W
+(']') S
+13 W
+(;) S
+HL
+(LCURLY) S
+18 W
+(:) S
+7 W
+('{') S
+13 W
+(;) S
+HL
+(RCURLY) S
+18 W
+(:) S
+7 W
+('}') S
+13 W
+(;) S
+HL
+(COLON) S
+19 W
+(:) S
+7 W
+(':') S
+13 W
+(;) S
+HL
+(COMMA) S
+19 W
+(:) S
+7 W
+(',') S
+13 W
+(;) S
+HL
+(//DOT) S
+19 W
+(:) S
+7 W
+('.') S
+13 W
+(;) S
+HL
+(ASSIGN) S
+18 W
+(:) S
+7 W
+('=') S
+13 W
+(;) S
+HL
+(EQUAL) S
+19 W
+(:) S
+7 W
+("==") S
+4 W
+(;) S
+HL
+(LNOT) S
+20 W
+(:) S
+7 W
+('!') S
+13 W
+(;) S
+HL
+(BNOT) S
+20 W
+(:) S
+7 W
+('~') S
+13 W
+(;) S
+HL
+(NOT_EQUAL) S
+15 W
+(:) S
+7 W
+("!=") S
+4 W
+(;) S
+HL
+(DIV) S
+29 W
+(:) S
+7 W
+('/') S
+13 W
+(;) S
+HL
+(DIV_ASSIGN) S
+14 W
+(:) S
+7 W
+("/=") S
+4 W
+(;) S
+HL
+(PLUS) S
+20 W
+(:) S
+7 W
+('+') S
+13 W
+(;) S
+HL
+(PLUS_ASSIGN) S
+13 W
+(:) S
+7 W
+("+=") S
+4 W
+(;) S
+HL
+(INC) S
+29 W
+(:) S
+7 W
+("++") S
+4 W
+(;) S
+HL
+(MINUS) S
+19 W
+(:) S
+7 W
+('-') S
+13 W
+(;) S
+HL
+(MINUS_ASSIGN) S
+4 W
+(:) S
+7 W
+("-=") S
+4 W
+(;) S
+HL
+(DEC) S
+29 W
+(:) S
+7 W
+("--") S
+4 W
+(;) S
+HL
+(STAR) S
+20 W
+(:) S
+7 W
+('*') S
+13 W
+(;) S
+HL
+(STAR_ASSIGN) S
+13 W
+(:) S
+7 W
+("*=") S
+4 W
+(;) S
+EndPage
+EndDSCPage
+
+%%Page: 14 14
+BeginDSCPage
+/PageNumber 14 def
+/PageCount 17 def
+/HeaderLinesLeft [
+  [ /h0 (java.g) ]
+  [ /h1 (/home/jpschewe/projects/java/org/tcfreenet/schewe/Assert/) ]
+] def
+/HeaderLinesRight [
+  [ /h0 /pagenumberstring load ]
+  [ /h1 (Dec 15 1999) ]
+] def
+2 SetHeaderLines
+BeginPage
+/f0 F
+false BG
+0.0 0.0 0.0 FG
+false UL
+(MOD) S
+29 W
+(:) S
+7 W
+('%') S
+13 W
+(;) S
+HL
+(MOD_ASSIGN) S
+14 W
+(:) S
+7 W
+("%=") S
+4 W
+(;) S
+HL
+(SR) S
+30 W
+(:) S
+7 W
+(">>") S
+4 W
+(;) S
+HL
+(SR_ASSIGN) S
+15 W
+(:) S
+7 W
+(">>=") S
+3 W
+(;) S
+HL
+(BSR) S
+29 W
+(:) S
+7 W
+(">>>") S
+3 W
+(;) S
+HL
+(BSR_ASSIGN) S
+14 W
+(:) S
+7 W
+(">>>=") S
+2 W
+(;) S
+HL
+(GE) S
+30 W
+(:) S
+7 W
+(">=") S
+4 W
+(;) S
+HL
+(GT) S
+30 W
+(:) S
+7 W
+(">") S
+13 W
+(;) S
+HL
+(SL) S
+30 W
+(:) S
+7 W
+("<<") S
+4 W
+(;) S
+HL
+(SL_ASSIGN) S
+15 W
+(:) S
+7 W
+("<<=") S
+3 W
+(;) S
+HL
+(LE) S
+30 W
+(:) S
+7 W
+("<=") S
+4 W
+(;) S
+HL
+(LT) S
+30 W
+(:) S
+7 W
+('<') S
+13 W
+(;) S
+HL
+(BXOR) S
+20 W
+(:) S
+7 W
+('^') S
+13 W
+(;) S
+HL
+(BXOR_ASSIGN) S
+13 W
+(:) S
+7 W
+("^=") S
+4 W
+(;) S
+HL
+(BOR) S
+29 W
+(:) S
+7 W
+('|') S
+13 W
+(;) S
+HL
+(BOR_ASSIGN) S
+14 W
+(:) S
+7 W
+("|=") S
+4 W
+(;) S
+HL
+(LOR) S
+29 W
+(:) S
+7 W
+("||") S
+4 W
+(;) S
+HL
+(BAND) S
+20 W
+(:) S
+7 W
+('&') S
+13 W
+(;) S
+HL
+(BAND_ASSIGN) S
+13 W
+(:) S
+7 W
+("&=") S
+4 W
+(;) S
+HL
+(LAND) S
+20 W
+(:) S
+7 W
+("&&") S
+4 W
+(;) S
+HL
+(SEMI) S
+20 W
+(:) S
+7 W
+(';') S
+13 W
+(;) S
+HL
+HL
+HL
+(// Whitespace -- ignored) S
+HL
+(WS) S
+6 W
+(:) S
+7 W
+(\() S
+7 W
+(' ') S
+HL
+16 W
+(|) S
+7 W
+('\\t') S
+HL
+16 W
+(|) S
+7 W
+('\\f') S
+HL
+16 W
+(// handle newlines) S
+HL
+16 W
+(|) S
+7 W
+(\() S
+7 W
+("\\r\\n"  // Evil DOS) S
+HL
+24 W
+(|) S
+7 W
+('\\r'    // Macintosh) S
+HL
+24 W
+(|) S
+7 W
+('\\n'    // Unix \(the right way\)) S
+HL
+24 W
+(\)) S
+HL
+24 W
+({ newline\(\); }) S
+HL
+16 W
+(\)) S
+HL
+16 W
+({ _ttype = Token.SKIP; }) S
+HL
+8 W
+(;) S
+HL
+HL
+(// Single-line comments) S
+HL
+(SL_COMMENT) S
+HL
+8 W
+(:) S
+7 W
+("//") S
+HL
+16 W
+(\(~\('\\n'|'\\r'\)\)* \('\\n'|'\\r'\('\\n'\)?\)) S
+HL
+16 W
+({$setType\(Token.SKIP\); newline\(\);}) S
+HL
+8 W
+(;) S
+HL
+HL
+(// Javadoc comments) S
+HL
+(JAVADOC_OPEN) S
+HL
+8 W
+(: "/**") S
+HL
+8 W
+({) S
+HL
+10 W
+(System.out.println\("java: got start of javadoc comment #" + text + "#"\);) S
+HL
+10 W
+(Main.selector.push\(Main.assertLexer\);) S
+HL
+8 W
+(}) S
+HL
+8 W
+(;) S
+HL
+HL
+(//JD_COMMENT) S
+HL
+(//) S
+10 W
+(:) S
+3 W
+("/**") S
+HL
+(//) S
+18 W
+(\() S
+3 W
+(options {) S
+HL
+(//) S
+34 W
+(generateAmbigWarnings=false;) S
+HL
+(//) S
+26 W
+(}) S
+HL
+(//) S
+18 W
+(:) S
+HL
+(//) S
+24 W
+({ LA\(2\)!='/' }? '*') S
+HL
+(//) S
+18 W
+(|) S
+3 W
+('\\r' '\\n') S
+15 W
+({newline\(\);}) S
+HL
+(//) S
+18 W
+(|) S
+3 W
+('\\r') S
+20 W
+({newline\(\);}) S
+HL
+(//) S
+18 W
+(|) S
+3 W
+('\\n') S
+20 W
+({newline\(\);}) S
+HL
+(//) S
+18 W
+(|) S
+3 W
+(~\('*'|'\\n'|'\\r'\)) S
+HL
+(//) S
+18 W
+(\)*) S
+HL
+(//) S
+18 W
+("*/") S
+HL
+(//) S
+16 W
+({) S
+HL
+(//) S
+24 W
+($setType\(Token.SKIP\);) S
+17 W
+HL
+(//) S
+24 W
+(System.out.println\("Got a javadoc comment #" + text + "#"\);) S
+HL
+(//) S
+16 W
+(}) S
+HL
+(//) S
+HL
+(//) S
+10 W
+(;) S
+EndPage
+EndDSCPage
+
+%%Page: 15 15
+BeginDSCPage
+/PageNumber 15 def
+/PageCount 17 def
+/HeaderLinesLeft [
+  [ /h0 (java.g) ]
+  [ /h1 (/home/jpschewe/projects/java/org/tcfreenet/schewe/Assert/) ]
+] def
+/HeaderLinesRight [
+  [ /h0 /pagenumberstring load ]
+  [ /h1 (Dec 15 1999) ]
+] def
+2 SetHeaderLines
+BeginPage
+/f0 F
+false BG
+0.0 0.0 0.0 FG
+false UL
+HL
+(// multiple-line comments) S
+HL
+(ML_COMMENT) S
+HL
+8 W
+(:) S
+7 W
+("/*") S
+HL
+16 W
+(~'*') S
+HL
+16 W
+(\() S
+7 W
+(/*) S
+6 W
+('\\r' '\\n' can be matched in one alternative or by matching) S
+HL
+32 W
+('\\r' in one iteration and '\\n' in another.  I am trying to) S
+HL
+32 W
+(handle any flavor of newline that comes in, but the language) S
+HL
+32 W
+(that allows both "\\r\\n" and "\\r" and "\\n" to all be valid) S
+HL
+32 W
+(newline is ambiguous.  Consequently, the resulting grammar) S
+HL
+32 W
+(must be ambiguous.  I'm shutting this warning off.) S
+HL
+25 W
+(*/) S
+HL
+24 W
+(options {) S
+HL
+32 W
+(generateAmbigWarnings=false;) S
+HL
+24 W
+(}) S
+HL
+16 W
+(:) S
+HL
+24 W
+({ LA\(2\)!='/' }? '*') S
+HL
+16 W
+(|) S
+7 W
+('\\r' '\\n') S
+15 W
+({newline\(\);}) S
+HL
+16 W
+(|) S
+7 W
+('\\r') S
+20 W
+({newline\(\);}) S
+HL
+16 W
+(|) S
+7 W
+('\\n') S
+20 W
+({newline\(\);}) S
+HL
+16 W
+(|) S
+7 W
+(~\('*'|'\\n'|'\\r'\)) S
+HL
+16 W
+(\)*) S
+HL
+16 W
+("*/") S
+HL
+16 W
+({$setType\(Token.SKIP\);}) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// character literals) S
+HL
+(CHAR_LITERAL) S
+HL
+8 W
+(:) S
+7 W
+('\\'' \( ESC | ~'\\'' \) '\\'') S
+HL
+8 W
+(;) S
+HL
+HL
+(// string literals) S
+HL
+(STRING_LITERAL) S
+HL
+8 W
+(:) S
+7 W
+('"' \(ESC|~\('"'|'\\\\'\)\)* '"') S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// escape sequence -- note that this is protected; it can only be called) S
+HL
+(//   from another lexer rule -- it will not ever directly return a token to) S
+HL
+(//   the parser) S
+HL
+(// There are various ambiguities hushed in this rule.  The optional) S
+HL
+(// '0'...'9' digit matches should be matched here rather than letting) S
+HL
+(// them go back to STRING_LITERAL to be matched.  ANTLR does the) S
+HL
+(// right thing by matching immediately; hence, it's ok to shut off) S
+HL
+(// the FOLLOW ambig warnings.) S
+HL
+(protected) S
+HL
+(ESC) S
+HL
+8 W
+(:) S
+7 W
+('\\\\') S
+HL
+16 W
+(\() S
+7 W
+('n') S
+HL
+16 W
+(|) S
+7 W
+('r') S
+HL
+16 W
+(|) S
+7 W
+('t') S
+HL
+16 W
+(|) S
+7 W
+('b') S
+HL
+16 W
+(|) S
+7 W
+('f') S
+HL
+16 W
+(|) S
+7 W
+('"') S
+HL
+16 W
+(|) S
+7 W
+('\\'') S
+HL
+16 W
+(|) S
+7 W
+('\\\\') S
+HL
+16 W
+(|) S
+7 W
+(\('u'\)+ HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT ) S
+HL
+16 W
+(|) S
+7 W
+(\('0'..'3'\)) S
+HL
+24 W
+(\() S
+HL
+32 W
+(options {) S
+HL
+40 W
+(warnWhenFollowAmbig = false;) S
+HL
+32 W
+(}) S
+HL
+24 W
+(:) S
+7 W
+(\('0'..'9'\)) S
+HL
+32 W
+(\() S
+7 W
+HL
+40 W
+(options {) S
+HL
+48 W
+(warnWhenFollowAmbig = false;) S
+HL
+40 W
+(}) S
+HL
+32 W
+(:) S
+7 W
+('0'..'9') S
+HL
+32 W
+(\)?) S
+HL
+24 W
+(\)?) S
+HL
+16 W
+(|) S
+7 W
+(\('4'..'7'\)) S
+EndPage
+EndDSCPage
+
+%%Page: 16 16
+BeginDSCPage
+/PageNumber 16 def
+/PageCount 17 def
+/HeaderLinesLeft [
+  [ /h0 (java.g) ]
+  [ /h1 (/home/jpschewe/projects/java/org/tcfreenet/schewe/Assert/) ]
+] def
+/HeaderLinesRight [
+  [ /h0 /pagenumberstring load ]
+  [ /h1 (Dec 15 1999) ]
+] def
+2 SetHeaderLines
+BeginPage
+/f0 F
+false BG
+0.0 0.0 0.0 FG
+false UL
+24 W
+(\() S
+HL
+32 W
+(options {) S
+HL
+40 W
+(warnWhenFollowAmbig = false;) S
+HL
+32 W
+(}) S
+HL
+24 W
+(:) S
+7 W
+(\('0'..'9'\)) S
+HL
+24 W
+(\)?) S
+HL
+16 W
+(\)) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// hexadecimal digit \(again, note it's protected!\)) S
+HL
+(protected) S
+HL
+(HEX_DIGIT) S
+HL
+8 W
+(:) S
+7 W
+(\('0'..'9'|'A'..'F'|'a'..'f'\)) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// a dummy rule to force vocabulary to be all characters \(except special) S
+HL
+(//   ones that ANTLR uses internally \(0 to 2\)) S
+HL
+(protected) S
+HL
+(VOCAB) S
+HL
+8 W
+(:) S
+7 W
+('\\3'..'\\377') S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// an identifier.  Note that testLiterals is set to true!  This means) S
+HL
+(// that after we match the rule, we look in the literals table to see) S
+HL
+(// if it's a literal or really an identifer) S
+HL
+(IDENT) S
+HL
+8 W
+(options {testLiterals=true;}) S
+HL
+8 W
+(:) S
+7 W
+(\('a'..'z'|'A'..'Z'|'_'|'$'\) \('a'..'z'|'A'..'Z'|'_'|'0'..'9'|'$'\)*) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(// a numeric literal) S
+HL
+(NUM_INT) S
+HL
+8 W
+({boolean isDecimal=false;}) S
+HL
+8 W
+(:) S
+7 W
+('.' {_ttype = DOT;}) S
+HL
+24 W
+(\(\('0'..'9'\)+ \(EXPONENT\)? \(FLOAT_SUFFIX\)? { _ttype = NUM_FLOAT; }\)?) S
+HL
+8 W
+(|) S
+7 W
+(\() S
+7 W
+('0' {isDecimal = true;} // special case for just '0') S
+HL
+24 W
+(\() S
+7 W
+(\('x'|'X'\)) S
+HL
+32 W
+(\() S
+64 W
+SL
+23 W
+(// hex) S
+HL
+40 W
+(// the 'e'|'E' and float suffix stuff look) S
+HL
+40 W
+(// like hex digits, hence the \(...\)+ doesn't) S
+HL
+40 W
+(// know when to stop: ambig.  ANTLR resolves) S
+HL
+40 W
+(// it correctly by matching immediately.  It) S
+HL
+40 W
+(// is therefor ok to hush warning.) S
+HL
+40 W
+(options {) S
+HL
+48 W
+(warnWhenFollowAmbig=false;) S
+HL
+40 W
+(}) S
+HL
+32 W
+(:) S
+7 W
+(HEX_DIGIT) S
+HL
+32 W
+(\)+) S
+HL
+24 W
+(|) S
+7 W
+(\('0'..'7'\)+) S
+54 W
+SL
+15 W
+(// octal) S
+HL
+24 W
+(\)?) S
+HL
+16 W
+(|) S
+7 W
+(\('1'..'9'\) \('0'..'9'\)*  {isDecimal=true;}) S
+15 W
+(// non-zero decim) S
+SL
+(al) S
+HL
+16 W
+(\)) S
+HL
+16 W
+(\() S
+7 W
+(\('l'|'L'\)) S
+HL
+16 W
+HL
+16 W
+(// only check to see if it's a float if looks like decimal so far) S
+HL
+16 W
+(|) S
+7 W
+({isDecimal}?) S
+HL
+24 W
+(\() S
+7 W
+('.' \('0'..'9'\)* \(EXPONENT\)? \(FLOAT_SUFFIX\)?) S
+HL
+24 W
+(|) S
+7 W
+(EXPONENT \(FLOAT_SUFFIX\)?) S
+HL
+24 W
+(|) S
+7 W
+(FLOAT_SUFFIX) S
+HL
+24 W
+(\)) S
+HL
+24 W
+({ _ttype = NUM_FLOAT; }) S
+HL
+16 W
+(\)?) S
+HL
+8 W
+(;) S
+HL
+HL
+EndPage
+EndDSCPage
+
+%%Page: 17 17
+BeginDSCPage
+/PageNumber 17 def
+/PageCount 17 def
+/HeaderLinesLeft [
+  [ /h0 (java.g) ]
+  [ /h1 (/home/jpschewe/projects/java/org/tcfreenet/schewe/Assert/) ]
+] def
+/HeaderLinesRight [
+  [ /h0 /pagenumberstring load ]
+  [ /h1 (Dec 15 1999) ]
+] def
+2 SetHeaderLines
+BeginPage
+/f0 F
+false BG
+0.0 0.0 0.0 FG
+false UL
+(// a couple protected methods to assist in matching floating point numbers) S
+HL
+(protected) S
+HL
+(EXPONENT) S
+HL
+8 W
+(:) S
+7 W
+(\('e'|'E'\) \('+'|'-'\)? \('0'..'9'\)+) S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+(protected) S
+HL
+(FLOAT_SUFFIX) S
+HL
+8 W
+(:) S
+7 W
+('f'|'F'|'d'|'D') S
+HL
+8 W
+(;) S
+HL
+HL
+HL
+8 W
+EndPage
+EndDSCPage
+
+
+%%Trailer
+%%Pages: 17
+EndDoc
+%%EOF

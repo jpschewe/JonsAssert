@@ -1,0 +1,5 @@
+1999-12-30  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* java.g: initial entry, supports pre and post conditions and
+	invariants.  Doesn't generate any code yet though.
+
