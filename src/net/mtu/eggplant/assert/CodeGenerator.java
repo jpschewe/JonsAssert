@@ -9,6 +9,9 @@ package org.tcfreenet.schewe.assert;
 
 import org.tcfreenet.schewe.utils.StringPair;
 
+import gnu.regexp.RE;
+import gnu.regexp.REException;
+
 import java.util.List;
 import java.util.Iterator;
 
@@ -738,6 +741,27 @@ public class CodeGenerator {
   }
 
   /**
+     The RE used to rewrite post conditions.
+  **/
+  static private RE _postConditionRewrite;
+  /**
+     Used to escape quotes
+  **/
+  static private RE _escapeQuotes;
+  static {
+    try {
+      _postConditionRewrite = new RE("\\$return");
+      _escapeQuotes = new RE("(\"|\')");
+    }
+    catch(REException re) {
+      System.err.println("This is really bad!");
+      re.printStackTrace();
+      System.exit(1);
+    }
+  }
+  
+    
+  /**
      Append to code code to check for the assert conditions in tokens.
   **/
   static private void addConditionChecks(final StringBuffer code,
@@ -748,13 +772,13 @@ public class CodeGenerator {
       String condition = token.getCondition();
       String message = token.getMessage();
       code.append("if(!");
-      code.append(condition);
+      code.append(_postConditionRewrite.substituteAll(condition, "__retVal"));
       code.append(") {");
       String errorMessage = "";
       if(message != null) {
         errorMessage = message + " + ";
       }
-      errorMessage += "\" " + condition + "\"";
+      errorMessage += "\" " + _escapeQuotes.substituteAll(condition, "\\$1") + "\"";
     
       code.append("org.tcfreenet.schewe.assert.AssertionViolation _JPS_av = new org.tcfreenet.schewe.assert.AssertionViolation(");
       code.append(errorMessage);
