@@ -22,7 +22,7 @@ import java.util.WeakHashMap;
 **/
 final public class AssertTools {
 
-  static private Map _superMethods = new WeakHashMap();
+  //static private Map _superMethods = new WeakHashMap();
   
   /**
      find the superclasses method, this is my version of a superClass method,
@@ -38,7 +38,8 @@ final public class AssertTools {
   **/
   static public Method findSuperMethod(final Class thisClass, final String methodName, final Class[] methodArgs) {
     //Get the method from this class
-    ScratchMethod sm = new ScratchMethod(thisClass, methodName, methodArgs);
+    //ScratchMethod sm = new ScratchMethod(thisClass, methodName, methodArgs);
+    
 //     Method thisMethod;
 //     try {
 //       String fullClassName = thisClass.getName().replace('.', '_');
@@ -56,9 +57,9 @@ final public class AssertTools {
 //     }
 
      //Now see if it's cached
-     if(_superMethods.containsKey(sm)) {
-       return (Method)_superMethods.get(sm);
-     }
+//      if(_superMethods.containsKey(sm)) {
+//        return (Method)_superMethods.get(sm);
+//      }
 
     Class superClass = thisClass.getSuperclass();
     Method superMethod = null;
@@ -85,7 +86,7 @@ final public class AssertTools {
     }
     
     //put it in the cache
-    _superMethods.put(sm, superMethod);
+    //_superMethods.put(sm, superMethod);
     
     return superMethod;
   }
@@ -332,21 +333,20 @@ final public class AssertTools {
   }
                                         
 
-  static private HashMap _classMap = new HashMap();
+  //static private HashMap _classMap = new HashMap();
   /**
      Get the class object for this class name.  Just like {@link
-     Class#forName(String) Class.forName()}, but uses an internal table for
-     caching classes.
+     Class#forName(String) Class.forName()}, but catches the exceptions
 
      @return null for no such class found
 
      @pre (className != null)
   **/
   static public Class classForName(final String className) {
-    if(_classMap.containsKey(className)) {
-      return (Class)_classMap.get(className);
-    }
-    else {
+//     if(_classMap.containsKey(className)) {
+//       return (Class)_classMap.get(className);
+//     }
+//     else {
       Class thisClass = null;
       try {
         thisClass = Class.forName(className);
@@ -354,10 +354,10 @@ final public class AssertTools {
       catch(ClassNotFoundException cnfe) {
         //ignore it, return null instead
       }
-      _classMap.put(className, thisClass);
+      //_classMap.put(className, thisClass);
       
       return thisClass;
-    }
-
+//     }
   }
+  
 }

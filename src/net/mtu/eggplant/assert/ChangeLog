@@ -1,3 +1,10 @@
+2000-04-30  Jon Schewe  <jpschewe@eggplant.mtu.net>
+
+	* AssertTools.java: Toyed around with caching super methods.
+	Tried using HashMap, got out of memory error, tried WeakHashMap,
+	finished, but didn't help performance, actually a little worse.
+
+
 2000-04-24  Jon Schewe  <jpschewe@eggplant.mtu.net>
 
 	* CodeGenerator.java: Switched pre and post conditions to do the
