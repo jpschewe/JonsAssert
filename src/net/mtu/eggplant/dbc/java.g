@@ -95,7 +95,7 @@ import org.apache.commons.logging.LogFactory;
  * <p>This parser has been modified from the original Recognizer to a pre-parser
  * that implements assertions in java as well as support JDK 1.4.</p>
  *
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 class JavaRecognizer extends Parser;
 options {
@@ -301,7 +301,7 @@ compilationUnit
 
     // optional package name
     (
-      ( /* (javadocComment)* */ packageName=packageDefinition )
+      ( (javadocComment)* packageDefinition ) => (javadocComment)* packageName=packageDefinition
       | /*nothing*/
     )
     {//stuff to do after finding packageName
@@ -326,11 +326,19 @@ compilationUnit
     
     // Next we have a series of zero or more import statements with
     // intermingled javadoc comments
-    ( /* (javadocComment)+ importDefinition | */ importDefinition )*
+    //(
+    //  ( (javadocComment)* importDefinition ) => (javadocComment)* importDefinition
+    //  | ( importDefinition )*
+    //)
+    ( importDefinition )*
 
     // Wrapping things up with any number of class or interface definitions
     // with their corresponding invariants
     ( (invariantCondition)* typeDefinition )*
+
+    //handle case where file is just javadocComments
+    //(javadocComment)*
+
     EOF
   ;
 

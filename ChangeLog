@@ -1,3 +1,8 @@
+2004-04-16  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/net/mtu/eggplant/dbc/java.g: Can now handle javadoc comments
+	above the package definition thanks to Loring Craymer.
+
 2004-04-09  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/net/mtu/eggplant/dbc/java14.g: Antlr now has inheritance
