@@ -94,8 +94,6 @@ import org.apache.commons.logging.LogFactory;
  *
  * <p>This parser has been modified from the original Recognizer to a pre-parser
  * that implements assertions in java as well as support JDK 1.4.</p>
- *
- * @version $Revision: 1.11 $
  */
 class JavaRecognizer extends Parser;
 options {
@@ -123,159 +121,16 @@ tokens {
 
   private static final Log LOG = LogFactory.getLog(JavaRecognizer.class);
 
-  public void print(final String s) {
-    System.out.println("Parser: " + s);
+  public void setHelper(final GrammarHelper helper) {
+    _helper = helper;
   }
 
-  /**
-     set the symbol table object to use.
-  **/
-  public void setSymtab(final Symtab symtab) {
-    _symtab = symtab;
-  }
+  private GrammarHelper _helper;
 
-  private Symtab _symtab;
-
-  /**
-     Get the symbol table object being used.
-  **/
-  public Symtab getSymtab() {
-    return _symtab;
+  public GrammarHelper getHelper() {
+    return _helper;
   }
   
-  /**
-     Given the id Token from the implements clause find the package the
-     interface is defined in.  Parse the interface for assertions and add
-     an AssertInterface object to the current class so we can check against
-     it later.
-  **/
-  protected void parseImplementedInterface(final Token t) {
-    String interfaceName = t.getText();
-    String packageName = "";
-    if(interfaceName.indexOf('.') > 0) {
-      //already qualified interface, break up into package and name
-      int lastDot = interfaceName.lastIndexOf('.');
-      packageName = interfaceName.substring(0, lastDot);
-      interfaceName = interfaceName.substring(lastDot+1);
-    }
-    else {
-      //Need to figure out the right package here, search through the
-      //current package, _imports
-    }
-
-    //actually parse the file so we can check
-    //against it later, if no file can be found then don't add it to the
-    //class, otherwise add it to the current class with
-    //getSymtab().getCurrentClass().addInterface(assertInterface)
-
-  }
-  
-  /**
-     add an assert.  This should get cached with the file object?
-     @param asserts asserts, ordered as they appear in the code. 
-  **/
-  protected void addAsserts(final List asserts, final Token jdClose) {
-    if(asserts != null && asserts.size() > 0) {
-      int line = jdClose.getLine();
-      int column = jdClose.getColumn()-1 + jdClose.getText().length();
-      //System.out.println("adding assert"
-      //  + " line: " + line
-      //  + " column: " + column
-      //  );
-      StringBuffer codeFrag = new StringBuffer();
-      Iterator iter = asserts.iterator();
-      while(iter.hasNext()) {
-        AssertToken assertToken = (AssertToken)iter.next();
-        String code = CodeGenerator.generateAssertion(assertToken);
-        codeFrag.append(code);
-      }
-      CodeFragment codeFragment = new CodeFragment(new CodePoint(line, column), codeFrag.toString(), CodeFragmentType.ASSERT);
-      getSymtab().addCodeFragment(codeFragment);
-    }
-  }
-
-  
-  private List _invariants = new LinkedList();
-
-  /**
-     add invariants to this class
-
-     @pre (invariant != null)
-  **/
-  protected void addInvariant(final Token invariant) {
-    if(! (invariant instanceof AssertToken)) {
-      throw new RuntimeException("Expecting AssertToken! " + invariant.getClass());
-    }
-    _invariants.add(invariant);
-  }
-
-  /**
-     get the invariants for this class.
-     Invariants are in the order they appear in the source.
-  **/
-  protected List getInvariants() {
-    return _invariants;
-  }
-
-  /**
-     Clear the list of invariants for this class.
-  **/
-  protected void clearInvariants() {
-    _invariants = new LinkedList();
-  }
-
-
-  private List _preConditions = new LinkedList();
-  /**
-     Get the list of preconditions that have been seen since the last clear.
-     Preconditions are in the order they appear in the source.
-  **/
-  public List getPreConditions() {
-    return _preConditions;
-  }
-
-  /**
-     Add a precondition to the list of preconditions.
-  **/
-  public void addPreCondition(final Token pre) {
-    if(! (pre instanceof AssertToken)) {
-      throw new RuntimeException("Expecting AssertToken! " + pre.getClass());
-    }
-    _preConditions.add(pre);
-  }
-
-  /**
-     clear out the list of preconditions.
-  **/
-  public void clearPreConditions() {
-    _preConditions = new LinkedList();
-  }
-
-  private List _postConditions = new LinkedList();
-  /**
-     Get the list of postconditions that have been seen since the last clear.
-     Postconditions are in the order they appear in the source.
-  **/
-  public List getPostConditions() {
-    return _postConditions;
-  }
-
-  /**
-     clear out the list of postconditions.
-  **/
-  public void addPostCondition(final Token post) {
-    if(! (post instanceof AssertToken)) {
-      throw new RuntimeException("Expecting AssertToken! " + post.getClass());
-    }
-    _postConditions.add(post);
-  }
-
-  /**
-     clear out the list of postconditions.
-  **/
-  public void clearPostConditions() {
-    _postConditions = new LinkedList();
-  }    
 }
 
 unit : pre start middle end EOF ;
@@ -288,21 +143,8 @@ start
 }
   :
     (packageName=packageDefinition uselessComments)?
-    {//stuff to do after finding packageName
-      getSymtab().setCurrentPackageName(packageName);
-      LOG.debug("just found the package: " + packageName);
-      //Now we just need to check to make sure the destination file is older
-      if(!getSymtab().getConfiguration().ignoreTimeStamp()) {
-        if(!getSymtab().isDestinationOlderThanCurrentFile(packageName)) {
-          // already parsed this file and force is off, skip it
-          throw new FileAlreadyParsedException();
-        }
-      }
-
-      //Put the print here so you don't see it unless we're really parsing the files
-      if(getSymtab().getConfiguration().isVerbose()) {
-        System.out.println("  " + getSymtab().getCurrentFile().getFile().getAbsolutePath());
-      }
+    {
+      getHelper().handlePackage(packageName);
     }
   ;
 
@@ -310,7 +152,7 @@ middle
   :
     (importDefinition uselessComments)*
     {
-      clearInvariants();
+      getHelper().clearInvariants();
     }
   ;
 
@@ -331,7 +173,7 @@ javadocComment
    This is a javadoc comment that we're looking for invariants in.
 **/
 invariantCondition
-  : JAVADOC_OPEN ( iv:INVARIANT_CONDITION { addInvariant(iv); } | PRE_CONDITION | POST_CONDITION | ASSERT_CONDITION )* JAVADOC_CLOSE
+  : JAVADOC_OPEN ( iv:INVARIANT_CONDITION { getHelper().addInvariant(iv); } | PRE_CONDITION | POST_CONDITION | ASSERT_CONDITION )* JAVADOC_CLOSE
   ;
 
 /**
@@ -502,7 +344,7 @@ identifierStar
 
     {
      // tell the symbol table about the import
-     getSymtab().addImport(className, packageName);
+     getHelper().getSymtab().addImport(className, packageName);
     }
   ;
 
@@ -535,11 +377,12 @@ classDefinition
 }
   : "class" id:IDENT
     {
-      if(getSymtab().getCurrentClass() != null) {
-    name = getSymtab().getCurrentClass().getName() + "$" + id.getText();
+      //handeling inner classes
+      if(getHelper().getSymtab().getCurrentClass() != null) {
+        name = getHelper().getSymtab().getCurrentClass().getName() + "$" + id.getText();
       }
       else {
-    name = id.getText();
+        name = id.getText();
       }
     }
     // it _might_ have a superclass...
@@ -563,11 +406,12 @@ interfaceDefinition
 }
   : "interface" id:IDENT
     {
-      if(getSymtab().getCurrentClass() != null) {
-    name = getSymtab().getCurrentClass().getName() + "$" + id.getText();
+      //handeling inner classes
+      if(getHelper().getSymtab().getCurrentClass() != null) {
+        name = getHelper().getSymtab().getCurrentClass().getName() + "$" + id.getText();
       }
       else {
-    name = id.getText();
+        name = id.getText();
       }
     }
     
@@ -586,23 +430,21 @@ classBlock [ String name, boolean isInterface, boolean isAnonymous, Token superc
   :
     lc:LCURLY
     {
-      getSymtab().startClass(name, getInvariants(), isInterface, isAnonymous, (superclass == null ? null : superclass.getText()));
-      clearInvariants();
+      getHelper().startClass(name, isInterface, isAnonymous, (superclass == null ? null : superclass.getText()));
     }
     //this should just be methods and constructors,
     //but can't find a better place for it.
     ( prePostField | SEMI )*
     rc:RCURLY
     {
-      clearInvariants();
-      getSymtab().finishClass(new CodePoint(rc.getLine(), rc.getColumn()-1));
+      getHelper().finishClass(rc);
     }
   ;
 
 prePosts 
     :
-    ( post:POST_CONDITION { addPostCondition(post); }
-    | pre:PRE_CONDITION { addPreCondition(pre); }
+    ( post:POST_CONDITION { getHelper().addPostCondition(post); }
+    | pre:PRE_CONDITION { getHelper().addPreCondition(pre); }
     | ASSERT_CONDITION
     | INVARIANT_CONDITION
     )*
@@ -628,8 +470,8 @@ interfaceExtends
 implementsClause
 { Token id, id2; }
   : (
-      "implements" id=identifier { parseImplementedInterface(id); }
-      ( COMMA id2=identifier { parseImplementedInterface(id2); } )*
+      "implements" id=identifier { getHelper().parseImplementedInterface(id); }
+      ( COMMA id2=identifier { getHelper().parseImplementedInterface(id2); } )*
     )?
   ;
 
@@ -661,15 +503,11 @@ field
       params = (List)p.getOne();
       thrownExceptions = (Set)p.getTwo();
       // needs to be before compoundStatement so that I can have it set for the addExit calls
-      getSymtab().startMethod(null, getPreConditions(), getPostConditions(), params, null, mods);
-      clearPreConditions();
-      clearPostConditions();
-      //print("just called startMethod for constructor");
+      getHelper().startMethod(null, params, null, mods);
     }
     startEnd=compoundStatement // constructor
     {
-      getSymtab().finishMethod(startEnd, thrownExceptions);
-      //print("Found finish: " + methodName);
+      getHelper().getSymtab().finishMethod(startEnd, thrownExceptions);
     }
     
 
@@ -684,10 +522,7 @@ field
       LPAREN params=parameterDeclarationList
       {
         // needs to be before compoundStatement so that I can have it set for the addExit calls
-        getSymtab().startMethod(methodName.getText(), getPreConditions(), getPostConditions(), params, retType.getText(), mods);
-        //print("just called startMethod: " + methodName.getText());
-        clearPreConditions();
-        clearPostConditions();
+        getHelper().startMethod(methodName.getText(), params, retType.getText(), mods);
       }
       RPAREN
 
@@ -698,14 +533,13 @@ field
       ( startEnd=compoundStatement | semi:SEMI )
       {
         if(startEnd != null) {
-          getSymtab().finishMethod(startEnd, thrownExceptions);
+          getHelper().getSymtab().finishMethod(startEnd, thrownExceptions);
         }
         else {
           //abstract, native or interface method
           CodePoint close = new CodePoint(semi.getLine(), semi.getColumn()-1);
-          getSymtab().finishMethod(new CodePointPair(close, close), null);
+          getHelper().getSymtab().finishMethod(new CodePointPair(close, close), null);
         }
-        //print("Found finish: " + methodName);
       }
     |   variableDefinitions SEMI
     )
@@ -866,13 +700,13 @@ parameterModifier
 assertOrInvariantCondition
 { List assertTokens = new LinkedList(); }
   : (JAVADOC_OPEN
-    ( assertCondition:ASSERT_CONDITION { assertTokens.add(assertCondition); clearInvariants(); }
+    ( assertCondition:ASSERT_CONDITION { assertTokens.add(assertCondition); getHelper().clearInvariants(); }
       | PRE_CONDITION
       | POST_CONDITION
-      | iv:INVARIANT_CONDITION { addInvariant(iv); assertTokens = new LinkedList(); }
+      | iv:INVARIANT_CONDITION { getHelper().addInvariant(iv); assertTokens = new LinkedList(); }
     )*
     jdc:JAVADOC_CLOSE 
-    { addAsserts(assertTokens, jdc); }
+    { getHelper().addAsserts(assertTokens, jdc); }
       )
   ;
 
@@ -980,7 +814,7 @@ statement
     CodePoint retcp = new CodePoint(ret.getLine(), ret.getColumn()-1);
     //add 1 so that code is inserted after the semi colon
     CodePoint semicp = new CodePoint(semi.getLine(), semi.getColumn());
-    getSymtab().getCurrentMethod().addExit(new CodePointPair(retcp, semicp));
+    getHelper().getSymtab().getCurrentMethod().addExit(new CodePointPair(retcp, semicp));
       }
 
     // switch/case statement

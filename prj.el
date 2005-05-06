@@ -13,7 +13,7 @@
    ;; Only look for all jars in lib and jar directories when they appear in
    ;; the classpath, but still leave it set so that jde-ant works using the
    ;; Java invocation method
-   '(jde-lib-directory-names (list "^lib$" "^jar$")) 
+   '(jde-lib-directory-names (list "^lib$" "^ant$" "^jar$")) 
    '(jde-sourcepath			(list (expand-file-name "src" project-root)))
    '(jde-run-read-app-args        	t)
    '(jde-run-option-debug         	nil) ;; don't try and debug on run
@@ -31,8 +31,8 @@
    '(jde-ant-invocation-method  	'("Java"))
    '(jde-ant-user-jar-files
      (list
-      (jde-convert-cygwin-path (expand-file-name "lib/junit-3.8.1.jar" project-root))
-      (jde-convert-cygwin-path (expand-file-name "lib/antlr-2.7.4.jar" project-root))
+      (jde-convert-cygwin-path (expand-file-name "lib" project-root))
+      (jde-convert-cygwin-path (expand-file-name "lib/ant" project-root))
       ))
    ;;'(jde-ant-invocation-method 		'("Script"))
    ;; while not perfect, this handles the case where jde-ant isn't loaded before this file is parsed
@@ -105,8 +105,6 @@
       "'>'n"
       "(progn (require 'jde-javadoc) (jde-javadoc-insert-start-block))"
       "\" * Add class comment here!\" '>'n"
-      "\" \" (jde-javadoc-insert-empty-line)"
-      "\" * @version $Revision: 1.19 $\" '>'n"
       "\" \" (jde-javadoc-insert 'tempo-template-jde-javadoc-end-block \"*/\")"
       "\"public class \"" 
       "(file-name-sans-extension (file-name-nondirectory buffer-file-name))" 

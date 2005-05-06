@@ -357,7 +357,7 @@ public final class JonsAssert {
       if(_debugLexer) {
         debugLexer(parser);
       } else {
-        parser.setSymtab(getSymtab());
+        parser.setHelper(new GrammarHelper(getSymtab()));
         parser.unit();
       }
     } else if(Configuration.JAVA_1_3 == sourceCompatibility) {
@@ -365,7 +365,7 @@ public final class JonsAssert {
       if(_debugLexer) {
         debugLexer(parser);
       } else {
-        parser.setSymtab(getSymtab());
+        parser.setHelper(new GrammarHelper(getSymtab()));
         parser.unit();
       }
     } else {
