@@ -142,3 +142,5 @@ calls the new native method...
 
 - ant task to delete instrumented files that coorespond to deleted source
 files
+
+You can find releases at http://mtu.net/~jpschewe/JonsAssert
