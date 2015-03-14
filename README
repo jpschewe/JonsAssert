@@ -1,1 +1,146 @@
-doc/README
+This is an assertion package for Java.  It implements assertions similar to
+those used in Eiffel.  I wrote this program because I've used a program in the
+past called AssertMate and it really didn't implement assertions very well and
+had a lot of bugs.  I talked with the people that wrote it and they decided to
+stop development, so I decided that being the programmer that I am, I'd write
+my own.  Little did I know how much I was getting into, I've written compilers
+before, but this is a little more difficult, I actually have to modify someone
+else's code and it still needs to work the way they intended.
+
+The grammar file used, java.g, is based off of the one from the Antlr home
+page.  The original authors comments still exist at the top of that file so
+they can recieve due credit.
+
+Implicit instrumentation is not yet supported, so each file needs to be
+instrumented explicitly.  Interfaces need no instrumentation, so they are just
+copied to the instrumented directory.  
+
+@assert checks cannot be before one liners ex:
+if(i < 10) /** @assert (i < 10) **/ i = 11;
+I think the reasons are pretty obvious.  It's very difficult to
+insert code here correctly.
+
+Preconditions on constructors are limited by the fact that they may not
+reference instance methods/variables or non-static inner classes.
+
+Methods called by assertions cannot throw exceptions.  It's rather difficult
+to find what's actually being called and what exceptions it can throw, with
+the exception of RuntimeExceptions.  Since these do not have to be caught it's
+ok to throw these.
+
+Pre and postconditions on private methods are only checked on that method.
+Even if a method with the same signature exists on the superclass.  This makes
+sense if you think about it a little, but I thought I should mention it.
+
+Preconditions on constructors are really quite difficult, so I've added some
+limitations to what is allowed.  Only static methods may be called from the
+precondition, or methods on another class, just like preconditions on static
+methods.  When calling a method from a constructor's precondition you have to
+specifiy the class name as if you were calling it from a Local class, that's
+because you actually are.
+
+Take a look at MethodSkeletons.xjava for an idea of what kind of checks are
+added to each method.  I hope to put together better documentation soon.
+
+More information can be found in the javadoc for the package
+net.mtu.eggplant.assert.  It'd be a good idea to check this, since I don't
+update this readme as often as the javadoc.
+
+FEATURES:
+(some people might call these bugs, but I put them there on purpose :)
+
+- Need to watch out for serializable classes.  If you don't specify the
+serialversionUID in the file, then the jvm computes it off of the file.
+Included in this computation are the methods.  Since instrumenting with
+JonsAssert adds methods to the class, the classes won't come up with the same
+ID and deserializing files won't always work.  The easy fix is to just define
+serialversionUIDs in all of your serializable classes.  I've found it's just a
+good idea anyway.
+
+- Does design by contract correct, except where noted in the BUGS.
+
+-- Allows for checking of return value in post condition via the variable
+$return
+
+- Preconditions can access private and package methods and variables, even
+though design by contract doesn't normally allow this.
+
+- allows one to specify the extension of the source and instrumented files.
+
+- assertions are checked on the methods called from assertions, however
+assertions that end up calling the methods themselves will not cause a
+recursive loop
+
+- support for classes in the default package is not very well tested.  If
+you have a problem with such classes, put them in a package!  It's just
+good programming practice.
+
+
+BUGS:
+- <CR>'s may exist inside assertions, however, if the first non-whitespace
+character, as determined by Character.isWhitespace, after the <CR> is an
+asterisk and it is intended to be part of the assertion and not part of the
+comment, as is commonly done in emacs, then that character will be lost from
+the assertion.
+
+- Interface assertions are not yet checked
+
+- Constructor preconditions don't work.  If a method in a class calls a
+constructor with the last argument being null and another constructor with the
+same signature, less the last argument, exists then the code will not compile
+due to a nondeterminism.  This can be worked around by casting null to the
+datatype of the last argument of the constructor.
+
+Example, notice that the second constructor has the same signature as the
+first, except for an extra argument tnat is an Object.  If the extra argument
+is a primative there is no problem.  It's also not a problem if the
+constructor is never called with null from inside the class, since the extra
+constructor created for checking preconditions is private.
+
+This won't work:
+public class A {
+  public A(int i) {
+    this(i, null);
+  }
+
+  public A(int i, Component c) {
+    //do something
+  }
+}
+This will work:
+public class A {
+  public A(int i) {
+    this(i, (Component)null);
+  }
+
+  public A(int i, Component c) {
+    //do something
+  }
+}
+
+
+- Reporting bugs.  If you happen to find a bug in the software, please send me
+a message, jpschewe@mtu.net.  At least include the message that was output
+and a description of what condition was being checked.  A stand alone test
+case that causes the error is REALLY helpful if you can do such a thing.
+
+- Methods called from pre and post conditions may throw exceptions if those
+exceptions are in the throws clause of the method to be checked.
+
+TODO:
+- fix bugs!
+
+- Assertions on native methods are not checked.  It seems like it'd be pretty
+hard to insert code into the C.  One idea is to create another method that
+calls the new native method...
+
+- Implement assertions of implemented interfaces.
+
+- implement pre/post conditions on constructors
+
+- handle constructor conditions on inner classes
+
+- ant task to delete instrumented files that coorespond to deleted source
+files
+
+You can find releases at http://mtu.net/~jpschewe/JonsAssert
